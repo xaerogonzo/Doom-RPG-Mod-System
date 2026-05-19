@@ -1,0 +1,252 @@
+// The poison (earth) upgrade tree.
+//
+// APPRENTICE: POISON SHOTS
+// Damages enemies continually. Duration scales linearly with number of stacks,
+// damage scales with square root.
+//
+// JOURNEYMAN: WEAKNESS
+// Poisoned enemies do less damage in proportion to the number of stacks.
+//
+// MASTER: PUTREFACTION
+// Dead enemies will explode in a cloud of poison, spreading it to nearby
+// enemies.
+//
+// MASTER: HALLUCINOGENS
+// Poisoned enemies will turn against their friends and fight for the player
+// once there is enough poison stacked on them to eventually kill them.
+// #namespace TFLV::Upgrade;
+// #debug off
+
+class TFLV_Upgrade_PoisonShots : TFLV_Upgrade_ElementalUpgrade {
+  override TFLV_Upgrade_UpgradeElement Element() { return TFLV_Upgrade_ELEM_POISON; }
+  override void OnDamageDealt(Actor player, Actor shot, Actor target, int damage) {
+    TFLV_Upgrade_Dot.GiveStacks(player, target, "TFLV_Upgrade_PoisonDot",
+      level * bonsai_stat_poison_stacks_per_hit,
+      level * bonsai_stat_poison_softcap_factor);
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("stacks", string.format("%.1f", level * bonsai_stat_poison_stacks_per_hit));
+    fields.insert("softcap", string.format("%.0f", level * bonsai_stat_poison_softcap_factor));
+  }
+}
+
+class TFLV_Upgrade_Weakness : TFLV_Upgrade_DotModifier {
+  override TFLV_Upgrade_UpgradeElement Element() { return TFLV_Upgrade_ELEM_POISON; }
+  override string DotType() { return "TFLV_Upgrade_PoisonDot"; }
+
+  override void ModifyDot(Actor player, Actor shot, Actor target, int damage, TFLV_Upgrade_Dot dot_item) {
+    TFLV_Upgrade_PoisonDot(dot_item).weakness = level;
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return HasIntermediatePrereq(info, "TFLV_Upgrade_PoisonShots");
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("reduction", AsPercentDecrease(bonsai_stat_poison_weakness_base ** level));
+  }
+}
+
+class TFLV_Upgrade_Hallucinogens : TFLV_Upgrade_DotModifier {
+  override TFLV_Upgrade_UpgradeElement Element() { return TFLV_Upgrade_ELEM_POISON; }
+  override string DotType() { return "TFLV_Upgrade_PoisonDot"; }
+
+  override void ModifyDot(Actor player, Actor shot, Actor target, int damage, TFLV_Upgrade_Dot dot_item) {
+    TFLV_Upgrade_PoisonDot(dot_item).hallucinogens = level;
+//    DEBUG("Set hallucinogen level=%d", level);
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return HasMasteryPrereq(info, "TFLV_Upgrade_Weakness", "TFLV_Upgrade_Putrefaction");
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("increase", AsPercentIncrease(GetDamageFactor(level, 1)));
+    fields.insert("armour", AsPercentDecrease(GetArmourFactor(level, 1)));
+    fields.insert("poisonrate", AsPercent(GetPoisonFactor(level)));
+  }
+
+  static double GetDamageFactor(uint level, double stacks) {
+    return 1.0 + bonsai_stat_poison_hallu_damage * level * stacks;
+  }
+  static double GetArmourFactor(uint level, double stacks) {
+    return (bonsai_stat_poison_hallu_armour ** level) ** stacks;
+  }
+  static double GetPoisonFactor(uint level) {
+    return bonsai_stat_poison_hallu_drain ** level;
+  }
+}
+
+class TFLV_Upgrade_Putrefaction : TFLV_Upgrade_ElementalUpgrade {
+  override TFLV_Upgrade_UpgradeElement Element() { return TFLV_Upgrade_ELEM_POISON; }
+  override void OnKill(PlayerPawn player, Actor shot, Actor target) {
+    double stacks = TFLV_Upgrade_Dot.CountStacks(target, "TFLV_Upgrade_PoisonDot");
+//    DEBUG("killed %s, poison stacks=%d", TAG(target), stacks);
+    if (stacks <= 0) return;
+
+    let aux = TFLV_Upgrade_Putrefaction_Aux(target.Spawn("TFLV_Upgrade_Putrefaction_Aux", target.pos));
+    aux.target = player;
+    aux.level = max(stacks - (stacks * bonsai_stat_poison_putref_transfer**level), 1);
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return HasMasteryPrereq(info, "TFLV_Upgrade_Weakness", "TFLV_Upgrade_Hallucinogens");
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("transfer", AsPercent(1.0 - bonsai_stat_poison_putref_transfer**level));
+    fields.insert("range", AsMeters(bonsai_stat_poison_putref_radius));
+  }
+}
+
+class TFLV_Upgrade_PoisonDot : TFLV_Upgrade_Dot {
+  uint weakness;
+  uint hallucinogens;
+
+  override double GetElementMultiplier() { return bonsai_stat_poison_mult; }
+
+  Default {
+    DamageType "Poison";
+  }
+
+  override string GetParticleColour() {
+    static const string colours[] = { "green", "green1", "black" };
+    static const string hallu[]   = { "red", "orange", "yellow", "green1", "blue", "purple" };
+    if (!owner.bFRIENDLY)
+      return colours[random[TFLV_Upgrade_RNG_PoisonColour](0,2)];
+    else
+      return hallu[random[TFLV_Upgrade_RNG_PoisonColour](0,5)];
+  }
+
+  override double GetParticleZV() { return -0.1; }
+
+  // Returns true if the enemy is close enough to the hallucinogens threshold
+  // that the player should be warned (within 50% of triggering).
+  bool NearHallucinogenThreshold() {
+    return hallucinogens > 0
+      && !owner.bFRIENDLY
+      && GetTotalDamage() >= owner.health * 0.5;
+  }
+
+  override void DrawVFX() {
+    uint mode = TFLV_Settings.vfx_for("bonsai_vfx_dot");
+
+    // When hallucinogens is about to trigger, override the normal VFX with a
+    // pulsing rainbow flash so the player knows to switch targets.
+    if (hallucinogens > 0 && NearHallucinogenThreshold()) {
+      if (mode != TFLV_VFX_FULL) {
+        // Reduced/minimal: flicker the render style between normal colours.
+        if (gametic & 2) {
+          owner.A_SetRenderStyle(1.0, STYLE_STENCIL);
+          owner.SetShade((gametic & 4) ? "yellow" : "orange");
+        } else {
+          owner.RestoreRenderStyle();
+        }
+      }
+      // Full VFX: extra bright particles are handled naturally by GetParticleColour
+      // switching to rainbow once bFRIENDLY, but add a pre-warning flash too.
+      if (mode == TFLV_VFX_FULL && (gametic & 4)) {
+        owner.A_SetRenderStyle(1.0, STYLE_STENCIL);
+        owner.SetShade("yellow");
+        owner.A_SetRenderStyle(1.0, STYLE_NORMAL);
+      }
+      super.DrawVFX();
+      return;
+    }
+
+    // Normal VFX path.
+    super.DrawVFX();
+  }
+
+  // Approximate total damage potential of all remaining poison stacks.
+  double GetTotalDamage() {
+    return (2.0/3.0) * (stacks)**(3.0/2.0) * 2.5;
+  }
+
+  override double GetDamage() {
+//    DEBUG("GetDamage: hallu=%d damage=%f health=%d", hallucinogens, GetTotalDamage(), owner.health);
+    if (hallucinogens > 0 && GetTotalDamage() >= owner.health && !owner.bFRIENDLY) {
+//      DEBUG("Made the %s friendly!", owner.GetClassName());
+      owner.A_SetFriendly(true);
+      owner.bDONTHARMCLASS = false;
+      owner.bDONTHARMSPECIES = false;
+    }
+//    DEBUG("poison stacks=%f damage=%f", stacks, (stacks**0.5 / 2.0));
+    double factor = 1.0;
+    if (owner.bFRIENDLY) factor = TFLV_Upgrade_Hallucinogens.GetPoisonFactor(hallucinogens);
+    double delta = bonsai_stat_poison_drain_rate * factor;
+    stacks -= delta;
+    return ((stacks+delta)**0.5 / 2.0) * factor;
+  }
+
+  // Damage modifier for Weakness and Hallucinogens upgrades.
+  // Visual warning: NearHallucinogenThreshold() / DrawVFX() handles the
+  // yellow/orange flash that tells the player when to switch targets.
+  override void ModifyDamage(
+      int damage, Name damageType, out int newdamage, bool passive,
+      Actor inflictor, Actor source, int flags) {
+    if (owner.bFRIENDLY && damageType != "Poison") {
+      // Hallucinating enemies have special damage rules.
+      newdamage = ModifyDamageWhileHallucinating(damage, passive, source);
+//      DEBUG("Hallucinating: %d damage (pasv=%d) -> %d", damage, passive, newdamage);
+      return;
+    }
+    // No effect on incoming damage or if poison has worn off or does not have
+    // any levels in Weakness.
+    if (passive || damage <= 0 || weakness <= 0 || stacks <= 0) {
+      return;
+    }
+    // Scale damage down based on total stacks + weakness level.
+    newdamage = max(1, floor(damage * bonsai_stat_poison_weakness_base ** (stacks * weakness)));
+//    DEBUG("Weakness: %d -> %d", damage, newdamage);
+  }
+
+  // Called for damage dealt or received while under the influence of Hallucinogens.
+  // Incoming damage is reduced and outgoing damage to non-players is increased.
+  int ModifyDamageWhileHallucinating(int damage, bool passive, Actor source) {
+    if (source && source.player) {
+      // Hallucinating enemies deal and receive 1 damage vs. players.
+      return 1;
+    }
+
+    if (passive) {
+      // Incoming damage reduced
+      return max(1, floor(damage * TFLV_Upgrade_Hallucinogens.GetArmourFactor(hallucinogens, stacks)));
+    } else {
+      // Outgoing damage increased.
+      return ceil(damage * TFLV_Upgrade_Hallucinogens.GetDamageFactor(hallucinogens, stacks));
+    }
+  }
+
+  override void CopyFrom(TFLV_Upgrade_Dot _src) {
+    super.CopyFrom(_src);
+    let src = TFLV_Upgrade_PoisonDot(_src);
+    self.weakness = max(self.weakness, src.weakness);
+    self.hallucinogens = max(self.hallucinogens, src.hallucinogens);
+  }
+}
+
+class TFLV_Upgrade_Putrefaction_Aux : Actor {
+  uint level;
+
+  Default {
+    RenderStyle "Translucent";
+    Alpha 0.4;
+    +NODAMAGETHRUST;
+  }
+
+  void Spread() {
+    Array<Actor> targets;
+    TFLV_Util.MonstersInRadius(self, bonsai_stat_poison_putref_radius, targets);
+    for (uint i = 0; i < targets.size(); ++i) {
+      TFLV_Upgrade_Dot.GiveStacks(self.target, targets[i], "TFLV_Upgrade_PoisonDot", level, level);
+    }
+  }
+
+  States {
+    Spawn:
+      LPBX ABABABCBCBCDCDCDEE 7 Spread();
+      STOP;
+  }
+}

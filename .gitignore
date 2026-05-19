@@ -1,0 +1,5 @@
+# tokensave shadow extension hardlinks (ZScript → C++, ACS → C)
+# These are NTFS hardlinks, not real files. Git ignores them; tokensave indexes them.
+*.zs.cpp
+*.zsc.cpp
+*.acs.c

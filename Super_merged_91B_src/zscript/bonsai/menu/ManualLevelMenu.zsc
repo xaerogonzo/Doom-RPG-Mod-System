@@ -1,0 +1,544 @@
+// Manual Level Setting menu — adjust upgrade levels on player and current weapon.
+// Shows [OFF] for pool-disabled upgrades and [N/A] for weapon-type mismatches.
+// Requires an active game with a weapon equipped for weapon upgrades.
+// #namespace TFLV::Menu;
+
+class TFLV_Menu_ManualLevelMenu : TFLV_Menu_GenericMenu {
+
+  // =========================================================================
+  // Helpers
+  // =========================================================================
+
+  static string CleanName(string rawName) {
+    string n = rawName;
+    n.Replace("TFLV_Upgrade_", "");
+    n.Replace("TFLV_", "");
+    return (n.Length() > 0) ? n : rawName;
+  }
+
+  // Maps upgrade class name to its pool toggle CVar.
+  static string GetToggleCVar(string c) {
+    if (c == "TFLV_Upgrade_AmmoLeech")            return "bonsai_upg_ammoleech";
+    if (c == "TFLV_Upgrade_ArmourLeech")           return "bonsai_upg_armourleech";
+    if (c == "TFLV_Upgrade_Bandoliers")            return "bonsai_upg_bandoliers";
+    if (c == "TFLV_Upgrade_BlastShaping")          return "bonsai_upg_blastshaping";
+    if (c == "TFLV_Upgrade_ECM")                   return "bonsai_upg_ecm";
+    if (c == "TFLV_Upgrade_HazardSuit")            return "bonsai_upg_hazardsuit";
+    if (c == "TFLV_Upgrade_Indestructible")        return "bonsai_upg_indestructible";
+    if (c == "TFLV_Upgrade_Companions")            return "bonsai_upg_companions";
+    if (c == "TFLV_Upgrade_Intuition")             return "bonsai_upg_intuition";
+    if (c == "TFLV_Upgrade_Juggler")               return "bonsai_upg_juggler";
+    if (c == "TFLV_Upgrade_LifeLeech")             return "bonsai_upg_lifeleech";
+    if (c == "TFLV_Upgrade_PlayerDamage")          return "bonsai_upg_playerdamage";
+    if (c == "TFLV_Upgrade_Thorns")                return "bonsai_upg_thorns";
+    if (c == "TFLV_Upgrade_ToughAsNails")          return "bonsai_upg_toughasnails";
+    if (c == "TFLV_Upgrade_AggressiveDefence")     return "bonsai_upg_aggressivedefence";
+    if (c == "TFLV_Upgrade_RicochetShots")         return "bonsai_upg_ricochetshots";
+    if (c == "TFLV_Upgrade_BouncyShots")           return "bonsai_upg_bouncyshots";
+    if (c == "TFLV_Upgrade_Cleave")                return "bonsai_upg_cleave";
+    if (c == "TFLV_Upgrade_DarkHarvest")           return "bonsai_upg_darkharvest";
+    if (c == "TFLV_Upgrade_DecoyFlares")           return "bonsai_upg_decoyflares";
+    if (c == "TFLV_Upgrade_ExplosiveDeath")        return "bonsai_upg_explosivedeath";
+    if (c == "TFLV_Upgrade_ExplosiveShots")        return "bonsai_upg_explosiveshots";
+    if (c == "TFLV_Upgrade_FastShots")             return "bonsai_upg_fastshots";
+    if (c == "TFLV_Upgrade_FragmentationShots")    return "bonsai_upg_fragmentationshots";
+    if (c == "TFLV_Upgrade_HomingShots")           return "bonsai_upg_homingshots";
+    if (c == "TFLV_Upgrade_PiercingShots")         return "bonsai_upg_piercingshots";
+    if (c == "TFLV_Upgrade_RapidFire")             return "bonsai_upg_rapidfire";
+    if (c == "TFLV_Upgrade_Shield")                return "bonsai_upg_shield";
+    if (c == "TFLV_Upgrade_Submunitions")          return "bonsai_upg_submunitions";
+    if (c == "TFLV_Upgrade_Sweep")                 return "bonsai_upg_sweep";
+    if (c == "TFLV_Upgrade_Swiftness")             return "bonsai_upg_swiftness";
+    if (c == "TFLV_Upgrade_WeaponDamage")          return "bonsai_upg_weapondamage";
+    if (c == "TFLV_Upgrade_IncendiaryShots")       return "bonsai_upg_incendiaryshots";
+    if (c == "TFLV_Upgrade_BurningTerror")         return "bonsai_upg_burningterror";
+    if (c == "TFLV_Upgrade_Conflagration")         return "bonsai_upg_conflagration";
+    if (c == "TFLV_Upgrade_InfernalKiln")          return "bonsai_upg_infernalkiln";
+    if (c == "TFLV_Upgrade_PoisonShots")           return "bonsai_upg_poisonshots";
+    if (c == "TFLV_Upgrade_Weakness")              return "bonsai_upg_weakness";
+    if (c == "TFLV_Upgrade_Putrefaction")          return "bonsai_upg_putrefaction";
+    if (c == "TFLV_Upgrade_Hallucinogens")         return "bonsai_upg_hallucinogens";
+    if (c == "TFLV_Upgrade_CorrosiveShots")        return "bonsai_upg_corrosiveshots";
+    if (c == "TFLV_Upgrade_ConcentratedAcid")      return "bonsai_upg_concentratedacid";
+    if (c == "TFLV_Upgrade_AcidSpray")             return "bonsai_upg_acidspray";
+    if (c == "TFLV_Upgrade_Embrittlement")         return "bonsai_upg_embrittlement";
+    if (c == "TFLV_Upgrade_ShockingInscription")   return "bonsai_upg_shockinginscription";
+    if (c == "TFLV_Upgrade_Revivification")        return "bonsai_upg_revivification";
+    if (c == "TFLV_Upgrade_ChainLightning")        return "bonsai_upg_chainlightning";
+    if (c == "TFLV_Upgrade_Thunderbolt")           return "bonsai_upg_thunderbolt";
+    if (c == "TFLV_Upgrade_ElementalBeam")         return "bonsai_upg_elementalbeam";
+    if (c == "TFLV_Upgrade_ElementalBlast")        return "bonsai_upg_elementalblast";
+    if (c == "TFLV_Upgrade_ElementalWave")         return "bonsai_upg_elementalwave";
+    return "";
+  }
+
+  static bool IsUpgradeEnabled(string c) {
+    string cv = GetToggleCVar(c);
+    if (cv.Length() == 0) return true;
+    let cvar = CVar.FindCVar(cv);
+    return cvar ? cvar.GetInt() > 0 : true;
+  }
+
+  // Returns the tier name for display (0=Disabled..5=Favored).
+  static string GetUpgradeTierName(string c) {
+    string cv = GetToggleCVar(c);
+    if (cv.Length() == 0) return "Common";
+    let cvar = CVar.FindCVar(cv);
+    int tier = cvar ? cvar.GetInt() : 4;
+    static const String NAMES[] = { "Disabled", "Very Rare", "Rare", "Uncommon", "Common", "Favored" };
+    if (tier < 0 || tier > 5) tier = 4;
+    return NAMES[tier];
+  }
+
+  // =========================================================================
+  // Category filters
+  // =========================================================================
+
+  static bool IsPlayerUpgrade(string c) {
+    return c == "TFLV_Upgrade_AmmoLeech"
+        || c == "TFLV_Upgrade_ArmourLeech"
+        || c == "TFLV_Upgrade_Bandoliers"
+        || c == "TFLV_Upgrade_BlastShaping"
+        || c == "TFLV_Upgrade_ECM"
+        || c == "TFLV_Upgrade_HazardSuit"
+        || c == "TFLV_Upgrade_Indestructible"
+        || c == "TFLV_Upgrade_Companions"
+        || c == "TFLV_Upgrade_Intuition"
+        || c == "TFLV_Upgrade_Juggler"
+        || c == "TFLV_Upgrade_LifeLeech"
+        || c == "TFLV_Upgrade_PlayerDamage"
+        || c == "TFLV_Upgrade_Thorns"
+        || c == "TFLV_Upgrade_ToughAsNails";
+  }
+  static bool IsMeleeOnlyUpgrade(string c) {
+    // These require strictly melee (bMELEEWEAPON). Never suitable for ranged weapons.
+    return c == "TFLV_Upgrade_Shield"
+        || c == "TFLV_Upgrade_Cleave"
+        || c == "TFLV_Upgrade_Sweep";
+  }
+  static bool IsMeleeUpgrade(string c) {
+    // All melee-category upgrades including wimpy-compatible ones.
+    return c == "TFLV_Upgrade_Shield" || c == "TFLV_Upgrade_DarkHarvest"
+        || c == "TFLV_Upgrade_Cleave" || c == "TFLV_Upgrade_Sweep"
+        || c == "TFLV_Upgrade_Swiftness";
+  }
+  static bool IsWimpyUpgrade(string c) {
+    // Suitable for melee OR wimpy weapons (no ammo). Shown separately.
+    return c == "TFLV_Upgrade_DarkHarvest" || c == "TFLV_Upgrade_Swiftness";
+  }
+  static bool IsProjectileOnlyUpgrade(string c) {
+    return c == "TFLV_Upgrade_BouncyShots"
+        || c == "TFLV_Upgrade_DecoyFlares"
+        || c == "TFLV_Upgrade_FastShots"
+        || c == "TFLV_Upgrade_FragmentationShots"
+        || c == "TFLV_Upgrade_HomingShots"
+        || c == "TFLV_Upgrade_PiercingShots";
+  }
+  static bool IsHitscanOnlyUpgrade(string c) {
+    return c == "TFLV_Upgrade_AggressiveDefence"
+        || c == "TFLV_Upgrade_ExplosiveShots"
+        || c == "TFLV_Upgrade_RicochetShots";
+  }
+  static bool IsAnyRangedUpgrade(string c) {
+    return c == "TFLV_Upgrade_ExplosiveDeath"
+        || c == "TFLV_Upgrade_RapidFire"
+        || c == "TFLV_Upgrade_Submunitions"
+        || c == "TFLV_Upgrade_WeaponDamage";
+  }
+  static bool IsFireUpgrade(string c) {
+    return c == "TFLV_Upgrade_IncendiaryShots" || c == "TFLV_Upgrade_BurningTerror"
+        || c == "TFLV_Upgrade_Conflagration"   || c == "TFLV_Upgrade_InfernalKiln";
+  }
+  static bool IsPoisonUpgrade(string c) {
+    return c == "TFLV_Upgrade_PoisonShots"  || c == "TFLV_Upgrade_Weakness"
+        || c == "TFLV_Upgrade_Putrefaction" || c == "TFLV_Upgrade_Hallucinogens";
+  }
+  static bool IsAcidUpgrade(string c) {
+    return c == "TFLV_Upgrade_CorrosiveShots"   || c == "TFLV_Upgrade_ConcentratedAcid"
+        || c == "TFLV_Upgrade_AcidSpray"        || c == "TFLV_Upgrade_Embrittlement";
+  }
+  static bool IsLightningUpgrade(string c) {
+    return c == "TFLV_Upgrade_ShockingInscription" || c == "TFLV_Upgrade_Revivification"
+        || c == "TFLV_Upgrade_ChainLightning"      || c == "TFLV_Upgrade_Thunderbolt";
+  }
+  static bool IsSynthesisUpgrade(string c) {
+    return c == "TFLV_Upgrade_ElementalBeam"
+        || c == "TFLV_Upgrade_ElementalBlast"
+        || c == "TFLV_Upgrade_ElementalWave";
+  }
+  static bool IsElementalUpgrade(string c) {
+    return IsFireUpgrade(c) || IsPoisonUpgrade(c) || IsAcidUpgrade(c)
+        || IsLightningUpgrade(c) || IsSynthesisUpgrade(c);
+  }
+
+  // =========================================================================
+  void AddUpgradeItem(
+      TFLV_Upgrade_Registry reg, uint i,
+      TFLV_Upgrade_UpgradeBag bag, uint bag_type,
+      uint wtypeflags) {
+    let upg = reg.upgrades[i];
+    if (!upg) return;
+    string u_class = reg.upgrade_names[i];
+    uint u_level   = bag.Level(u_class);
+    string d_name  = upg.GetName();
+    if (d_name.Length() == 0) d_name = CleanName(u_class);
+    string d_desc  = upg.GetDesc();
+    if (d_desc.Length() == 0) d_desc = CleanName(u_class);
+
+    bool enabled = IsUpgradeEnabled(u_class);
+    // Always show as compatible — weapon type filtering via UI context is
+    // unreliable due to ZScript scope restrictions. Section headers serve
+    // as the organizational guide instead.
+    bool compatible = true;
+
+    mDesc.mItems.Push(new("TFLV_Menu_ManualLevelItem").Init(
+      d_name, u_class, u_level, bag_type, i, enabled, compatible));
+
+    string tt = d_desc;
+    if (!enabled) tt = tt.."\n[POOL: DISABLED - excluded from level-up rolls]";
+    PushTooltip(tt);
+  }
+
+  // =========================================================================
+  // Init
+  // =========================================================================
+
+  override void Init(Menu parent, OptionMenuDescriptor desc) {
+    super.InitDynamic(parent, desc);
+    TooltipGeometry(0.5, 1.0, 0.75, 1.0, 0.5);
+    TooltipAppearance("", "", "tfttbg");
+
+    let pps = TFLV_EventHandler.GetConsolePlayerStats();
+    if (!pps) {
+      PushText(" ", Font.CR_RED);
+      PushText("No player stats found. Start a game first.", Font.CR_RED);
+      return;
+    }
+
+    let handler = TFLV_EventHandler(StaticEventHandler.Find("TFLV_EventHandler"));
+    if (!handler || !handler.UPGRADE_REGISTRY) {
+      PushText(" ", Font.CR_RED);
+      PushText("Upgrade registry not found.", Font.CR_RED);
+      return;
+    }
+
+    let reg = handler.UPGRADE_REGISTRY;
+
+    PushText(" ", Font.CR_GOLD);
+    PushText("Manual Level Setting", Font.CR_GOLD);
+    PushText("Left/Right: +/- 1 Level  |  Enter: Reset to 0  |  [OFF]=excluded from level-up rolls", Font.CR_WHITE);
+
+    // --- Player Upgrades ---
+    PushText(" ", Font.CR_ORANGE);
+    mDesc.mItems.Push(new("TFLV_Menu_ResetAllItem").Init(">> Reset ALL Player Upgrades", 0));
+    PushTooltip("Removes every upgrade from your player. This cannot be undone.");
+
+    PushText(" ", Font.CR_GOLD);
+    PushText("Player Upgrades", Font.CR_GOLD);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsPlayerUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, pps.upgrades, 0, 0);
+    }
+
+    // --- Weapon Upgrades ---
+    TFLV_CurrentStats w_stats;
+    if (!pps.GetCurrentStats(w_stats)) {
+      PushText(" ", Font.CR_DARKGRAY);
+      PushText("(Equip a weapon to adjust weapon upgrade levels)", Font.CR_DARKGRAY);
+      mDesc.mSelectedItem = -1;
+      return;
+    }
+
+    uint wtf = w_stats.wtypeflags;
+    bool is_melee   = (wtf & TFLV_TYPE_MELEE) != 0;
+    bool is_hitscan = (wtf & TFLV_TYPE_HITSCAN) != 0;
+    bool is_proj    = (wtf & TFLV_TYPE_PROJECTILE) != 0;
+    bool is_wimpy   = (wtf & TFLV_TYPE_WIMPY) != 0;
+    bool type_known = (wtf != 0) || is_melee;
+
+    PushText(" ", Font.CR_ORANGE);
+    mDesc.mItems.Push(new("TFLV_Menu_ResetAllItem").Init(
+      string.format(">> Reset ALL Weapon Upgrades (%s)", w_stats.wname), 1));
+    PushTooltip("Removes every upgrade from your current weapon. This cannot be undone.");
+
+    // Build type label from flags
+    string type_str = "";
+    if (is_melee)   type_str = type_str..(type_str.Length()>0?", ":"").."Melee";
+    if (is_hitscan) type_str = type_str..(type_str.Length()>0?", ":"").."Hitscan";
+    if (is_proj)    type_str = type_str..(type_str.Length()>0?", ":"").."Projectile";
+    if (is_wimpy)   type_str = type_str..(type_str.Length()>0?", ":"").."Wimpy";
+    if (type_str.Length() == 0) type_str = "Unknown - fire weapon to detect type";
+
+    PushText(" ", Font.CR_CYAN);
+    PushText(string.format("Weapon: %s  [%s]", w_stats.wname, type_str), Font.CR_CYAN);
+    PushText("[OFF]=excluded from level-up rolls  |  sections show upgrade categories", Font.CR_DARKGRAY);
+
+    // Wimpy toggle — lets the player mark any weapon as wimpy for reduced XP cost.
+    mDesc.mItems.Push(new("TFLV_Menu_WimpyToggleItem").Init(w_stats.wname));
+    PushTooltip("Cycles: AUTO → FORCED ON (always wimpy) → FORCED OFF (never wimpy). "
+      .."Wimpy weapons use "..int(bonsai_level_cost_mul_for_wimpy * 100).."% of normal XP per level and enable Dark Harvest and Swiftness. "
+      .."Persists with this weapon across maps.");
+
+    // --- Melee-only upgrades ---
+    PushText(" ", Font.CR_TEAL);
+    PushText("Melee-Only Upgrades", Font.CR_TEAL);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsMeleeOnlyUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    // --- Melee or Wimpy upgrades ---
+    PushText(" ", Font.CR_TEAL);
+    PushText("Melee / Wimpy Upgrades", Font.CR_TEAL);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsWimpyUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    PushText(" ", Font.CR_YELLOW);
+    PushText("Hitscan Upgrades", Font.CR_YELLOW);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsHitscanOnlyUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    PushText(" ", Font.CR_LIGHTBLUE);
+    PushText("Projectile Upgrades", Font.CR_LIGHTBLUE);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsProjectileOnlyUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    PushText(" ", Font.CR_WHITE);
+    PushText("Any Ranged Upgrades", Font.CR_WHITE);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsAnyRangedUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    PushText(" ", Font.CR_RED);
+    PushText("Fire Upgrades", Font.CR_RED);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsFireUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    PushText(" ", Font.CR_GREEN);
+    PushText("Poison Upgrades", Font.CR_GREEN);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsPoisonUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    PushText(" ", Font.CR_BROWN);
+    PushText("Acid Upgrades", Font.CR_BROWN);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsAcidUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    PushText(" ", Font.CR_BLUE);
+    PushText("Lightning Upgrades", Font.CR_BLUE);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsLightningUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    PushText(" ", Font.CR_PURPLE);
+    string synth_label = "Elemental Synthesis";
+    if      (is_hitscan && !is_melee) synth_label = "Elemental Synthesis  [Beam: hitscan]";
+    else if (is_proj    && !is_melee) synth_label = "Elemental Synthesis  [Blast: projectile]";
+    else if (is_melee)                synth_label = "Elemental Synthesis  [Wave: melee]";
+    PushText(synth_label, Font.CR_PURPLE);
+    for (uint i = 0; i < reg.upgrade_names.Size(); ++i) {
+      if (!IsSynthesisUpgrade(reg.upgrade_names[i])) continue;
+      AddUpgradeItem(reg, i, w_stats.wupgrades, 1, wtf);
+    }
+
+    mDesc.mSelectedItem = -1;
+  }
+}
+
+// =============================================================================
+// ManualLevelItem
+// =============================================================================
+class TFLV_Menu_ManualLevelItem : OptionMenuItem {
+  string upgrade_class;
+  uint current_level;
+  uint bag_type;
+  uint registry_index;
+  bool pool_enabled;
+
+  TFLV_Menu_ManualLevelItem Init(
+      string d_name, string class_in, uint lv, uint bag, uint reg_idx,
+      bool enabled, bool compat) {
+    self.upgrade_class  = class_in;
+    self.current_level  = lv;
+    self.bag_type       = bag;
+    self.registry_index = reg_idx;
+    self.pool_enabled   = enabled;
+    super.Init(d_name, "");
+    return self;
+  }
+
+  override bool Selectable() { return true; }
+
+  override int Draw(OptionMenuDescriptor d, int y, int indent, bool selected) {
+    let pps = TFLV_EventHandler.GetConsolePlayerStats();
+    if (pps) {
+      if (bag_type == 0) {
+        current_level = pps.upgrades.Level(upgrade_class);
+      } else {
+        TFLV_CurrentStats s;
+        if (pps.GetCurrentStats(s)) current_level = s.wupgrades.Level(upgrade_class);
+      }
+    }
+    string cvname = TFLV_Menu_ManualLevelMenu.GetToggleCVar(upgrade_class);
+    if (cvname.Length() > 0) {
+      let cv = CVar.FindCVar(cvname);
+      pool_enabled = cv ? cv.GetInt() > 0 : true;
+    }
+
+    uint label_col, val_col;
+    if (!pool_enabled) {
+      if (current_level > 0) {
+        label_col = selected ? Font.CR_FIRE   : Font.CR_ORANGE;
+        val_col   = selected ? Font.CR_ORANGE : Font.CR_DARKRED;
+      } else {
+        label_col = selected ? Font.CR_ORANGE : Font.CR_DARKRED;
+        val_col   = Font.CR_BLACK;
+      }
+    } else {
+      label_col = selected ? Font.CR_WHITE : Font.CR_DARKRED;
+      val_col   = current_level > 0
+        ? (selected ? Font.CR_GREEN    : Font.CR_DARKGREEN)
+        : (selected ? Font.CR_DARKGRAY : Font.CR_BLACK);
+    }
+
+    drawLabel(indent, y, label_col);
+    string v_str = current_level > 0 ? string.format("Level %d", current_level) : "---";
+    if (!pool_enabled) {
+      v_str = v_str.." [DISABLED]";
+    } else {
+      string tier = TFLV_Menu_ManualLevelMenu.GetUpgradeTierName(upgrade_class);
+      if (tier != "Common") v_str = v_str.." ["..tier.."]";
+    }
+    drawValue(indent, y, val_col, v_str);
+    return indent;
+  }
+
+  override bool MenuEvent(int key, bool fromController) {
+    if (key == Menu.MKey_Right) {
+      Menu.MenuSound("menu/change");
+      EventHandler.SendNetworkEvent("bonsai-set-level", bag_type, registry_index, 1);
+      return true;
+    } else if (key == Menu.MKey_Left) {
+      Menu.MenuSound("menu/change");
+      EventHandler.SendNetworkEvent("bonsai-set-level", bag_type, registry_index, -1);
+      return true;
+    } else if (key == Menu.MKey_Enter) {
+      Menu.MenuSound("menu/choose");
+      EventHandler.SendNetworkEvent("bonsai-set-level-abs", bag_type, registry_index, 0);
+      return true;
+    }
+    return super.MenuEvent(key, fromController);
+  }
+}
+
+// =============================================================================
+// WimpyToggleItem — cycles wimpy_override on the current weapon
+// =============================================================================
+class TFLV_Menu_WimpyToggleItem : OptionMenuItem {
+  string wpn_name;
+
+  TFLV_Menu_WimpyToggleItem Init(string name) {
+    self.wpn_name = name;
+    super.Init("Mark as Wimpy", "");
+    return self;
+  }
+
+  override bool Selectable() { return true; }
+
+  // Returns the current override state from live WeaponInfo.
+  // -1 = forced off, 0 = auto, 1 = forced on
+  private int GetOverride() {
+    let pps = TFLV_EventHandler.GetConsolePlayerStats();
+    if (!pps) return 0;
+    let info = pps.GetInfoForCurrentWeapon();
+    if (!info) return 0;
+    return info.wimpy_override;
+  }
+
+  private bool GetEffectiveWimpy() {
+    let pps = TFLV_EventHandler.GetConsolePlayerStats();
+    if (!pps) return false;
+    TFLV_CurrentStats s;
+    if (!pps.GetCurrentStats(s)) return false;
+    return (s.wtypeflags & TFLV_TYPE_WIMPY) != 0;
+  }
+
+  override int Draw(OptionMenuDescriptor d, int y, int indent, bool selected) {
+    int  ov        = GetOverride();
+    bool is_wimpy  = GetEffectiveWimpy();
+
+    uint label_col = selected ? Font.CR_WHITE : Font.CR_DARKRED;
+
+    string val;
+    uint val_col;
+    if (ov > 0) {
+      val     = "FORCED ON  (reduced XP cost)";
+      val_col = selected ? Font.CR_GREEN : Font.CR_DARKGREEN;
+    } else if (ov < 0) {
+      val     = "FORCED OFF  (normal XP cost)";
+      val_col = selected ? Font.CR_ORANGE : Font.CR_BROWN;
+    } else if (is_wimpy) {
+      val     = "AUTO: YES  (reduced XP cost)";
+      val_col = selected ? Font.CR_LIGHTBLUE : Font.CR_BLUE;
+    } else {
+      val     = "AUTO: NO";
+      val_col = selected ? Font.CR_DARKGRAY : Font.CR_BLACK;
+    }
+
+    drawLabel(indent, y, label_col);
+    drawValue(indent, y, val_col, val);
+    return indent;
+  }
+
+  override bool MenuEvent(int key, bool fromController) {
+    if (key == Menu.MKey_Enter || key == Menu.MKey_Left || key == Menu.MKey_Right) {
+      Menu.MenuSound("menu/change");
+      EventHandler.SendNetworkEvent("bonsai-toggle-wimpy");
+      return true;
+    }
+    return super.MenuEvent(key, fromController);
+  }
+}
+
+// =============================================================================
+// ResetAllItem
+// =============================================================================
+class TFLV_Menu_ResetAllItem : OptionMenuItem {
+  uint bag_type;
+
+  TFLV_Menu_ResetAllItem Init(string label, uint bag_type_) {
+    self.bag_type = bag_type_;
+    super.Init(label, "");
+    return self;
+  }
+
+  override bool Selectable() { return true; }
+
+  override int Draw(OptionMenuDescriptor d, int y, int indent, bool selected) {
+    drawLabel(indent, y, selected ? Font.CR_FIRE : Font.CR_ORANGE);
+    return indent;
+  }
+
+  override bool MenuEvent(int key, bool fromController) {
+    if (key == Menu.MKey_Enter) {
+      Menu.MenuSound("menu/choose");
+      EventHandler.SendNetworkEvent("bonsai-reset-all-upgrades", bag_type);
+      return true;
+    }
+    return super.MenuEvent(key, fromController);
+  }
+}

@@ -1,0 +1,2 @@
+// Typist Bridge for Super Merged
+// Load order: SuperMerged.pk3 -> Typist.pk3 -> typist_bridge.pk3

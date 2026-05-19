@@ -1,0 +1,367 @@
+// =============================================================================
+// Gun Bonsai — Legendoom Integration
+//
+// Adds support for Legendoom weapon effects. When Legendoom is installed and
+// a weapon levels up at the configured interval, it receives a new LD effect
+// instead of (or in addition to) a normal upgrade. The player can cycle
+// through a weapon's learned effects with the configured keybind.
+//
+// Gracefully no-ops when Legendoom is not installed — all entry points check
+// TFLV_Settings.have_legendoom() before doing anything.
+// =============================================================================
+
+// Matches Legendoom's internal rarity levels.
+enum TFLV_LDRarity {
+  RARITY_MUNDANE   = -1,
+  RARITY_COMMON    =  0,
+  RARITY_UNCOMMON  =  1,
+  RARITY_RARE      =  2,
+  RARITY_EPIC      =  3,
+}
+
+// =============================================================================
+// TFLV_LegendoomUtil — static helpers for querying LD inventory items
+// =============================================================================
+
+class TFLV_LegendoomUtil {
+
+  // Returns the rarity of a Legendoom weapon held by act, using the given
+  // class name prefix (e.g. "LDPistol").
+  static TFLV_LDRarity GetWeaponRarity(Actor act, string prefix) {
+    if (act.FindInventory(prefix .. "LegendaryEpic"))    return RARITY_EPIC;
+    if (act.FindInventory(prefix .. "LegendaryRare"))    return RARITY_RARE;
+    if (act.FindInventory(prefix .. "LegendaryUncommon"))return RARITY_UNCOMMON;
+    if (act.FindInventory(prefix .. "LegendaryCommon"))  return RARITY_COMMON;
+    return RARITY_MUNDANE;
+  }
+
+  // Finds the first inventory item whose class name starts with prefix.
+  // Case-insensitive because GZDoom isn't consistent about class name casing.
+  static Inventory FindItemWithPrefix(Actor act, string prefix) {
+    prefix = prefix.MakeLower();
+    for (Inventory item = act.Inv; item; item = item.Inv) {
+      string cls = item.GetClassName();
+      cls = cls.MakeLower();
+      if (cls.IndexOf(prefix) == 0) return item;
+    }
+    return null;
+  }
+
+  // Returns the class name of the active LD effect on act (e.g. "LDPistolEffect_Vampiric").
+  // Returns "" if no effect is active.
+  static string GetActiveWeaponEffect(Actor act, string prefix) {
+    Inventory item = FindItemWithPrefix(act, prefix .. "Effect_");
+    if (item) return item.GetClassName();
+    return "";
+  }
+
+  // Returns the localised display title for an effect class name.
+  static string GetEffectTitle(string effect) {
+    string suffix = effect.Mid(effect.RightIndexOf("_") + 1);
+    return StringTable.Localize("$LD_FX_TITLE_" .. suffix);
+  }
+
+  // Returns the first line of the effect description (no flavour text).
+  static string GetEffectDesc(string effect) {
+    string full = GetEffectDescFull(effect);
+    int nl = full.IndexOf("\n");
+    return (nl >= 0) ? full.Left(nl) : full;
+  }
+
+  // Returns the full effect description including flavour text.
+  static string GetEffectDescFull(string effect) {
+    string suffix = effect.Mid(effect.RightIndexOf("_") + 1);
+    return StringTable.Localize("$LD_FX_DESCR_" .. suffix);
+  }
+}
+
+// =============================================================================
+// TFLV_LegendoomWeaponInfo — per-weapon LD state (effects, slots, rarity)
+// =============================================================================
+
+class TFLV_LegendoomWeaponInfo : Object play {
+  TFLV_WeaponInfo info;       // back-reference to the owning WeaponInfo
+  uint  effectSlots;          // how many effects this weapon can hold
+  uint  maxRarity;            // highest rarity effect the weapon can receive
+  bool  canReplaceEffects;    // whether the weapon can swap out old effects
+  Array<string> effects;      // class names of all learned effects
+  int   currentEffect;        // index into effects[] of the active effect (-1 = none)
+  string currentEffectName;   // display name of the active effect
+
+  void Init(TFLV_WeaponInfo info) {
+    self.info          = info;
+    currentEffect      = -1;
+    currentEffectName  = "";
+    effects.Clear();
+  }
+
+  // Called when the WeaponInfo is rebound to a (possibly new) weapon.
+  void Rebind(TFLV_WeaponInfo info) {
+    string LDWeaponType = "LDWeapon";
+    if (info.wpn is LDWeaponType) {
+      InitLegendoom();
+    } else {
+      effectSlots = 0;
+    }
+  }
+
+  // Validates that currentEffect still matches what's actually in the player's
+  // inventory. Called after save/load and on rebind, since inventory state may
+  // have changed while the effects[] array was serialized separately.
+  void ValidateCurrentEffect() {
+    if (effects.Size() == 0) {
+      currentEffect     = -1;
+      currentEffectName = "";
+      return;
+    }
+    // Check if the currently indexed effect is actually active in inventory.
+    if (currentEffect >= 0 && currentEffect < int(effects.Size())) {
+      string prefix = info.wpn.GetClassName();
+      string active = TFLV_LegendoomUtil.GetActiveWeaponEffect(info.wpn.owner, prefix);
+      if (active != "" && active == effects[currentEffect])
+        return; // all good
+      // Active effect doesn't match — find which one is actually active.
+      int idx = (active != "") ? effects.Find(active) : effects.Size();
+      currentEffect = (idx < int(effects.Size())) ? idx : -1;
+      currentEffectName = (currentEffect >= 0)
+        ? TFLV_LegendoomUtil.GetEffectTitle(effects[currentEffect]) : "";
+    }
+  }
+
+  // Queries the weapon's Legendoom inventory to set up slots and initial effect.
+  void InitLegendoom() {
+    string prefix = info.wpn.GetClassName();
+
+    TFLV_LDRarity rarity = TFLV_LegendoomUtil.GetWeaponRarity(info.wpn.owner, prefix);
+    canReplaceEffects = GunRarityMatchesSetting(bonsai_which_guns_can_replace, rarity);
+
+    if (GunRarityMatchesSetting(bonsai_which_guns_can_learn, rarity)) {
+      effectSlots = bonsai_base_ld_effect_slots + rarity * bonsai_bonus_ld_effect_slots;
+    } else {
+      effectSlots = 0;
+    }
+
+    // Determine the maximum rarity of effects the weapon can receive.
+    if (bonsai_ignore_gun_rarity) {
+      maxRarity = RARITY_EPIC;
+    } else {
+      maxRarity = max(RARITY_COMMON, rarity);
+    }
+
+    // Record any effect the weapon already has when it spawns.
+    string effect = TFLV_LegendoomUtil.GetActiveWeaponEffect(info.wpn.owner, prefix);
+    if (effect != "") {
+      int idx = effects.Find(effect);
+      if (idx == effects.Size()) {
+        effects.Push(effect);
+        idx = effects.Size() - 1;
+      }
+      currentEffect     = idx;
+      currentEffectName = TFLV_LegendoomUtil.GetEffectTitle(effect);
+    } else {
+      currentEffect     = -1;
+      currentEffectName = "";
+    }
+  }
+
+  // Advances to the next effect in the learned list.
+  void CycleEffect() {
+    if (effects.Size() == 0) return;
+    SelectEffect((currentEffect + 1) % effects.Size());
+  }
+
+  // Activates the effect at the given index, deactivating the current one first.
+  void SelectEffect(uint index) {
+    if (index >= effects.Size()) return;
+    if (currentEffect >= 0)
+      info.wpn.owner.TakeInventory(effects[currentEffect], 1);
+    currentEffect     = index;
+    currentEffectName = TFLV_LegendoomUtil.GetEffectTitle(effects[currentEffect]);
+    info.wpn.owner.GiveInventory(effects[currentEffect], 1);
+  }
+
+  // Removes the effect at index. If it is the active one, cycles to another first.
+  void DiscardEffect(uint index) {
+    if (index >= effects.Size()) return;
+    if (index == currentEffect) {
+      info.wpn.owner.TakeInventory(effects[index], 1);
+      effects.Delete(index);
+      // currentEffect is now stale; CycleEffect wraps around safely on empty.
+      currentEffect = -1;
+      if (effects.Size() > 0) CycleEffect();
+    } else {
+      if (index < uint(currentEffect)) --currentEffect;
+      effects.Delete(index);
+    }
+  }
+
+  // Returns true if act's rarity meets the threshold for the given setting.
+  bool GunRarityMatchesSetting(TFLV_WhichGuns setting, TFLV_LDRarity rarity) {
+    return (rarity == RARITY_MUNDANE) ? bool(setting & 1) : bool(setting & 2);
+  }
+
+  // Dumps LD state to console (for debug/info screen).
+  void DumpToConsole() {
+    if (effectSlots == 0) { Console.PrintF("(no Legendoom data)"); return; }
+    Console.PrintF("Legendoom: %d slots, %s replace, maxRarity: %d",
+      effectSlots, canReplaceEffects ? "can" : "can't", maxRarity);
+    for (uint i = 0; i < effects.Size(); ++i) {
+      Console.PrintF("  [%d] %s — %s", i,
+        TFLV_LegendoomUtil.GetEffectTitle(effects[i]),
+        TFLV_LegendoomUtil.GetEffectDesc(effects[i]));
+    }
+  }
+}
+
+// =============================================================================
+// TFLV_LegendoomEffectGiver — actor that grants a new LD effect on level-up
+//
+// Spawns tentative PickupLegendary actors until it finds one that is within
+// the weapon's rarity cap and is not a duplicate, then installs it.
+// If all slots are full and replacement is allowed, prompts the player to
+// choose which existing effect to discard via GunBonsaiNewLDEffectMenu.
+// =============================================================================
+
+class TFLV_LegendoomEffectGiver : TFLV_UpgradeGiver {
+  TFLV_LegendoomWeaponInfo info;  // LD state for the weapon being upgraded
+  Weapon wpn;                     // the weapon itself
+  string prefix;                  // weapon class name prefix for LD inventory queries
+  Actor upgrade;                  // tentative PickupLegendary being evaluated
+  string newEffect;               // effect class name chosen for installation
+
+  // Returns true if this weapon is eligible for a new LD effect.
+  bool BeginLevelUp() {
+    if (info.effectSlots == 0) return false;
+    if (info.effects.Size() >= info.effectSlots && !info.canReplaceEffects) return false;
+    wpn    = info.info.wpn;
+    prefix = wpn.GetClassName();
+    return true;
+  }
+
+  // Spawns a tentative PickupLegendary to evaluate.
+  void CreateUpgrade() {
+    if (upgrade) upgrade.Destroy();
+    upgrade = Spawn(prefix .. "PickupLegendary", (0, 0, 0));
+  }
+
+  // Returns true if the tentative upgrade is usable (right rarity, not duplicate).
+  bool IsCreatedUpgradeGood() {
+    if (!info || !wpn) { self.Destroy(); return false; }
+    string effect = TFLV_LegendoomUtil.GetActiveWeaponEffect(upgrade, prefix);
+    if (TFLV_LegendoomUtil.GetWeaponRarity(upgrade, prefix) > info.maxRarity) return false;
+    if (info.effects.Find(effect) != info.effects.Size()) return false;
+    return true;
+  }
+
+  // Installs the accepted upgrade or opens the discard menu if slots are full.
+  void InstallUpgrade() {
+    if (!info || !wpn) { upgrade.Destroy(); return; }
+
+    string effect     = TFLV_LegendoomUtil.GetActiveWeaponEffect(upgrade, prefix);
+    string effectname = TFLV_LegendoomUtil.GetEffectTitle(effect);
+    Console.PrintF(StringTable.Localize("$TFLV_MSG_LD_EFFECT"), wpn.GetTag(), effectname);
+
+    if (info.effects.Size() == 0) {
+      // No existing effects — pick it up directly and activate it.
+      info.effects.Push(effect);
+      info.SelectEffect(0);
+      // Tag it so PerPlayerStats pickup handling knows this is an in-place upgrade.
+      upgrade.FindInventory(prefix .. "EffectActive").bNOTELEFRAG = true;
+      upgrade.Warp(owner);
+      return;
+    }
+
+    if (info.effects.Size() < info.effectSlots) {
+      // Room for another effect — record it without activating, discard pickup.
+      info.effects.Push(effect);
+      upgrade.Destroy();
+      return;
+    }
+
+    // All slots full — ask the player to choose which effect to discard.
+    newEffect = effect;
+    SetStateLabel("ChooseEffectToDiscard");
+  }
+
+  // Called with the player's choice from GunBonsaiNewLDEffectMenu.
+  // index == -1 means discard the new effect; >= 0 means discard an existing one.
+  void DiscardEffect(int index) {
+    if (index < 0) {
+      upgrade.Destroy();
+      self.Destroy();
+      return;
+    }
+    string effect = TFLV_LegendoomUtil.GetActiveWeaponEffect(upgrade, prefix);
+    info.effects.Push(effect);
+    info.DiscardEffect(index);
+    upgrade.Destroy();
+    self.Destroy();
+  }
+
+  States {
+    ChooseUpgrade:
+      TNT1 A 0 A_JumpIf(BeginLevelUp(), "TryCreateUpgrade");
+      STOP;
+    TryCreateUpgrade:
+      TNT1 A 2 CreateUpgrade();
+      TNT1 A 0 A_JumpIf(IsCreatedUpgradeGood(), "InstallUpgrade");
+      LOOP;
+    InstallUpgrade:
+      TNT1 A 0 InstallUpgrade();
+      STOP;
+    ChooseEffectToDiscard:
+      TNT1 A 1 AwaitChoice("GunBonsaiNewLDEffectMenu");
+      LOOP;
+    Chosen:
+      TNT1 A 0 DiscardEffect(chosen);
+      STOP;
+  }
+}
+
+// =============================================================================
+// TFLV_Menu_NewLDEffectMenu — prompts the player to choose an effect to discard
+// =============================================================================
+
+class TFLV_Menu_NewLDEffectMenu : TFLV_Menu_GenericMenu {
+  override void Init(Menu parent, OptionMenuDescriptor desc) {
+    super.Init(parent, desc);
+    mDesc.mItems.Clear();
+    mDesc.mSelectedItem = -1;
+
+    let stats = TFLV_EventHandler.GetConsolePlayerStats();
+    let giver = TFLV_LegendoomEffectGiver(stats.currentEffectGiver);
+    if (!giver) {
+      Console.PrintF("Gun Bonsai: missing/wrong giver in NewLDEffectMenu");
+      return;
+    }
+
+    PushText("", Font.CR_GOLD);
+    PushText(String.Format(
+        StringTable.Localize("$TFLV_MENU_LD_TOO_MANY_EFFECTS"),
+        giver.wpn.GetTag(),
+        TFLV_LegendoomUtil.GetEffectTitle(giver.newEffect)),
+      Font.CR_GOLD);
+    PushText("", Font.CR_GOLD);
+    PushText("$TFLV_MENU_LD_NEW_EFFECT", Font.CR_CYAN);
+    PushEffect(giver.newEffect, -1);
+    PushText("", Font.CR_LIGHTBLUE);
+    PushText("$TFLV_MENU_LD_EXISTING_EFFECTS", Font.CR_LIGHTBLUE);
+    for (uint i = 0; i < giver.info.effects.Size(); ++i) {
+      PushEffect(giver.info.effects[i], i);
+    }
+  }
+
+  // Prevent backing out without making a choice.
+  override bool MenuEvent(int key, bool fromController) {
+    if (key == Menu.MKey_Back) return true;
+    return super.MenuEvent(key, fromController);
+  }
+
+  void PushEffect(string effect, int index) {
+    PushKeyValueOption(
+      TFLV_LegendoomUtil.GetEffectTitle(effect),
+      TFLV_LegendoomUtil.GetEffectDesc(effect),
+      "bonsai-choose-level-up-option",
+      index);
+  }
+}

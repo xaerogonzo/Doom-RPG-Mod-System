@@ -1,0 +1,51 @@
+// =============================================================================
+// TFLV_Upgrade_Companions — Gun Bonsai player upgrade for the Companion system
+//
+// Appears in the player upgrade pool when companions_gun_bonsai_mode is on.
+// Each level increases the number of companions and unlocks features at
+// configurable level thresholds.
+// =============================================================================
+// #namespace TFLV::Upgrade;
+
+class TFLV_Upgrade_Companions : TFLV_Upgrade_BaseUpgrade {
+
+  override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const {
+    return companions_enabled
+      && companions_gun_bonsai_mode
+      && stats.upgrades.Level("TFLV_Upgrade_Companions") < bonsai_companions_max_level;
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    int allies = min(
+      bonsai_companions_base_allies + (level > 0 ? (int(level) - 1) * bonsai_companions_allies_per_level : 0),
+      bonsai_companions_max_allies);
+    fields.insert("allies", "" .. allies);
+
+    // Boss threshold info.
+    int bossLevel = bonsai_companions_boss_min_level;
+    if (bossLevel <= 0) {
+      fields.insert("boss-info", "Boss companions: disabled.");
+    } else if (level >= uint(bossLevel)) {
+      fields.insert("boss-info", "Boss companions: unlocked.");
+    } else {
+      fields.insert("boss-info", String.Format("Boss companions at level %d.", bossLevel));
+    }
+
+    // Archvile threshold info.
+    int archLevel = bonsai_companions_archvile_min_level;
+    if (archLevel <= 0) {
+      fields.insert("arch-info", "Archvile companions: disabled.");
+    } else if (level >= uint(archLevel)) {
+      fields.insert("arch-info", "Archvile companions: unlocked.");
+    } else {
+      fields.insert("arch-info", String.Format("Archvile companions at level %d.", archLevel));
+    }
+
+    // Revive limit.
+    int revives = bonsai_companions_base_revives + (level > 0 ? (int(level) - 1) * bonsai_companions_revives_per_level : 0);
+    if (revives <= 0)
+      fields.insert("revive-info", "Resurrections: unlimited.");
+    else
+      fields.insert("revive-info", String.Format("%d resurrection(s) per companion.", revives));
+  }
+}

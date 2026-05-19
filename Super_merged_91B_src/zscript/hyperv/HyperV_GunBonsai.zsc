@@ -1,0 +1,512 @@
+// =============================================================================
+// Hyper-V x Gun Bonsai Integration — 9 upgrade classes + enforcement handler
+// =============================================================================
+
+class TFLV_HyperV_IntegrationHandler : EventHandler
+{
+    Array<int> pendingEnforce;
+
+    override void PlayerEntered(PlayerEvent e)
+    {
+        if (pendingEnforce.Find(e.playerNumber) == pendingEnforce.Size())
+            pendingEnforce.Push(e.playerNumber);
+    }
+
+    override void PlayerRespawned(PlayerEvent e)
+    {
+        // Re-enforce on respawn so upgrade-gated features stay correct
+        // regardless of keep-upgrades-on-death settings.
+        if (pendingEnforce.Find(e.playerNumber) == pendingEnforce.Size())
+            pendingEnforce.Push(e.playerNumber);
+    }
+
+    override void WorldTick()
+    {
+        if (pendingEnforce.Size() == 0) return;
+        for (int i = pendingEnforce.Size() - 1; i >= 0; i--)
+        {
+            int pnum = pendingEnforce[i];
+            if (!playeringame[pnum] || !players[pnum].mo) continue;
+            EnforceForPlayer(pnum);
+            pendingEnforce.Delete(i);
+        }
+    }
+
+    static void EnforceForPlayer(int pnum)
+    {
+        if (!playeringame[pnum] || !players[pnum].mo) return;
+        let pawn = players[pnum].mo;
+        let stats = TFLV_PerPlayerStats.GetStatsFor(pawn);
+
+        if (CV("hyperv_gb_mobility"))
+        {
+            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_Mobility") : 0;
+            SetB("vmm_dash",        lv >= 1);
+            SetB("vmm_double_dash", lv >= 2);
+            SetB("vmm_ledge_climb", lv >= 2);
+            SetB("vmm_double_jump", lv >= 3);
+            if (lv >= 1)
+            {
+                int scaleLvs  = max(0, int(lv) - 3);
+                double baseCD = CVf("bonsai_hyperv_mobility_base_cooldown");
+                double minCD  = CVf("bonsai_hyperv_mobility_min_cooldown");
+                double cdMult = max(minCD / baseCD, 1.0 - scaleLvs * CVf("bonsai_hyperv_mobility_cd_per_level"));
+                SetF("vmm_dash_cooldown", baseCD * cdMult);
+            }
+        }
+
+        if (CV("hyperv_gb_melee"))
+        {
+            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_Melee") : 0;
+            SetB("vmm_melee",       lv >= 1);
+            SetB("vmm_melee_combo", lv >= 2);
+            SetB("vmm_melee_parry", lv >= 3);
+            if (lv >= 1)
+            {
+                int scaleLvs  = max(0, int(lv) - 3);
+                int baseDmgMin = CVI("bonsai_hyperv_melee_base_dmg_min");
+                int baseDmgMax = CVI("bonsai_hyperv_melee_base_dmg_max");
+                int dmgBonus  = scaleLvs * CVI("bonsai_hyperv_melee_dmg_per_level");
+                SetI("vmm_melee_dmg_min", baseDmgMin + dmgBonus);
+                SetI("vmm_melee_dmg_max", baseDmgMax + dmgBonus * 2);
+                double cdMult = max(0.3, 1.0 - scaleLvs * CVf("bonsai_hyperv_melee_cd_per_level"));
+                SetI("vmm_melee_base_cooldown", int(CVI("bonsai_hyperv_melee_base_tics") * cdMult));
+                if (lv >= 2)
+                {
+                    int critBonus = scaleLvs * CVI("bonsai_hyperv_melee_crit_per_level");
+                    SetI("vmm_melee_combo_crit", min(10, CVI("bonsai_hyperv_melee_base_crit") + critBonus));
+                }
+                if (lv >= 3)
+                {
+                    int parryBonus = scaleLvs * CVI("bonsai_hyperv_melee_parry_per_level");
+                    SetI("vmm_melee_parry_prob", min(80, CVI("bonsai_hyperv_melee_base_parry") + parryBonus));
+                }
+            }
+        }
+
+        if (CV("hyperv_gb_health_regen"))
+        {
+            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_HealthRegen") : 0;
+            SetB("vmm_health_regen", lv >= 1);
+            if (lv >= 1)
+            {
+                int scaleLvs  = max(0, int(lv) - 3);
+                int capBase   = CVI("bonsai_hyperv_hregen_cap_base");
+                int cap = capBase * min(3, int(lv)) + scaleLvs * CVI("bonsai_hyperv_hregen_cap_per_level");
+                double tick = max(CVf("bonsai_hyperv_hregen_min_tick"),
+                    CVf("bonsai_hyperv_hregen_tick_base") - (int(lv) - 1) * CVf("bonsai_hyperv_hregen_tick_per_level"));
+                SetI("vmm_regen_max", cap);
+                SetI("vmm_regen_min", 0);
+                SetI("vmm_regen_amount", CVI("bonsai_hyperv_hregen_amount"));
+                SetF("vmm_regen_time", tick);
+            }
+        }
+
+        if (CV("hyperv_gb_armor_regen"))
+        {
+            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_ArmorRegen") : 0;
+            SetB("vmm_armor_regen", lv >= 1);
+            if (lv >= 1)
+            {
+                int cap  = CVI("bonsai_hyperv_aregen_cap_base") + (int(lv) - 1) * CVI("bonsai_hyperv_aregen_cap_per_level");
+                double tick = max(CVf("bonsai_hyperv_aregen_min_tick"),
+                    CVf("bonsai_hyperv_aregen_tick_base") - (int(lv) - 1) * CVf("bonsai_hyperv_aregen_tick_per_level"));
+                SetI("vmm_armor_regen_max",    cap);
+                SetI("vmm_armor_regen_amount", CVI("bonsai_hyperv_aregen_amount"));
+                SetF("vmm_armor_regen_time",   tick);
+            }
+        }
+
+        if (CV("hyperv_gb_ammo_regen"))
+        {
+            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_AmmoRegen") : 0;
+            SetB("vmm_ammo_regen", lv >= 1);
+            if (lv >= 1)
+            {
+                double tick = max(CVf("bonsai_hyperv_ammoregen_min_tick"),
+                    CVf("bonsai_hyperv_ammoregen_tick_base") - (int(lv) - 1) * CVf("bonsai_hyperv_ammoregen_tick_per_level"));
+                SetF("vmm_ammo_regen_time", tick);
+                SetB("vmm_ammo_regen_backpack", lv >= 2);
+            }
+        }
+
+        if (CV("hyperv_gb_agility"))
+        {
+            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_Agility") : 0;
+            int scaleLvs = max(0, int(lv) - 2);
+            double spd = (lv >= 1 ? CVf("bonsai_hyperv_agility_base_speed") : 1.0)
+                + scaleLvs * CVf("bonsai_hyperv_agility_speed_per_level");
+            double jmp = (lv >= 2 ? CVf("bonsai_hyperv_agility_base_jump") : 1.0)
+                + scaleLvs * CVf("bonsai_hyperv_agility_jump_per_level");
+            SetF("vmm_speed_mult", spd);
+            SetF("vmm_jump_mult",  jmp);
+        }
+
+        // Weapon upgrades: default to OFF, OnActivate/OnDeactivate handle per-weapon toggling
+        if (CV("hyperv_gb_hook"))       SetB("vmm_hook",      false);
+        if (CV("hyperv_gb_teleporter")) SetB("vmm_teleport",  false);
+        if (CV("hyperv_gb_slomo"))      SetB("sm_enabled",    false);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    static bool   CV(String n)  { CVar c = CVar.FindCVar(n); return c && c.GetBool(); }
+    static void   SetB(String n, bool v)   { CVar c = CVar.FindCVar(n); if(c) c.SetInt(v?1:0); }
+    static void   SetI(String n, int v)    { CVar c = CVar.FindCVar(n); if(c) c.SetInt(v); }
+    static void   SetF(String n, double v) { CVar c = CVar.FindCVar(n); if(c) c.SetFloat(v); }
+    static int    CVI(String n) { CVar c = CVar.FindCVar(n); return c ? c.GetInt()   : 0; }
+    static double CVf(String n) { CVar c = CVar.FindCVar(n); return c ? c.GetFloat() : 0; }
+}
+
+// =============================================================================
+// Shared helper: reads the max level for an upgrade from its CVar
+// =============================================================================
+class TFLV_HyperV_UpgradeHelper : Object
+{
+    static int MaxLevel(String cvarName, int hardMin)
+    {
+        CVar c = CVar.FindCVar(cvarName);
+        int v = c ? c.GetInt() : hardMin;
+        return max(hardMin, v);
+    }
+}
+
+// =============================================================================
+// 1. MOBILITY (player upgrade)
+// Lv1: dash  Lv2: double dash + ledge climb  Lv3: double jump
+// Lv4+: dash cooldown reduction per level
+// =============================================================================
+class TFLV_Upgrade_HyperV_Mobility : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const
+    {
+        if (!CVar.FindCVar("hyperv_enabled").GetBool()) return false;
+        if (!CVar.FindCVar("hyperv_gb_mobility").GetBool()) return false;
+        return int(stats.upgrades.Level("TFLV_Upgrade_HyperV_Mobility"))
+            < TFLV_HyperV_UpgradeHelper.MaxLevel("bonsai_hyperv_mobility_max_level", 3);
+    }
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        TFLV_HyperV_IntegrationHandler.EnforceForPlayer(stats.owner.PlayerNumber());
+    }
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        String unlocked;
+        if      (level == 0) unlocked = "Nothing yet.";
+        else if (level == 1) unlocked = "Dash.";
+        else if (level == 2) unlocked = "Dash, Double Dash, Ledge Climb.";
+        else                 unlocked = "Dash, Double Dash, Ledge Climb, Double Jump.";
+        int scaleLvs = max(0, int(level) - 3);
+        double cdReduction = scaleLvs * CVar.FindCVar("bonsai_hyperv_mobility_cd_per_level").GetFloat();
+        fields.insert("unlocked", unlocked);
+        fields.insert("cd", scaleLvs > 0 ? String.Format("Dash cooldown -%.0f%%", cdReduction * 100) : "");
+    }
+}
+
+// =============================================================================
+// 2. MELEE / COMBAT TRAINING (player upgrade)
+// Lv1: auto-melee  Lv2: combo  Lv3: parry
+// Lv4+: damage, cooldown, crit, and parry probability scale per level
+// =============================================================================
+class TFLV_Upgrade_HyperV_Melee : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const
+    {
+        if (!CVar.FindCVar("hyperv_enabled").GetBool()) return false;
+        if (!CVar.FindCVar("hyperv_gb_melee").GetBool()) return false;
+        return int(stats.upgrades.Level("TFLV_Upgrade_HyperV_Melee"))
+            < TFLV_HyperV_UpgradeHelper.MaxLevel("bonsai_hyperv_melee_max_level", 3);
+    }
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        TFLV_HyperV_IntegrationHandler.EnforceForPlayer(stats.owner.PlayerNumber());
+    }
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        String feat;
+        if      (level == 0) feat = "Next: Auto-melee.";
+        else if (level == 1) feat = "Next: Combo system.";
+        else if (level == 2) feat = "Next: Parry.";
+        else
+        {
+            int s = int(level) - 3;
+            int dmg = 1 + s * CVar.FindCVar("bonsai_hyperv_melee_dmg_per_level").GetInt();
+            feat = String.Format("Dmg bonus: +%d. Scaling active.", dmg);
+        }
+        fields.insert("feat", feat);
+    }
+}
+
+// =============================================================================
+// 3. BULLET TIME (weapon upgrade, wimpy/melee only)
+// Lv1: slomo 60% pool  Lv2: full pool + berserk/invuln
+// Lv3+: extra pool points and depth per level
+// =============================================================================
+class TFLV_Upgrade_HyperV_BulletTime : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const
+    {
+        if (!CVar.FindCVar("hyperv_enabled").GetBool()) return false;
+        if (!CVar.FindCVar("hyperv_gb_slomo").GetBool()) return false;
+        if (!CVar.FindCVar("bonsai_hyperv_slomo_any_weapon").GetBool()
+            && !info.IsMelee() && !info.IsWimpy()) return false;
+        return int(info.upgrades.Level("TFLV_Upgrade_HyperV_BulletTime"))
+            < TFLV_HyperV_UpgradeHelper.MaxLevel("bonsai_hyperv_slomo_max_level", 2);
+    }
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        uint lv = info.upgrades.Level("TFLV_Upgrade_HyperV_BulletTime");
+        TFLV_HyperV_IntegrationHandler.SetB("sm_enabled", true);
+        int scaleLvs = max(0, int(lv) - 1);
+        int pts   = CVar.FindCVar("bonsai_hyperv_slomo_pts_base").GetInt()
+                    + scaleLvs * CVar.FindCVar("bonsai_hyperv_slomo_pts_per_level").GetInt();
+        int depth = CVar.FindCVar("bonsai_hyperv_slomo_base_depth").GetInt()
+                    + scaleLvs * CVar.FindCVar("bonsai_hyperv_slomo_depth_per_level").GetInt();
+        TFLV_HyperV_IntegrationHandler.SetI("sm_totalslomopoints", pts);
+        TFLV_HyperV_IntegrationHandler.SetI("sm_slowdown_depth",   min(100, depth));
+        TFLV_HyperV_IntegrationHandler.SetB("sm_berserk_enabled",  lv >= 2);
+        TFLV_HyperV_IntegrationHandler.SetB("sm_invuln_enabled",   lv >= 2);
+    }
+    override void OnDeactivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        if (CVar.FindCVar("hyperv_gb_slomo").GetBool())
+            TFLV_HyperV_IntegrationHandler.SetB("sm_enabled", false);
+    }
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        int base_pts = CVar.FindCVar("bonsai_hyperv_slomo_pts_base").GetInt();
+        int per_lvl  = CVar.FindCVar("bonsai_hyperv_slomo_pts_per_level").GetInt();
+        int scaleLvs = max(0, int(level) - 1);
+        int pts   = base_pts + scaleLvs * per_lvl;
+        int depth = CVar.FindCVar("bonsai_hyperv_slomo_base_depth").GetInt()
+                    + scaleLvs * CVar.FindCVar("bonsai_hyperv_slomo_depth_per_level").GetInt();
+        fields.insert("pts",   String.Format("%d points", pts));
+        fields.insert("depth", String.Format("%d%% slowdown", min(100, depth)));
+        fields.insert("next",  level == 0 ? String.Format("Lv1: %d pts, %d%% slowdown.", base_pts, CVar.FindCVar("bonsai_hyperv_slomo_base_depth").GetInt())
+                             : level == 1 ? String.Format("Lv2: %d pts + berserk/invuln.", base_pts + per_lvl)
+                             :              "Extra capacity per level.");
+    }
+}
+
+// =============================================================================
+// 4. HEALTH REGEN (player upgrade)
+// Lv1: regen to 25  Lv2: to 50  Lv3: to 75  Lv4+: cap and speed scale
+// =============================================================================
+class TFLV_Upgrade_HyperV_HealthRegen : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const
+    {
+        if (!CVar.FindCVar("hyperv_enabled").GetBool()) return false;
+        if (!CVar.FindCVar("hyperv_gb_health_regen").GetBool()) return false;
+        return int(stats.upgrades.Level("TFLV_Upgrade_HyperV_HealthRegen"))
+            < TFLV_HyperV_UpgradeHelper.MaxLevel("bonsai_hyperv_hregen_max_level", 3);
+    }
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        TFLV_HyperV_IntegrationHandler.EnforceForPlayer(stats.owner.PlayerNumber());
+    }
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        int scaleLvs = max(0, int(level) - 3);
+        int capBase  = CVar.FindCVar("bonsai_hyperv_hregen_cap_base").GetInt();
+        int cap = capBase * min(3, int(level))
+            + scaleLvs * CVar.FindCVar("bonsai_hyperv_hregen_cap_per_level").GetInt();
+        double tick = max(CVar.FindCVar("bonsai_hyperv_hregen_min_tick").GetFloat(),
+            CVar.FindCVar("bonsai_hyperv_hregen_tick_base").GetFloat()
+            - (int(level) - 1) * CVar.FindCVar("bonsai_hyperv_hregen_tick_per_level").GetFloat());
+        fields.insert("cap",  String.Format("%d HP", cap));
+        fields.insert("tick", String.Format("%.1fs", tick));
+    }
+}
+
+// =============================================================================
+// 5. ARMOR REGEN (player upgrade)
+// Lv1: to 50  Lv2: to 100  Lv3+: cap scales
+// =============================================================================
+class TFLV_Upgrade_HyperV_ArmorRegen : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const
+    {
+        if (!CVar.FindCVar("hyperv_enabled").GetBool()) return false;
+        if (!CVar.FindCVar("hyperv_gb_armor_regen").GetBool()) return false;
+        return int(stats.upgrades.Level("TFLV_Upgrade_HyperV_ArmorRegen"))
+            < TFLV_HyperV_UpgradeHelper.MaxLevel("bonsai_hyperv_aregen_max_level", 2);
+    }
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        TFLV_HyperV_IntegrationHandler.EnforceForPlayer(stats.owner.PlayerNumber());
+    }
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        int cap = CVar.FindCVar("bonsai_hyperv_aregen_cap_base").GetInt()
+            + (int(level) - 1) * CVar.FindCVar("bonsai_hyperv_aregen_cap_per_level").GetInt();
+        double tick = max(CVar.FindCVar("bonsai_hyperv_aregen_min_tick").GetFloat(),
+            CVar.FindCVar("bonsai_hyperv_aregen_tick_base").GetFloat()
+            - (int(level) - 1) * CVar.FindCVar("bonsai_hyperv_aregen_tick_per_level").GetFloat());
+        fields.insert("cap",  String.Format("%d armor", cap));
+        fields.insert("tick", String.Format("%.1fs", tick));
+    }
+}
+
+// =============================================================================
+// 6. AMMO REGEN (player upgrade)
+// Lv1: slow regen  Lv2: faster + backpack  Lv3+: tick speed scales
+// =============================================================================
+class TFLV_Upgrade_HyperV_AmmoRegen : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const
+    {
+        if (!CVar.FindCVar("hyperv_enabled").GetBool()) return false;
+        if (!CVar.FindCVar("hyperv_gb_ammo_regen").GetBool()) return false;
+        return int(stats.upgrades.Level("TFLV_Upgrade_HyperV_AmmoRegen"))
+            < TFLV_HyperV_UpgradeHelper.MaxLevel("bonsai_hyperv_ammoregen_max_level", 2);
+    }
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        TFLV_HyperV_IntegrationHandler.EnforceForPlayer(stats.owner.PlayerNumber());
+    }
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        double tick = max(CVar.FindCVar("bonsai_hyperv_ammoregen_min_tick").GetFloat(),
+            CVar.FindCVar("bonsai_hyperv_ammoregen_tick_base").GetFloat()
+            - (int(level) - 1) * CVar.FindCVar("bonsai_hyperv_ammoregen_tick_per_level").GetFloat());
+        fields.insert("tick",     String.Format("%.1fs", tick));
+        fields.insert("backpack", level >= 2 ? "Yes" : "No");
+    }
+}
+
+// =============================================================================
+// 7. AGILITY (player upgrade)
+// Lv1: +25% speed  Lv2: +35% jump  Lv3+: both scale
+// =============================================================================
+class TFLV_Upgrade_HyperV_Agility : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const
+    {
+        if (!CVar.FindCVar("hyperv_enabled").GetBool()) return false;
+        if (!CVar.FindCVar("hyperv_gb_agility").GetBool()) return false;
+        return int(stats.upgrades.Level("TFLV_Upgrade_HyperV_Agility"))
+            < TFLV_HyperV_UpgradeHelper.MaxLevel("bonsai_hyperv_agility_max_level", 2);
+    }
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        TFLV_HyperV_IntegrationHandler.EnforceForPlayer(stats.owner.PlayerNumber());
+    }
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        int scaleLvs = max(0, int(level) - 2);
+        double spd = (level >= 1 ? CVar.FindCVar("bonsai_hyperv_agility_base_speed").GetFloat() : 1.0)
+            + scaleLvs * CVar.FindCVar("bonsai_hyperv_agility_speed_per_level").GetFloat();
+        double jmp = (level >= 2 ? CVar.FindCVar("bonsai_hyperv_agility_base_jump").GetFloat() : 1.0)
+            + scaleLvs * CVar.FindCVar("bonsai_hyperv_agility_jump_per_level").GetFloat();
+        fields.insert("speed", String.Format("x%.2f speed", spd));
+        fields.insert("jump",  String.Format("x%.2f jump", jmp));
+    }
+}
+
+// =============================================================================
+// 8. HOOK (weapon upgrade, all weapons, cap 2)
+// =============================================================================
+class TFLV_Upgrade_HyperV_Hook : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const
+    {
+        if (!CVar.FindCVar("hyperv_enabled").GetBool()) return false;
+        if (!CVar.FindCVar("hyperv_gb_hook").GetBool()) return false;
+        return int(info.upgrades.Level("TFLV_Upgrade_HyperV_Hook"))
+            < TFLV_HyperV_UpgradeHelper.MaxLevel("bonsai_hyperv_hook_max_level", 2);
+    }
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        uint lv = info.upgrades.Level("TFLV_Upgrade_HyperV_Hook");
+        TFLV_HyperV_IntegrationHandler.SetB("vmm_hook",      lv >= 1);
+        TFLV_HyperV_IntegrationHandler.SetB("vmm_hook_pull", lv >= 2);
+        TFLV_HyperV_IntegrationHandler.SetB("vmm_hook_stun", lv >= 2);
+        if (lv >= 2)
+        {
+            int scaleLvs = max(0, int(lv) - 2);
+            TFLV_HyperV_IntegrationHandler.SetF("vmm_hook_stun_dur_min",
+                TFLV_HyperV_IntegrationHandler.CVf("bonsai_hyperv_hook_stun_min_base")
+                + scaleLvs * TFLV_HyperV_IntegrationHandler.CVf("bonsai_hyperv_hook_stun_min_per_level"));
+            TFLV_HyperV_IntegrationHandler.SetF("vmm_hook_stun_dur_max",
+                TFLV_HyperV_IntegrationHandler.CVf("bonsai_hyperv_hook_stun_max_base")
+                + scaleLvs * TFLV_HyperV_IntegrationHandler.CVf("bonsai_hyperv_hook_stun_max_per_level"));
+        }
+    }
+    override void OnDeactivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        if (CVar.FindCVar("hyperv_gb_hook").GetBool())
+            TFLV_HyperV_IntegrationHandler.SetB("vmm_hook", false);
+    }
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        double sMinBase = CVar.FindCVar("bonsai_hyperv_hook_stun_min_base").GetFloat();
+        double sMaxBase = CVar.FindCVar("bonsai_hyperv_hook_stun_max_base").GetFloat();
+        if (level == 0)
+        {
+            fields.insert("next", "Hook unlocked (surface pull).");
+        }
+        else if (level == 1)
+        {
+            fields.insert("next", String.Format("Enemy pull + stun (%.1f-%.1fs).",
+                sMinBase, sMaxBase));
+        }
+        else
+        {
+            int scaleLvs = max(0, int(level) - 2);
+            double sMin = sMinBase + scaleLvs * CVar.FindCVar("bonsai_hyperv_hook_stun_min_per_level").GetFloat();
+            double sMax = sMaxBase + scaleLvs * CVar.FindCVar("bonsai_hyperv_hook_stun_max_per_level").GetFloat();
+            fields.insert("next", String.Format("Maxed. Stun: %.1f-%.1fs.", sMin, sMax));
+        }
+    }
+}
+
+// =============================================================================
+// 9. TELEPORTER (weapon upgrade, all weapons, cap 2)
+// =============================================================================
+class TFLV_Upgrade_HyperV_Teleporter : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const
+    {
+        if (!CVar.FindCVar("hyperv_enabled").GetBool()) return false;
+        if (!CVar.FindCVar("hyperv_gb_teleporter").GetBool()) return false;
+        return int(info.upgrades.Level("TFLV_Upgrade_HyperV_Teleporter"))
+            < TFLV_HyperV_UpgradeHelper.MaxLevel("bonsai_hyperv_tp_max_level", 2);
+    }
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        uint lv = info.upgrades.Level("TFLV_Upgrade_HyperV_Teleporter");
+        TFLV_HyperV_IntegrationHandler.SetB("vmm_teleport", lv >= 1);
+        if (lv >= 1)
+        {
+            int scaleLvs = int(lv) - 1;
+            int range = CVar.FindCVar("bonsai_hyperv_tp_range_base").GetInt()
+                        + scaleLvs * CVar.FindCVar("bonsai_hyperv_tp_range_per_level").GetInt();
+            double cd = max(CVar.FindCVar("bonsai_hyperv_tp_cd_min").GetFloat(),
+                CVar.FindCVar("bonsai_hyperv_tp_cd_base").GetFloat()
+                - scaleLvs * CVar.FindCVar("bonsai_hyperv_tp_cd_per_level").GetFloat());
+            TFLV_HyperV_IntegrationHandler.SetI("vmm_tp_max_range", range);
+            TFLV_HyperV_IntegrationHandler.SetF("vmm_tp_cooldown",  cd);
+        }
+    }
+    override void OnDeactivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        if (CVar.FindCVar("hyperv_gb_teleporter").GetBool())
+            TFLV_HyperV_IntegrationHandler.SetB("vmm_teleport", false);
+    }
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        int base_r   = CVar.FindCVar("bonsai_hyperv_tp_range_base").GetInt();
+        int per_r    = CVar.FindCVar("bonsai_hyperv_tp_range_per_level").GetInt();
+        double base_cd = CVar.FindCVar("bonsai_hyperv_tp_cd_base").GetFloat();
+        double per_cd  = CVar.FindCVar("bonsai_hyperv_tp_cd_per_level").GetFloat();
+        double min_cd  = CVar.FindCVar("bonsai_hyperv_tp_cd_min").GetFloat();
+        int scaleLvs = max(0, int(level) - 1);
+        int range    = base_r + scaleLvs * per_r;
+        double cd    = max(min_cd, base_cd - scaleLvs * per_cd);
+        fields.insert("range", String.Format("%d units", range));
+        fields.insert("cd",    String.Format("%.2fs cooldown", cd));
+        fields.insert("next",  level == 0 ? String.Format("Lv1: range %d, %.2fs cd.", base_r, base_cd)
+                             : level == 1 ? String.Format("Lv2: range %d, %.2fs cd.", base_r + per_r, max(min_cd, base_cd - per_cd))
+                             :              "Scales per level.");
+    }
+}

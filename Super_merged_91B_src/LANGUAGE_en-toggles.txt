@@ -1,0 +1,76 @@
+// Localization strings for Upgrade Toggle descriptions.
+// Descriptions sourced from UPGRADES.txt for accuracy.
+[en default]
+
+// Player Upgrades
+TFLV_TOGGLE_AMMOLEECH = "Enemies drop ammo for one of your weapons when killed. Higher levels drop more ammo per kill. Drop quantity scales with enemy strength.";
+TFLV_TOGGLE_ARMOURLEECH = "Enemies drop armour repairs when killed. Restores 2 AC per level, capped at 100 (lv1) or 200 (lv2+).";
+TFLV_TOGGLE_BANDOLIERS = "Increases ammo capacity. Stacks with the backpack. May interact oddly with mods that have their own ammo capacity mechanics.";
+TFLV_TOGGLE_BLASTSHAPING = "Significantly reduces self-damage from area attacks like rockets. Cannot reduce damage below 1.";
+TFLV_TOGGLE_ECM = "Attempts to hack incoming seeker missiles, redirecting them against nearby enemies or the enemy that fired them.";
+TFLV_TOGGLE_HAZARDSUIT = "Reduces damage from environmental hazards such as acid floors and lava.";
+TFLV_TOGGLE_INDESTRUCTIBLE = "Earn extra lives from level clears, boss kills, and taking damage. Lives scale with upgrade level. Requires Indestructible integration to be enabled.";
+TFLV_TOGGLE_INTUITION = "At level 1, you start every level with the map revealed. At level 2, the locations of most actors are revealed on the map as well. Max 2 levels.";
+TFLV_TOGGLE_JUGGLER = "Weapon switching becomes instantaneous. May not work with some mods. Max 1 level.";
+TFLV_TOGGLE_LIFELEECH = "Enemies drop health when killed. Restores 1 HP per level, capped at 100 (lv1) or 200 (lv2+).";
+TFLV_TOGGLE_PLAYERDAMAGE = "Increases the damage you deal with all weapons by 5% per level. Stacks with per-weapon damage upgrades.";
+TFLV_TOGGLE_THORNS = "Enemies attacking you take damage proportional to what they dealt, increasing as they get closer. Nearby enemies also suffer your weapon's elemental effects.";
+TFLV_TOGGLE_TOUGHASNAILS = "Reduces incoming damage. Cannot reduce below 1.";
+
+// Weapon Upgrades - General
+TFLV_TOGGLE_AGGRESSIVEDEFENCE = "Attacks destroy enemy projectiles near the impact point. Good for clearing rooms of fireballs.";
+TFLV_TOGGLE_BOUNCYSHOTS = "Projectiles bounce off walls. At high levels, they bounce off enemies too. Mutually exclusive with Piercing and Fragmentation.";
+TFLV_TOGGLE_CLEAVE = "Melee kills grant a free, extra powerful attack against a nearby enemy. Can chain if the free attack also kills.";
+TFLV_TOGGLE_DARKHARVEST = "Killing an enemy restores health and armour. Restores 1/1 HP/AC per level, x10 for bosses.";
+TFLV_TOGGLE_DECOYFLARES = "Shots you fire distract enemy seeker missiles, drawing them away from you.";
+TFLV_TOGGLE_EXPLOSIVEDEATH = "Enemies explode when killed. Blast radius is based on enemy size; bigger enemies produce bigger booms. Can chain.";
+TFLV_TOGGLE_EXPLOSIVESHOTS = "Shots that hit create a small explosion. Damage is based on level plus a portion of original damage. Self-damage is reduced.";
+TFLV_TOGGLE_FASTSHOTS = "Increases projectile flight speed. No effect on hitscan weapons.";
+TFLV_TOGGLE_FRAGMENTATIONSHOTS = "Shots release a ring of hitscan attacks on impact. Mutually exclusive with Piercing and Bouncy.";
+TFLV_TOGGLE_HOMINGSHOTS = "Projectiles seek enemies. Higher levels have smarter tracking. Flies straight until near target. Max 12 levels.";
+TFLV_TOGGLE_PIERCINGSHOTS = "Shots go through enemies. Each level reduces per-hit damage less aggressively. Available on any projectile weapon.";
+TFLV_TOGGLE_RICOCHETSHOTS = "Hitscan shots bounce to nearby enemies after each hit. Each upgrade level adds one more bounce. Hitscan only.";
+TFLV_TOGGLE_RAPIDFIRE = "Increases attack speed by 50% per level (additive). Max 10 levels (+500%). Great DPS but costs more ammo. Includes Legendoom compatibility patch. Weapons with ammo only.";
+TFLV_TOGGLE_SHIELD = "Reduces incoming ranged damage moderately and melee damage significantly, but only while actively attacking in melee or briefly after a melee kill. Melee only.";
+TFLV_TOGGLE_SUBMUNITIONS = "Killing an enemy releases bouncy explosives. Damage depends on level and overkill amount. Higher levels release more bomblets. Ranged only.";
+TFLV_TOGGLE_SWEEP = "Melee attacks hit multiple enemies. Deals a portion of damage to enemies in melee range of both you and your target. Melee only.";
+TFLV_TOGGLE_SWIFTNESS = "Killing an enemy temporarily freezes time. Additional kills extend the duration slightly. Melee or wimpy weapons only.";
+TFLV_TOGGLE_WEAPONDAMAGE = "Increases all damage dealt with this weapon by 10% per level. Stacks with the player-wide Bloodthirsty upgrade.";
+
+// Elemental Master Switches
+TFLV_TOGGLE_FIRE_MASTER = "Master switch for all Fire upgrades. Fire does more damage the more health the target has, and burns out below 50% HP. Good on all weapons. Apprentice: Searing Inscription. Journeyman: Burning Terror. Master: Conflagration OR Infernal Kiln. Only Disabled/non-Disabled matters here — individual upgrade rarity is set below.";
+TFLV_TOGGLE_POISON_MASTER = "Master switch for all Poison upgrades. Poison is weak per stack but stacks increase both duration and DPS with no upper bound. Best with rapid-fire weapons. Apprentice: Venomous Inscription. Journeyman: Weakness. Master: Putrefaction OR Hallucinogens. Only Disabled/non-Disabled matters here — individual upgrade rarity is set below.";
+TFLV_TOGGLE_ACID_MASTER = "Master switch for all Acid upgrades. Acid stacks convert to damage on a 1:1 basis, faster at low HP. Has a soft cap based on per-shot damage, so best with high per-shot weapons (SSG, rockets). Apprentice: Corrosive Inscription. Journeyman: Concentrated Acid. Master: Acid Spray OR Embrittlement. Only Disabled/non-Disabled matters here — individual upgrade rarity is set below.";
+TFLV_TOGGLE_LIGHTNING_MASTER = "Master switch for all Lightning upgrades. Lightning does no bonus damage but slows targets. Stacks are capped by skill level. Effective with both rapid-fire and single-shot guns. Apprentice: Shocking Inscription. Journeyman: Thunderbolt. Master: Revivification OR Chain Lightning. Only Disabled/non-Disabled matters here — individual upgrade rarity is set below.";
+
+// Fire Upgrades
+TFLV_TOGGLE_INCENDIARYSHOTS = "Apprentice. Shots cause enemies to ignite. Higher levels apply fire stacks faster and raise the softcap, increasing both DPS and total damage. Fire cuts off at 50% HP.";
+TFLV_TOGGLE_BURNINGTERROR = "Journeyman. Burning enemies flee once they drop below a health threshold based on stack count and terror level. Also provides a fire damage bonus and flinch chance. Requires Searing Inscription lv2.";
+TFLV_TOGGLE_CONFLAGRATION = "Master (AoE). Burning enemies with enough stacks spread fire to nearby enemies. Higher levels increase transfer rate and range. Requires Burning Terror lv2.";
+TFLV_TOGGLE_INFERNALKILN = "Master (single target). Attacking burning enemies gives a stacking attack/defence buff that wears off over time. Requires Burning Terror lv2.";
+
+// Poison Upgrades
+TFLV_TOGGLE_POISONSHOTS = "Apprentice. Shots poison enemies. Leveling up increases stacks applied per attack. Poison ticks at 1 stack/second with diminishing damage returns. Best with rapid-fire weapons.";
+TFLV_TOGGLE_WEAKNESS = "Journeyman. Poisoned enemies deal less damage. Each stack reduces damage by 1% with diminishing returns. Requires Venomous Inscription lv2.";
+TFLV_TOGGLE_PUTREFACTION = "Master (AoE). Killing a poisoned enemy explodes a cloud of poison gas, spreading stacks to nearby enemies. More stacks on the victim means more spread. Requires Weakness lv2.";
+TFLV_TOGGLE_HALLUCINOGENS = "Master (single target). Once an enemy has enough poison to eventually kill it, it fights on your side. Affected enemies get a damage bonus from Weakness instead of a penalty. Requires Weakness lv2.";
+
+// Acid Upgrades
+TFLV_TOGGLE_CORROSIVESHOTS = "Apprentice. Attacks cover enemies in acid. Stacks applied are 50% of damage dealt (+50% per level). Acid damage accelerates at low HP.";
+TFLV_TOGGLE_CONCENTRATEDACID = "Journeyman. Increases the threshold at which acid damage accelerates by 10% per level, and the damage conversion ratio by 10% per level. Both have diminishing returns. Requires Corrosive Inscription lv2.";
+TFLV_TOGGLE_ACIDSPRAY = "Master (AoE). Attacks that exceed the acid softcap splash acid onto nearby enemies. Splash range and level depends on your Acid Spray level. Requires Concentrated Acid lv2.";
+TFLV_TOGGLE_EMBRITTLEMENT = "Master (single target). Enemies with acid stacks take 1% more damage from all sources per stack. Enemies with low enough HP die instantly based on acid stacks and upgrade level. Requires Concentrated Acid lv2.";
+
+// Lightning Upgrades
+TFLV_TOGGLE_SHOCKINGINSCRIPTION = "Apprentice. Shots reduce targets to half speed. Slow is softcapped at 1 second per upgrade level.";
+TFLV_TOGGLE_THUNDERBOLT = "Journeyman. Once you sufficiently exceed the lightning softcap, the target is struck by lightning, stunning it and spreading stacks to nearby enemies. Gets harder to trigger each time. Requires Shocking Inscription lv2.";
+TFLV_TOGGLE_REVIVIFICATION = "Master (single target). Slaying an enemy raises it as a ghostly minion. It stays until it dies or you kill something stronger. At lv2 it's hasted; at lv3 it can fly. Requires Thunderbolt lv2.";
+TFLV_TOGGLE_CHAINLIGHTNING = "Master (AoE). Slain enemies release chain lightning that arcs between targets. Damage is based on target HP, lightning stacks, and chain length. Cannot arc to you. Requires Thunderbolt lv2.";
+
+// Elemental Synthesis Upgrades
+TFLV_TOGGLE_ELEMENTALBEAM = "Hitscan only. A piercing beam that copies all elemental effects from your target to every enemy in the beam. Requires two elemental masteries on one weapon.";
+TFLV_TOGGLE_ELEMENTALBLAST = "Projectile only. A blast that copies all elemental effects from your target to nearby enemies. Requires two elemental masteries on one weapon.";
+TFLV_TOGGLE_ELEMENTALWAVE = "Melee only. A wave that copies all elemental effects to enemies near you. Requires two elemental masteries on one weapon.";
+TFLV_TOGGLE_COMPANIONS = "Friendly monsters spawn at map start to fight alongside you. Requires Companions integration mode to be enabled, or companion count set above 0 in standalone mode.";
+
+TFLV_TOGGLE_OVERDRIVE = "Kill streaks charge this weapon for a damage bonus. Each kill within the streak window adds 1 charge (capped per upgrade level). Charges expire if you stop killing. Per-weapon — switching weapons resets nothing, but you start building charge fresh on the new weapon.";

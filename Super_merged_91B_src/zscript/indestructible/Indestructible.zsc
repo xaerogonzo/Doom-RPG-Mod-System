@@ -1,0 +1,465 @@
+// =============================================================================
+// Indestructible - Extra Lives System
+// Merged from: EventHandler, Force, PlayerInfo, Powerups, Service
+// Now integrated into main TFLV_EventHandler but keeps its own subsystem classes.
+// The TFIS_ tooltip classes are eliminated; uses unified TFLV_ tooltip system.
+// =============================================================================
+
+// =============================================================================
+// Completion Requirements Enum
+// =============================================================================
+
+enum TFIS_CompletionRequirements {
+  COMPLETION_NONE = 0,
+  COMPLETION_ALL_KILLS = 1,
+  COMPLETION_ALL_SECRETS = 2,
+  COMPLETION_KILLS_OR_SECRETS = 3,
+  COMPLETION_KILLS_OR_SECRETS_STACKING = 4,
+  COMPLETION_KILLS_AND_SECRETS = 5
+}
+
+// =============================================================================
+// PlayerInfo (lives tracking and management)
+// =============================================================================
+
+class TFIS_PlayerInfo : Object play {
+  int lives;
+  int lives_reported;
+  int charge;
+  Array<string> levels_cleared;
+  TFIS_IndestructibleForce force;
+
+  static TFIS_PlayerInfo Create() {
+    TFIS_PlayerInfo info = new("TFIS_PlayerInfo");
+    info.GiveStartingLives();
+    return info;
+  }
+
+  void GiveStartingLives() {
+    lives = indestructible_gun_bonsai_mode ? 0 : indestructible_starting_lives;
+    lives_reported = 0;
+  }
+
+  void Message(string msg) {
+    force.Message(msg);
+  }
+
+  bool LevelSeen(string md5) {
+    return levels_cleared.find(md5) != levels_cleared.size();
+  }
+
+  uint BonusCount() {
+    let all_kills = level.killed_monsters >= level.total_monsters;
+    let all_secrets = level.found_secrets >= level.total_secrets;
+    switch (indestructible_completion_requirement) {
+      case COMPLETION_NONE: return 1;
+      case COMPLETION_ALL_KILLS: return all_kills ? 1 : 0;
+      case COMPLETION_ALL_SECRETS: return all_secrets ? 1 : 0;
+      case COMPLETION_KILLS_OR_SECRETS: return all_kills || all_secrets ? 1 : 0;
+      case COMPLETION_KILLS_AND_SECRETS: return all_kills && all_secrets ? 1 : 0;
+      case COMPLETION_KILLS_OR_SECRETS_STACKING:
+        if (all_kills && all_secrets) return 2;
+        else if (all_kills || all_secrets) return 1;
+        return 0;
+      default: return 1;
+    }
+  }
+
+  void AddLevelClearLives(string md5) {
+    if (LevelSeen(md5)) return;
+    let bonus_count = BonusCount();
+    if (!bonus_count) return;
+    levels_cleared.push(md5);
+    AdjustLives(indestructible_lives_per_level * bonus_count, true);
+    if (lives < indestructible_min_lives_per_level) {
+      AdjustLives(indestructible_min_lives_per_level - lives, false);
+    }
+  }
+
+  void AddBossKillLives() {
+    AdjustLives(indestructible_lives_per_boss, true);
+  }
+
+  void AddDamageCharge(uint damage) {
+    if (!indestructible_damage_per_bonus_life) return;
+    uint bonus = 0;
+    charge += damage;
+    while (charge >= indestructible_damage_per_bonus_life) {
+      charge -= indestructible_damage_per_bonus_life;
+      ++bonus;
+    }
+    if (bonus) AdjustLives(bonus, true);
+  }
+
+  void AdjustLives(int delta, bool apply_maximum) {
+    if (lives < 0) { ReportLivesCount(); return; }
+    let old_lives = lives;
+    if (!apply_maximum || !indestructible_max_lives) {
+      lives = max(0, lives + delta);
+    } else if (lives < indestructible_max_lives) {
+      lives = max(0, min(lives + delta, indestructible_max_lives));
+    }
+    ReportLivesCount();
+  }
+
+  void ReportLivesCount() {
+    force.SetStateLabel("DisplayLivesCount");
+  }
+
+  void DisplayLivesCount() {
+    let delta = lives - lives_reported;
+    if (lives_reported < 0 && lives >= 0) delta = -9999;
+    else if (lives_reported >= 0 && lives < 0) delta = 9999;
+
+    EventHandler.SendNetworkEvent("indestructible-report-lives", lives, delta, 0);
+    if (lives < 0) {
+      Message("$TFIS_MSG_UNLIMITED_LIVES");
+    } else if (delta < 0) {
+      Message(string.format(StringTable.Localize("$TFIS_MSG_REDUCED_LIVES"), lives));
+    } else if (delta > 0) {
+      let cv = CVar.GetCVar("indestructible_lifegain_flash_rgb", force.owner.player);
+      uint colour = cv ? cv.GetInt() : 0;
+      if (colour) {
+        colour |= 0xFE000000;
+        force.owner.A_SetBlend(colour, 0.8, 40);
+      }
+      Message(string.format(StringTable.Localize("$TFIS_MSG_INCREASED_LIVES"), lives));
+    } else {
+      Message(string.format(StringTable.Localize("$TFIS_MSG_UNCHANGED_LIVES"), lives));
+    }
+    lives_reported = lives;
+  }
+}
+
+// =============================================================================
+// IndestructibleForce (inventory item that handles death prevention)
+// =============================================================================
+
+class TFIS_IndestructibleForce : Inventory {
+  TFIS_PlayerInfo info;
+
+  Default {
+    Inventory.Amount 1;
+    Inventory.MaxAmount 1;
+    +INVENTORY.IGNORESKILL;
+    +INVENTORY.UNTOSSABLE;
+    +INVENTORY.UNDROPPABLE;
+    +INVENTORY.QUIET;
+  }
+
+  States {
+    RestoreHealth:
+      TNT1 A 1;
+      TNT1 A 0 RestorePlayerHealth();
+    DisplayLivesCount:
+      TNT1 A 15;
+      TNT1 A 0 { info.DisplayLivesCount(); }
+      GOTO Idle;
+    Idle:
+      TNT1 A -1;
+      STOP;
+  }
+
+  void Initialize(TFIS_PlayerInfo info) {
+    self.info = info;
+    self.info.force = self;
+    info.ReportLivesCount();
+    MoveToTail();
+  }
+
+  void MoveToTail() {
+    if (self.inv == null) return;
+    Actor head, tail;
+    Actor item = owner;
+    while (item) {
+      if (item == self) {
+        head = item;
+      }
+      if (item.inv == null) {
+        tail = item;
+      }
+      item = item.inv;
+    }
+    if (head == tail) return;
+
+    // Remove self from chain
+    Actor prev = owner;
+    while (prev && prev.inv != self) prev = prev.inv;
+    if (prev) prev.inv = self.inv;
+
+    // Append to tail
+    tail.inv = self;
+    self.inv = null;
+  }
+
+  void RestorePlayerHealth() {
+    if (!owner || !owner.player) return;
+    owner.GiveBody(indestructible_restore_hp);
+  }
+
+  void Message(string msg) {
+    if (!owner || !owner.player) return;
+    if (owner.player != players[consoleplayer]) return;
+    Console.Printf("%s", StringTable.Localize(msg));
+  }
+
+  void GivePowerup(Name power) {
+    let force = Powerup(owner.FindInventory(power));
+    let duration = indestructible_duration * 35; // tics per second
+    if (force) {
+      force.effectTics = max(force.effectTics, duration);
+    } else {
+      force = Powerup(owner.GiveInventoryType(power));
+      if (!force) return;
+      force.effectTics = duration;
+    }
+  }
+
+  void GiveScreenEffect(uint effect) {
+    static const string effects[] = {
+      "", "Red", "Gold", "Green", "Blue", "Inverse", "RedWhite", "Desaturate" };
+    if (effect <= 0 || effect > 7) return;
+    GivePowerup("TFIS_IndestructibleScreenEffect_"..effects[effect]);
+  }
+
+  void ActivateIndestructability() {
+    Message("$TFIS_MSG_ACTIVATED");
+
+    let cv = CVar.GetCVar("indestructible_screen_effect", owner.player);
+    GiveScreenEffect(cv ? cv.GetInt() : -1);
+    if (indestructible_invincibility)
+      GivePowerup("TFIS_IndestructibleInvincibility");
+    if (indestructible_slomo)
+      GivePowerup("TFIS_IndestructibleSlomo");
+    if (indestructible_damage_bonus)
+      GivePowerup("TFIS_IndestructibleDamage");
+
+    if (info.lives > 0) {
+      info.AdjustLives(-1, false);
+    }
+    self.SetStateLabel("RestoreHealth");
+  }
+
+  override void AbsorbDamage(int damage, Name damageType, out int newdamage, Actor inflictor, Actor source, int flags) {
+    if (!info) return;
+
+    // In both standalone and bonsai mode, prevent death if the player has lives.
+    // The difference is only HOW lives are earned, not how they're spent.
+    if (owner.health - damage > 0) return;
+    if (info.lives == 0) return;
+
+    // Prevent death and activate buffs
+    newdamage = 0;
+    ActivateIndestructability();
+  }
+}
+
+// =============================================================================
+// Powerups
+// =============================================================================
+
+mixin class TFIS_IndestructibleStopWhenFrozen {
+  override void Tick() {
+    if (owner && owner.player && owner.player.IsTotallyFrozen()) return;
+    super.Tick();
+  }
+}
+
+class TFIS_IndestructibleInvincibility : PowerInvulnerable {
+  mixin TFIS_IndestructibleStopWhenFrozen;
+}
+
+class TFIS_IndestructibleScreenEffect : Powerup {
+  mixin TFIS_IndestructibleStopWhenFrozen;
+  Default { +INVENTORY.NOSCREENBLINK; }
+}
+
+class TFIS_IndestructibleScreenEffect_Red : TFIS_IndestructibleScreenEffect
+{ Default { Powerup.Color "RedMap"; } }
+class TFIS_IndestructibleScreenEffect_Gold : TFIS_IndestructibleScreenEffect
+{ Default { Powerup.Color "GoldMap"; } }
+class TFIS_IndestructibleScreenEffect_Green : TFIS_IndestructibleScreenEffect
+{ Default { Powerup.Color "GreenMap"; } }
+class TFIS_IndestructibleScreenEffect_Blue : TFIS_IndestructibleScreenEffect
+{ Default { Powerup.Color "BlueMap"; } }
+class TFIS_IndestructibleScreenEffect_Inverse : TFIS_IndestructibleScreenEffect
+{ Default { Powerup.Color "InverseMap"; } }
+class TFIS_IndestructibleScreenEffect_RedWhite : TFIS_IndestructibleScreenEffect
+{ Default { Powerup.ColorMap 1.0,1.0,1.0, 1.0,0.0,0.0; } }
+class TFIS_IndestructibleScreenEffect_Desaturate : TFIS_IndestructibleScreenEffect
+{ Default { Powerup.ColorMap 0.0,0.0,0.0, 1.0,1.0,1.0; } }
+
+class TFIS_IndestructibleDamage : Powerup {
+  mixin TFIS_IndestructibleStopWhenFrozen;
+  override void ModifyDamage(
+      int damage, Name damageType, out int newdamage,
+      bool passive, Actor inflictor, Actor source, int flags) {
+    if (passive) return;
+    newdamage = damage*2;
+  }
+}
+
+class TFIS_IndestructibleSlomo : PowerTimeFreezer {
+  mixin TFIS_IndestructibleStopWhenFrozen;
+
+  void FixPlayerFlags() {
+    if (!owner || !owner.player || !owner.player.timefreezer) return;
+    uint freezemask = 1 << owner.PlayerNumber();
+    owner.player.timefreezer |= freezemask;
+    for (int i = 0; i < MAXPLAYERS; i++) {
+      if (playeringame[i] && players[i].mo && players[i].mo.IsTeammate(Owner)) {
+        players[i].timefreezer |= freezemask;
+      }
+    }
+  }
+
+  // Returns true if another PowerTimeFreezer (e.g. Swiftness) is also active.
+  // When that's the case we must not call Level.setFrozen(false) on expiry —
+  // doing so would unfreeze the world while Swiftness still has time remaining,
+  // and the player would get stuck unable to move until Swiftness also expired.
+  bool OtherFreezersActive() {
+    if (!owner) return false;
+    for (Inventory inv = owner.inv; inv; inv = inv.inv) {
+      let ptf = PowerTimeFreezer(inv);
+      if (ptf && ptf != self && ptf.effectTics > 0) return true;
+    }
+    return false;
+  }
+
+  bool ShouldFreeze() {
+    return indestructible_slomo == 1 || (level.maptime/2) % indestructible_slomo;
+  }
+
+  override void DoEffect() {
+    FixPlayerFlags();
+    if (Level.maptime & 1
+        || (Owner && Owner.player && Owner.player.IsTotallyFrozen())) {
+      return;
+    }
+    // Only manage the frozen state if no other freezer is running.
+    // If Swiftness (or any other PowerTimeFreezer) is active, leave the
+    // frozen state alone — Swiftness manages it via its own timefreezer mask.
+    if (!OtherFreezersActive()) {
+      Level.setFrozen(effectTics > 0 && ShouldFreeze());
+    }
+  }
+
+  override bool CanPickup(Actor other) { return true; }
+  override bool IsBlinking() { return false; }
+}
+
+// =============================================================================
+// Indestructible Subsystem (used by main EventHandler)
+// =============================================================================
+
+class TFIS_IndestructibleSystem play {
+  TFIS_PlayerInfo info[MAXPLAYERS];
+
+  void InitPlayer(uint p) {
+    let pawn = players[p].mo;
+    let force = TFIS_IndestructibleForce(pawn.FindInventory("TFIS_IndestructibleForce"));
+    if (force) {
+      if (force.info && force.info == info[p]) return;
+      info[p] = force.info;
+      force.Initialize(force.info);
+    } else if (!info[p] || !indestructible_ignore_death_exits) {
+      force = TFIS_IndestructibleForce(pawn.GiveInventoryType("TFIS_IndestructibleForce"));
+      force.Initialize(TFIS_PlayerInfo.Create());
+      info[p] = force.info;
+    } else {
+      force = TFIS_IndestructibleForce(pawn.GiveInventoryType("TFIS_IndestructibleForce"));
+      force.Initialize(info[p]);
+    }
+  }
+
+  void PlayerEntered(int p) {
+    if (level.totaltime == 0) info[p] = null;
+    InitPlayer(p);
+  }
+
+  void WorldLoaded(bool isSaveGame, bool isReopen) {
+    for (uint i = 0; i < MAXPLAYERS; ++i) {
+      if (playeringame[i]) InitPlayer(i);
+    }
+    // Only award standalone level-clear lives when NOT in bonsai mode.
+    // In bonsai mode, the TFLV_Upgrade_Indestructible.OnMapEntry handles this.
+    if (!isSaveGame && !isReopen && !indestructible_gun_bonsai_mode) {
+      for (uint i = 0; i < MAXPLAYERS; ++i) {
+        if (playeringame[i] && info[i]) {
+          info[i].AddLevelClearLives(level.GetChecksum());
+        }
+      }
+    }
+  }
+
+  void HandleNetworkEvent(string name, int arg1, int arg2) {
+    if (name == "indestructible-adjust-lives") {
+      for (uint i = 0; i < MAXPLAYERS; ++i) {
+        if (info[i]) info[i].AdjustLives(arg1, arg2 != 0);
+      }
+    } else if (name == "indestructible-clamp-lives") {
+      for (uint i = 0; i < MAXPLAYERS; ++i) {
+        if (info[i] && info[i].lives > arg2)
+          info[i].AdjustLives(arg2 - info[i].lives, false);
+      }
+    }
+  }
+
+  void WorldThingDied(Actor thing) {
+    if (!thing || !thing.bBOSS) return;
+    // In bonsai mode, boss kill lives are handled by the upgrade's OnKill.
+    if (indestructible_gun_bonsai_mode) return;
+    if (indestructible_lives_per_boss <= 0) return;
+    for (uint i = 0; i < MAXPLAYERS; ++i) {
+      if (info[i]) info[i].AddBossKillLives();
+    }
+  }
+}
+
+// =============================================================================
+// Service (RPC interface for Indestructible)
+// =============================================================================
+
+class TFIS_IndestructibleService : Service play {
+  TFIS_IndestructibleSystem system;
+
+  void Init(TFIS_IndestructibleSystem system) {
+    self.system = system;
+  }
+
+  override int GetInt(String fn, String str_arg, int p, double limit, Object _obj) {
+    if (fn == "get-lives") return GetLives(p);
+    else if (fn == "set-lives") return SetLives(p, int(limit));
+    else if (fn == "adjust-lives") return AdjustLivesRPC(p, int(limit), str_arg != "");
+    else if (fn == "apply-min") return ApplyMin(p, int(limit));
+    else if (fn == "apply-max") return ApplyMax(p, int(limit));
+    else {
+      console.printf("IndestructibleService: unknown rpc name '%s'", fn);
+      return 0;
+    }
+  }
+
+  int GetLives(int p) { return system.info[p].lives; }
+
+  int SetLives(int p, int lives) {
+    system.info[p].lives = lives;
+    return AdjustLivesRPC(p, 0, false);
+  }
+
+  int AdjustLivesRPC(int p, int delta, bool respect_max) {
+    system.info[p].AdjustLives(delta, respect_max);
+    return GetLives(p);
+  }
+
+  int ApplyMin(int p, int min) {
+    let lives = GetLives(p);
+    if (lives != -1 && lives < min) return SetLives(p, min);
+    return lives;
+  }
+
+  int ApplyMax(int p, int max) {
+    let lives = GetLives(p);
+    if (lives == -1 || lives > max) return SetLives(p, max);
+    return lives;
+  }
+}

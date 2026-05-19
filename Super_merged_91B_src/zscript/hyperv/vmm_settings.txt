@@ -1,0 +1,515 @@
+// Copyright 2018-2020 Alexander Kromm (m8f/mmaulwurff)
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/
+//
+// This cvar loader is taken from laser sight mod by Alexander Kromm (m8f/mmaulwurff)
+
+class vmm_Settings
+{
+  double damageMultiplier()   			{ return damageMultiplierCvar.getDouble();   	}
+  double jumpMultiplier()   			{ return jumpMultiplierCvar.getDouble();   		}
+  double speedMultiplier()   			{ return speedMultiplierCvar.getDouble();   	}
+
+  // Player Rules
+  double takenDamageMult()            { return takenDamageMultCvar.getDouble();    }
+  double selfDamageMult()             { return selfDamageMultCvar.getDouble();     }
+  double frictionMult()               { return frictionMultCvar.getDouble();       }
+  int    maxHealth()                  { return maxHealthCvar.getInt();             }
+  int    startHealth()                { return startHealthCvar.getInt();           }
+  int    startArmor()                 { return startArmorCvar.getInt();            }
+
+  // World Rules
+  double enemyHealthMult()            { return enemyHealthMultCvar.getDouble();    }
+  int    enemyHealthMax()             { return enemyHealthMaxCvar.getInt();        }
+  double enemySpeedMult()             { return enemySpeedMultCvar.getDouble();     }
+  double friendHealthMult()           { return friendHealthMultCvar.getDouble();   }
+  int    friendHealthMax()            { return friendHealthMaxCvar.getInt();       }
+  double friendSpeedMult()            { return friendSpeedMultCvar.getDouble();    }
+
+  // Permanent Powerups
+  bool permBuddha()                   { return permBuddhaCvar.getBool();           }
+  bool permDamage()                   { return permDamageCvar.getBool();           }
+  bool permDoubleFiring()             { return permDoubleFiringCvar.getBool();     }
+  bool permDrain()                    { return permDrainCvar.getBool();            }
+  bool permFlight()                   { return permFlightCvar.getBool();           }
+  bool permFrightener()               { return permFrightenerCvar.getBool();       }
+  bool permGhost()                    { return permGhostCvar.getBool();            }
+  bool permHighJump()                 { return permHighJumpCvar.getBool();         }
+  bool permInfiniteAmmo()             { return permInfiniteAmmoCvar.getBool();     }
+  bool permInvisibility()             { return permInvisibilityCvar.getBool();     }
+  bool permInvulnerability()          { return permInvulnerabilityCvar.getBool();  }
+  bool permIronFeet()                 { return permIronFeetCvar.getBool();         }
+  bool permLightAmp()                 { return permLightAmpCvar.getBool();         }
+  bool permMask()                     { return permMaskCvar.getBool();             }
+  bool permProtection()               { return permProtectionCvar.getBool();       }
+  bool permRegeneration()             { return permRegenerationCvar.getBool();     }
+  bool permScanner()                  { return permScannerCvar.getBool();          }
+  bool permShadow()                   { return permShadowCvar.getBool();           }
+  bool permSpeed()                    { return permSpeedCvar.getBool();            }
+  bool permStrength()                 { return permStrengthCvar.getBool();         }
+  bool permTargeter()                 { return permTargeterCvar.getBool();         }
+  bool permTimeFreezer()              { return permTimeFreezerCvar.getBool();      }
+  bool permTorch()                    { return permTorchCvar.getBool();            }
+  bool permWeaponLevel2()             { return permWeaponLevel2Cvar.getBool();     }
+  bool dashEnabled()					{ return dashCvar.getBool();					}
+  double dashMultiplier()   			{ return dashMultiplierCvar.getDouble();   		}
+  double dashCooldown()   				{ return dashCooldownCvar.getDouble();   		}
+  bool doubleDashEnabled()   			{ return doubleDashCvar.getBool();   			}
+  bool dashFwdLeap()					{ return dashFwdLeapCvar.getBool();				}
+  bool dashSideEnabled()				{ return dashSideCvar.getBool();				}
+  double dashSideMult()					{ return dashSideMultCvar.getDouble();			}
+  bool dashBackEnabled()				{ return dashBackCvar.getBool();				}
+  double dashBackMult()					{ return dashBackMultCvar.getDouble();			}
+  bool dashStaminaEnabled()				{ return dashStaminaCvar.getBool();				}
+  int dashFwdCost()						{ return dashFwdCostCvar.getInt();				}
+  int dashSideCost()					{ return dashSideCostCvar.getInt();				}
+  int dashBackCost()					{ return dashBackCostCvar.getInt();				}
+  bool doubleJumpEnabled()   			{ return doubleJumpCvar.getBool();   			}
+  bool ledgeClimbEnabled()   			{ return ledgeClimbCvar.getBool();   			}
+  // Health regen
+  bool   healthRegenEnabled()         { return helthRegenCvar.getBool();              }
+  int    healthRegenAmount()          { return healthRegenAmountCvar.getInt();        }
+  int    healthRegenType()            { return healthRegenTypeCvar.getInt();          }
+  double healthRegenTime()            { return healthRegenTimeCvar.getDouble();       }
+  int    healthRegenMin()             { return healthRegenMinCvar.getInt();           }
+  int    healthRegenMax()             { return healthRegenMaxCvar.getInt();           }
+  double healthRegenSoundVol()        { return healthRegenSoundVolCvar.getDouble();   }
+  double healthRegenVisual()          { return healthRegenVisualCvar.getDouble();     }
+  int    healthRegenColor()           { return healthRegenColorCvar.getInt();         }
+  // Armor regen
+  bool   armorRegenEnabled()          { return armorRegenCvar.getBool();              }
+  int    armorRegenAmount()           { return armorRegenAmountCvar.getInt();         }
+  int    armorRegenType()             { return armorRegenTypeCvar.getInt();           }
+  double armorRegenTime()             { return armorRegenTimeCvar.getDouble();        }
+  int    armorRegenMin()              { return armorRegenMinCvar.getInt();            }
+  int    armorRegenMax()              { return armorRegenMaxCvar.getInt();            }
+  double armorRegenSoundVol()         { return armorRegenSoundVolCvar.getDouble();    }
+  double armorRegenVisual()           { return armorRegenVisualCvar.getDouble();      }
+  int    armorRegenColor()            { return armorRegenColorCvar.getInt();          }
+  // Ammo regen
+  bool   ammoRegenEnabled()           { return ammoRegenCvar.getBool();               }
+  double ammoRegenTime()              { return ammoRegenTimeCvar.getDouble();         }
+  bool   ammoRegenBackpack()          { return ammoRegenBackpackCvar.getBool();       }
+  double ammoRegenSoundVol()          { return ammoRegenSoundVolCvar.getDouble();     }
+  double ammoRegenVisual()            { return ammoRegenVisualCvar.getDouble();       }
+  int    ammoRegenColor()             { return ammoRegenColorCvar.getInt();           }
+  bool meleeEnabled()   				{ return meleeCvar.getBool();   				}
+  bool meleeVRMode()					{ return meleeVRModeCvar.getBool();				}
+  bool meleeKeyMode()					{ return meleeKeyCvar.getBool();				}
+  bool meleeSoundEnabled()				{ return meleeSoundCvar.getBool();				}
+  bool meleePuffEnabled()				{ return meleePuffCvar.getBool();				}
+  bool meleeStaminaEnabled()			{ return meleeStaminaCvar.getBool();			}
+  bool meleeBerserkEnabled()			{ return meleeBerserkCvar.getBool();			}
+  double meleeRange()					{ return meleeRangeCvar.getDouble();			}
+  double meleeMult()					{ return meleeMultCvar.getDouble();				}
+  int meleePreset()						{ return meleePresetCvar.getInt();				}
+  int meleeDmgMin()						{ return meleeDmgMinCvar.getInt();				}
+  int meleeDmgMax()						{ return meleeDmgMaxCvar.getInt();				}
+  int meleeBaseCooldown()				{ return meleeBaseCooldownCvar.getInt();		}
+  int meleeIndicator()					{ return meleeIndicatorCvar.getInt();			}
+  bool meleeIndicatorOn()				{ return meleeIndicatorOnCvar.getBool();		}
+  double meleeIndicatorRange()			{ return meleeIndicatorRangeCvar.getDouble();	}
+  bool meleeCombo()   					{ return meleeComboCvar.getBool();   			}
+  int meleeComboHit()   				{ return meleeComboHitCvar.getInt();   			}
+  int meleeComboCrit()   				{ return meleeComboCritCvar.getInt();   		}
+  double meleeKnockback()   			{ return meleeKnockbackCvar.getDouble();   		}
+  int meleeKnockbackMass()   			{ return meleeKnockbackMassCvar.getInt();   	}
+  int meleeComboStun()   				{ return meleeComboStunCvar.getInt();   		}
+  bool parryEnabled()					{ return parryCvar.getBool();				}
+  int parryResist()						{ return parryResistCvar.getInt();			}
+  int parryCritResist()					{ return parryCritResistCvar.getInt();		}
+  bool parryAlways()					{ return parryAlwaysCvar.getBool();			}
+  int parryChance()						{ return parryChanceCvar.getInt();			}
+  int parryDuration()					{ return parryDurationCvar.getInt();		}
+  double parryStunMin()				{ return parryStunMinCvar.getDouble();		}
+  double parryStunMax()				{ return parryStunMaxCvar.getDouble();		}
+  int parryProb()						{ return parryProbCvar.getInt();			}
+  int meleeBerserkCrit()				{ return meleeBerserkCritCvar.getInt();		}
+  int meleeBerserkStamina()				{ return meleeBerserkStaminaCvar.getInt();	}
+  int meleeBerserkStun()				{ return meleeBerserkStunCvar.getInt();		}
+  double meleeBerserkDmg()				{ return meleeBerserkDmgCvar.getDouble();	}
+  double meleeBerserkCooldown()			{ return meleeBerserkCooldownCvar.getDouble(); }
+  bool slot1Mode()						{ return slot1ModeCvar.getBool();				}
+  bool slot1SuppressSnd()				{ return slot1SuppressSndCvar.getBool();		}
+  bool slot1Combo()						{ return slot1ComboCvar.getBool();				}
+  int  slot1ComboRate()					{ return slot1ComboRateCvar.getInt();			}
+  bool slot1Indicator()					{ return slot1IndicatorCvar.getBool();			}
+  bool slot1Parry()						{ return slot1ParryCvar.getBool();				}
+  int  slot1CritDmgMin()				{ return slot1CritDmgMinCvar.getInt();			}
+  int  slot1CritDmgMax()				{ return slot1CritDmgMaxCvar.getInt();			}
+  int  slot1RapidThreshold()			{ return slot1RapidThresholdCvar.getInt();		}
+  int  slot1RapidWindow()				{ return slot1RapidWindowCvar.getInt();			}
+  int  slot1RapidCrit()					{ return slot1RapidCritCvar.getInt();			}
+  double ghookCooldown()   				{ return ghookCooldownCvar.getDouble();   		}
+  double ghookMaxDist()					{ return ghookMaxDistCvar.getDouble();			}
+  bool ghookEnabled()					{ return ghookCvar.getBool();					}
+  bool ghookPullEnabled()				{ return ghookPullCvar.getBool();				}
+  bool ghookStunEnabled()				{ return ghookStunCvar.getBool();				}
+  double ghookStunMin()				{ return ghookStunMinCvar.getDouble();			}
+  double ghookStunMax()				{ return ghookStunMaxCvar.getDouble();			}
+  bool teleportEnabled()				{ return teleportCvar.getBool();				}
+  bool teleportRestricted()				{ return teleportRestrictCvar.getBool();			}
+  double teleportBeamSpeed()			{ return teleportBeamSpeedCvar.getDouble();		}
+  double teleportMaxRange()				{ return teleportMaxRangeCvar.getDouble();		}
+  double teleportCooldown()				{ return teleportCooldownCvar.getDouble();		}
+  
+  bool hyperVMeleeDisabled() 			{ return hyperVMeleeDisabledCvar.isDefined() && hyperVMeleeDisabledCvar.getBool(); }
+
+  static
+  vmm_Settings of()
+  {
+    let result = new("vmm_Settings");
+
+    // Player Rules
+    result.takenDamageMultCvar      = vmm_Cvar.of("vmm_taken_damage_mult");
+    result.selfDamageMultCvar       = vmm_Cvar.of("vmm_self_damage_mult");
+    result.frictionMultCvar         = vmm_Cvar.of("vmm_friction_mult");
+    result.maxHealthCvar            = vmm_Cvar.of("vmm_max_health");
+    result.startHealthCvar          = vmm_Cvar.of("vmm_start_health");
+    result.startArmorCvar           = vmm_Cvar.of("vmm_start_armor");
+    // World Rules
+    result.enemyHealthMultCvar      = vmm_Cvar.of("vmm_enemy_health_mult");
+    result.enemyHealthMaxCvar       = vmm_Cvar.of("vmm_enemy_health_max");
+    result.enemySpeedMultCvar       = vmm_Cvar.of("vmm_enemy_speed_mult");
+    result.friendHealthMultCvar     = vmm_Cvar.of("vmm_friend_health_mult");
+    result.friendHealthMaxCvar      = vmm_Cvar.of("vmm_friend_health_max");
+    result.friendSpeedMultCvar      = vmm_Cvar.of("vmm_friend_speed_mult");
+    // Permanent Powerups
+    result.permBuddhaCvar           = vmm_Cvar.of("vmm_perm_buddha");
+    result.permDamageCvar           = vmm_Cvar.of("vmm_perm_damage");
+    result.permDoubleFiringCvar     = vmm_Cvar.of("vmm_perm_doublefiring");
+    result.permDrainCvar            = vmm_Cvar.of("vmm_perm_drain");
+    result.permFlightCvar           = vmm_Cvar.of("vmm_perm_flight");
+    result.permFrightenerCvar       = vmm_Cvar.of("vmm_perm_frightener");
+    result.permGhostCvar            = vmm_Cvar.of("vmm_perm_ghost");
+    result.permHighJumpCvar         = vmm_Cvar.of("vmm_perm_highjump");
+    result.permInfiniteAmmoCvar     = vmm_Cvar.of("vmm_perm_infiniteammo");
+    result.permInvisibilityCvar     = vmm_Cvar.of("vmm_perm_invisibility");
+    result.permInvulnerabilityCvar  = vmm_Cvar.of("vmm_perm_invulnerability");
+    result.permIronFeetCvar         = vmm_Cvar.of("vmm_perm_ironfeet");
+    result.permLightAmpCvar         = vmm_Cvar.of("vmm_perm_lightamp");
+    result.permMaskCvar             = vmm_Cvar.of("vmm_perm_mask");
+    result.permProtectionCvar       = vmm_Cvar.of("vmm_perm_protection");
+    result.permRegenerationCvar     = vmm_Cvar.of("vmm_perm_regeneration");
+    result.permScannerCvar          = vmm_Cvar.of("vmm_perm_scanner");
+    result.permShadowCvar           = vmm_Cvar.of("vmm_perm_shadow");
+    result.permSpeedCvar            = vmm_Cvar.of("vmm_perm_speed");
+    result.permStrengthCvar         = vmm_Cvar.of("vmm_perm_strength");
+    result.permTargeterCvar         = vmm_Cvar.of("vmm_perm_targeter");
+    result.permTimeFreezerCvar      = vmm_Cvar.of("vmm_perm_timefreezer");
+    result.permTorchCvar            = vmm_Cvar.of("vmm_perm_torch");
+    result.permWeaponLevel2Cvar     = vmm_Cvar.of("vmm_perm_weaponlevel2");
+    result.damageMultiplierCvar   		= vmm_Cvar.of("vmm_damage_mult");
+    result.jumpMultiplierCvar   		= vmm_Cvar.of("vmm_jump_mult");
+    result.speedMultiplierCvar   		= vmm_Cvar.of("vmm_speed_mult");
+    result.dashCvar						= vmm_Cvar.of("vmm_dash");
+    result.dashMultiplierCvar   		= vmm_Cvar.of("vmm_dash_mult");
+    result.dashCooldownCvar   			= vmm_Cvar.of("vmm_dash_cooldown");
+    result.doubleDashCvar   			= vmm_Cvar.of("vmm_double_dash");
+    result.dashFwdLeapCvar				= vmm_Cvar.of("vmm_dash_fwd_leap");
+    result.dashSideCvar					= vmm_Cvar.of("vmm_dash_side");
+    result.dashSideMultCvar				= vmm_Cvar.of("vmm_dash_side_mult");
+    result.dashBackCvar					= vmm_Cvar.of("vmm_dash_back");
+    result.dashBackMultCvar				= vmm_Cvar.of("vmm_dash_back_mult");
+    result.dashStaminaCvar				= vmm_Cvar.of("vmm_dash_stamina");
+    result.dashFwdCostCvar				= vmm_Cvar.of("vmm_dash_fwd_cost");
+    result.dashSideCostCvar				= vmm_Cvar.of("vmm_dash_side_cost");
+    result.dashBackCostCvar				= vmm_Cvar.of("vmm_dash_back_cost");
+    result.doubleJumpCvar   			= vmm_Cvar.of("vmm_double_jump");
+    result.ledgeClimbCvar   			= vmm_Cvar.of("vmm_ledge_climb");
+    // Health regen
+    result.helthRegenCvar           = vmm_Cvar.of("vmm_health_regen");
+    result.healthRegenAmountCvar    = vmm_Cvar.of("vmm_regen_amount");
+    result.healthRegenTypeCvar      = vmm_Cvar.of("vmm_regen_type");
+    result.healthRegenTimeCvar      = vmm_Cvar.of("vmm_regen_time");
+    result.healthRegenMinCvar       = vmm_Cvar.of("vmm_regen_min");
+    result.healthRegenMaxCvar       = vmm_Cvar.of("vmm_regen_max");
+    result.healthRegenSoundVolCvar  = vmm_Cvar.of("vmm_regen_sound_vol");
+    result.healthRegenVisualCvar    = vmm_Cvar.of("vmm_regen_visual");
+    result.healthRegenColorCvar     = vmm_Cvar.of("vmm_regen_color");
+    // Armor regen
+    result.armorRegenCvar           = vmm_Cvar.of("vmm_armor_regen");
+    result.armorRegenAmountCvar     = vmm_Cvar.of("vmm_armor_regen_amount");
+    result.armorRegenTypeCvar       = vmm_Cvar.of("vmm_armor_regen_type");
+    result.armorRegenTimeCvar       = vmm_Cvar.of("vmm_armor_regen_time");
+    result.armorRegenMinCvar        = vmm_Cvar.of("vmm_armor_regen_min");
+    result.armorRegenMaxCvar        = vmm_Cvar.of("vmm_armor_regen_max");
+    result.armorRegenSoundVolCvar   = vmm_Cvar.of("vmm_armor_regen_sound_vol");
+    result.armorRegenVisualCvar     = vmm_Cvar.of("vmm_armor_regen_visual");
+    result.armorRegenColorCvar      = vmm_Cvar.of("vmm_armor_regen_color");
+    // Ammo regen
+    result.ammoRegenCvar            = vmm_Cvar.of("vmm_ammo_regen");
+    result.ammoRegenTimeCvar        = vmm_Cvar.of("vmm_ammo_regen_time");
+    result.ammoRegenBackpackCvar    = vmm_Cvar.of("vmm_ammo_regen_backpack");
+    result.ammoRegenSoundVolCvar    = vmm_Cvar.of("vmm_ammo_regen_sound_vol");
+    result.ammoRegenVisualCvar      = vmm_Cvar.of("vmm_ammo_regen_visual");
+    result.ammoRegenColorCvar       = vmm_Cvar.of("vmm_ammo_regen_color");
+    result.meleeCvar					= vmm_Cvar.of("vmm_melee");
+    result.meleeVRModeCvar				= vmm_Cvar.of("vmm_melee_vr_mode");
+    result.meleeKeyCvar					= vmm_Cvar.of("vmm_melee_key");
+    result.meleeSoundCvar				= vmm_Cvar.of("vmm_melee_sound");
+    result.meleePuffCvar				= vmm_Cvar.of("vmm_melee_puff");
+    result.meleeStaminaCvar				= vmm_Cvar.of("vmm_melee_stamina");
+    result.meleeBerserkCvar				= vmm_Cvar.of("vmm_melee_berserk");
+    result.meleeRangeCvar				= vmm_Cvar.of("vmm_melee_range");
+    result.meleeMultCvar				= vmm_Cvar.of("vmm_melee_mult");
+    result.meleePresetCvar				= vmm_Cvar.of("vmm_melee_preset");
+    result.meleeDmgMinCvar				= vmm_Cvar.of("vmm_melee_dmg_min");
+    result.meleeDmgMaxCvar				= vmm_Cvar.of("vmm_melee_dmg_max");
+    result.meleeBaseCooldownCvar			= vmm_Cvar.of("vmm_melee_base_cooldown");
+    result.meleeIndicatorCvar			= vmm_Cvar.of("vmm_melee_indicator");
+    result.meleeIndicatorOnCvar			= vmm_Cvar.of("vmm_melee_indicator_on");
+    result.meleeIndicatorRangeCvar		= vmm_Cvar.of("vmm_melee_indicator_range");
+    result.meleeComboCvar   			= vmm_Cvar.of("vmm_melee_combo");
+    result.meleeComboHitCvar   			= vmm_Cvar.of("vmm_melee_combohit");
+    result.meleeComboCritCvar   		= vmm_Cvar.of("vmm_melee_combocrit");
+    result.meleeKnockbackCvar   		= vmm_Cvar.of("vmm_melee_knockback");
+    result.meleeKnockbackMassCvar   	= vmm_Cvar.of("vmm_melee_kb_mass");
+    result.meleeComboStunCvar   		= vmm_Cvar.of("vmm_melee_stun");
+    result.parryCvar					= vmm_Cvar.of("vmm_melee_parry");
+    result.parryResistCvar				= vmm_Cvar.of("vmm_melee_parry_resist");
+    result.parryCritResistCvar			= vmm_Cvar.of("vmm_melee_parry_crit_resist");
+    result.parryAlwaysCvar				= vmm_Cvar.of("vmm_melee_parry_always");
+    result.parryChanceCvar				= vmm_Cvar.of("vmm_melee_parry_chance");
+    result.parryDurationCvar			= vmm_Cvar.of("vmm_melee_parry_duration");
+    result.parryStunMinCvar				= vmm_Cvar.of("vmm_melee_parry_stun_min");
+    result.parryStunMaxCvar				= vmm_Cvar.of("vmm_melee_parry_stun_max");
+    result.parryProbCvar				= vmm_Cvar.of("vmm_melee_parry_prob");
+    result.meleeBerserkCritCvar			= vmm_Cvar.of("vmm_melee_berserk_crit");
+    result.meleeBerserkStaminaCvar		= vmm_Cvar.of("vmm_melee_berserk_stamina");
+    result.meleeBerserkStunCvar			= vmm_Cvar.of("vmm_melee_berserk_stun");
+    result.meleeBerserkDmgCvar			= vmm_Cvar.of("vmm_melee_berserk_dmg");
+    result.meleeBerserkCooldownCvar		= vmm_Cvar.of("vmm_melee_berserk_cooldown");
+    result.slot1ModeCvar				= vmm_Cvar.of("vmm_melee_slot1_mode");
+    result.slot1SuppressSndCvar			= vmm_Cvar.of("vmm_melee_slot1_suppress_snd");
+    result.slot1ComboCvar				= vmm_Cvar.of("vmm_melee_slot1_combo");
+    result.slot1ComboRateCvar			= vmm_Cvar.of("vmm_melee_slot1_combo_rate");
+    result.slot1IndicatorCvar			= vmm_Cvar.of("vmm_melee_slot1_indicator");
+    result.slot1ParryCvar				= vmm_Cvar.of("vmm_melee_slot1_parry");
+    result.slot1CritDmgMinCvar			= vmm_Cvar.of("vmm_melee_slot1_crit_dmg_min");
+    result.slot1CritDmgMaxCvar			= vmm_Cvar.of("vmm_melee_slot1_crit_dmg_max");
+    result.slot1RapidThresholdCvar		= vmm_Cvar.of("vmm_melee_slot1_rapid_threshold");
+    result.slot1RapidWindowCvar			= vmm_Cvar.of("vmm_melee_slot1_rapid_window");
+    result.slot1RapidCritCvar			= vmm_Cvar.of("vmm_melee_slot1_rapid_crit");
+    result.ghookCooldownCvar   			= vmm_Cvar.of("vmm_hook_cooldown");
+    result.ghookMaxDistCvar				= vmm_Cvar.of("vmm_hook_maxdist");
+    result.ghookCvar					= vmm_Cvar.of("vmm_hook");
+    result.ghookPullCvar				= vmm_Cvar.of("vmm_hook_pull");
+    result.ghookStunCvar					= vmm_Cvar.of("vmm_hook_stun");
+    result.ghookStunMinCvar				= vmm_Cvar.of("vmm_hook_stun_dur_min");
+    result.ghookStunMaxCvar				= vmm_Cvar.of("vmm_hook_stun_dur_max");
+    result.teleportCvar					= vmm_Cvar.of("vmm_teleport");
+    result.teleportRestrictCvar			= vmm_Cvar.of("vmm_tp_restrict");
+    result.teleportBeamSpeedCvar		= vmm_Cvar.of("vmm_tp_beam_speed");
+    result.teleportMaxRangeCvar			= vmm_Cvar.of("vmm_tp_max_range");
+    result.teleportCooldownCvar			= vmm_Cvar.of("vmm_tp_cooldown");
+
+    result.hyperVMeleeDisabledCvar 		= vmm_Cvar.of("vmm_melee_disable");
+
+    return result;
+  }
+
+  // Player Rules
+  private vmm_Cvar takenDamageMultCvar;
+  private vmm_Cvar selfDamageMultCvar;
+  private vmm_Cvar frictionMultCvar;
+  private vmm_Cvar maxHealthCvar;
+  private vmm_Cvar startHealthCvar;
+  private vmm_Cvar startArmorCvar;
+  // World Rules
+  private vmm_Cvar enemyHealthMultCvar;
+  private vmm_Cvar enemyHealthMaxCvar;
+  private vmm_Cvar enemySpeedMultCvar;
+  private vmm_Cvar friendHealthMultCvar;
+  private vmm_Cvar friendHealthMaxCvar;
+  private vmm_Cvar friendSpeedMultCvar;
+  // Permanent Powerups
+  private vmm_Cvar permBuddhaCvar;
+  private vmm_Cvar permDamageCvar;
+  private vmm_Cvar permDoubleFiringCvar;
+  private vmm_Cvar permDrainCvar;
+  private vmm_Cvar permFlightCvar;
+  private vmm_Cvar permFrightenerCvar;
+  private vmm_Cvar permGhostCvar;
+  private vmm_Cvar permHighJumpCvar;
+  private vmm_Cvar permInfiniteAmmoCvar;
+  private vmm_Cvar permInvisibilityCvar;
+  private vmm_Cvar permInvulnerabilityCvar;
+  private vmm_Cvar permIronFeetCvar;
+  private vmm_Cvar permLightAmpCvar;
+  private vmm_Cvar permMaskCvar;
+  private vmm_Cvar permProtectionCvar;
+  private vmm_Cvar permRegenerationCvar;
+  private vmm_Cvar permScannerCvar;
+  private vmm_Cvar permShadowCvar;
+  private vmm_Cvar permSpeedCvar;
+  private vmm_Cvar permStrengthCvar;
+  private vmm_Cvar permTargeterCvar;
+  private vmm_Cvar permTimeFreezerCvar;
+  private vmm_Cvar permTorchCvar;
+  private vmm_Cvar permWeaponLevel2Cvar;
+  private vmm_Cvar damageMultiplierCvar;
+  private vmm_Cvar jumpMultiplierCvar;
+  private vmm_Cvar speedMultiplierCvar;
+  private vmm_Cvar dashCvar;
+  private vmm_Cvar dashMultiplierCvar;
+  private vmm_Cvar dashCooldownCvar;
+  private vmm_Cvar doubleDashCvar;
+  private vmm_Cvar dashFwdLeapCvar;
+  private vmm_Cvar dashSideCvar;
+  private vmm_Cvar dashSideMultCvar;
+  private vmm_Cvar dashBackCvar;
+  private vmm_Cvar dashBackMultCvar;
+  private vmm_Cvar dashStaminaCvar;
+  private vmm_Cvar dashFwdCostCvar;
+  private vmm_Cvar dashSideCostCvar;
+  private vmm_Cvar dashBackCostCvar;
+  private vmm_Cvar doubleJumpCvar;
+  private vmm_Cvar ledgeClimbCvar;
+  // Health regen
+  private vmm_Cvar helthRegenCvar;
+  private vmm_Cvar healthRegenAmountCvar;
+  private vmm_Cvar healthRegenTypeCvar;
+  private vmm_Cvar healthRegenTimeCvar;
+  private vmm_Cvar healthRegenMinCvar;
+  private vmm_Cvar healthRegenMaxCvar;
+  private vmm_Cvar healthRegenSoundVolCvar;
+  private vmm_Cvar healthRegenVisualCvar;
+  private vmm_Cvar healthRegenColorCvar;
+  // Armor regen
+  private vmm_Cvar armorRegenCvar;
+  private vmm_Cvar armorRegenAmountCvar;
+  private vmm_Cvar armorRegenTypeCvar;
+  private vmm_Cvar armorRegenTimeCvar;
+  private vmm_Cvar armorRegenMinCvar;
+  private vmm_Cvar armorRegenMaxCvar;
+  private vmm_Cvar armorRegenSoundVolCvar;
+  private vmm_Cvar armorRegenVisualCvar;
+  private vmm_Cvar armorRegenColorCvar;
+  // Ammo regen
+  private vmm_Cvar ammoRegenCvar;
+  private vmm_Cvar ammoRegenTimeCvar;
+  private vmm_Cvar ammoRegenBackpackCvar;
+  private vmm_Cvar ammoRegenSoundVolCvar;
+  private vmm_Cvar ammoRegenVisualCvar;
+  private vmm_Cvar ammoRegenColorCvar;
+  private vmm_Cvar meleeCvar;
+  private vmm_Cvar meleeVRModeCvar;
+  private vmm_Cvar meleeKeyCvar;
+  private vmm_Cvar meleeSoundCvar;
+  private vmm_Cvar meleePuffCvar;
+  private vmm_Cvar meleeStaminaCvar;
+  private vmm_Cvar meleeBerserkCvar;
+  private vmm_Cvar meleeRangeCvar;
+  private vmm_Cvar meleeMultCvar;
+  private vmm_Cvar meleePresetCvar;
+  private vmm_Cvar meleeDmgMinCvar;
+  private vmm_Cvar meleeDmgMaxCvar;
+  private vmm_Cvar meleeBaseCooldownCvar;
+  private vmm_Cvar meleeIndicatorCvar;
+  private vmm_Cvar meleeIndicatorOnCvar;
+  private vmm_Cvar meleeIndicatorRangeCvar;
+  private vmm_Cvar meleeComboCvar;
+  private vmm_Cvar meleeComboHitCvar;
+  private vmm_Cvar meleeComboCritCvar;
+  private vmm_Cvar meleeKnockbackCvar;
+  private vmm_Cvar meleeKnockbackMassCvar;
+  private vmm_Cvar meleeComboStunCvar;
+  private vmm_Cvar parryCvar;
+  private vmm_Cvar parryResistCvar;
+  private vmm_Cvar parryCritResistCvar;
+  private vmm_Cvar parryAlwaysCvar;
+  private vmm_Cvar parryChanceCvar;
+  private vmm_Cvar parryDurationCvar;
+  private vmm_Cvar parryStunMinCvar;
+  private vmm_Cvar parryStunMaxCvar;
+  private vmm_Cvar parryProbCvar;
+  private vmm_Cvar meleeBerserkCritCvar;
+  private vmm_Cvar meleeBerserkStaminaCvar;
+  private vmm_Cvar meleeBerserkStunCvar;
+  private vmm_Cvar meleeBerserkDmgCvar;
+  private vmm_Cvar meleeBerserkCooldownCvar;
+  private vmm_Cvar slot1ModeCvar;
+  private vmm_Cvar slot1SuppressSndCvar;
+  private vmm_Cvar slot1ComboCvar;
+  private vmm_Cvar slot1ComboRateCvar;
+  private vmm_Cvar slot1IndicatorCvar;
+  private vmm_Cvar slot1ParryCvar;
+  private vmm_Cvar slot1CritDmgMinCvar;
+  private vmm_Cvar slot1CritDmgMaxCvar;
+  private vmm_Cvar slot1RapidThresholdCvar;
+  private vmm_Cvar slot1RapidWindowCvar;
+  private vmm_Cvar slot1RapidCritCvar;
+  private vmm_Cvar ghookCooldownCvar;
+  private vmm_Cvar ghookMaxDistCvar;
+  private vmm_Cvar ghookCvar;
+  private vmm_Cvar ghookPullCvar;
+  private vmm_Cvar ghookStunCvar;
+  private vmm_Cvar ghookStunMinCvar;
+  private vmm_Cvar ghookStunMaxCvar;
+  private vmm_Cvar teleportCvar;
+  private vmm_Cvar teleportRestrictCvar;
+  private vmm_Cvar teleportBeamSpeedCvar;
+  private vmm_Cvar teleportMaxRangeCvar;
+  private vmm_Cvar teleportCooldownCvar;
+  
+  //not settings, but public api
+  private vmm_Cvar hyperVMeleeDisabledCvar;
+
+} // class vmm_Settings
+
+/**
+ * This class provides access to a user or server Cvar.
+ *
+ * Accessing Cvars through this class is faster because calling Cvar.GetCvar()
+ * is costly. This class caches the result of Cvar.GetCvar() and handles
+ * loading a savegame.
+ */
+class vmm_Cvar
+{
+
+// public: /////////////////////////////////////////////////////////////////////
+
+  static
+  vmm_Cvar of(String name)
+  {
+    let result = new("vmm_Cvar");
+    result._name = name;
+    return result;
+  }
+
+  bool   isDefined() { load(); return (_cvar != NULL);   }
+
+  String getString() { load(); return _cvar.GetString(); }
+  bool   getBool()   { load(); return _cvar.GetInt();    }
+  int    getInt()    { load(); return _cvar.GetInt();    }
+  double getDouble() { load(); return _cvar.GetFloat();  }
+
+// private: ////////////////////////////////////////////////////////////////////
+
+  private
+  void load()
+  {
+    if (_cvar == NULL)
+    {
+      PlayerInfo player = players[consolePlayer];
+
+      _cvar = Cvar.GetCvar(_name, player);
+    }
+  }
+
+  private String         _name;
+  private transient Cvar _cvar;
+
+} // class vmm_Cvar

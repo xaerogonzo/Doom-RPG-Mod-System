@@ -1,0 +1,42 @@
+// =============================================================================
+// Typist Bridge for Super Merged
+//
+// Requires: Super_Merged.pk3 + Typist.pk3
+// Load order: SuperMerged.pk3 -> Typist.pk3 -> typist_bridge.pk3
+//
+// Gates DoomPoints scoring to Typist's Combat mode only. In Explore mode,
+// no score is awarded. Scoring flows normally into Gun Bonsai's score-to-XP
+// conversion via player.mo.score, which both systems write to.
+//
+// No changes to Super Merged are required beyond having this pk3 in the load
+// order. Super Merged's dp_ScoringSystem.makePlayerScore() performs a soft
+// class registry check for tt_TypistPlayerScore at runtime — if this pk3 is
+// loaded, the bridge activates automatically. If not, it falls back silently
+// to the standard dp_PlayerScore with zero overhead.
+// =============================================================================
+
+// Gates all DoomPoints scoring to Typist's Combat mode.
+// isScoringAllowed() is called at the top of every scoring method in
+// dp_Counter before any points are awarded.
+class tt_TypistCounter : dp_Counter
+{
+  override bool isScoringAllowed() const
+  {
+    let eh = tt_EventHandler(EventHandler.find("tt_EventHandler"));
+    if (eh == NULL) return true; // Typist not active — score freely.
+    return eh.getMode() == tt_Mode.Combat;
+  }
+}
+
+// Injects tt_TypistCounter into the player score chain.
+// dp_ScoringSystem.makePlayerScore() in Super Merged detects this class
+// via a soft class<dp_PlayerScore> cast and uses it automatically.
+class tt_TypistPlayerScore : dp_PlayerScore
+{
+  override dp_Counter makeCounter(int playerNumber,
+                                  dp_TimerBonus timerBonus,
+                                  dp_HealthBonus healthBonus)
+  {
+    return new("tt_TypistCounter").init(playerNumber, timerBonus, healthBonus);
+  }
+}

@@ -1,0 +1,2876 @@
+// =============================================================================
+// Super Merged — Unified MENUDEF
+// Components: Gun Bonsai, Indestructible, Doom Points, Companions, Hyper-V
+// =============================================================================
+
+// Gun Bonsai - Unified MENUDEF
+// Single top-level menu with master switches and submenus
+// =============================================================================
+
+AddOptionMenu "OptionsMenu"
+{
+  StaticText ""
+  TFLV_AnimatedSubmenu "Gun Bonsai Suite", "GunBonsaiSuiteMenu"
+}
+
+// =============================================================================
+// Master Menu
+// =============================================================================
+
+OptionMenu "GunBonsaiSuiteMenu"
+{
+  Title "Gun Bonsai Suite"
+
+  StaticText "Master Switches", GOLD
+  StaticText ""
+  Option "Gun Bonsai (Weapon Upgrades)", "bonsai_enabled",       "OnOff"
+  Option "Indestructible (Extra Lives)", "indestructible_enabled","OnOff"
+  Option "Doom Points (Scoring)",        "dp_enabled",            "OnOff"
+  Option "Companions (Friendly Monsters)","companions_enabled",   "OnOff"
+  Option "Hyper-V (Movement Systems)",    "hyperv_enabled",       "OnOff"
+
+  StaticText ""
+  StaticText "Configuration", GOLD
+  StaticText ""
+  TFLV_AnimatedSubmenu "Gun Bonsai Options",      "GunBonsaiOptions"
+  TFLV_AnimatedSubmenu "Indestructible Options",  "IndestructibleOptions"
+  TFLV_AnimatedSubmenu "Doom Points Options",     "dp_MainMenu"
+  TFLV_AnimatedSubmenu "Companions Options",      "CompanionsOptions"
+  TFLV_AnimatedSubmenu "Hyper-V Options",          "VMM_Settings"
+}
+
+// =============================================================================
+// Gun Bonsai Options
+// =============================================================================
+
+
+// =============================================================================
+// Gun Bonsai Menus
+// =============================================================================
+
+OptionMenu "GunBonsaiOptions"
+{
+  class TFLV_TooltipOptionMenu
+  Title "$TFLV_OPT_TITLE"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.25, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  DefaultSelection 4
+
+  StaticText ""
+  StaticText "$TFLV_OPT_HEADER_UI", CYAN
+
+  Option "$TFLV_OPT_NAME_HUD_SKIN", "bonsai_hud_skin", "GunBonsaiHudSkin"
+  TFLV_Tooltip "$TFLV_OPT_TT_HUD_SKIN"
+  Slider "$TFLV_OPT_NAME_HUD_X", "bonsai_hud_x", 0.0, 1.0, 0.01, 2
+  Slider "$TFLV_OPT_NAME_HUD_Y", "bonsai_hud_y", 0.0, 1.0, 0.01, 2
+  TFLV_Tooltip "$TFLV_OPT_TT_HUD_XY"
+  Slider "$TFLV_OPT_NAME_HUD_SIZE", "bonsai_hud_size", 0.05, 0.3, 0.01, 2
+  TFLV_Tooltip "$TFLV_OPT_TT_HUD_SIZE"
+  Slider "$TFLV_OPT_NAME_HUD_ALPHA", "bonsai_hud_alpha", 0.0, 1.0, 0.05, 2
+  TFLV_Tooltip "$TFLV_OPT_TT_HUD_ALPHA"
+  Option "$TFLV_OPT_NAME_HUD_MIRROR", "bonsai_hud_mirror", "GunBonsaiHudMirrorMode"
+  TFLV_Tooltip "$TFLV_OPT_TT_HUD_MIRROR"
+  ColorPicker "$TFLV_OPT_NAME_HUD_RGB_FRAME", "bonsai_hud_rgb_frame"
+  TFLV_Tooltip "$TFLV_OPT_TT_HUD_RGB_FRAME"
+  ColorPicker "$TFLV_OPT_NAME_HUD_RGB_WEAPON", "bonsai_hud_rgb_weapon"
+  TFLV_Tooltip "$TFLV_OPT_TT_HUD_RGB_WEAPON"
+  ColorPicker "$TFLV_OPT_NAME_HUD_RGB_PLAYER", "bonsai_hud_rgb_player"
+  TFLV_Tooltip "$TFLV_OPT_TT_HUD_RGB_PLAYER"
+  Option "$TFLV_OPT_NAME_VFX_MODE", "bonsai_vfx_mode", "GunBonsaiVfxMode"
+  TFLV_Tooltip "$TFLV_OPT_TT_VFX_MODE"
+  TFLV_AnimatedSubmenu "Performance / VFX Detail",        "GunBonsaiVfxDetail"
+  TFLV_Tooltip "Per-feature visual effects quality settings. Override individual systems independently of the global VFX level above."
+  Option "$TFLV_OPT_NAME_LEVELUP_FLASH", "bonsai_levelup_flash", "OnOff"
+  TFLV_Tooltip "$TFLV_OPT_TT_LEVELUP_FLASH"
+  ColorPicker "$TFLV_OPT_NAME_LEVELUP_FLASH_RGB", "bonsai_levelup_flash_rgb"
+  TFLV_Tooltip ""
+  Option "$TFLV_OPT_NAME_LEVELUP_SOUND_MODE", "bonsai_levelup_sound_mode", "GunBonsaiLevelUpSoundOption"
+  TFLV_Tooltip "$TFLV_OPT_TT_LEVELUP_SOUND_MODE"
+  TextField "$TFLV_OPT_NAME_LEVELUP_SOUND", "bonsai_levelup_sound"
+  TFLV_Tooltip "$TFLV_OPT_TT_LEVELUP_SOUND"
+
+  StaticText ""
+  StaticText "$TFLV_OPT_HEADER_COMPATIBILITY", WHITE
+  Option "$TFLV_OPT_NAME_AUTOSAVE_AFTER_LEVEL", "bonsai_autosave_after_level", "OnOff"
+  TFLV_Tooltip "$TFLV_OPT_TT_AUTOSAVE_AFTER_LEVEL"
+  Option "Level-up menu rejection", "bonsai_rejection_mode", "GunBonsaiRejectionMode"
+  TFLV_Tooltip "Lock: escape opens the pause menu but the upgrade prompt stays — accidental dismissal is impossible. Reject: pressing back twice deducts exactly that level's XP cost; your surplus remainder is kept and you stay at the same level."
+  Option "$TFLV_OPT_NAME_UPGRADE_BINDING_MODE", "bonsai_upgrade_binding_mode", "GunBonsaiUpgradeBindingMode"
+  TFLV_Tooltip "$TFLV_OPT_TT_UPGRADE_BINDING_MODE"
+  Option "$TFLV_OPT_NAME_USE_BUILTIN_ACTORS", "bonsai_use_builtin_actors", "OnOff"
+  TFLV_Tooltip "$TFLV_OPT_TT_USE_BUILTIN_ACTORS"
+  Option "$TFLV_OPT_NAME_AMMOLESS_WEAPONS_ARE_WIMPY", "bonsai_ammoless_weapons_are_wimpy", "OnOff"
+  TFLV_Tooltip "$TFLV_OPT_TT_AMMOLESS_WEAPONS_ARE_WIMPY"
+
+  StaticText ""
+  TFLV_AnimatedSubmenu "XP Pacing & Leveling",              "GunBonsaiXPPacing"
+  TFLV_Tooltip "All XP and leveling settings: base cost, curve, source factors, upgrade choices, melee/wimpy multipliers, and the hybrid curve configurator. All settings are profile-aware."
+
+  StaticText ""
+  StaticText "$TFLV_OPT_HEADER_LEVELING_MODES", GOLD
+  ScaleSlider "$TFLV_OPT_NAME_RESPEC_INTERVAL", "bonsai_respec_interval", 0, 32, 1, "$TFLV_OPT_SLIDER_DISABLED"
+  TFLV_Tooltip "$TFLV_OPT_TT_RESPEC_INTERVAL"
+  TextField "$TFLV_OPT_NAME_FORCED_UPGRADES", "bonsai_forced_upgrades"
+  TFLV_Tooltip "$TFLV_OPT_TT_FORCED_UPGRADES"
+
+  StaticText ""
+  StaticText "Progression Controls", ORANGE
+  Option "$TFLV_OPT_NAME_IGNORE_DEATH_EXITS", "bonsai_ignore_death_exits", "OnOff"
+  TFLV_Tooltip "$TFLV_OPT_TT_IGNORE_DEATH_EXITS"
+  Option "Freeze Progression (no XP gain)", "bonsai_freeze_progression", "OnOff"
+  TFLV_Tooltip "When enabled, weapons and players stop gaining XP entirely. Existing upgrades remain active. Useful for locking in a build and jumping into maps."
+  Option "Always Keep Upgrades On Death", "bonsai_keep_upgrades_on_death", "OnOff"
+  TFLV_Tooltip "When enabled, upgrades are never lost on death or map transition — including death exits and pistol starts. Starting a brand new game still resets everything. This overrides the 'Keep upgrades on death exit/pistol start' setting above."
+  Slider "XP Penalty on Death (%)", "bonsai_death_xp_penalty", 0.0, 1.0, 0.05, 2
+  TFLV_Tooltip "Fraction of current weapon XP lost when you die. 0 = no penalty. 0.25 = lose 25% of weapon XP. XP will not drop below the current level threshold (you won't de-level)."
+
+  StaticText ""
+  StaticText "Upgrade Manager", LIGHTBLUE
+  TFLV_AnimatedSubmenu "Balance & Upgrade Profiles",     "GunBonsaiBalanceProfiles"
+  TFLV_Tooltip "Profiles, balance tuning sliders, and upgrade pool rarity settings. Each profile stores all settings in one slot."
+  TFLV_AnimatedSubmenu "Manual Level Setting",           "GunBonsaiManualLevels"
+  TFLV_Tooltip "Set upgrade levels directly on your player or current weapon. Requires an active game. Shows [OFF] for pool-disabled upgrades and [N/A] for weapon-type mismatches."
+  StaticText ""
+  StaticText "LegenDoom Integration", GRAY
+  TFLV_AnimatedSubmenu "LegenDoom Integration",          "GunBonsaiLegendoom"
+  TFLV_Tooltip "Settings for Legendoom weapon effect integration. Only has any effect if Legendoom is also loaded."
+}
+
+OptionValue "GunBonsaiHudMirrorMode" { 0, "$TFLV_OPT_MIRRORMODE_0"  1, "$TFLV_OPT_MIRRORMODE_1"  2, "$TFLV_OPT_MIRRORMODE_2"  3, "$TFLV_OPT_MIRRORMODE_3" }
+
+// =============================================================================
+// Balance & Upgrade Profiles — master submenu
+// =============================================================================
+
+OptionMenu "GunBonsaiBalanceProfiles"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Balance & Upgrade Profiles"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText ""
+  TFLV_AnimatedSubmenu "Profiles",              "GunBonsaiProfileSlots"
+  TFLV_Tooltip "Apply, save, and reset the 6 profiles. Each slot stores all balance tuning and upgrade pool settings."
+  TFLV_AnimatedSubmenu "Balance Tuning",        "GunBonsaiStatAdjust"
+  TFLV_Tooltip "Fine-tune upgrade power levels with sliders. Changes apply immediately to existing upgrades."
+  TFLV_AnimatedSubmenu "Upgrade Pool / Rarity", "GunBonsaiUpgradeToggles"
+  TFLV_Tooltip "Control which upgrades appear in level-up rolls and how often each tier is offered."
+}
+
+// =============================================================================
+// Profile slots — apply / save / reset for all 6
+// =============================================================================
+
+OptionMenu "GunBonsaiProfileSlots"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Profiles"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  Option "Last Applied Profile", "bonsai_active_profile", "GunBonsaiProfiles"
+  TFLV_Tooltip "Shows the last profile applied. Informational only — use the buttons below."
+  StaticText "Apply loads saved data, or preset defaults if nothing saved yet.", DARKGRAY
+  StaticText "All operations require an active game.", DARKGRAY
+
+  StaticText ""
+  StaticText "Default", GOLD
+  Command "  Apply Default",      "set bonsai_active_profile 0; netevent bonsai-profile-apply-0"
+  TFLV_Tooltip "Loads saved Default data, or vanilla Gun Bonsai values if never saved. Requires an active game."
+  Command "  Save to Default",    "netevent bonsai-profile-save-0"
+  TFLV_Tooltip "Saves ALL current balance and pool settings into the Default slot. Requires an active game."
+  Command "  Reset Default",      "netevent bonsai-profile-reset-0"
+  TFLV_Tooltip "Clears saved Default data and restores vanilla Gun Bonsai values. Requires an active game."
+
+  StaticText ""
+  StaticText "Balanced", GOLD
+  Command "  Apply Balanced",     "set bonsai_active_profile 1; netevent bonsai-profile-apply-1"
+  TFLV_Tooltip "Loads saved Balanced data, or the built-in Balanced preset if never saved. Requires an active game."
+  Command "  Save to Balanced",   "netevent bonsai-profile-save-1"
+  TFLV_Tooltip "Saves ALL current balance and pool settings into the Balanced slot. Requires an active game."
+  Command "  Reset Balanced",     "netevent bonsai-profile-reset-1"
+  TFLV_Tooltip "Clears saved Balanced data and restores the built-in Balanced preset. Requires an active game."
+
+  StaticText ""
+  StaticText "Challenging", GOLD
+  Command "  Apply Challenging",  "set bonsai_active_profile 2; netevent bonsai-profile-apply-2"
+  TFLV_Tooltip "Loads saved Challenging data, or the built-in Challenging preset if never saved. Requires an active game."
+  Command "  Save to Challenging","netevent bonsai-profile-save-2"
+  TFLV_Tooltip "Saves ALL current balance and pool settings into the Challenging slot. Requires an active game."
+  Command "  Reset Challenging",  "netevent bonsai-profile-reset-2"
+  TFLV_Tooltip "Clears saved Challenging data and restores the built-in Challenging preset. Requires an active game."
+
+  StaticText ""
+  StaticText "Punishing", GOLD
+  Command "  Apply Punishing",    "set bonsai_active_profile 3; netevent bonsai-profile-apply-3"
+  TFLV_Tooltip "Loads saved Punishing data, or the built-in Punishing preset if never saved. Requires an active game."
+  Command "  Save to Punishing",  "netevent bonsai-profile-save-3"
+  TFLV_Tooltip "Saves ALL current balance and pool settings into the Punishing slot. Requires an active game."
+  Command "  Reset Punishing",    "netevent bonsai-profile-reset-3"
+  TFLV_Tooltip "Clears saved Punishing data and restores the built-in Punishing preset. Requires an active game."
+
+  StaticText ""
+  StaticText "Custom", GOLD
+  Command "  Apply Custom",       "set bonsai_active_profile 4; netevent bonsai-profile-apply-4"
+  TFLV_Tooltip "Loads saved Custom data. Seeds from vanilla values if never saved. Requires an active game."
+  Command "  Save to Custom",     "netevent bonsai-profile-save-4"
+  TFLV_Tooltip "Saves ALL current balance and pool settings into the Custom slot. Requires an active game."
+  Command "  Reset Custom",       "netevent bonsai-profile-reset-4"
+  TFLV_Tooltip "Clears saved Custom data and restores vanilla values. Requires an active game."
+
+  StaticText ""
+  StaticText "Brutal Mode", GOLD
+  StaticText "Vanilla upgrade power + Brutal Doom pacing.", DARKGRAY
+  Command "  Apply Brutal Mode",  "set bonsai_active_profile 5; netevent bonsai-profile-apply-5"
+  TFLV_Tooltip "Loads saved Brutal Mode data, or built-in preset (base cost 4000, gentle curve, score-XP only). Requires an active game."
+  Command "  Save to Brutal Mode","netevent bonsai-profile-save-5"
+  TFLV_Tooltip "Saves ALL current balance and pool settings into the Brutal Mode slot. Requires an active game."
+  Command "  Reset Brutal Mode",  "netevent bonsai-profile-reset-5"
+  TFLV_Tooltip "Clears saved Brutal Mode data and restores the built-in Brutal Mode preset. Requires an active game."
+
+  StaticText ""
+  TFLV_AnimatedSubmenu "Export Profiles", "GunBonsaiProfileExport"
+  TFLV_Tooltip "Export individual profile slots to the console as paste-ready commands. Share settings with other players."
+}
+
+// =============================================================================
+// Profile Export submenu — one export button per slot
+// =============================================================================
+
+OptionMenu "GunBonsaiProfileExport"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Export Profiles"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Prints the selected profile to the console.", DARKGRAY
+  StaticText "Paste the output into another player\'s console,", DARKGRAY
+  StaticText "then have them Apply it from the Profiles menu.", DARKGRAY
+
+  StaticText ""
+  Command "  Export Default",     "netevent bonsai-profile-export-0"
+  TFLV_Tooltip "Prints the Default profile string to the console. Only useful if you have saved custom data to this slot."
+  Command "  Export Balanced",    "netevent bonsai-profile-export-1"
+  TFLV_Tooltip "Prints the Balanced profile string to the console. Only useful if you have saved custom data to this slot."
+  Command "  Export Challenging", "netevent bonsai-profile-export-2"
+  TFLV_Tooltip "Prints the Challenging profile string to the console. Only useful if you have saved custom data to this slot."
+  Command "  Export Punishing",   "netevent bonsai-profile-export-3"
+  TFLV_Tooltip "Prints the Punishing profile string to the console. Only useful if you have saved custom data to this slot."
+  Command "  Export Custom",      "netevent bonsai-profile-export-4"
+  TFLV_Tooltip "Prints the Custom profile string to the console. Only useful if you have saved custom data to this slot."
+  Command "  Export Brutal Mode", "netevent bonsai-profile-export-5"
+  TFLV_Tooltip "Prints the Brutal Mode profile string to the console. Only useful if you have saved custom data to this slot."
+}
+
+// =============================================================================
+// Upgrade Toggles - enable/disable individual upgrades from the roll pool
+// =============================================================================
+
+OptionMenu "GunBonsaiUpgradeToggles"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Upgrade Pool / Rarity"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Set rarity per upgrade. Common = default chance.", DARKGRAY
+  TFLV_AnimatedSubmenu "Tier Weights",                    "GunBonsaiTierWeights"
+  TFLV_Tooltip "Adjust the exact numerical weight for each tier. Disabled=0, Very Rare=1, Rare=3, Uncommon=6, Common=10, Favored=20 by default."
+  Command ">> Reset ALL upgrades to Common", "resetcvar bonsai_upg_ammoleech; resetcvar bonsai_upg_armourleech; resetcvar bonsai_upg_bandoliers; resetcvar bonsai_upg_blastshaping; resetcvar bonsai_upg_ecm; resetcvar bonsai_upg_hazardsuit; resetcvar bonsai_upg_indestructible; resetcvar bonsai_upg_companions; resetcvar bonsai_upg_intuition; resetcvar bonsai_upg_juggler; resetcvar bonsai_upg_lifeleech; resetcvar bonsai_upg_playerdamage; resetcvar bonsai_upg_thorns; resetcvar bonsai_upg_toughasnails; resetcvar bonsai_upg_aggressivedefence; resetcvar bonsai_upg_bouncyshots; resetcvar bonsai_upg_cleave; resetcvar bonsai_upg_darkharvest; resetcvar bonsai_upg_decoyflares; resetcvar bonsai_upg_explosivedeath; resetcvar bonsai_upg_explosiveshots; resetcvar bonsai_upg_fastshots; resetcvar bonsai_upg_fragmentationshots; resetcvar bonsai_upg_homingshots; resetcvar bonsai_upg_piercingshots; resetcvar bonsai_upg_ricochetshots; resetcvar bonsai_upg_rapidfire; resetcvar bonsai_upg_shield; resetcvar bonsai_upg_submunitions; resetcvar bonsai_upg_sweep; resetcvar bonsai_upg_swiftness; resetcvar bonsai_upg_weapondamage; resetcvar bonsai_upg_incendiaryshots; resetcvar bonsai_upg_burningterror; resetcvar bonsai_upg_conflagration; resetcvar bonsai_upg_infernalkiln; resetcvar bonsai_upg_poisonshots; resetcvar bonsai_upg_weakness; resetcvar bonsai_upg_putrefaction; resetcvar bonsai_upg_hallucinogens; resetcvar bonsai_upg_corrosiveshots; resetcvar bonsai_upg_concentratedacid; resetcvar bonsai_upg_acidspray; resetcvar bonsai_upg_embrittlement; resetcvar bonsai_upg_shockinginscription; resetcvar bonsai_upg_revivification; resetcvar bonsai_upg_chainlightning; resetcvar bonsai_upg_thunderbolt; resetcvar bonsai_upg_elementalbeam; resetcvar bonsai_upg_elementalblast; resetcvar bonsai_upg_elementalwave; resetcvar bonsai_upg_overdrive; resetcvar bonsai_upg_hyperv_mobility; resetcvar bonsai_upg_hyperv_melee; resetcvar bonsai_upg_hyperv_bullettime; resetcvar bonsai_upg_hyperv_healthregen; resetcvar bonsai_upg_hyperv_armorregen; resetcvar bonsai_upg_hyperv_ammoregen; resetcvar bonsai_upg_hyperv_agility; resetcvar bonsai_upg_hyperv_hook; resetcvar bonsai_upg_hyperv_teleporter; resetcvar bonsai_upg_hyperv_bullettime"
+  TFLV_Tooltip "Resets every upgrade's rarity tier back to Common. Does not affect the Tier Weights settings."
+
+  StaticText ""
+  StaticText "Player Upgrades", GOLD
+  StaticText ""
+  Option "Ammo Leech",          "bonsai_upg_ammoleech",       "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_AMMOLEECH"
+  Option "Armour Leech",        "bonsai_upg_armourleech",     "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_ARMOURLEECH"
+  Option "Bandoliers",          "bonsai_upg_bandoliers",      "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_BANDOLIERS"
+  Option "Blast Shaping",       "bonsai_upg_blastshaping",    "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_BLASTSHAPING"
+  Option "Bloodthirsty",        "bonsai_upg_playerdamage",    "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_PLAYERDAMAGE"
+  Option "Hazard Suit",         "bonsai_upg_hazardsuit",      "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_HAZARDSUIT"
+  Option "Indestructible",      "bonsai_upg_indestructible",  "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_INDESTRUCTIBLE"
+  Option "Companions",          "bonsai_upg_companions",      "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_COMPANIONS"
+
+  StaticText "--- Hyper-V Integration Upgrades ---"
+  Option "Mobility (Dash/Jump/Crouch)",      "bonsai_upg_hyperv_mobility",     "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity for the Mobility upgrade (dash, jump, crouch, ledge climb, double jump). Default Common."
+  Option "Combat Training (Melee/Parry)",    "bonsai_upg_hyperv_melee",        "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity for the Combat Training upgrade (auto-melee, combo, parry). Default Common."
+  Option "Regeneration (Health)",            "bonsai_upg_hyperv_healthregen",  "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity for the Health Regeneration upgrade. Default Common."
+  Option "Armor Recovery",                   "bonsai_upg_hyperv_armorregen",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity for the Armor Recovery upgrade. Default Uncommon."
+  Option "Resupply (Ammo Regen)",            "bonsai_upg_hyperv_ammoregen",    "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity for the Ammo Regen upgrade. Default Uncommon."
+  Option "Agility (Speed/Jump Mult)",        "bonsai_upg_hyperv_agility",      "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity for the Agility upgrade. Default Common."
+  Option "Intuition",           "bonsai_upg_intuition",       "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_INTUITION"
+  Option "Juggler",             "bonsai_upg_juggler",         "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_JUGGLER"
+  Option "Life Leech",          "bonsai_upg_lifeleech",       "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_LIFELEECH"
+  Option "Personal ECM",        "bonsai_upg_ecm",             "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_ECM"
+  Option "Thorns",              "bonsai_upg_thorns",          "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_THORNS"
+  Option "Tough As Nails",      "bonsai_upg_toughasnails",    "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_TOUGHASNAILS"
+
+  StaticText ""
+  StaticText "Weapon Upgrades - Ranged", CYAN
+  StaticText ""
+  Option "Aggressive Defence",  "bonsai_upg_aggressivedefence", "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_AGGRESSIVEDEFENCE"
+  Option "Bouncy Shots",        "bonsai_upg_bouncyshots",     "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_BOUNCYSHOTS"
+  Option "Decoy Flares",        "bonsai_upg_decoyflares",     "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_DECOYFLARES"
+  Option "Explosive Death",     "bonsai_upg_explosivedeath",  "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_EXPLOSIVEDEATH"
+  Option "Explosive Shots",     "bonsai_upg_explosiveshots",  "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_EXPLOSIVESHOTS"
+  Option "Fast Shots",          "bonsai_upg_fastshots",       "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_FASTSHOTS"
+  Option "Fragmentation Shots", "bonsai_upg_fragmentationshots", "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_FRAGMENTATIONSHOTS"
+  Option "Homing Shots",        "bonsai_upg_homingshots",     "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_HOMINGSHOTS"
+  Option "Piercing Shots",      "bonsai_upg_piercingshots",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_PIERCINGSHOTS"
+  Option "Rapid Fire",          "bonsai_upg_rapidfire",       "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_RAPIDFIRE"
+  Option "Ricochet Shots",      "bonsai_upg_ricochetshots",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_RICOCHETSHOTS"
+  Option "Overdrive",           "bonsai_upg_overdrive",       "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_OVERDRIVE"
+  Option "Submunitions",        "bonsai_upg_submunitions",    "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_SUBMUNITIONS"
+  Option "Weapon Damage",       "bonsai_upg_weapondamage",    "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_WEAPONDAMAGE"
+
+  StaticText ""
+  StaticText "Weapon Upgrades - Melee", TEAL
+  StaticText ""
+  Option "Cleave",              "bonsai_upg_cleave",          "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_CLEAVE"
+  Option "Dark Harvest",        "bonsai_upg_darkharvest",     "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_DARKHARVEST"
+  Option "Shield",              "bonsai_upg_shield",          "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_SHIELD"
+  Option "Sweep",               "bonsai_upg_sweep",           "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_SWEEP"
+  Option "Swiftness",           "bonsai_upg_swiftness",       "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_SWIFTNESS"
+
+  StaticText ""
+  StaticText "Hyper-V Weapon Upgrades", ORANGE
+  StaticText ""
+  Option "Grappling Hook",  "bonsai_upg_hyperv_hook",       "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity for the Grappling Hook weapon upgrade. Default Common."
+  Option "Teleporter",      "bonsai_upg_hyperv_teleporter", "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity for the Teleporter weapon upgrade. Default Uncommon."
+  Option "Bullet Time",     "bonsai_upg_hyperv_bullettime", "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity for the Bullet Time weapon upgrade (melee/wimpy weapons only). Default Uncommon."
+
+  StaticText ""
+  StaticText "Fire Element", RED
+  StaticText ""
+  Option ">> ALL Fire Upgrades",  "bonsai_upg_fire_all",      "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_FIRE_MASTER"
+  Option "  Incendiary Shots (Apprentice)",  "bonsai_upg_incendiaryshots", "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_INCENDIARYSHOTS"
+  Option "  Burning Terror (Journeyman)",    "bonsai_upg_burningterror",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_BURNINGTERROR"
+  Option "  Conflagration (Master)",         "bonsai_upg_conflagration",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_CONFLAGRATION"
+  Option "  Infernal Kiln (Master)",         "bonsai_upg_infernalkiln",    "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_INFERNALKILN"
+
+  StaticText ""
+  StaticText "Poison Element", GREEN
+  StaticText ""
+  Option ">> ALL Poison Upgrades", "bonsai_upg_poison_all",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_POISON_MASTER"
+  Option "  Poison Shots (Apprentice)",      "bonsai_upg_poisonshots",     "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_POISONSHOTS"
+  Option "  Weakness (Journeyman)",          "bonsai_upg_weakness",        "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_WEAKNESS"
+  Option "  Putrefaction (Master)",          "bonsai_upg_putrefaction",    "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_PUTREFACTION"
+  Option "  Hallucinogens (Master)",         "bonsai_upg_hallucinogens",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_HALLUCINOGENS"
+
+  StaticText ""
+  StaticText "Acid Element", BROWN
+  StaticText ""
+  Option ">> ALL Acid Upgrades",   "bonsai_upg_acid_all",     "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_ACID_MASTER"
+  Option "  Corrosive Shots (Apprentice)",   "bonsai_upg_corrosiveshots",  "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_CORROSIVESHOTS"
+  Option "  Concentrated Acid (Journeyman)", "bonsai_upg_concentratedacid", "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_CONCENTRATEDACID"
+  Option "  Acid Spray (Master)",            "bonsai_upg_acidspray",       "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_ACIDSPRAY"
+  Option "  Embrittlement (Master)",         "bonsai_upg_embrittlement",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_EMBRITTLEMENT"
+
+  StaticText ""
+  StaticText "Lightning Element", BLUE
+  StaticText ""
+  Option ">> ALL Lightning Upgrades", "bonsai_upg_lightning_all", "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_LIGHTNING_MASTER"
+  Option "  Shocking Inscription (Apprentice)", "bonsai_upg_shockinginscription", "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_SHOCKINGINSCRIPTION"
+  Option "  Revivification (Journeyman)",    "bonsai_upg_revivification",  "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_REVIVIFICATION"
+  Option "  Chain Lightning (Master)",       "bonsai_upg_chainlightning",  "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_CHAINLIGHTNING"
+  Option "  Thunderbolt (Master)",           "bonsai_upg_thunderbolt",     "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_THUNDERBOLT"
+
+  StaticText ""
+  StaticText "Elemental Synthesis", PURPLE
+  StaticText ""
+  Option "Elemental Beam",      "bonsai_upg_elementalbeam",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_ELEMENTALBEAM"
+  Option "Elemental Blast",     "bonsai_upg_elementalblast",  "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_ELEMENTALBLAST"
+  Option "Elemental Wave",      "bonsai_upg_elementalwave",   "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "$TFLV_TOGGLE_ELEMENTALWAVE"
+}
+OptionValue "GunBonsaiUpgradeTier" { 0, "Disabled"  1, "Very Rare"  2, "Rare"  3, "Uncommon"  4, "Common"  5, "Favored" }
+
+// =============================================================================
+// Tier Weights
+// =============================================================================
+
+OptionMenu "GunBonsaiTierWeights"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Tier Weights"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Controls the numerical weight for each tier.", DARKGRAY
+  StaticText "Higher = more likely to appear in the upgrade pool.", DARKGRAY
+  StaticText "Disabled is always 0 (never appears).", DARKGRAY
+  StaticText ""
+  Slider "Very Rare weight",   "bonsai_weight_veryrare",  0, 20, 1, 0
+  TFLV_Tooltip "Weight for Very Rare upgrades. Default: 1. At default Common weight (10), a Very Rare upgrade is ~10x less likely to appear than a Common one."
+  Slider "Rare weight",        "bonsai_weight_rare",      0, 20, 1, 0
+  TFLV_Tooltip "Weight for Rare upgrades. Default: 3."
+  Slider "Uncommon weight",    "bonsai_weight_uncommon",  0, 20, 1, 0
+  TFLV_Tooltip "Weight for Uncommon upgrades. Default: 6."
+  Slider "Common weight",      "bonsai_weight_common",    1, 30, 1, 0
+  TFLV_Tooltip "Weight for Common upgrades. Default: 10. This is the baseline — all other tiers are relative to this."
+  Slider "Favored weight",     "bonsai_weight_favored",   1, 40, 1, 0
+  TFLV_Tooltip "Weight for Favored upgrades. Default: 20. At default Common weight (10), a Favored upgrade is ~2x as likely to appear."
+  StaticText ""
+  Command ">> Reset Tier Weights to Defaults", "resetcvar bonsai_weight_veryrare; resetcvar bonsai_weight_rare; resetcvar bonsai_weight_uncommon; resetcvar bonsai_weight_common; resetcvar bonsai_weight_favored"
+  TFLV_Tooltip "Restores all tier weights to their default values (Very Rare=1, Rare=3, Uncommon=6, Common=10, Favored=20)."
+}
+
+OptionValue "GunBonsaiHudSkin" { 0, "$TFLV_OPT_HUDSKIN_0"  1, "$TFLV_OPT_HUDSKIN_1"  2, "$TFLV_OPT_HUDSKIN_2"  3, "$TFLV_OPT_HUDSKIN_3" }
+OptionValue "GunBonsaiVfxMode" { 0, "$TFLV_OPT_VFX_MODE_0"  1, "$TFLV_OPT_VFX_MODE_1"  2, "$TFLV_OPT_VFX_MODE_2" }
+OptionValue "GunBonsaiVfxFeature" { -1, "Follow global"  0, "Off"  1, "Reduced"  2, "Full" }
+
+// =============================================================================
+// Performance / VFX Detail
+// =============================================================================
+
+OptionMenu "GunBonsaiVfxDetail"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Performance / VFX Detail"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Global setting (affects all features not overridden below).", DARKGRAY
+  StaticText ""
+  Option "Global VFX level",    "bonsai_vfx_mode", "GunBonsaiVfxMode"
+  TFLV_Tooltip "$TFLV_OPT_TT_VFX_MODE"
+  Command ">> Set all features to: Off",     "set bonsai_vfx_dot -1; set bonsai_vfx_frag -1; set bonsai_vfx_lightning -1; set bonsai_vfx_ricochet -1; set bonsai_vfx_synthesis -1; set bonsai_vfx_mode 0"
+  TFLV_Tooltip "Sets all features to Off and clears per-feature overrides."
+  Command ">> Set all features to: Reduced", "set bonsai_vfx_dot -1; set bonsai_vfx_frag -1; set bonsai_vfx_lightning -1; set bonsai_vfx_ricochet -1; set bonsai_vfx_synthesis -1; set bonsai_vfx_mode 1"
+  TFLV_Tooltip "Sets all features to Reduced and clears per-feature overrides."
+  Command ">> Set all features to: Full",    "set bonsai_vfx_dot -1; set bonsai_vfx_frag -1; set bonsai_vfx_lightning -1; set bonsai_vfx_ricochet -1; set bonsai_vfx_synthesis -1; set bonsai_vfx_mode 2"
+  TFLV_Tooltip "Sets all features to Full and clears per-feature overrides."
+  StaticText ""
+  StaticText "Per-Feature Overrides", GOLD
+  StaticText "Set to 'Follow global' to use the setting above.", DARKGRAY
+  StaticText ""
+  Option "DoT tick particles",          "bonsai_vfx_dot",       "GunBonsaiVfxFeature"
+  TFLV_Tooltip "Particles emitted every tic on enemies affected by fire, poison, acid, or lightning DoT. Off = no particles, Reduced = colour tint on enemy instead, Full = full particles. HIGH IMPACT with many debuffed enemies simultaneously."
+  Option "Fragmentation shot trails",   "bonsai_vfx_frag",      "GunBonsaiVfxFeature"
+  TFLV_Tooltip "Trail particles left by fragmentation shot fragments as they travel. Off/Reduced = no trail, Full = trail. HIGH IMPACT at high upgrade levels with fast weapons."
+  Option "Lightning arc particles",     "bonsai_vfx_lightning",  "GunBonsaiVfxFeature"
+  TFLV_Tooltip "Rail-style visual effect on Thunderbolt arcs. Off/Reduced = no arc VFX, Full = arc particles."
+  Option "Ricochet hit particles",      "bonsai_vfx_ricochet",   "GunBonsaiVfxFeature"
+  TFLV_Tooltip "Spark particles on ricochet impacts. Off/Reduced = no sparks, Full = sparks."
+  Option "Elemental Synthesis particles","bonsai_vfx_synthesis",  "GunBonsaiVfxFeature"
+  TFLV_Tooltip "Particles on Elemental Synthesis (Beam/Blast/Wave) hits. Off/Reduced = no particles, Full = particles."
+}
+OptionValue "GunBonsaiLevelUpSoundOption" { -1, "$TFLV_OPT_FANFARE_N"  0, "$TFLV_OPT_FANFARE_0"  1, "$TFLV_OPT_FANFARE_1"  2, "$TFLV_OPT_FANFARE_2"  3, "$TFLV_OPT_FANFARE_3" }
+OptionValue "GunBonsaiUpgradeBindingMode" { 0, "$TFLV_OPT_BINDMODE_0"  1, "$TFLV_OPT_BINDMODE_1"  2, "$TFLV_OPT_BINDMODE_2" }
+OptionValue "GunBonsaiRejectionMode" { 0, "Lock (can't dismiss)"  1, "Reject (deducts level cost)" }
+OptionValue "GunBonsaiGraphMode" { 0, "Relative (shape only)"  1, "Absolute (raw XP, capped)" }
+OptionValue "GunBonsaiHybridComponent" { 0, "Power (base x level^x)"  1, "Exponential (base x b^level)" }
+OptionValue "GunBonsaiXPCurve" { 0, "Custom Power (base x level^x)"  1, "Custom Exponential (base x b^level)"  2, "Hybrid (exp to power curve)" }
+OptionValue "GunBonsaiProfiles" { 0, "Default (Gun Bonsai vanilla)"  1, "Balanced"  2, "Challenging"  3, "Punishing"  4, "Custom (saved)"  5, "Brutal Mode" }
+OptionValue "GunBonsaiWhatKindOfGunSelector" { 0, "$TFLV_OPT_LDMODE_0"  1, "$TFLV_OPT_LDMODE_1"  2, "$TFLV_OPT_LDMODE_2"  3, "$TFLV_OPT_LDMODE_3" }
+
+// =============================================================================
+// LegenDoom Integration menu
+// =============================================================================
+
+OptionMenu "GunBonsaiLegendoom"
+{
+  class TFLV_TooltipOptionMenu
+  Title "LegenDoom Integration"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "These settings only apply when Legendoom is installed.", DARKGRAY
+  StaticText ""
+  Slider "Gun levels per LD effect",           "bonsai_gun_levels_per_ld_effect", 0, 20, 1, 0
+  TFLV_Tooltip "$TFLV_OPT_TT_GUN_LEVELS_PER_LD_EFFECT"
+  StaticText ""
+  Option "LD effects learnable by",            "bonsai_which_guns_can_learn",   "GunBonsaiWhatKindOfGunSelector"
+  TFLV_Tooltip "$TFLV_OPT_TT_WHICH_GUNS_CAN_LEARN"
+  Option "LD effects replaceable by",          "bonsai_which_guns_can_replace", "GunBonsaiWhatKindOfGunSelector"
+  TFLV_Tooltip "$TFLV_OPT_TT_WHICH_GUNS_CAN_REPLACE"
+  StaticText ""
+  Slider "Base number of LD effect slots",     "bonsai_base_ld_effect_slots",   0, 16, 1, 0
+  TFLV_Tooltip "$TFLV_OPT_TT_BASE_LD_EFFECT_SLOTS"
+  Slider "Bonus slots per LD rarity level",    "bonsai_bonus_ld_effect_slots",  0, 16, 1, 0
+  TFLV_Tooltip "$TFLV_OPT_TT_BONUS_LD_EFFECT_SLOTS"
+  StaticText ""
+  Option "Ignore original gun rarity",         "bonsai_ignore_gun_rarity",      "OnOff"
+  TFLV_Tooltip "$TFLV_OPT_TT_IGNORE_GUN_RARITY"
+}
+
+OptionMenu "GunBonsaiNewLDEffectMenu"
+{
+  class TFLV_Menu_NewLDEffectMenu
+  Title "$TFLV_MENU_LD_NEW_EFFECT_TITLE"
+}
+
+OptionMenu "GunBonsaiPlayerLevelUpMenu" { class TFLV_Menu_PlayerLevelUpMenu  Title "$TFLV_MENU_PLAYER_LEVELUP_TITLE" }
+OptionMenu "GunBonsaiWeaponLevelUpMenu" { class TFLV_Menu_WeaponLevelUpMenu  Title "$TFLV_MENU_WEAPON_LEVELUP_TITLE" }
+OptionMenu "GunBonsaiStatusDisplay" { class TFLV_Menu_StatusDisplay  Title "$TFLV_MENU_STATUS_TITLE" }
+
+// =============================================================================
+// Stat Adjustments - three category submenus
+// =============================================================================
+
+OptionMenu "GunBonsaiStatAdjust"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Balance Tuning"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Changes apply immediately. Use Profiles to save and restore sets of values.", DARKGRAY
+  StaticText ""
+  TFLV_AnimatedSubmenu "XP Pacing & Leveling",              "GunBonsaiXPPacing"
+  TFLV_Tooltip "All XP and leveling settings in one place. All settings are saved to profiles."
+  StaticText ""
+  StaticText "Category Tuning", GOLD
+  StaticText ""
+  TFLV_AnimatedSubmenu "Player Upgrades",   "GunBonsaiStatPlayer"
+  TFLV_Tooltip "Tune Bloodthirsty, Tough As Nails, Blast Shaping, Bandoliers, ECM, Life/Armour Leech, Thorns, Swiftness, Dark Harvest."
+  TFLV_AnimatedSubmenu "Weapon Upgrades",   "GunBonsaiStatWeapon"
+  TFLV_Tooltip "Tune Weapon Damage, Rapid Fire, HE Rounds, Explosive Death, Fragmentation, Submunitions, Homing, Decoy Flares, Aggressive Defence, Shield, Sweep, Cleave."
+  TFLV_AnimatedSubmenu "Elemental Damage",  "GunBonsaiStatElemental"
+  TFLV_Tooltip "Tune per-element DoT output multipliers and Elemental Synthesis AoE radii."
+
+
+  StaticText ""
+  StaticText "Reset All", GOLD
+  Command ">> Reset ALL Balance Tuning to Defaults", "resetcvar bonsai_stat_player_damage; resetcvar bonsai_stat_weapon_damage; resetcvar bonsai_stat_tough_as_nails; resetcvar bonsai_stat_blast_shaping; resetcvar bonsai_stat_ecm_base_range; resetcvar bonsai_stat_ecm_range_per_level; resetcvar bonsai_stat_ecm_lock_base; resetcvar bonsai_stat_ecm_lock_per_level; resetcvar bonsai_stat_bandoliers_bonus; resetcvar bonsai_stat_lifeleech_boss_mul; resetcvar bonsai_stat_armourleech_boss_mul; resetcvar bonsai_stat_darkharvest_cap_per_level; resetcvar bonsai_stat_rapid_fire; resetcvar bonsai_stat_explosive_damage; resetcvar bonsai_stat_explosive_radius; resetcvar bonsai_stat_explosive_radius_per_level; resetcvar bonsai_stat_explosivedeath_scale; resetcvar bonsai_stat_frag_base_count; resetcvar bonsai_stat_frag_per_level; resetcvar bonsai_stat_frag_damage; resetcvar bonsai_stat_frag_arc; resetcvar bonsai_stat_submunitions_base; resetcvar bonsai_stat_submunitions_health_scale; resetcvar bonsai_stat_submunitions_bonus_damage; resetcvar bonsai_stat_submunitions_lifetime; resetcvar bonsai_stat_homing_base_range; resetcvar bonsai_stat_homing_turn_rate; resetcvar bonsai_stat_piercing_damage; resetcvar bonsai_stat_ricochet_damage; resetcvar bonsai_stat_ricochet_range; resetcvar bonsai_stat_ricochet_spread; resetcvar bonsai_stat_ricochet_spread_step; resetcvar bonsai_stat_ricochet_bounces; resetcvar bonsai_stat_overdrive_damage; resetcvar bonsai_stat_overdrive_window; resetcvar bonsai_stat_overdrive_max_stacks; resetcvar bonsai_stat_flare_base_range; resetcvar bonsai_stat_flare_decay; resetcvar bonsai_stat_agdef_base_radius; resetcvar bonsai_stat_agdef_radius_per_level; resetcvar bonsai_stat_shield_melee_base; resetcvar bonsai_stat_shield_ranged_base; resetcvar bonsai_stat_sweep_base; resetcvar bonsai_stat_sweep_decay; resetcvar bonsai_stat_cleave_overkill; resetcvar bonsai_stat_cleave_health_cap; resetcvar bonsai_stat_thorns_min_range; resetcvar bonsai_stat_thorns_max_range; resetcvar bonsai_stat_swiftness_base_tics; resetcvar bonsai_stat_swiftness_level_tics; resetcvar bonsai_stat_swiftness_combo_tics; resetcvar bonsai_stat_fire_mult; resetcvar bonsai_stat_fire_stack_rate; resetcvar bonsai_stat_fire_cutoff; resetcvar bonsai_stat_fire_heat_factor; resetcvar bonsai_stat_fire_damage_per_stack; resetcvar bonsai_stat_fire_terror_base; resetcvar bonsai_stat_fire_terror_damage; resetcvar bonsai_stat_poison_mult; resetcvar bonsai_stat_poison_stacks_per_hit; resetcvar bonsai_stat_poison_softcap_factor; resetcvar bonsai_stat_poison_drain_rate; resetcvar bonsai_stat_poison_weakness_base; resetcvar bonsai_stat_poison_hallu_damage; resetcvar bonsai_stat_poison_hallu_armour; resetcvar bonsai_stat_poison_hallu_drain; resetcvar bonsai_stat_poison_putref_transfer; resetcvar bonsai_stat_poison_putref_radius; resetcvar bonsai_stat_acid_mult; resetcvar bonsai_stat_acid_stack_base; resetcvar bonsai_stat_acid_stack_per_level; resetcvar bonsai_stat_acid_base_threshold; resetcvar bonsai_stat_acid_dps_above; resetcvar bonsai_stat_acid_dps_mult; resetcvar bonsai_stat_acid_concentration_threshold; resetcvar bonsai_stat_acid_concentration_drain; resetcvar bonsai_stat_acid_spray_base_range; resetcvar bonsai_stat_acid_spray_range_per_level; resetcvar bonsai_stat_acid_embrit_damage; resetcvar bonsai_stat_lightning_mult; resetcvar bonsai_stat_lightning_stack_rate; resetcvar bonsai_stat_lightning_softcap; resetcvar bonsai_stat_lightning_tbolt_stun_base; resetcvar bonsai_stat_lightning_tbolt_stun_per_level; resetcvar bonsai_stat_lightning_tbolt_radius_base; resetcvar bonsai_stat_lightning_tbolt_radius_per_level; resetcvar bonsai_stat_lightning_tbolt_cap_base; resetcvar bonsai_stat_lightning_chain_radius; resetcvar bonsai_stat_lightning_reviv_damage; resetcvar bonsai_stat_lightning_reviv_armour; resetcvar bonsai_stat_elemblast_radius; resetcvar bonsai_stat_elemwave_radius"
+
+  StaticText ""
+  StaticText "Console reset: 'resetcvar bonsai_stat_*'", DARKGRAY
+}
+
+// =============================================================================
+// XP Pacing & Leveling — unified submenu (replaces the old inline XP Pacing
+// section). Accessible from both GunBonsaiOptions and GunBonsaiStatAdjust.
+// ALL settings here are saved to profiles.
+// =============================================================================
+
+OptionMenu "GunBonsaiXPPacing"
+{
+  class TFLV_Menu_XPPacingMenu
+  Title "XP Pacing & Leveling"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "All settings here are saved to profiles.", DARKGRAY
+  Option "Graph display mode",                  "bonsai_graph_mode",          "GunBonsaiGraphMode"
+  TFLV_Tooltip "Relative: Y axis shows % of max cost — curve shape only, base XP cost invisible. Absolute: Y axis shows raw XP values capped at 15x base cost — changing base XP visibly shifts the curve."
+  Slider "Graph: levels shown",                 "bonsai_graph_max_level",     2, 100, 1, 0
+  TFLV_Tooltip "How many weapon levels to display on the graph X axis. Lower values show fine detail at early levels; higher values show long-term curve shape."
+  StaticText ""
+  Slider "$TFLV_OPT_NAME_DAMAGE_TO_XP_FACTOR", "bonsai_damage_to_xp_factor", 0.0, 2.0, 0.05, 2
+  TFLV_Tooltip "$TFLV_OPT_TT_DAMAGE_TO_XP_FACTOR"
+  Slider "$TFLV_OPT_NAME_SCORE_TO_XP_FACTOR",  "bonsai_score_to_xp_factor",  0.0, 2.0, 0.05, 2
+  TFLV_Tooltip "$TFLV_OPT_TT_SCORE_TO_XP_FACTOR"
+
+  StaticText ""
+  StaticText "Leveling Cost", GOLD
+  TextField "$TFLV_OPT_NAME_BASE_LEVEL_COST",   "bonsai_base_level_cost"
+  TFLV_Tooltip "$TFLV_OPT_TT_BASE_LEVEL_COST"
+  Option "$TFLV_OPT_NAME_XP_CURVE",             "bonsai_xp_curve",            "GunBonsaiXPCurve"
+  TFLV_Tooltip "XP cost formula per level. Custom Power: base x level^x (set exponent in submenu). Custom Exponential: base x b^level (set base in submenu). Hybrid: blends two components with a smooth transition."
+  TFLV_PreviewSubmenu "Custom Power curve settings",         "GunBonsaiCustomPower", 0
+  TFLV_Tooltip "Set the power exponent for the Custom Power curve (base_cost x level^x). Active when XP curve is Custom Power."
+  TFLV_PreviewSubmenu "Custom Exponential curve settings",   "GunBonsaiCustomExp", 1
+  TFLV_Tooltip "Set the base for the Custom Exponential curve (base_cost x b^level). Active when XP curve is Custom Exponential."
+  TFLV_PreviewSubmenu "Hybrid curve settings",               "GunBonsaiHybridCurve", 2
+  TFLV_Tooltip "Configure the Hybrid curve (blends Custom Exponential into Custom Power). Active when XP curve is Hybrid."
+  Slider "$TFLV_OPT_NAME_LEVEL_COST_MUL_FOR_MELEE", "bonsai_level_cost_mul_for_melee", 0.1, 5.0, 0.1, 1
+  TFLV_Tooltip "$TFLV_OPT_TT_LEVEL_COST_MUL"
+  Slider "$TFLV_OPT_NAME_LEVEL_COST_MUL_FOR_WIMPY", "bonsai_level_cost_mul_for_wimpy", 0.1, 5.0, 0.1, 1
+  TFLV_Tooltip "$TFLV_OPT_TT_LEVEL_COST_MUL"
+
+  StaticText ""
+  StaticText "Level-up Rate", GOLD
+  Slider "$TFLV_OPT_NAME_GUN_LEVELS_PER_PLAYER_LEVEL", "bonsai_gun_levels_per_player_level", 2, 100, 1, 0
+  TFLV_Tooltip "$TFLV_OPT_TT_GUN_LEVELS_PER_PLAYER_LEVEL"
+  ScaleSlider "$TFLV_OPT_NAME_UPGRADE_CHOICES_PER_GUN_LEVEL",    "bonsai_upgrade_choices_per_gun_level",    -1, 50, 1, "$TFLV_OPT_SLIDER_NOUPGRADES", "$TFLV_OPT_SLIDER_ALLUPGRADES"
+  ScaleSlider "$TFLV_OPT_NAME_UPGRADE_CHOICES_PER_PLAYER_LEVEL", "bonsai_upgrade_choices_per_player_level", -1, 50, 1, "$TFLV_OPT_SLIDER_NOUPGRADES", "$TFLV_OPT_SLIDER_ALLUPGRADES"
+  TFLV_Tooltip "$TFLV_OPT_TT_UPGRADE_CHOICES_PER_LEVEL"
+
+  StaticText ""
+  Command ">> Reset all XP pacing to defaults", "resetcvar bonsai_base_level_cost; resetcvar bonsai_xp_curve; resetcvar bonsai_damage_to_xp_factor; resetcvar bonsai_score_to_xp_factor; resetcvar bonsai_gun_levels_per_player_level; resetcvar bonsai_upgrade_choices_per_gun_level; resetcvar bonsai_upgrade_choices_per_player_level; resetcvar bonsai_level_cost_mul_for_melee; resetcvar bonsai_level_cost_mul_for_wimpy; resetcvar bonsai_power_curve_exponent; resetcvar bonsai_exp_curve_base; resetcvar bonsai_hybrid_component_a; resetcvar bonsai_hybrid_component_b; resetcvar bonsai_hybrid_exp_base_a; resetcvar bonsai_hybrid_exp_base_b; resetcvar bonsai_hybrid_power_a; resetcvar bonsai_hybrid_power_b; resetcvar bonsai_hybrid_transition_start; resetcvar bonsai_hybrid_transition_end; resetcvar bonsai_hybrid_bias; resetcvar bonsai_hybrid_smooth"
+  TFLV_Tooltip "Resets all XP pacing CVars to engine defaults, including hybrid curve settings."
+}
+
+// =============================================================================
+// Hybrid XP Curve configurator
+// =============================================================================
+// Custom Power XP Curve
+// =============================================================================
+
+OptionMenu "GunBonsaiCustomPower"
+{
+  class TFLV_Menu_XPPacingMenu
+  Title "Custom Power Curve"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Active when XP Curve is set to Custom Power.", DARKGRAY
+  StaticText "Formula: base_cost x level^exponent", DARKGRAY
+  StaticText "All settings are saved to profiles.", DARKGRAY
+  StaticText ""
+
+  Slider "Power exponent",                     "bonsai_power_curve_exponent", 0.0, 6.0, 0.1, 1
+  TFLV_Tooltip "The exponent x in base_cost x level^x. 1.0 = linear, 2.0 = quadratic, 3.0 = cubic. Fractional values give smooth intermediate curves. Higher values make later levels much more expensive."
+
+  StaticText ""
+  Command ">> Reset to default (exponent 2.0)", "resetcvar bonsai_power_curve_exponent"
+  TFLV_Tooltip "Restores default power exponent: 2.0 (quadratic equivalent)."
+}
+
+// =============================================================================
+// Custom Exponential XP Curve
+// =============================================================================
+
+OptionMenu "GunBonsaiCustomExp"
+{
+  class TFLV_Menu_XPPacingMenu
+  Title "Custom Exponential Curve"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Active when XP Curve is set to Custom Exponential.", DARKGRAY
+  StaticText "Formula: base_cost x base^(level-1)", DARKGRAY
+  StaticText "All settings are saved to profiles.", DARKGRAY
+  StaticText ""
+
+  Slider "Exponential base",                   "bonsai_exp_curve_base",       1.1, 4.0, 0.05, 2
+  TFLV_Tooltip "The base b in base_cost x b^(level-1). 1.5 = gentle exponential equivalent. 2.0 = standard exponential equivalent. Higher values mean steeper late-game growth. Values just above 1.0 approach near-constant cost."
+
+  StaticText ""
+  Command ">> Reset to default (base 1.5)",    "resetcvar bonsai_exp_curve_base"
+  TFLV_Tooltip "Restores default exponential base: 1.5 (gentle exponential equivalent)."
+}
+
+// =============================================================================
+
+OptionMenu "GunBonsaiHybridCurve"
+{
+  class TFLV_Menu_XPPacingMenu
+  Title "Hybrid XP Curve"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Component A  (low-level phase)", PURPLE
+  Option "Type",            "bonsai_hybrid_component_a", "GunBonsaiHybridComponent"
+  TFLV_Tooltip "Curve shape used before the transition. Power: base_cost x level^x. Exponential: base_cost x base^(level-1)."
+  Slider "Power exponent",  "bonsai_hybrid_power_a",    0.0, 6.0, 0.1, 1
+  TFLV_Tooltip "Power exponent for Component A. 0=flat, 1=linear, 2=quadratic, 3=cubic. Only active when type is Power."
+  Slider "Exp base",        "bonsai_hybrid_exp_base_a", 1.1, 4.0, 0.05, 2
+  TFLV_Tooltip "Exponential base for Component A. 1.5=gentle, 2.0=steep. Only active when type is Exponential."
+  StaticText "Component B  (high-level phase)", GOLD
+  Option "Type",            "bonsai_hybrid_component_b", "GunBonsaiHybridComponent"
+  TFLV_Tooltip "Curve shape used after the transition. Power: base_cost x level^x. Exponential: base_cost x base^(level-1)."
+  Slider "Power exponent",  "bonsai_hybrid_power_b",    0.0, 6.0, 0.1, 1
+  TFLV_Tooltip "Power exponent for Component B. 0=flat, 1=linear, 2=quadratic, 3=cubic. Only active when type is Power."
+  Slider "Exp base",        "bonsai_hybrid_exp_base_b", 1.1, 4.0, 0.05, 2
+  TFLV_Tooltip "Exponential base for Component B. 1.5=gentle, 2.0=steep. Only active when type is Exponential."
+  StaticText "Transition", ORANGE
+  Slider "Transition start (level)",  "bonsai_hybrid_transition_start", 1, 20, 1, 0
+  TFLV_Tooltip "Level where blending begins. Below this, Component A is pure."
+  Slider "Transition end (level)",    "bonsai_hybrid_transition_end",   2, 40, 1, 0
+  TFLV_Tooltip "Level where blending completes. Above this, Component B is pure."
+  Slider "Transition bias",           "bonsai_hybrid_bias",            -2.0, 2.0, 0.05, 2
+  TFLV_Tooltip "Shape of the blend S-curve. 0=symmetric. Negative=snaps to B faster. Positive=lingers on A longer."
+  Slider "Transition smoothing",      "bonsai_hybrid_smooth",           0, 15, 1, 0
+  TFLV_Tooltip "Averages XP cost over adjacent levels to soften sharp spikes at the transition. 0=off, higher=smoother."
+  Command ">> Reset hybrid curve to defaults", "resetcvar bonsai_hybrid_component_a; resetcvar bonsai_hybrid_component_b; resetcvar bonsai_hybrid_exp_base_a; resetcvar bonsai_hybrid_exp_base_b; resetcvar bonsai_hybrid_power_a; resetcvar bonsai_hybrid_power_b; resetcvar bonsai_hybrid_transition_start; resetcvar bonsai_hybrid_transition_end; resetcvar bonsai_hybrid_bias; resetcvar bonsai_hybrid_smooth"
+  TFLV_Tooltip "Restores defaults: Component A=Exponential (base 1.5), Component B=Power (exponent 2.0), transition levels 3-10."
+  StaticText "Graph controls (scroll up to see graph)", DARKGRAY
+  Option "Graph display mode",  "bonsai_graph_mode",        "GunBonsaiGraphMode"
+  TFLV_Tooltip "Relative: % of max cost. Absolute: raw XP values."
+  Slider "Graph: levels shown", "bonsai_graph_max_level",   2, 100, 1, 0
+  TFLV_Tooltip "How many weapon levels the graph shows."
+  Option "XP cost scaling",     "bonsai_xp_curve",          "GunBonsaiXPCurve"
+  TFLV_Tooltip "Change XP curve type without leaving this submenu."
+  StaticText ""
+  StaticText "Only active when XP Curve is set to Hybrid.", DARKGRAY
+  StaticText "Blends component A (low levels) into component B (high levels).", DARKGRAY
+  StaticText "All settings here are saved to profiles.", DARKGRAY
+}
+
+// -----------------------------------------------------------------------------
+// Player Upgrades
+// -----------------------------------------------------------------------------
+OptionMenu "GunBonsaiStatPlayer"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Player Upgrades"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Damage & Defence", GOLD
+  StaticText ""
+  Slider "Bloodthirsty (% bonus/level)", "bonsai_stat_player_damage", 0.0, 0.50, 0.01, 2
+  TFLV_Tooltip "Bonus damage as a percentage of the hit per level. Default 0.10 = +10%/level. A flat +level minimum is also applied, guaranteeing at least 1 bonus per level even on weak weapons."
+  Slider "Tough As Nails (reduction base)", "bonsai_stat_tough_as_nails", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "Multiplicative damage reduction per level: damage * base^level. Default 0.90 = 10% reduction/level. At lv3: 0.90^3 = 73% damage taken. Lower = stronger. Cannot reduce below 1 or below the flat level reduction."
+  Slider "Blast Shaping (self-dmg base)", "bonsai_stat_blast_shaping", 0.10, 0.90, 0.05, 2
+  TFLV_Tooltip "Self-damage reduction from your own explosions: self_damage * base^level. Default 0.50 = 50% off per level. At lv2: 0.50^2 = 25% of blast self-damage. Lower = stronger protection."
+
+  StaticText ""
+  StaticText "Survival & Utility", GOLD
+  StaticText ""
+  Slider "ECM Intercept Range (base)", "bonsai_stat_ecm_base_range", 64, 512, 32, 0
+  TFLV_Tooltip "Base range at which ECM detects and attempts to redirect incoming seeker missiles. Default 192 map units (~6m)."
+  Slider "ECM Intercept Range/Level", "bonsai_stat_ecm_range_per_level", 16, 128, 16, 0
+  TFLV_Tooltip "Map units added to ECM intercept range per upgrade level. Default 64/level. Total = base + (level * this)."
+  Slider "ECM Lock-On Range (base)", "bonsai_stat_ecm_lock_base", 32, 512, 32, 0
+  TFLV_Tooltip "Base range within which ECM searches for monsters to redirect intercepted missiles toward. Default 128 map units. If no monster found, tries to return the missile to its launcher."
+  Slider "ECM Lock-On Range/Level", "bonsai_stat_ecm_lock_per_level", 8, 64, 8, 0
+  TFLV_Tooltip "Map units added to ECM lock-on range per upgrade level. Default 32/level."
+
+  StaticText ""
+  StaticText "Leech & Harvest", GOLD
+  StaticText ""
+  Slider "Bandoliers Ammo Bonus/Level", "bonsai_stat_bandoliers_bonus", 0.10, 2.0, 0.10, 2
+  TFLV_Tooltip "Fraction of base ammo capacity added per upgrade level. Default 0.50 = +50%/level. At lv2: 2.0x capacity. Applies to both normal and backpack-expanded limits."
+  Slider "Life Leech Boss Multiplier", "bonsai_stat_lifeleech_boss_mul", 2, 30, 1, 0
+  TFLV_Tooltip "HP dropped by boss enemies vs normal enemies. Default 10x. Normal kills drop (upgrade level) HP. Boss kills drop (level * this). Applies to the Scavenge Blood upgrade."
+  Slider "Armour Leech Boss Multiplier", "bonsai_stat_armourleech_boss_mul", 2, 30, 1, 0
+  TFLV_Tooltip "Armour dropped by boss enemies vs normal enemies. Default 10x. Normal kills drop (level*2) armour. Boss kills drop (level*2*this). Applies to Scavenge Steel."
+  Slider "Dark Harvest Cap Growth/Level", "bonsai_stat_darkharvest_cap_per_level", 0.0, 1.0, 0.05, 2
+  TFLV_Tooltip "How much the HP/armour overcap grows per upgrade level. Default 0.20 = +20%/level above player max. At lv3: 1.6x max HP cap. Set to 0.0 to prevent ever exceeding base max."
+  StaticText ""
+  StaticText "Integration Upgrades", GOLD
+  StaticText "Profile-managed settings for Indestructible and Companions upgrades.", DARKGRAY
+  StaticText ""
+  TFLV_AnimatedSubmenu "Indestructible Integration", "GunBonsaiStatIndestructible"
+  TFLV_Tooltip "Balance settings for the Indestructible upgrade (Gun Bonsai integration mode). Controls max level, lives per clear, boss kills, and damage charging thresholds. Saved to profiles."
+  TFLV_AnimatedSubmenu "Companions Integration",     "GunBonsaiStatCompanions"
+  TFLV_AnimatedSubmenu "Hyper-V Upgrades",           "GunBonsaiStatHyperV"
+  TFLV_Tooltip "Balance settings for the Companions upgrade (Gun Bonsai integration mode). Controls max level, ally counts, boss unlocks, and resurrection limits. Saved to profiles."
+
+  StaticText ""
+  StaticText "Reset", GOLD
+  Command ">> Reset Player Upgrades to Defaults", "resetcvar bonsai_stat_player_damage; resetcvar bonsai_stat_tough_as_nails; resetcvar bonsai_stat_blast_shaping; resetcvar bonsai_stat_ecm_base_range; resetcvar bonsai_stat_ecm_range_per_level; resetcvar bonsai_stat_ecm_lock_base; resetcvar bonsai_stat_ecm_lock_per_level; resetcvar bonsai_stat_bandoliers_bonus; resetcvar bonsai_stat_lifeleech_boss_mul; resetcvar bonsai_stat_armourleech_boss_mul; resetcvar bonsai_stat_darkharvest_cap_per_level"
+}
+
+// -----------------------------------------------------------------------------
+// Hyper-V Upgrades (Balance Tuning)
+OptionMenu "GunBonsaiStatHyperV"
+{
+  class TFLV_TooltipOptionMenu
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  Title "Hyper-V Upgrades"
+
+  StaticText "Max Levels", GOLD
+  StaticText "Minimum is the level required to unlock all features.", DARKGRAY
+  Slider "Mobility max level",       "bonsai_hyperv_mobility_max_level",   3, 10, 1, 0
+  TFLV_Tooltip "Maximum level for the Mobility upgrade. Levels above 3 reduce dash cooldown. Default 3."
+  Slider "Combat Training max level","bonsai_hyperv_melee_max_level",      3, 10, 1, 0
+  TFLV_Tooltip "Maximum level for Combat Training. Levels above 3 scale damage, cooldown, crit, and parry. Default 6."
+  Slider "Bullet Time max level",    "bonsai_hyperv_slomo_max_level",      2, 10, 1, 0
+  TFLV_Tooltip "Maximum level for Bullet Time. Levels above 2 scale pool size and slowdown depth. Default 4."
+  Slider "Regeneration max level",   "bonsai_hyperv_hregen_max_level",     3, 10, 1, 0
+  TFLV_Tooltip "Maximum level for Health Regeneration. Levels above 3 scale HP cap and tick speed. Default 5."
+  Slider "Armor Recovery max level", "bonsai_hyperv_aregen_max_level",     2, 10, 1, 0
+  TFLV_Tooltip "Maximum level for Armor Recovery. Levels above 2 scale armor cap. Default 4."
+  Slider "Resupply max level",       "bonsai_hyperv_ammoregen_max_level",  2, 10, 1, 0
+  TFLV_Tooltip "Maximum level for Ammo Regen. Levels above 2 improve tick speed. Default 3."
+  Slider "Agility max level",        "bonsai_hyperv_agility_max_level",    2, 10, 1, 0
+  TFLV_Tooltip "Maximum level for Agility. Levels above 2 further increase speed and jump height. Default 4."
+  Slider "Hook max level",           "bonsai_hyperv_hook_max_level",       2, 4,  1, 0
+  TFLV_Tooltip "Maximum level for Grappling Hook. Default 2 (both features unlocked)."
+  Slider "Teleporter max level",     "bonsai_hyperv_tp_max_level",         2, 4,  1, 0
+  TFLV_Tooltip "Maximum level for Teleporter. Default 2 (both features unlocked)."
+
+  StaticText ""
+  StaticText "Mobility", GOLD
+  Slider "Base dash cooldown (s)",        "bonsai_hyperv_mobility_base_cooldown",  0.1, 3.0, 0.1, 1
+  TFLV_Tooltip "Dash cooldown applied at Lv1 of Mobility (seconds). Scaled down by levels above 3. Default 1.0."
+  Slider "Min dash cooldown (s)",         "bonsai_hyperv_mobility_min_cooldown",   0.05, 1.0, 0.05, 2
+  TFLV_Tooltip "Minimum dash cooldown floor — scaling can never push it below this. Default 0.2."
+  Slider "Cooldown reduction per level",  "bonsai_hyperv_mobility_cd_per_level",   0.0, 0.3, 0.05, 2
+  TFLV_Tooltip "Fraction of base cooldown removed per level above 3. 0.1 = 10% reduction/level. Default 0.1."
+
+  StaticText ""
+  StaticText "Combat Training", GOLD
+  Slider "Base damage min",           "bonsai_hyperv_melee_base_dmg_min",    0, 10, 1, 0
+  TFLV_Tooltip "Minimum melee damage per hit at Lv1 (before scaling). Default 1."
+  Slider "Base damage max",           "bonsai_hyperv_melee_base_dmg_max",    1, 20, 1, 0
+  TFLV_Tooltip "Maximum melee damage per hit at Lv1 (before scaling). Default 6."
+  Slider "Base cooldown (tics)",      "bonsai_hyperv_melee_base_tics",       10, 70, 1, 0
+  TFLV_Tooltip "Base tic delay between melee hits at Lv1 (35 tics = 1 second). Default 35."
+  Slider "Base crit chance (Lv2)",    "bonsai_hyperv_melee_base_crit",       0, 10, 1, 0
+  TFLV_Tooltip "Starting crit chance when Combo unlocks at Lv2 (out of 10, so 4 = 40%). Default 4."
+  Slider "Base parry probability (Lv3)", "bonsai_hyperv_melee_base_parry",   0, 40, 2, 0
+  TFLV_Tooltip "Starting parry activation chance when Parry unlocks at Lv3 (%). Default 10."
+  Slider "Damage bonus per level",    "bonsai_hyperv_melee_dmg_per_level",   0, 10, 1, 0
+  TFLV_Tooltip "Bonus added to melee damage min and max per scaling level (above Lv3). Default 2."
+  Slider "Cooldown reduction/level",  "bonsai_hyperv_melee_cd_per_level",    0.0, 0.3, 0.05, 2
+  TFLV_Tooltip "Fraction of base cooldown removed per scaling level. 0.1 = 10% faster per level. Default 0.1."
+  Slider "Crit chance bonus/level",   "bonsai_hyperv_melee_crit_per_level",  0, 3, 1, 0
+  TFLV_Tooltip "Bonus to crit chance (out of 10) per scaling level above 3. Default 1."
+  Slider "Parry probability/level",   "bonsai_hyperv_melee_parry_per_level", 0, 15, 1, 0
+  TFLV_Tooltip "Bonus to parry activation probability per scaling level above 3. Default 5."
+
+  StaticText ""
+  StaticText "Bullet Time", GOLD
+  Slider "Slomo pool at Lv1",         "bonsai_hyperv_slomo_pts_lv1",         20, 300, 10, 0
+  TFLV_Tooltip "Slomo point pool granted at Bullet Time Lv1 (60% capacity). Default 120."
+  Slider "Slomo pool at Lv2",         "bonsai_hyperv_slomo_pts_lv2",         40, 500, 10, 0
+  TFLV_Tooltip "Slomo point pool at Lv2+ (full capacity, base for scaling levels). Default 200."
+  Slider "Base slowdown depth (%)",   "bonsai_hyperv_slomo_base_depth",      10, 100, 5, 0
+  TFLV_Tooltip "Base slowdown depth percentage at Lv1 (100 = full bullet time). 100 is the effective cap — the engine clamps depth there. Default 100."
+  Option "Allow on all weapons",      "bonsai_hyperv_slomo_any_weapon",      "OnOff"
+  TFLV_Tooltip "When ON, the Bullet Time upgrade appears on all weapon types, not just melee/wimpy. Default OFF."
+  Slider "Extra points per level",    "bonsai_hyperv_slomo_pts_per_level",   0, 100, 5, 0
+  TFLV_Tooltip "Additional slomo points per level above 2. Default 40."
+  Slider "Extra depth % per level",   "bonsai_hyperv_slomo_depth_per_level", 0, 30,  5, 0
+  TFLV_Tooltip "Additional slowdown depth percentage per level above 2. Default 10."
+
+  StaticText ""
+  StaticText "Health Regeneration", GOLD
+  Slider "HP restored per tick",      "bonsai_hyperv_hregen_amount",         1, 20, 1, 0
+  TFLV_Tooltip "HP healed per regen tick. Higher values recover health faster at the cost of less granularity. Default 1."
+  Slider "HP cap per unlock level",   "bonsai_hyperv_hregen_cap_base",       5, 50, 5, 0
+  TFLV_Tooltip "HP cap gained per unlock level (Lv1-3). At default 25: Lv1=25, Lv2=50, Lv3=75. Default 25."
+  Slider "Tick interval at Lv1 (s)",  "bonsai_hyperv_hregen_tick_lv1",       1.0, 15.0, 0.5, 1
+  TFLV_Tooltip "Regen tick interval in seconds at Lv1. Smaller = faster regen. Default 5.0."
+  Slider "Tick interval at Lv2 (s)",  "bonsai_hyperv_hregen_tick_lv2",       1.0, 12.0, 0.5, 1
+  TFLV_Tooltip "Regen tick interval in seconds at Lv2. Default 3.5."
+  Slider "Tick interval at Lv3 (s)",  "bonsai_hyperv_hregen_tick_lv3",       0.5, 10.0, 0.5, 1
+  TFLV_Tooltip "Regen tick interval in seconds at Lv3 (base for scaling levels). Default 2.5."
+  Slider "Min tick interval (s)",     "bonsai_hyperv_hregen_min_tick",        0.25, 5.0, 0.25, 2
+  TFLV_Tooltip "Minimum regen interval floor — scaling cannot push it below this. Default 1.0."
+  Slider "HP cap bonus per level",    "bonsai_hyperv_hregen_cap_per_level",   0, 30, 5, 0
+  TFLV_Tooltip "Additional HP cap per level above 3. Default 15."
+  Slider "Tick speed per level (s)",  "bonsai_hyperv_hregen_tick_per_level",  0.0, 1.0, 0.1, 1
+  TFLV_Tooltip "Seconds removed from regen interval per level above 3. Default 0.5."
+
+  StaticText ""
+  StaticText "Armor Recovery", GOLD
+  Slider "Armor restored per tick",   "bonsai_hyperv_aregen_amount",         1, 20, 1, 0
+  TFLV_Tooltip "Armor restored per regen tick. Default 1."
+  Slider "Armor cap at Lv1",          "bonsai_hyperv_aregen_cap_lv1",        10, 150, 5, 0
+  TFLV_Tooltip "Maximum armor Armor Recovery regen targets at Lv1. Default 50."
+  Slider "Armor cap at Lv2",          "bonsai_hyperv_aregen_cap_lv2",        20, 200, 5, 0
+  TFLV_Tooltip "Maximum armor at Lv2 (base for scaling levels). Default 100."
+  Slider "Tick interval at Lv1 (s)",  "bonsai_hyperv_aregen_tick_lv1",       1.0, 20.0, 0.5, 1
+  TFLV_Tooltip "Armor regen tick interval in seconds at Lv1. Default 6.0."
+  Slider "Tick interval at Lv2 (s)",  "bonsai_hyperv_aregen_tick_lv2",       1.0, 15.0, 0.5, 1
+  TFLV_Tooltip "Armor regen tick interval in seconds at Lv2+. Default 4.0."
+  Slider "Armor cap bonus per level", "bonsai_hyperv_aregen_cap_per_level",  0, 50, 5, 0
+  TFLV_Tooltip "Additional armor cap per level above 2. Default 25."
+
+  StaticText ""
+  StaticText "Resupply (Ammo Regen)", GOLD
+  Slider "Tick interval at Lv1 (s)",  "bonsai_hyperv_ammoregen_tick_lv1",    2.0, 30.0, 0.5, 1
+  TFLV_Tooltip "Ammo regen tick interval in seconds at Lv1. Default 10.0."
+  Slider "Tick interval at Lv2 (s)",  "bonsai_hyperv_ammoregen_tick_lv2",    1.0, 20.0, 0.5, 1
+  TFLV_Tooltip "Ammo regen tick interval in seconds at Lv2 (base for scaling). Default 6.0."
+  Slider "Min tick interval (s)",     "bonsai_hyperv_ammoregen_min_tick",     0.5, 8.0, 0.5, 1
+  TFLV_Tooltip "Minimum ammo regen interval floor. Default 2.0."
+  Slider "Tick speed per level (s)",  "bonsai_hyperv_ammoregen_tick_per_level", 0.0, 2.0, 0.5, 1
+  TFLV_Tooltip "Seconds removed from ammo regen interval per level above 2. Default 1.0."
+
+  StaticText ""
+  StaticText "Agility", GOLD
+  Slider "Base speed mult (Lv1)",     "bonsai_hyperv_agility_base_speed",    1.0, 2.0, 0.05, 2
+  TFLV_Tooltip "Speed multiplier applied at Agility Lv1. 1.25 = 25% faster. Default 1.25."
+  Slider "Base jump mult (Lv2)",      "bonsai_hyperv_agility_base_jump",     1.0, 2.0, 0.05, 2
+  TFLV_Tooltip "Jump height multiplier applied at Agility Lv2. 1.35 = 35% higher. Default 1.35."
+  Slider "Speed bonus per level",     "bonsai_hyperv_agility_speed_per_level", 0.0, 0.2, 0.05, 2
+  TFLV_Tooltip "Additional speed multiplier per level above 2. Default 0.05."
+  Slider "Jump bonus per level",      "bonsai_hyperv_agility_jump_per_level",  0.0, 0.2, 0.05, 2
+  TFLV_Tooltip "Additional jump height multiplier per level above 2. Default 0.05."
+
+  StaticText ""
+  StaticText "Grappling Hook", GOLD
+  Slider "Stun min duration at Lv2 (s)",    "bonsai_hyperv_hook_stun_min_base",       0.25, 8.0,  0.25, 2
+  TFLV_Tooltip "Minimum stun duration applied to enemies when Hook Lv2 pull hits. Default 2.0s."
+  Slider "Stun max duration at Lv2 (s)",    "bonsai_hyperv_hook_stun_max_base",       0.5,  12.0, 0.25, 2
+  TFLV_Tooltip "Maximum stun duration applied to enemies when Hook Lv2 pull hits. Default 4.0s."
+  Slider "Stun min bonus per level (s)",    "bonsai_hyperv_hook_stun_min_per_level",  0.0,  2.0,  0.25, 2
+  TFLV_Tooltip "Bonus added to minimum stun per scaling level above Lv2. Default 0.5s."
+  Slider "Stun max bonus per level (s)",    "bonsai_hyperv_hook_stun_max_per_level",  0.0,  3.0,  0.25, 2
+  TFLV_Tooltip "Bonus added to maximum stun per scaling level above Lv2. Default 1.0s."
+
+  StaticText ""
+  StaticText "Teleporter", GOLD
+  Slider "Range at Lv1 (map units)",  "bonsai_hyperv_tp_range_lv1",   256, 2048, 64, 0
+  TFLV_Tooltip "Teleport beam maximum range at Lv1. Default 1024."
+  Slider "Range at Lv2 (map units)",  "bonsai_hyperv_tp_range_lv2",   512, 4096, 64, 0
+  TFLV_Tooltip "Teleport beam maximum range at Lv2. Default 2048."
+  Slider "Cooldown at Lv1 (s)",       "bonsai_hyperv_tp_cd_lv1",      0.25, 5.0, 0.25, 2
+  TFLV_Tooltip "Teleporter cooldown in seconds at Lv1. Default 1.5."
+  Slider "Cooldown at Lv2 (s)",       "bonsai_hyperv_tp_cd_lv2",      0.1,  3.0, 0.1,  1
+  TFLV_Tooltip "Teleporter cooldown in seconds at Lv2. Default 0.75."
+
+  StaticText ""
+  Command ">> Reset Hyper-V Upgrades to Defaults", "resetcvar bonsai_hyperv_mobility_max_level; resetcvar bonsai_hyperv_melee_max_level; resetcvar bonsai_hyperv_slomo_max_level; resetcvar bonsai_hyperv_hregen_max_level; resetcvar bonsai_hyperv_aregen_max_level; resetcvar bonsai_hyperv_ammoregen_max_level; resetcvar bonsai_hyperv_agility_max_level; resetcvar bonsai_hyperv_hook_max_level; resetcvar bonsai_hyperv_tp_max_level; resetcvar bonsai_hyperv_mobility_base_cooldown; resetcvar bonsai_hyperv_mobility_min_cooldown; resetcvar bonsai_hyperv_mobility_cd_per_level; resetcvar bonsai_hyperv_melee_base_dmg_min; resetcvar bonsai_hyperv_melee_base_dmg_max; resetcvar bonsai_hyperv_melee_base_tics; resetcvar bonsai_hyperv_melee_base_crit; resetcvar bonsai_hyperv_melee_base_parry; resetcvar bonsai_hyperv_melee_dmg_per_level; resetcvar bonsai_hyperv_melee_cd_per_level; resetcvar bonsai_hyperv_melee_crit_per_level; resetcvar bonsai_hyperv_melee_parry_per_level; resetcvar bonsai_hyperv_slomo_pts_lv1; resetcvar bonsai_hyperv_slomo_pts_lv2; resetcvar bonsai_hyperv_slomo_base_depth; resetcvar bonsai_hyperv_slomo_any_weapon; resetcvar bonsai_hyperv_slomo_pts_per_level; resetcvar bonsai_hyperv_slomo_depth_per_level; resetcvar bonsai_hyperv_hregen_amount; resetcvar bonsai_hyperv_hregen_cap_base; resetcvar bonsai_hyperv_hregen_tick_lv1; resetcvar bonsai_hyperv_hregen_tick_lv2; resetcvar bonsai_hyperv_hregen_tick_lv3; resetcvar bonsai_hyperv_hregen_min_tick; resetcvar bonsai_hyperv_hregen_cap_per_level; resetcvar bonsai_hyperv_hregen_tick_per_level; resetcvar bonsai_hyperv_aregen_amount; resetcvar bonsai_hyperv_aregen_cap_lv1; resetcvar bonsai_hyperv_aregen_cap_lv2; resetcvar bonsai_hyperv_aregen_tick_lv1; resetcvar bonsai_hyperv_aregen_tick_lv2; resetcvar bonsai_hyperv_aregen_cap_per_level; resetcvar bonsai_hyperv_ammoregen_tick_lv1; resetcvar bonsai_hyperv_ammoregen_tick_lv2; resetcvar bonsai_hyperv_ammoregen_min_tick; resetcvar bonsai_hyperv_ammoregen_tick_per_level; resetcvar bonsai_hyperv_agility_base_speed; resetcvar bonsai_hyperv_agility_base_jump; resetcvar bonsai_hyperv_agility_speed_per_level; resetcvar bonsai_hyperv_agility_jump_per_level; resetcvar bonsai_hyperv_hook_stun_min_base; resetcvar bonsai_hyperv_hook_stun_max_base; resetcvar bonsai_hyperv_hook_stun_min_per_level; resetcvar bonsai_hyperv_hook_stun_max_per_level; resetcvar bonsai_hyperv_tp_range_lv1; resetcvar bonsai_hyperv_tp_range_lv2; resetcvar bonsai_hyperv_tp_cd_lv1; resetcvar bonsai_hyperv_tp_cd_lv2"
+  TFLV_Tooltip "Reset all Hyper-V upgrade balance values back to their defaults."
+}
+
+// Indestructible Integration (Balance Tuning)
+// -----------------------------------------------------------------------------
+
+OptionMenu "GunBonsaiStatIndestructible"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Indestructible Integration"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Requires: Indestructible Options > Gun Bonsai Integration = ON", ORANGE
+  StaticText "Settings here are saved to profiles and affect balance across all profiles.", DARKGRAY
+  StaticText ""
+
+  StaticText "Upgrade Scaling", GOLD
+  StaticText ""
+  Slider "Max Upgrade Level",              "bonsai_indestructible_max_level",           1, 10, 1, 0
+  TFLV_Tooltip "Maximum level the Indestructible upgrade can reach. Higher levels increase lives earned, max lives, and reduce damage charge threshold. Profiles can set this differently per difficulty."
+  Slider "Base Max Lives",                 "bonsai_indestructible_base_max_lives",       1, 10, 1, 0
+  TFLV_Tooltip "Base max lives before level scaling. Total max = base + (level * level). At default 1: lv1=2, lv2=5, lv3=10, lv4=17. Lower for more punishing profiles."
+
+  StaticText ""
+  StaticText "Level Clear Lives", GOLD
+  StaticText ""
+  Option "Enable Level Clear Lives",       "bonsai_indestructible_lives_on_clear", "OnOff"
+  TFLV_Tooltip "When ON, completing a map grants lives based on upgrade level. Disable on Punishing profiles to make lives scarce."
+  Slider "  Base Lives Per Clear",         "bonsai_indestructible_base_lives_per_clear", 1, 5, 1, 0
+  TFLV_Tooltip "Lives per level clear, multiplied by upgrade level. At default 1: lv1=1, lv2=2, lv3=3, lv4=4 lives per clear."
+
+  StaticText ""
+  StaticText "Boss Kill Lives", GOLD
+  StaticText ""
+  Option "Enable Boss Kill Lives",         "bonsai_indestructible_lives_on_boss", "OnOff"
+  TFLV_Tooltip "When ON, killing a boss monster grants +1 life if upgrade level is high enough. Disable on Punishing profiles."
+  Slider "  Min Level for Boss Kills",     "bonsai_indestructible_boss_kill_level", 1, 10, 1, 0
+  TFLV_Tooltip "Upgrade level required before boss kills start granting lives. Default 3. Raise on harder profiles."
+
+  StaticText ""
+  StaticText "Damage Charging", GOLD
+  StaticText ""
+  Option "Enable Damage Charging",         "bonsai_indestructible_lives_on_damage", "OnOff"
+  TFLV_Tooltip "When ON, accumulating damage gradually earns lives. A generous system — consider disabling on Punishing profiles."
+  Slider "  Base Damage Per Life",         "bonsai_indestructible_damage_per_life", 50, 2000, 25, 0
+  TFLV_Tooltip "Base damage to take before earning one bonus life. Scales down with upgrade level. Default 400: lv1=400, lv2=267, lv3=200, lv4=160. Raise for punishing profiles."
+
+  StaticText ""
+  StaticText "Reset", GOLD
+  Command ">> Reset Indestructible Integration to Defaults", "resetcvar bonsai_indestructible_max_level; resetcvar bonsai_indestructible_base_max_lives; resetcvar bonsai_indestructible_lives_on_clear; resetcvar bonsai_indestructible_base_lives_per_clear; resetcvar bonsai_indestructible_lives_on_boss; resetcvar bonsai_indestructible_boss_kill_level; resetcvar bonsai_indestructible_lives_on_damage; resetcvar bonsai_indestructible_damage_per_life"
+}
+
+// -----------------------------------------------------------------------------
+// Companions Integration (Balance Tuning)
+// -----------------------------------------------------------------------------
+
+OptionMenu "GunBonsaiStatCompanions"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Companions Integration"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Requires: Companions Options > Integration Mode = Gun Bonsai", ORANGE
+  StaticText "Settings here are saved to profiles and affect balance across all profiles.", DARKGRAY
+  StaticText ""
+
+  StaticText "Upgrade Scaling", GOLD
+  StaticText ""
+  Slider "Max Upgrade Level",              "bonsai_companions_max_level",          1, 10, 1, 0
+  TFLV_Tooltip "Maximum level the Companions upgrade can reach. Higher levels unlock more allies and resurrections. Default 6."
+  Slider "Base Allies at Level 1",         "bonsai_companions_base_allies",         1, 8,  1, 0
+  TFLV_Tooltip "Number of companions at upgrade level 1. Default 1. Raise for a more ally-heavy playstyle."
+  Slider "Additional Allies Per Level",    "bonsai_companions_allies_per_level",    0, 4,  1, 0
+  TFLV_Tooltip "Companions gained per upgrade level beyond level 1. Default 1. Set to 0 to lock ally count at base."
+  Slider "Maximum Total Allies",           "bonsai_companions_max_allies",          1, 16, 1, 0
+  TFLV_Tooltip "Hard cap on companion count regardless of upgrade level. Default 8. Lower on Punishing profiles to prevent overwhelming ally hordes."
+
+  StaticText ""
+  StaticText "Unlock Thresholds", GOLD
+  StaticText ""
+  Slider "Boss Unlock Level (0=disabled)", "bonsai_companions_boss_min_level",      0, 10, 1, 0
+  TFLV_Tooltip "Minimum upgrade level at which boss-tier companions can spawn. 0 = always disabled. Raise to gate powerful allies behind investment."
+  Slider "Archvile Unlock Level (0=off)",  "bonsai_companions_archvile_min_level",  0, 10, 1, 0
+  TFLV_Tooltip "Minimum upgrade level at which Arch-Vile companions can spawn. Arch-Viles resurrect enemies — a double-edged tool. 0 = always disabled."
+
+  StaticText ""
+  StaticText "Resurrection", GOLD
+  StaticText ""
+  Slider "Base Resurrections at Level 1",  "bonsai_companions_base_revives",        0, 10, 1, 0
+  TFLV_Tooltip "Resurrection count per companion at upgrade level 1. 0 = unlimited resurrections. Default 1."
+  Slider "Additional Resurrections/Level", "bonsai_companions_revives_per_level",   0, 5,  1, 0
+  TFLV_Tooltip "Extra resurrections per companion gained per upgrade level. Default 1."
+
+  StaticText ""
+  StaticText "Reset", GOLD
+  Command ">> Reset Companions Integration to Defaults", "resetcvar bonsai_companions_max_level; resetcvar bonsai_companions_base_allies; resetcvar bonsai_companions_allies_per_level; resetcvar bonsai_companions_max_allies; resetcvar bonsai_companions_boss_min_level; resetcvar bonsai_companions_archvile_min_level; resetcvar bonsai_companions_base_revives; resetcvar bonsai_companions_revives_per_level"
+}
+
+// -----------------------------------------------------------------------------
+// Weapon Upgrades
+// -----------------------------------------------------------------------------
+OptionMenu "GunBonsaiStatWeapon"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Weapon Upgrades"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Damage (All Weapons)", GOLD
+  StaticText ""
+  Slider "Weapon Damage (% bonus/level)", "bonsai_stat_weapon_damage", 0.0, 0.50, 0.01, 2
+  TFLV_Tooltip "Bonus damage percentage per level for this weapon only. Default 0.20 = +20%/level."
+  Slider "Rapid Fire (speed multiplier)", "bonsai_stat_rapid_fire", 0.0, 3.0, 0.5, 2
+  TFLV_Tooltip "Scales Rapid Fire's effective level (integer-truncated). Steps of 0.5 are the smallest meaningful increment — e.g. at upgrade level 2, stat 0.5 gives effective level 1 (1.5x), stat 1.0 gives effective level 2 (2x). Values between steps have no additional effect. Default 1.0."
+  Slider "Overdrive - Damage Per Stack (%)",   "bonsai_stat_overdrive_damage",     0.01, 0.30, 0.01, 2
+  TFLV_Tooltip "Damage multiplier added per charge stack. Default 0.08 = +8% per stack. At max stacks (level 3 default 5): +40% total."
+  Slider "Overdrive - Streak Window (secs)",   "bonsai_stat_overdrive_window",     0.5,  8.0,  0.5,  1
+  TFLV_Tooltip "Seconds between kills before the streak resets. Syncs with Doom Points streak window if Doom Points is active. Default 3.0."
+  Slider "Overdrive - Max Stacks",             "bonsai_stat_overdrive_max_stacks", 1,    12,   1,    0
+  TFLV_Tooltip "Maximum charge stacks at level 3+. Level 1 hard-caps at 3, level 2 at 5 regardless of this setting. Default 5."
+
+  StaticText ""
+  StaticText "Any Ranged (Hitscan + Projectile)", GOLD
+  StaticText "(Explosive Death, Submunitions)", DARKGRAY
+  StaticText ""
+  Slider "Explosive Death - Health Scaling Base",    "bonsai_stat_explosivedeath_scale", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "Formula: (spawnHP + overkill) * (1 - base^level). Default 0.80: lv1=20%, lv2=36%, lv3=49%. Lower = more powerful."
+  Slider "Submunitions - Base Count",                "bonsai_stat_submunitions_base", 1, 10, 1, 0
+  TFLV_Tooltip "Bomblets per kill before per-level growth. Default 3. Total = base + upgrade level."
+  Slider "Submunitions - Health Scaling Base",       "bonsai_stat_submunitions_health_scale", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "Formula: (spawnHP + overkill) * (1 - base^level) / count. Default 0.80."
+  Slider "Submunitions - Bonus Flat Damage/Level",   "bonsai_stat_submunitions_bonus_damage", 0, 20, 1, 0
+  TFLV_Tooltip "Flat bonus per bomblet per upgrade level. Default 4/level."
+  Slider "Submunitions - Lifetime Multiplier",       "bonsai_stat_submunitions_lifetime", 0.25, 3.0, 0.25, 2
+  TFLV_Tooltip "Multiplier on bomblet lifetime. Default 1.0 = level*5 seconds."
+
+  StaticText ""
+  StaticText "Hitscan Only", GOLD
+  StaticText "(HE Rounds, Aggressive Defence, Ricochet Shots)", DARKGRAY
+  StaticText ""
+  Slider "Ricochet Shots - Damage Per Bounce (%)", "bonsai_stat_ricochet_damage", 0.10, 1.0, 0.05, 2
+  TFLV_Tooltip "Fraction of the previous hit's damage dealt per ricochet bounce. Stacks multiplicatively: 0.50 = 50% on first bounce, 25% on second. Default 0.50."
+  Slider "Ricochet Shots - Max Bounce Range",      "bonsai_stat_ricochet_range",  64, 1024, 64, 0
+  TFLV_Tooltip "Maximum distance in map units a ricochet can travel to reach its next target. Default 512 (~4 metres)."
+  Slider "Ricochet Shots - Base Spread (degrees)", "bonsai_stat_ricochet_spread", 0.0, 45.0, 1.0, 1
+  TFLV_Tooltip "Angle spread on ricochet arcs at level 1. Reduced each level by the spread step divisor below. Default 25. Set to 0 for pinpoint accuracy at all levels."
+  Slider "Ricochet Shots - Spread Step (divisor/level)", "bonsai_stat_ricochet_spread_step", 1.0, 4.0, 0.1, 1
+  TFLV_Tooltip "Spread is divided by this value each level above 1. Default 1.5: lv1=25, lv2=17, lv3=11, lv4=7. Higher = faster tightening per level. 1.0 = spread never reduces."
+  Slider "Ricochet Shots - Bounce Multiplier",          "bonsai_stat_ricochet_bounces",     0.1, 2.0, 0.1, 1
+  TFLV_Tooltip "Effective bounces = floor(level * this), minimum 1. Like Rapid Fire: at 0.5 you need level 2 for 1 bounce, level 4 for 2. Default 1.0 = one bounce per level."
+  StaticText "(HE Rounds, Aggressive Defence)", DARKGRAY
+  StaticText ""
+  Slider "HE Rounds - Damage (%/level)",             "bonsai_stat_explosive_damage", 0.0, 0.50, 0.01, 2
+  TFLV_Tooltip "Explosion damage as fraction of original hit per level. Default 0.10 = 10%/level. Minimum always = upgrade level."
+  Slider "HE Rounds - Base Radius (map units)",      "bonsai_stat_explosive_radius", 16, 192, 8, 0
+  TFLV_Tooltip "Starting blast radius before per-level growth. Default 64 map units."
+  Slider "HE Rounds - Radius Growth/Level",          "bonsai_stat_explosive_radius_per_level", 4, 64, 4, 0
+  TFLV_Tooltip "Map units added per level. Default 16/level."
+  Slider "Aggressive Defence - Base Radius",         "bonsai_stat_agdef_base_radius", 16, 256, 16, 0
+  TFLV_Tooltip "Base destruction radius around damaged enemy. Default 64 map units."
+  Slider "Aggressive Defence - Radius/Level",        "bonsai_stat_agdef_radius_per_level", 8, 128, 8, 0
+  TFLV_Tooltip "Map units added per upgrade level. Default 32/level."
+
+  StaticText ""
+  StaticText "Projectile Only", GOLD
+  StaticText "(Homing, Decoy Flares, Fragmentation, Bouncy/Fast/Piercing Shots)", DARKGRAY
+  StaticText ""
+  Slider "Fragmentation - Base Fragment Count",      "bonsai_stat_frag_base_count", 2, 20, 1, 0
+  TFLV_Tooltip "Fragments fired before per-level growth. Default 6."
+  Slider "Fragmentation - Fragments Added/Level",    "bonsai_stat_frag_per_level", 1, 8, 1, 0
+  TFLV_Tooltip "Fragments per upgrade level. Default 2/level."
+  Slider "Fragmentation - Fragment Damage (%)",      "bonsai_stat_frag_damage", 0.05, 0.50, 0.05, 2
+  TFLV_Tooltip "Each fragment deals this fraction of original damage. Default 0.20 = 20%."
+  Slider "Fragmentation - Spread Arc",               "bonsai_stat_frag_arc", 0.05, 1.0, 0.05, 2
+  TFLV_Tooltip "1.0 = full 360 ring. 0.5 = 180 forward cone. 0.25 = 90 tight cone."
+  Slider "Homing - Base Lock-On Range",              "bonsai_stat_homing_base_range", 16, 256, 16, 0
+  TFLV_Tooltip "Base lock-on range in map units. Default 64. Also added per level."
+  Slider "Homing - Terminal Turn Rate",              "bonsai_stat_homing_turn_rate", 0.25, 3.0, 0.25, 2
+  TFLV_Tooltip "Multiplier on homing turn speed. Default 1.0 = level deg/tic."
+  Slider "Piercing Shots - Damage Per Hit (%)",      "bonsai_stat_piercing_damage", 0.10, 0.90, 0.05, 2
+  TFLV_Tooltip "Fraction of base damage dealt per pierce hit. Stacks per level: damage = base * this^level. Default 0.60 = 60% per hit at level 1, 36% at level 2, etc. Lower = weaker but more pierces feel consistent."
+  Slider "Decoy Flares - Base Distraction Range",    "bonsai_stat_flare_base_range", 128, 2048, 128, 0
+  TFLV_Tooltip "Range at lv1 within which your shots attract enemy seekers. Default 768 (~6m)."
+  Slider "Decoy Flares - Range Decay/Level",         "bonsai_stat_flare_decay", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "Range = base * decay^(level-1). Default 0.875 = 12.5% shrink per level."
+
+  StaticText ""
+  StaticText "Melee Only", GOLD
+  StaticText "(Shield, Sweep, Cleave, Thorns, Swiftness)", DARKGRAY
+  StaticText ""
+  Slider "Shield - Melee Reduction Base",            "bonsai_stat_shield_melee_base", 0.30, 0.95, 0.05, 2
+  TFLV_Tooltip "Close-range damage: damage * base^level. Default 0.70 = 30% off/level."
+  Slider "Shield - Ranged Reduction Base",           "bonsai_stat_shield_ranged_base", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "Ranged damage while shield active. Default 0.90 = 10% off/level."
+  Slider "Sweep - Splash Damage Base",               "bonsai_stat_sweep_base", 0.10, 1.50, 0.05, 2
+  TFLV_Tooltip "Base in formula: pct = base - (decay^level). Default 0.80."
+  Slider "Sweep - Damage Decay Rate",                "bonsai_stat_sweep_decay", 0.10, 0.90, 0.05, 2
+  TFLV_Tooltip "Decay in formula. Default 0.60. Lower = more splash per level."
+  Slider "Cleave - Overkill Bonus/Level",            "bonsai_stat_cleave_overkill", 0.05, 1.0, 0.05, 2
+  TFLV_Tooltip "Overkill multiplier per level. Default 0.25. At lv4: 2.0x overkill."
+  Slider "Cleave - Health Contribution Cap",         "bonsai_stat_cleave_health_cap", 0.10, 1.0, 0.05, 2
+  TFLV_Tooltip "Max fraction of next enemy's spawn HP contributing to cleave. Default 0.50."
+  Slider "Thorns - Min Range per Level",             "bonsai_stat_thorns_min_range", 32, 512, 32, 0
+  TFLV_Tooltip "Min retaliation range per upgrade level. Default 192/level."
+  Slider "Thorns - Max Range per Level",             "bonsai_stat_thorns_max_range", 128, 2048, 128, 0
+  TFLV_Tooltip "Max retaliation range per upgrade level. Default 1024/level."
+  Slider "Swiftness - Base Duration (tics)",         "bonsai_stat_swiftness_base_tics", 7.0, 70.0, 7.0, 0
+  TFLV_Tooltip "Base freeze tics at level 1. Default 28 (~0.8s). 35 tics = 1 second."
+  Slider "Swiftness - Duration per Level (tics)",    "bonsai_stat_swiftness_level_tics", 0.0, 35.0, 7.0, 0
+  TFLV_Tooltip "Freeze tics added per upgrade level. Default 7/level (~0.2s)."
+  Slider "Swiftness - Combo Bonus per Kill",         "bonsai_stat_swiftness_combo_tics", 0.0, 35.0, 5.0, 0
+  TFLV_Tooltip "Bonus tics per kill while Swiftness is active. Default 5/kill."
+  StaticText ""
+  StaticText "Reset", GOLD
+  Command ">> Reset Weapon Upgrades to Defaults", "resetcvar bonsai_stat_weapon_damage; resetcvar bonsai_stat_rapid_fire; resetcvar bonsai_stat_explosive_damage; resetcvar bonsai_stat_explosive_radius; resetcvar bonsai_stat_explosive_radius_per_level; resetcvar bonsai_stat_explosivedeath_scale; resetcvar bonsai_stat_frag_base_count; resetcvar bonsai_stat_frag_per_level; resetcvar bonsai_stat_frag_damage; resetcvar bonsai_stat_frag_arc; resetcvar bonsai_stat_submunitions_base; resetcvar bonsai_stat_submunitions_health_scale; resetcvar bonsai_stat_submunitions_bonus_damage; resetcvar bonsai_stat_submunitions_lifetime; resetcvar bonsai_stat_homing_base_range; resetcvar bonsai_stat_homing_turn_rate; resetcvar bonsai_stat_flare_base_range; resetcvar bonsai_stat_flare_decay; resetcvar bonsai_stat_agdef_base_radius; resetcvar bonsai_stat_agdef_radius_per_level; resetcvar bonsai_stat_shield_melee_base; resetcvar bonsai_stat_shield_ranged_base; resetcvar bonsai_stat_sweep_base; resetcvar bonsai_stat_sweep_decay; resetcvar bonsai_stat_cleave_overkill; resetcvar bonsai_stat_cleave_health_cap; resetcvar bonsai_stat_thorns_min_range; resetcvar bonsai_stat_thorns_max_range; resetcvar bonsai_stat_swiftness_base_tics; resetcvar bonsai_stat_swiftness_level_tics; resetcvar bonsai_stat_swiftness_combo_tics"
+}
+
+// -----------------------------------------------------------------------------
+// Elemental Damage - hub with per-element submenus
+// -----------------------------------------------------------------------------
+OptionMenu "GunBonsaiStatElemental"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Elemental Damage"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Fine-tune each element per upgrade tier.", DARKGRAY
+  StaticText "Output multipliers apply on top of all other values.", DARKGRAY
+  StaticText ""
+  TFLV_AnimatedSubmenu "Fire",      "GunBonsaiStatFire"
+  TFLV_Tooltip "Tune Searing Inscription stack rate, fire cutoff, heat factor, damage/stack, Burning Terror flee threshold and damage bonus."
+  TFLV_AnimatedSubmenu "Poison",    "GunBonsaiStatPoison"
+  TFLV_Tooltip "Tune Venomous Inscription stacks/softcap, drain rate, Weakness reduction, Hallucinogens factors, Putrefaction transfer and range."
+  TFLV_AnimatedSubmenu "Acid",      "GunBonsaiStatAcid"
+  TFLV_Tooltip "Tune Corrosive Inscription conversion, AcidDot threshold/DPS, Concentrated Acid curve, Acid Spray range, Embrittlement bonus."
+  TFLV_AnimatedSubmenu "Lightning", "GunBonsaiStatLightning"
+  TFLV_Tooltip "Tune Shocking Inscription stack rate/softcap, Thunderbolt stun/radius/cap, Chain Lightning arc range, Revivification damage/armour."
+
+  StaticText ""
+  StaticText "Elemental Synthesis (Rare Upgrades)", GOLD
+  StaticText "Unlocked after mastering two elements on one weapon.", DARKGRAY
+  StaticText ""
+  Slider "Elemental Blast AoE Radius Mult", "bonsai_stat_elemblast_radius", 1.0, 20.0, 0.5, 1
+  TFLV_Tooltip "Elemental Blast copies effects to all enemies within (target radius * this). Default 7.0."
+  Slider "Elemental Wave AoE Radius Mult",  "bonsai_stat_elemwave_radius",  1.0, 30.0, 0.5, 1
+  TFLV_Tooltip "Elemental Wave copies effects to all enemies within (player radius * this). Default 10.0."
+
+  StaticText ""
+  StaticText "Reset", GOLD
+  Command ">> Reset ALL Elemental to Defaults", "resetcvar bonsai_stat_fire_mult; resetcvar bonsai_stat_fire_stack_rate; resetcvar bonsai_stat_fire_cutoff; resetcvar bonsai_stat_fire_heat_factor; resetcvar bonsai_stat_fire_damage_per_stack; resetcvar bonsai_stat_fire_terror_base; resetcvar bonsai_stat_fire_terror_damage; resetcvar bonsai_stat_poison_mult; resetcvar bonsai_stat_poison_stacks_per_hit; resetcvar bonsai_stat_poison_softcap_factor; resetcvar bonsai_stat_poison_drain_rate; resetcvar bonsai_stat_poison_weakness_base; resetcvar bonsai_stat_poison_hallu_damage; resetcvar bonsai_stat_poison_hallu_armour; resetcvar bonsai_stat_poison_hallu_drain; resetcvar bonsai_stat_poison_putref_transfer; resetcvar bonsai_stat_poison_putref_radius; resetcvar bonsai_stat_acid_mult; resetcvar bonsai_stat_acid_stack_base; resetcvar bonsai_stat_acid_stack_per_level; resetcvar bonsai_stat_acid_base_threshold; resetcvar bonsai_stat_acid_dps_above; resetcvar bonsai_stat_acid_dps_mult; resetcvar bonsai_stat_acid_concentration_threshold; resetcvar bonsai_stat_acid_concentration_drain; resetcvar bonsai_stat_acid_spray_base_range; resetcvar bonsai_stat_acid_spray_range_per_level; resetcvar bonsai_stat_acid_embrit_damage; resetcvar bonsai_stat_lightning_mult; resetcvar bonsai_stat_lightning_stack_rate; resetcvar bonsai_stat_lightning_softcap; resetcvar bonsai_stat_lightning_tbolt_stun_base; resetcvar bonsai_stat_lightning_tbolt_stun_per_level; resetcvar bonsai_stat_lightning_tbolt_radius_base; resetcvar bonsai_stat_lightning_tbolt_radius_per_level; resetcvar bonsai_stat_lightning_tbolt_cap_base; resetcvar bonsai_stat_lightning_chain_radius; resetcvar bonsai_stat_lightning_reviv_damage; resetcvar bonsai_stat_lightning_reviv_armour; resetcvar bonsai_stat_elemblast_radius; resetcvar bonsai_stat_elemwave_radius"
+}
+
+// -----------------------------------------------------------------------------
+// Fire
+// -----------------------------------------------------------------------------
+OptionMenu "GunBonsaiStatFire"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Fire"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Output Multiplier", ORANGE
+  StaticText ""
+  Slider "Fire Damage Multiplier", "bonsai_stat_fire_mult", 0.0, 3.0, 0.1, 1
+  TFLV_Tooltip "Final multiplier applied to every fire DoT damage tick. Default 1.0. Stacks multiplicatively on top of all the per-tick values below."
+
+  StaticText ""
+  StaticText "Searing Inscription (Apprentice)", ORANGE
+  StaticText ""
+  Slider "  Stack Rate (%/damage)", "bonsai_stat_fire_stack_rate", 0.01, 1.0, 0.01, 2
+  TFLV_Tooltip "Stacks applied per point of damage dealt, multiplied by upgrade level. Default 0.20 = 20% of damage becomes stacks at lv1. Higher = fire builds faster per hit."
+
+  StaticText ""
+  StaticText "Fire DoT Behaviour", ORANGE
+  StaticText ""
+  Slider "  Burnout Health Cutoff", "bonsai_stat_fire_cutoff", 0.0, 0.90, 0.05, 2
+  TFLV_Tooltip "HP% below which fire goes dormant. Default 0.50 = stops at 50% HP. 0.0 = fire can kill. 0.90 = only burns top 10% of HP. Burning Terror pushes this lower."
+  Slider "  Heat Factor", "bonsai_stat_fire_heat_factor", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "Exponential rate at which fire damage zooms toward the cutoff. Default 0.90. Lower = fire frontloads its damage more aggressively. Higher = damage spread more evenly over time."
+  Slider "  Damage per Stack per Tick", "bonsai_stat_fire_damage_per_stack", 0.5, 20.0, 0.5, 1
+  TFLV_Tooltip "Maximum damage per stack per DoT tick (x5 = DPS/stack). Default 4.0 = up to 20 DPS per stack. Actual tick damage is also capped by remaining health above the cutoff."
+
+  StaticText ""
+  StaticText "Burning Terror (Journeyman)", ORANGE
+  StaticText ""
+  Slider "  Flee Threshold Base", "bonsai_stat_fire_terror_base", 0.30, 0.95, 0.05, 2
+  TFLV_Tooltip "Enemy flees when missing_health >= base^(stacks+terror). Default 0.70. Lower = panic triggers earlier. Higher = hard to trigger. At lv2 with 5 stacks: 0.70^7 = 8% missing HP triggers flee."
+  Slider "  Damage Bonus per Terror Level", "bonsai_stat_fire_terror_damage", 0.0, 5.0, 0.25, 2
+  TFLV_Tooltip "Flat fire damage bonus per Burning Terror level per tick above the cutoff. Default 1.0 = +1/tick/level. 0 = Terror is a pure fear debuff with no extra damage."
+
+  StaticText ""
+  StaticText "Reset", ORANGE
+  Command ">> Reset Fire to Defaults", "resetcvar bonsai_stat_fire_mult; resetcvar bonsai_stat_fire_stack_rate; resetcvar bonsai_stat_fire_cutoff; resetcvar bonsai_stat_fire_heat_factor; resetcvar bonsai_stat_fire_damage_per_stack; resetcvar bonsai_stat_fire_terror_base; resetcvar bonsai_stat_fire_terror_damage"
+}
+
+// -----------------------------------------------------------------------------
+// Poison
+// -----------------------------------------------------------------------------
+OptionMenu "GunBonsaiStatPoison"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Poison"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Output Multiplier", GREEN
+  StaticText ""
+  Slider "Poison Damage Multiplier", "bonsai_stat_poison_mult", 0.0, 3.0, 0.1, 1
+  TFLV_Tooltip "Final multiplier on all poison DoT ticks. Default 1.0. Raise if poison feels weak versus other elements."
+
+  StaticText ""
+  StaticText "Venomous Inscription (Apprentice)", GREEN
+  StaticText ""
+  Slider "  Stacks per Hit (x level)", "bonsai_stat_poison_stacks_per_hit", 0.1, 5.0, 0.1, 1
+  TFLV_Tooltip "Stacks applied per hit, multiplied by upgrade level. Default 1.0: lv1=1 stack, lv3=3 stacks. 1 stack lasts ~1 second at default drain rate."
+  Slider "  Softcap Factor (x level)", "bonsai_stat_poison_softcap_factor", 1.0, 30.0, 1.0, 0
+  TFLV_Tooltip "Softcap = level * this. Default 10: lv1=10 softcap, lv3=30. Higher = more stacks before diminishing returns."
+
+  StaticText ""
+  StaticText "Poison DoT Behaviour", GREEN
+  StaticText ""
+  Slider "  Drain Rate per Tick", "bonsai_stat_poison_drain_rate", 0.02, 1.0, 0.02, 2
+  TFLV_Tooltip "Stacks consumed per DoT tick (5 ticks/sec). Default 0.20 = 1 stack/second. Lower = poison lasts longer. Higher = faster but shorter duration."
+
+  StaticText ""
+  StaticText "Weakness (Journeyman)", GREEN
+  StaticText ""
+  Slider "  Damage Reduction Base", "bonsai_stat_poison_weakness_base", 0.80, 0.999, 0.005, 3
+  TFLV_Tooltip "Enemy outgoing damage: base^(stacks * level). Default 0.990. Lower = stronger debuff. At 0.99 with 10 stacks lv1: 90% damage. At 0.95: 60% damage."
+
+  StaticText ""
+  StaticText "Hallucinogens (Mastery)", GREEN
+  StaticText ""
+  Slider "  Friendly Damage Bonus", "bonsai_stat_poison_hallu_damage", 0.001, 0.05, 0.001, 3
+  TFLV_Tooltip "Outgoing damage bonus per stack per level for converted enemies: 1 + (this * stacks * level). Default 0.010 = +1%/stack/level."
+  Slider "  Friendly Armour Base", "bonsai_stat_poison_hallu_armour", 0.70, 0.999, 0.01, 2
+  TFLV_Tooltip "Incoming damage for converted enemies: base^(level * stacks). Default 0.95. Lower = tougher converted enemies."
+  Slider "  Poison Drain Slow Base", "bonsai_stat_poison_hallu_drain", 0.10, 0.99, 0.01, 2
+  TFLV_Tooltip "Drain rate multiplier while hallucinating: base^level. Default 0.50 = halved per level. Lower = converted enemies stay longer."
+
+  StaticText ""
+  StaticText "Putrefaction (Mastery)", GREEN
+  StaticText ""
+  Slider "  Transfer Retention Base", "bonsai_stat_poison_putref_transfer", 0.10, 0.90, 0.05, 2
+  TFLV_Tooltip "Fraction NOT spread per level: spread = stacks * (1 - base^level). Default 0.50: lv1=50% spread, lv2=75%. Lower = more transfer."
+  Slider "  Spread Radius (map units)", "bonsai_stat_poison_putref_radius", 32, 512, 16, 0
+  TFLV_Tooltip "Radius of the death cloud. Default 100 map units (~3m)."
+
+  StaticText ""
+  StaticText "Reset", GREEN
+  Command ">> Reset Poison to Defaults", "resetcvar bonsai_stat_poison_mult; resetcvar bonsai_stat_poison_stacks_per_hit; resetcvar bonsai_stat_poison_softcap_factor; resetcvar bonsai_stat_poison_drain_rate; resetcvar bonsai_stat_poison_weakness_base; resetcvar bonsai_stat_poison_hallu_damage; resetcvar bonsai_stat_poison_hallu_armour; resetcvar bonsai_stat_poison_hallu_drain; resetcvar bonsai_stat_poison_putref_transfer; resetcvar bonsai_stat_poison_putref_radius"
+}
+
+// -----------------------------------------------------------------------------
+// Acid
+// -----------------------------------------------------------------------------
+OptionMenu "GunBonsaiStatAcid"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Acid"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Output Multiplier", PURPLE
+  StaticText ""
+  Slider "Acid Damage Multiplier", "bonsai_stat_acid_mult", 0.0, 3.0, 0.1, 1
+  TFLV_Tooltip "Final multiplier on all acid DoT ticks. Default 1.0."
+
+  StaticText ""
+  StaticText "Corrosive Inscription (Apprentice)", PURPLE
+  StaticText ""
+  Slider "  Stack Conversion Base (%)", "bonsai_stat_acid_stack_base", 0.10, 1.0, 0.05, 2
+  TFLV_Tooltip "Base fraction of damage converted to acid stacks. Default 0.50 = 50% of damage. Per-level bonus is added on top."
+  Slider "  Stack Conversion per Level (%)", "bonsai_stat_acid_stack_per_level", 0.0, 0.30, 0.01, 2
+  TFLV_Tooltip "Additional conversion fraction per upgrade level. Default 0.10 = +10%/level. At lv3: 0.50 + 0.30 = 80% of damage becomes stacks."
+
+  StaticText ""
+  StaticText "Acid DoT Behaviour", PURPLE
+  StaticText ""
+  Slider "  Base HP Threshold (%)", "bonsai_stat_acid_base_threshold", 0.10, 0.90, 0.05, 2
+  TFLV_Tooltip "HP% at which damage starts accelerating (before Concentrated Acid). Default 0.50. Above: slow DPS. Below: rapidly ramps up."
+  Slider "  Baseline DPS per Level", "bonsai_stat_acid_dps_above", 0.1, 5.0, 0.1, 1
+  TFLV_Tooltip "Damage per tick per level above the threshold (x5 for DPS). Default 1.0 = 5 DPS/level. Raise for more consistent pre-threshold damage."
+  Slider "  Max DPS Multiplier (low HP)", "bonsai_stat_acid_dps_mult", 1.0, 20.0, 0.5, 1
+  TFLV_Tooltip "Maximum DPS multiplier below the threshold. Default 6.0 = up to 30 DPS/level at very low HP. Higher = acid punishes weakened enemies harder."
+
+  StaticText ""
+  StaticText "Concentrated Acid (Journeyman)", PURPLE
+  StaticText ""
+  Slider "  Threshold Curve Base", "bonsai_stat_acid_concentration_threshold", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "How fast the damage threshold rises with concentration: threshold = base_threshold * (2 - curve^level). Default 0.80. Lower = threshold rises faster per level."
+  Slider "  Stack Drain Rate Base", "bonsai_stat_acid_concentration_drain", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "Stack consumption modifier: consumed = damage * drain^concentration. Default 0.90 = stacks last ~11% longer per level. Lower = much longer duration."
+
+  StaticText ""
+  StaticText "Acid Spray (Mastery)", PURPLE
+  StaticText ""
+  Slider "  Base Splash Range (map units)", "bonsai_stat_acid_spray_base_range", 16, 256, 16, 0
+  TFLV_Tooltip "Base splash range before per-level growth. Default 64 map units."
+  Slider "  Splash Range per Level", "bonsai_stat_acid_spray_range_per_level", 8, 128, 8, 0
+  TFLV_Tooltip "Map units added per Acid Spray level. Default 32/level. Total = base + (level * this)."
+
+  StaticText ""
+  StaticText "Embrittlement (Mastery)", PURPLE
+  StaticText ""
+  Slider "  Damage Bonus per Stack/Level", "bonsai_stat_acid_embrit_damage", 0.001, 0.05, 0.001, 3
+  TFLV_Tooltip "Incoming damage bonus per acid stack per Embrittlement level. Default 0.010 = +1%/stack/level. At lv2 with 20 stacks: +40% all damage taken."
+
+  StaticText ""
+  StaticText "Reset", PURPLE
+  Command ">> Reset Acid to Defaults", "resetcvar bonsai_stat_acid_mult; resetcvar bonsai_stat_acid_stack_base; resetcvar bonsai_stat_acid_stack_per_level; resetcvar bonsai_stat_acid_base_threshold; resetcvar bonsai_stat_acid_dps_above; resetcvar bonsai_stat_acid_dps_mult; resetcvar bonsai_stat_acid_concentration_threshold; resetcvar bonsai_stat_acid_concentration_drain; resetcvar bonsai_stat_acid_spray_base_range; resetcvar bonsai_stat_acid_spray_range_per_level; resetcvar bonsai_stat_acid_embrit_damage"
+}
+
+// -----------------------------------------------------------------------------
+// Lightning
+// -----------------------------------------------------------------------------
+OptionMenu "GunBonsaiStatLightning"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Lightning"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Output Multiplier", CYAN
+  StaticText ""
+  Slider "Lightning Effect Multiplier", "bonsai_stat_lightning_mult", 0.0, 3.0, 0.1, 1
+  TFLV_Tooltip "Multiplier on lightning DoT tick effects. Default 1.0. Lightning primarily slows and stuns rather than dealing direct damage."
+
+  StaticText ""
+  StaticText "Shocking Inscription (Apprentice)", CYAN
+  StaticText ""
+  Slider "  Stack Rate (%/damage x level)", "bonsai_stat_lightning_stack_rate", 0.01, 1.0, 0.01, 2
+  TFLV_Tooltip "Stacks per point of damage, multiplied by upgrade level. Default 0.20. Each stack = 1 tic of slow (35 tics/sec). Higher = slow builds faster."
+  Slider "  Softcap per Level (tics)", "bonsai_stat_lightning_softcap", 1.0, 20.0, 1.0, 0
+  TFLV_Tooltip "Softcap = level * this, in tics (35 = 1 second). Default 5: lv1 = 5 tics, lv3 = 15 tics. Also controls Thunderbolt trigger threshold."
+
+  StaticText ""
+  StaticText "Thunderbolt (Journeyman)", CYAN
+  StaticText ""
+  Slider "  Stun Duration Base (tics)", "bonsai_stat_lightning_tbolt_stun_base", 0.0, 35.0, 5.0, 0
+  TFLV_Tooltip "Base stun in tics at level 0 before per-level bonus. Default 5 tics. 35 = 1 second. Total stun also scales with stack count."
+  Slider "  Stun Duration per Level (tics)", "bonsai_stat_lightning_tbolt_stun_per_level", 0.0, 35.0, 5.0, 0
+  TFLV_Tooltip "Stun tics added per Thunderbolt level. Default 5/level. At lv2: 5 + 10 = 15 tics base."
+  Slider "  AoE Radius Base (map units)", "bonsai_stat_lightning_tbolt_radius_base", 16, 256, 16, 0
+  TFLV_Tooltip "Base Thunderbolt AoE radius before per-level growth. Default 64 map units."
+  Slider "  AoE Radius per Level", "bonsai_stat_lightning_tbolt_radius_per_level", 8, 256, 8, 0
+  TFLV_Tooltip "Map units added per Thunderbolt level. Default 64/level."
+  Slider "  Trigger Cap Base", "bonsai_stat_lightning_tbolt_cap_base", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "Thunderbolt fires when stacks >= softcap * (1 + base^level). Default 0.90. Lower = triggers more easily. Cap grows 25% harder each time it fires."
+
+  StaticText ""
+  StaticText "Chain Lightning (Mastery)", CYAN
+  StaticText ""
+  Slider "  Arc Radius Multiplier", "bonsai_stat_lightning_chain_radius", 1.0, 10.0, 0.5, 1
+  TFLV_Tooltip "Arc jump range = max(victim_radius, 32) * (this + level). Default 3.0. Higher = wider chain spread between enemies."
+
+  StaticText ""
+  StaticText "Revivification (Mastery)", CYAN
+  StaticText ""
+  Slider "  Minion Damage Bonus per Level", "bonsai_stat_lightning_reviv_damage", 0.0, 1.0, 0.05, 2
+  TFLV_Tooltip "Minion outgoing damage multiplier per level: 1 + (this * level). Default 0.20 = +20%/level. At lv3: 1.6x damage."
+  Slider "  Minion Damage Reduction Base", "bonsai_stat_lightning_reviv_armour", 0.50, 0.99, 0.01, 2
+  TFLV_Tooltip "Minion incoming damage: base^level. Default 0.80 = 20% off/level. At lv2: 64% of damage taken."
+
+  StaticText ""
+  StaticText "Reset", CYAN
+  Command ">> Reset Lightning to Defaults", "resetcvar bonsai_stat_lightning_mult; resetcvar bonsai_stat_lightning_stack_rate; resetcvar bonsai_stat_lightning_softcap; resetcvar bonsai_stat_lightning_tbolt_stun_base; resetcvar bonsai_stat_lightning_tbolt_stun_per_level; resetcvar bonsai_stat_lightning_tbolt_radius_base; resetcvar bonsai_stat_lightning_tbolt_radius_per_level; resetcvar bonsai_stat_lightning_tbolt_cap_base; resetcvar bonsai_stat_lightning_chain_radius; resetcvar bonsai_stat_lightning_reviv_damage; resetcvar bonsai_stat_lightning_reviv_armour"
+}
+
+// =============================================================================
+// Manual Level Setting - set upgrade levels directly
+// =============================================================================
+
+OptionMenu "GunBonsaiManualLevels"
+{
+  class TFLV_Menu_ManualLevelMenu
+  Title "Manual Level Setting"
+}
+
+// =============================================================================
+// Indestructible Options
+// =============================================================================
+
+
+// =============================================================================
+// Indestructible Menus
+// =============================================================================
+
+OptionMenu "IndestructibleOptions"
+{
+  class TFLV_TooltipOptionMenu
+  Title "$TFIS_HEADER_OPTIONS"
+  DefaultSelection 3
+
+  TFLV_TooltipGeometry 0.0, 0.5, 0.25, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "$TFIS_HEADER_COMPATIBILITY", GOLD
+  Option "$TFIS_OPT_IGNORE_DEATH_EXITS", "indestructible_ignore_death_exits", "YesNo"
+  TFLV_Tooltip "$TFIS_TT_IGNORE_DEATH_EXITS"
+  Option "$TFIS_OPT_GUN_BONSAI_MODE", "indestructible_gun_bonsai_mode", "YesNo"
+  TFLV_Tooltip "$TFIS_TT_GUN_BONSAI_MODE"
+
+  StaticText ""
+  StaticText "Bonsai Integration Tuning", ORANGE
+  StaticText "Balance settings are in: Gun Bonsai > Balance Tuning > Player Upgrades > Indestructible Integration.", DARKGRAY
+
+  StaticText ""
+  StaticText "$TFIS_HEADER_APPEARANCE", GOLD
+  Option "$TFIS_OPT_SCREEN_EFFECT", "indestructible_screen_effect", "IndestructibleScreenEffect"
+  TFLV_Tooltip "$TFIS_TT_SCREEN_EFFECT"
+  ColorPicker "$TFIS_OPT_LIFEGAIN_FLASH", "indestructible_lifegain_flash_rgb"
+  TFLV_Tooltip "$TFIS_TT_LIFEGAIN_FLASH"
+
+  StaticText ""
+  StaticText "$TFIS_HEADER_BUFF_CONFIG", GOLD
+  Slider "$TFIS_OPT_DURATION", "indestructible_duration", 0, 300, 1, 0
+  TFLV_Tooltip "$TFIS_TT_DURATION"
+  Slider "$TFIS_OPT_HEAL", "indestructible_restore_hp", 1, 200, 1, 0
+  TFLV_Tooltip "$TFIS_TT_HEAL"
+  Option "$TFIS_OPT_INVINCIBLE", "indestructible_invincibility", "YesNo"
+  TFLV_Tooltip "$TFIS_TT_INVINCIBLE"
+  Option "$TFIS_OPT_DAMAGEBUFF", "indestructible_damage_bonus", "YesNo"
+  TFLV_Tooltip "$TFIS_TT_DAMAGEBUFF"
+  Option "$TFIS_OPT_SLOMO", "indestructible_slomo", "IndestructibleSlomoEffect"
+  TFLV_Tooltip "$TFIS_TT_SLOMO"
+
+  StaticText ""
+  StaticText "$TFIS_HEADER_LIVES_CONFIG", GOLD
+  ScaleSlider "$TFIS_OPT_INITIAL_LIVES", "indestructible_starting_lives", -1, 20, 1, "None", "Infinite"
+  TFLV_Tooltip "$TFIS_TT_INITIAL_LIVES"
+  Slider "$TFIS_OPT_LEVEL_LIVES_MIN", "indestructible_min_lives_per_level", 0, 20, 1, 0
+  TFLV_Tooltip "$TFIS_TT_LEVEL_LIVES_MIN"
+  ScaleSlider "$TFIS_OPT_LIVES_MAX", "indestructible_max_lives", 0, 20, 1, "Unlimited"
+  TFLV_Tooltip "$TFIS_TT_LIVES_MAX"
+
+  StaticText ""
+  StaticText "$TFIS_HEADER_LIVES_CONFIG_BONUSES", GOLD
+  Slider "$TFIS_OPT_LEVEL_LIVES_GRANT", "indestructible_lives_per_level", 0, 20, 1, 0
+  TFLV_Tooltip "$TFIS_TT_LEVEL_LIVES_GRANT"
+  Option "$TFIS_OPT_LEVEL_COMPLETION_REQUIREMENT", "indestructible_completion_requirement", "IndestructibleCompletionRequirement"
+  TFLV_Tooltip "$TFIS_TT_LEVEL_COMPLETION_REQUIREMENT"
+  Slider "$TFIS_OPT_BOSS_LIVES_GRANT", "indestructible_lives_per_boss", 0, 10, 1, 0
+  TFLV_Tooltip "$TFIS_TT_BOSS_LIVES_GRANT"
+  Slider "$TFIS_OPT_DAMAGE_TO_LIVES_RATIO", "indestructible_damage_per_bonus_life", 0, 10000, 100, 0
+  TFLV_Tooltip "$TFIS_TT_DAMAGE_TO_LIVES_RATIO"
+}
+
+OptionValue "IndestructibleScreenEffect" { 0, "None"  1, "Red"  2, "Gold"  3, "Green"  4, "Blue"  5, "Inverse"  6, "Red/White"  7, "Desaturate" }
+OptionValue "IndestructibleSlomoEffect" { 0, "Off"  1, "Freeze"  2, "1/2 Speed"  3, "1/3 Speed"  4, "1/4 Speed" }
+OptionValue "IndestructibleCompletionRequirement" { 0, "None"  1, "100% Kills"  2, "100% Secrets"  3, "Either (non-stacking)"  4, "Either (stacking)"  5, "Both" }
+
+// =============================================================================
+// Doom Points Options
+// =============================================================================
+
+
+// =============================================================================
+// Doom Points Menus
+// =============================================================================
+
+OptionMenu dp_TopMenu { class dp_Top  Title "Top Scores" }
+
+OptionMenu dp_GeneralMenu
+{
+  class TFLV_TooltipOptionMenu
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  Title "General Settings"
+  Option "Show Score HUD", "dp_show", "OnOff"
+  TFLV_Tooltip "Toggles the Doom Points score HUD overlay on or off. Does not affect scoring — points still accumulate when hidden."
+}
+
+OptionValue dp_AnchorValues { 0, "Top"  1, "Center"  2, "Bottom" }
+OptionValue dp_ColorValues { 0, "Brick"  1, "Tan"  2, "Gray"  3, "Green"  4, "Brown"  5, "Gold"  6, "Red"  7, "Blue"  8, "Orange"  9, "White"  10, "Yellow"  11, "Black"  12, "Light Blue"  13, "Cream"  14, "Olive"  15, "Dark Green"  16, "Dark Red"  17, "Dark Brown"  18, "Purple"  19, "Dark Gray"  20, "Cyan"  21, "Ice"  22, "Fire"  23, "Sapphire"  24, "Teal" }
+
+OptionMenu dp_HudMenu
+{
+  class TFLV_TooltipOptionMenu
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  Title "HUD Settings"
+  StaticText "Position", 1
+  Slider "Horizontal Position (%)",    "dp_hud_x",         0.0, 100.0, 5.0
+  TFLV_Tooltip "Horizontal position of the score display as a percentage of screen width. 0 = left edge, 100 = right edge."
+  Option "Vertical Anchor",            "dp_hud_anchor",    "dp_AnchorValues"
+  TFLV_Tooltip "Which edge of the screen the HUD anchors to vertically. Top/Center/Bottom."
+  Slider "Vertical Offset (pixels)",   "dp_hud_y_offset",  -200, 200, 5
+  TFLV_Tooltip "Fine-tune vertical position in pixels relative to the anchor point. Negative moves up, positive moves down."
+  StaticText ""
+  StaticText "Appearance", 1
+  Slider "Scale",                      "dp_hud_scale",     0.5, 3.0, 0.25
+  TFLV_Tooltip "Overall size multiplier for the score HUD. 1.0 is default size."
+  Slider "Opacity",                    "dp_hud_opacity",   0.0, 1.0, 0.1
+  TFLV_Tooltip "Transparency of the score HUD. 0.0 = fully invisible, 1.0 = fully opaque."
+  Option "Score Color",                "dp_hud_color",     "dp_ColorValues"
+  TFLV_Tooltip "Color of the score text."
+  StaticText ""
+  StaticText "Elements", 1
+  Option "Show Score Number",          "dp_hud_show_score",      "OnOff"
+  TFLV_Tooltip "Show the current score value in the HUD."
+  Option "Show Score Label",           "dp_hud_show_label",      "OnOff"
+  TFLV_Tooltip "Show the 'SCORE' label text above the score number."
+  Option "Show Streak Bar",            "dp_hud_show_streak_bar", "OnOff"
+  TFLV_Tooltip "Show the kill streak progress bar. Fills as you chain kills within the streak window."
+  Option "Show Bonus Text",            "dp_hud_show_bonus",      "OnOff"
+  TFLV_Tooltip "Show the current streak kill count and bonus point amount next to your score."
+  Option "Show Multiplayer Tally",     "dp_hud_show_tally",      "OnOff"
+  TFLV_Tooltip "In multiplayer, show a score tally for all players. Has no effect in singleplayer."
+}
+
+OptionMenu dp_KillsMenu
+{
+  class TFLV_TooltipOptionMenu
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  Title "Kill Scoring"
+  StaticText "Scoring Mode", 1
+  Option "Real-Time Damage Scoring",   "dp_realtime_scoring",  "OnOff"
+  TFLV_Tooltip "ON: score accumulates continuously as you deal damage — DoT effects (fire, poison, acid) score as each tick lands. OFF: the full kill value is awarded only when the enemy dies. Real-time feels more responsive but can feel chaotic with elemental builds."
+  StaticText ""
+  StaticText "Bonuses", 1
+  Option "Health Multiplier",          "dp_health_multiplier", "OnOff"
+  TFLV_Tooltip "Multiplies kill score by the enemy's remaining health percentage. Killing a full-health enemy scores more than finishing off a wounded one. Rewards aggressive play."
+  Option "Kill Streak Bonus",          "dp_timer_bonus",       "OnOff"
+  TFLV_Tooltip "Adds bonus points per kill when kills happen within the Streak Window. Also drives the Overdrive upgrade's kill streak counter and VUAS achievement milestones."
+  Slider "Streak Window (seconds)",    "dp_bonus_countdown",   1.0, 10.0, 0.5
+  TFLV_Tooltip "Time in seconds you have to chain kills before the streak resets. Also controls the Overdrive upgrade's charge window. Default 3.0."
+  Slider "Streak Bonus Per Kill",      "dp_streak_bonus_step", 1, 100, 1
+  TFLV_Tooltip "Points added to the streak bonus each time you kill within the window. Bonus accumulates across the streak. Default 10."
+  Slider "Streak Bonus Maximum",       "dp_streak_max_bonus",  0, 2000, 50
+  TFLV_Tooltip "Hard cap on the streak bonus. Once reached, further kills in the streak don't increase the bonus — but the streak itself continues for Overdrive and VUAS purposes. 0 disables the bonus entirely. Default 500."
+
+  StaticText ""
+  StaticText "Streak Kill Count Milestones", GOLD
+  StaticText "Kill thresholds for VUAS streak achievements.", DARKGRAY
+  Slider "Milestone 1 - Kill Count",   "dp_streak_threshold_1", 1, 50,  1, 0
+  TFLV_Tooltip "Kills-in-a-row needed to fire the first streak milestone event. Unlocks the 'On a Roll' achievement in VUAS. Default 5."
+  Slider "Milestone 2 - Kill Count",   "dp_streak_threshold_2", 1, 100, 1, 0
+  TFLV_Tooltip "Kills-in-a-row needed to fire the second streak milestone event. Unlocks the 'Unstoppable' achievement in VUAS. Default 10."
+  Slider "Milestone 3 - Kill Count",   "dp_streak_threshold_3", 1, 200, 1, 0
+  TFLV_Tooltip "Kills-in-a-row needed to fire the third streak milestone event. Unlocks the hidden 'Untouchable' achievement in VUAS. Default 25."
+
+  StaticText ""
+  StaticText "Point Values", 1
+  Slider "Non-Monster Kill Points",    "dp_non_monster_points", 0, 100, 5
+  TFLV_Tooltip "Points awarded for killing non-monster actors (barrels, turrets, etc.). Default 5."
+  StaticText ""
+  StaticText "Death Penalty", 1
+  Slider "Score Lost on Death",        "dp_death_score_penalty", 0, 5000, 50
+  TFLV_Tooltip "Flat score deduction when the player dies. Score cannot drop below 0. Set to 0 to disable. Default 500."
+}
+
+OptionMenu dp_PickupsMenu
+{
+  class TFLV_TooltipOptionMenu
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  Title "Pickup Scoring"
+  StaticText "Toggles", 1
+  Option "Item Pickups",               "dp_items_enabled",       "OnOff"
+  TFLV_Tooltip "Award points when the player picks up items (health, armor, ammo, weapons)."
+  Option "Key Pickups",                "dp_keys_enabled",        "OnOff"
+  TFLV_Tooltip "Award points when the player picks up keys."
+  Option "Powerup Pickups",            "dp_powerups_enabled",    "OnOff"
+  TFLV_Tooltip "Award points when the player picks up powerups (Berserk, Invulnerability, etc.)."
+  Option "Health/Armor Bonus Pickups", "dp_healtharmor_enabled", "OnOff"
+  TFLV_Tooltip "Award points for picking up small bonus items (Health Bonus, Armor Bonus). Uses separate point values below."
+  StaticText ""
+  StaticText "Point Values", 1
+  Slider "Item Points",                "dp_item_points",         0, 100, 5
+  TFLV_Tooltip "Points per item pickup. Applies to health, armor, ammo, and weapons. Default 5."
+  Slider "Key Points",                 "dp_key_points",          0, 1000, 50
+  TFLV_Tooltip "Points per key pickup. Keys are typically rare so defaults are higher. Default 100."
+  Slider "Powerup Points",             "dp_powerup_points",      0, 500, 25
+  TFLV_Tooltip "Points per powerup pickup. Default 50."
+  Slider "Health Bonus Points",        "dp_healthbonus_points",  0, 50, 1
+  TFLV_Tooltip "Points per Health Bonus pickup. These are common so the default is low. Default 1."
+  Slider "Armor Bonus Points",         "dp_armorbonus_points",   0, 50, 1
+  TFLV_Tooltip "Points per Armor Bonus pickup. Default 1."
+}
+
+OptionMenu dp_SecretsMenu
+{
+  class TFLV_TooltipOptionMenu
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  Title "Secret Scoring"
+  Option "Secret Scoring Enabled",     "dp_secrets_enabled", "OnOff"
+  TFLV_Tooltip "Award points when the player discovers secret areas. Separate from the Completion Bonuses awarded at end of map for 100% secrets."
+  Slider "Points per Secret",          "dp_secret_points",   0, 1000, 50
+  TFLV_Tooltip "Points awarded per secret area found. Default 100."
+}
+
+OptionMenu dp_CompletionMenu
+{
+  class TFLV_TooltipOptionMenu
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  Title "Completion Bonuses"
+  StaticText "Awarded at end of map for 100% completion.", 1
+  StaticText ""
+  Option "Completion Bonuses Enabled", "dp_completion_enabled", "OnOff"
+  TFLV_Tooltip "Enable lump-sum bonus points at map end for achieving 100% in each category. Each bonus is independent — you can earn the kills bonus without the secrets bonus."
+  StaticText ""
+  Slider "100% Kills Bonus",           "dp_allkills_bonus",    0, 5000, 100
+  TFLV_Tooltip "Bonus points awarded at map end if you killed every monster. Default 1000."
+  Slider "100% Secrets Bonus",         "dp_allsecrets_bonus",  0, 5000, 100
+  TFLV_Tooltip "Bonus points awarded at map end if you found every secret. Default 500."
+  Slider "100% Items Bonus",           "dp_allitems_bonus",    0, 5000, 100
+  TFLV_Tooltip "Bonus points awarded at map end if you picked up every item. Default 500."
+}
+
+// =============================================================================
+
+OptionMenu dp_MainMenu
+{
+  class TFLV_TooltipOptionMenu
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  Title "Doom Points"
+  TFLV_AnimatedSubmenu "General Settings",    "dp_GeneralMenu"
+  TFLV_AnimatedSubmenu "HUD Settings",        "dp_HudMenu"
+  TFLV_AnimatedSubmenu "Kill Scoring",        "dp_KillsMenu"
+  TFLV_AnimatedSubmenu "Pickup Scoring",      "dp_PickupsMenu"
+  TFLV_AnimatedSubmenu "Secret Scoring",      "dp_SecretsMenu"
+  TFLV_AnimatedSubmenu "Completion Bonuses",  "dp_CompletionMenu"
+  StaticText ""
+  TFLV_AnimatedSubmenu "Top Scores",          "dp_TopMenu"
+  TFLV_Tooltip "View the top scores for the current map."
+}
+
+// =============================================================================
+// Companions Options
+// =============================================================================
+
+
+// =============================================================================
+// Companions Menus
+// =============================================================================
+
+OptionMenu "CompanionsOptions"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Companions"
+
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Mode", GOLD
+  StaticText ""
+  Option "Gun Bonsai Integration Mode", "companions_gun_bonsai_mode", "YesNo"
+  TFLV_Tooltip "ON: Ally count and boss/archvile/revive thresholds scale from the Companions player upgrade. OFF: Standalone mode, all settings driven by CVars below."
+  StaticText ""
+  StaticText "Standalone Settings", GOLD
+  StaticText "Used when Gun Bonsai Integration Mode is OFF.", DARKGRAY
+  StaticText ""
+  Slider "Allies at level start",         "companions_ally_count",  0, 20, 1, 0
+  TFLV_Tooltip "How many companion monsters to spawn at the start of each map. 0 = none."
+  Option "Bosses can spawn",              "companions_bosses",       "YesNo"
+  TFLV_Tooltip "Whether boss monsters can spawn as companions (e.g. Cyberdemon in Doom, Maulotaur/D'Sparil in Heretic, Heresiarch in Hexen, Inquisitor in Strife)."
+  Option "Archviles can spawn",           "companions_archviles",    "YesNo"
+  TFLV_Tooltip "Whether dangerous high-tier monsters can appear as companions (e.g. Arch-Vile in Doom 2, Iron Lich in Heretic, Dark Bishop in Hexen, StrifeBishop in Strife)."
+  Slider "Boss spawn chance (out of 256)","companions_boss_chance",  1, 256, 1, 0
+  TFLV_Tooltip "Probability of a boss companion spawning instead of a regular one."
+  Option "Monster roster",                "companions_compat",       "CompanionsCompat"
+  TFLV_Tooltip "Which monster set to use when selecting random companions."
+  Option "Strife: include Rebels",        "companions_strife_rebels","YesNo"
+  TFLV_Tooltip "Strife roster only: include Rebel soldiers (The Front) in the companion pool."
+  Option "Strife: include Order enemies", "companions_strife_order", "YesNo"
+  TFLV_Tooltip "Strife roster only: include Order combatants (Acolytes, Sentinel, Templar) in the pool. Boss/dangerous tier always draws from Order regardless of this toggle."
+  StaticText ""
+
+  TFLV_AnimatedSubmenu "Gun Bonsai Scaling",   "CompanionsGBSettings"
+  TFLV_Tooltip "Per-level scaling values for the Companions player upgrade. Only applies when Gun Bonsai Integration Mode is ON."
+  TFLV_AnimatedSubmenu "Visuals",              "CompanionsVisuals"
+  TFLV_Tooltip "Color, pointer arrow, and transparency options."
+  TFLV_AnimatedSubmenu "Combat Behavior",      "CompanionsBehavior"
+  TFLV_Tooltip "Targeting, following, idle, strafing, and attack settings."
+  TFLV_AnimatedSubmenu "Stats",                "CompanionsStats"
+  TFLV_Tooltip "HP multiplier, damage factor, resize, and speed."
+  TFLV_AnimatedSubmenu "Teleportation",        "CompanionsTeleport"
+  TFLV_Tooltip "Max range, fog, delay, and no-sight teleport settings."
+  TFLV_AnimatedSubmenu "Healing",              "CompanionsHealing"
+  TFLV_Tooltip "Passive healing type, rate, and range."
+  TFLV_AnimatedSubmenu "Resurrection",         "CompanionsResurrection"
+  TFLV_Tooltip "Revival enable, speed, warmup, and limit settings."
+}
+
+OptionMenu "CompanionsGBSettings"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Companions - Gun Bonsai Scaling"
+
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Balance settings have moved.", ORANGE
+  StaticText "Go to: Gun Bonsai Suite > Gun Bonsai Options > Balance & Upgrade Profiles", DARKGRAY
+  StaticText "  > Balance Tuning > Player Upgrades > Companions Integration", DARKGRAY
+  StaticText ""
+  StaticText "Settings there are saved to your active balance profile.", DARKGRAY
+}
+
+OptionMenu "CompanionsVisuals"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Companions - Visuals"
+
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText ""
+  Option "Colored companions",             "F_Colored",         "YesNo"
+  TFLV_Tooltip "Tint companions with a custom color so they're visually distinct."
+  ColorPicker "Companion color",           "F_Color"
+  TFLV_Tooltip "The color used to tint companions."
+  Option "Pointer arrow above companions", "F_Pointer",         "YesNo"
+  TFLV_Tooltip "Show a small floating arrow above each companion."
+  Option "Translucent when nearby",        "F_TranslucentProx", "YesNo"
+  TFLV_Tooltip "Companions become translucent when you're close, so they don't obstruct your view."
+}
+
+OptionMenu "CompanionsBehavior"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Companions - Combat Behavior"
+
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText ""
+  Option "Enemies target companions",         "F_Targetting",    "YesNo"
+  TFLV_Tooltip "Hostile monsters will also target your companions."
+  Option "Companions alert enemies on attack","F_AttackAlert",   "YesNo"
+  TFLV_Tooltip "When a companion fires or melees, nearby enemies are alerted."
+  Option "Follow player when idle",           "F_Follow",        "YesNo"
+  TFLV_Tooltip "Companions without a target will move toward you."
+  Option "Stand idle when nearby",            "F_Idle",          "YesNo"
+  TFLV_Tooltip "Companions enter their idle animation when close to you."
+  Slider "Idle range",                        "F_IdleRange",     64, 256, 8, 0
+  TFLV_Tooltip "Distance at which companions go idle."
+  Option "Strafe when fighting",              "F_Strafing",      "YesNo"
+  TFLV_Tooltip "Ranged companions strafe sideways while engaging enemies."
+  Option "No friendly fire",                  "F_NoFriendlyFire","YesNo"
+  TFLV_Tooltip "Companion and player attacks cannot hurt each other."
+  Option "Walk through companions",           "F_Walkable",      "YesNo"
+  TFLV_Tooltip "Companions become non-solid when you're very close."
+  Slider "Walk-through range",                "F_WalkableRange", 72, 312, 8, 0
+  TFLV_Tooltip "How close you need to be before companions become non-solid."
+}
+
+OptionMenu "CompanionsStats"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Companions - Stats"
+
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText ""
+  Slider "HP multiplier",    "F_HPMult",       0.1, 10.0, 0.1, 1
+  TFLV_Tooltip "Multiplier applied to each companion's base health on spawn."
+  Slider "Damage factor",    "F_DamageFactor", 0.1, 10.0, 0.1, 1
+  TFLV_Tooltip "Scales companion outgoing damage (multiplicative with base damage factor)."
+  Slider "Damage multiplier","F_DamageMult",   0.1, 10.0, 0.1, 1
+  TFLV_Tooltip "Additional damage multiplier applied to companions."
+  Option "Resize large companions",  "F_Resize", "YesNo"
+  TFLV_Tooltip "Companions taller than 32 or wider than 24 are shrunk to fit in corridors."
+  Option "Speed mode",       "F_Fasters",      "CompanionsSpeed"
+  TFLV_Tooltip "Which companions receive the ALWAYSFAST flag (doubles attack/movement speed)."
+}
+
+OptionMenu "CompanionsTeleport"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Companions - Teleportation"
+
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText ""
+  Option "Teleport to player",                "F_Teleport",        "YesNo"
+  TFLV_Tooltip "Companions teleport back to you when they fall too far behind."
+  Option "Push away on teleport",             "F_WarpPush",        "YesNo"
+  TFLV_Tooltip "Give companions a random velocity burst after teleporting."
+  Option "Show teleport fog",                 "F_FogTel",          "YesNo"
+  TFLV_Tooltip "Spawn teleport fog actors at origin and destination when companions teleport."
+  Slider "Max range before teleporting",      "F_TeleportRange",   512, 8192, 64, 0
+  TFLV_Tooltip "Distance at which a companion forcibly teleports to your position."
+  Option "Teleport if can't see you",         "F_TeleportNoSight", "YesNo"
+  TFLV_Tooltip "Companions also teleport if they've lost sight of you for long enough."
+  Slider "No-sight delay (seconds)",          "F_TeleportDelay",   2, 20, 1, 0
+  TFLV_Tooltip "Seconds without line-of-sight before a companion teleports to you."
+}
+
+OptionMenu "CompanionsHealing"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Companions - Healing"
+
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText ""
+  Option "Healing mode",          "F_Healing",  "CompanionsHeal"
+  TFLV_Tooltip "How companions regenerate health. Off, over time, or only near you."
+  Slider "Heal range (near-you)", "F_HealRange", 64, 312, 8, 0
+  TFLV_Tooltip "How close you must be for near-you healing to work."
+  Slider "Heal rate (frames)",    "F_HealRate",  1, 70, 1, 0
+  TFLV_Tooltip "How often (in game frames) a heal tick occurs. 35 = once per second. Each tick restores 2% of base HP."
+}
+
+OptionMenu "CompanionsResurrection"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Companions - Resurrection"
+
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText ""
+  Option "Companions can be resurrected",  "F_Revive",      "YesNo"
+  TFLV_Tooltip "Stand near a dead companion's corpse to slowly revive them."
+  Option "Death and revival announcements","F_ReviveMsg",   "YesNo"
+  TFLV_Tooltip "Print console messages when a companion dies or is revived."
+  Slider "Resurrection speed",             "F_ReviveSpeed", 0.25, 4.0, 0.25, 2
+  TFLV_Tooltip "Multiplier on resurrection time. Lower = faster. Default 1.0."
+  Slider "Warmup time (ticks)",            "F_ReviveWarmup", 0, 210, 35, 0
+  TFLV_Tooltip "How long you must stand near the corpse before the process begins. 35 ticks = 1 second."
+  Option "Resurrection limit (standalone)","F_ReviveLimit", "CompanionsRevLimit"
+  TFLV_Tooltip "How many times each companion can be resurrected. Only used in standalone mode — upgrade mode uses the bonsai_companions_* scaling values."
+  StaticText ""
+  StaticText "Resurrection process: stand near a dead", DARKGRAY
+  StaticText "companion's corpse. Bigger monsters take", DARKGRAY
+  StaticText "longer. Stepping away stalls progress.", DARKGRAY
+}
+
+OptionValue "CompanionsCompat"  { 0, "Ultimate Doom"  1, "Doom 2"  2, "Heretic"  3, "Hexen"  4, "Chex Quest 3"  5, "Strife" }
+OptionValue "CompanionsSpeed"   { 0, "Never"  1, "Melee only"  2, "Always" }
+OptionValue "CompanionsHeal"    { 0, "Off"  1, "Over time"  2, "Near player only" }
+OptionValue "CompanionsRevLimit"
+{
+  0, "Unlimited"
+  1, "1 resurrection"
+  2, "2 resurrections"
+  3, "3 resurrections"
+  4, "4 resurrections"
+  5, "5 resurrections"
+}
+
+
+// =============================================================================
+// Hyper-V Menus
+// =============================================================================
+
+OptionMenu "VMM_Settings" {
+	class TFLV_TooltipOptionMenu
+	Title "Hyper-V Options"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText "Gun Bonsai Integration", GOLD
+	StaticText "Lock features behind upgrades earned through combat.", DARKGRAY
+	Option "Mobility (Dash/Jump/Crouch)",    "hyperv_gb_mobility",     "OnOff"
+	TFLV_Tooltip "When ON, dash, jump, crouch, ledge climb, and double jump are locked behind the Mobility player upgrade."
+	Option "Combat Training (Melee/Parry)",  "hyperv_gb_melee",        "OnOff"
+	TFLV_Tooltip "When ON, auto-melee, combo, and parry are locked behind the Combat Training player upgrade."
+	Option "Bullet Time (Slomo)",            "hyperv_gb_slomo",        "OnOff"
+	TFLV_Tooltip "When ON, bullet time is a melee/wimpy weapon upgrade. Swiftness is removed from the pool."
+	Option "Regeneration (Health)",          "hyperv_gb_health_regen", "OnOff"
+	TFLV_Tooltip "When ON, health regeneration is locked behind the Regeneration player upgrade."
+	Option "Armor Recovery",                 "hyperv_gb_armor_regen",  "OnOff"
+	TFLV_Tooltip "When ON, armor regeneration is locked behind the Armor Recovery player upgrade."
+	Option "Resupply (Ammo Regen)",          "hyperv_gb_ammo_regen",   "OnOff"
+	TFLV_Tooltip "When ON, ammo regeneration is locked behind the Resupply player upgrade."
+	Option "Agility (Speed/Jump Mult)",      "hyperv_gb_agility",      "OnOff"
+	TFLV_Tooltip "When ON, speed and jump bonuses are locked behind the Agility player upgrade."
+	Option "Grappling Hook",                 "hyperv_gb_hook",         "OnOff"
+	TFLV_Tooltip "When ON, the hook is a weapon upgrade. Each weapon independently unlocks it."
+	Option "Teleporter",                     "hyperv_gb_teleporter",   "OnOff"
+	TFLV_Tooltip "When ON, the teleporter is a weapon upgrade. Each weapon independently unlocks it."
+	StaticText " "
+	StaticText "--- Abilities ---", "Gold"
+	TFLV_AnimatedSubmenu "Movement & Mobility",				"VMM_Movement"
+	TFLV_Tooltip "$VMM_TT_MOVEMENT"
+	TFLV_AnimatedSubmenu "Melee Combat",						"VMM_Melee"
+	TFLV_Tooltip "$VMM_TT_MELEE"
+	TFLV_AnimatedSubmenu "Stamina",							"VMM_Stamina"
+	TFLV_Tooltip "$VMM_TT_STAMINA"
+	TFLV_AnimatedSubmenu "Teleporter",						"VMM_Teleport"
+	TFLV_Tooltip "$VMM_TT_TELEPORT"
+	TFLV_AnimatedSubmenu "Grappling & Meat Hook",			"VMM_Hook"
+	TFLV_Tooltip "$VMM_TT_HOOK"
+	TFLV_AnimatedSubmenu "Slomo Bullet Time",				"VMM_Slomo"
+	TFLV_Tooltip "$VMM_TT_SLOMO"
+	StaticText " "
+	StaticText "--- Game Rules ---", "Gold"
+	TFLV_AnimatedSubmenu "Player Rules",						"VMM_PlayerRules"
+	TFLV_Tooltip "$VMM_TT_PLAYER_RULES"
+	TFLV_AnimatedSubmenu "World Rules",						"VMM_WorldRules"
+	TFLV_Tooltip "$VMM_TT_WORLD_RULES"
+	TFLV_AnimatedSubmenu "Permanent Powerups",				"VMM_Powerups"
+	TFLV_Tooltip "$VMM_TT_POWERUPS"
+	TFLV_AnimatedSubmenu "Regeneration",						"VMM_Regeneration"
+	TFLV_Tooltip "$VMM_TT_REGEN"
+	StaticText " "
+	StaticText "--- Display ---", "Gold"
+	TFLV_AnimatedSubmenu "Ability HUD",						"VMM_Hud"
+	TFLV_Tooltip "$VMM_TT_HUD"
+	StaticText " "
+	Command "Reset ALL Hyper-V Settings to Defaults",	"vmm_reset_all"
+	TFLV_Tooltip "$VMM_TT_RESET_ALL"
+}
+
+OptionMenu "VMM_Movement" {
+	class TFLV_TooltipOptionMenu
+	Title "Movement & Mobility"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_mobility is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	TFLV_AnimatedSubmenu "Dash & Roll Settings",				"VMM_Dash"
+	TFLV_Tooltip "$VMM_TT_DASH"
+	StaticText " "
+	StaticText "Double Jumping", "Gold"
+	Option "Double Jump",						"vmm_double_jump", "OnOff"
+	TFLV_Tooltip "$VMM_TT_DOUBLE_JUMP"
+	StaticText " "
+	StaticText "Ledge Climbing", "Gold"
+	Option "Ledge Climb",						"vmm_ledge_climb", "OnOff"
+	TFLV_Tooltip "$VMM_TT_LEDGE_CLIMB"
+}
+
+OptionMenu "VMM_Dash" {
+	class TFLV_TooltipOptionMenu
+	Title "Dash & Roll Settings"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_mobility is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "General", "Gold"
+	Option "Distance Preset",					"vmm_dash_preset", "DashPreset", vmm_dash
+	TFLV_Tooltip "$VMM_TT_DASH_PRESET"
+	StaticText " "
+	Option "Enable Dash",						"vmm_dash", "OnOff"
+	TFLV_Tooltip "$VMM_TT_DASH_ENABLED"
+	Control "Dash / Roll Modifier Key",			"+vmm_dash_mod"
+	TFLV_Tooltip "$VMM_TT_DASH_MOD_KEY"
+	Option "Double Dash",						"vmm_double_dash", "OnOff", vmm_dash
+	TFLV_Tooltip "$VMM_TT_DOUBLE_DASH"
+	Slider "Dash Cooldown (Sec)",				"vmm_dash_cooldown", "0", "5.0", "0.25", "2", vmm_dash
+	TFLV_Tooltip "$VMM_TT_DASH_COOLDOWN"
+	StaticText " "
+	StaticText "Forward Dash", "Gold"
+	Option "Forward Leap",						"vmm_dash_fwd_leap", "OnOff", vmm_dash
+	TFLV_Tooltip "$VMM_TT_DASH_FWD_LEAP"
+	Slider "Forward Dash Distance",				"vmm_dash_mult", "0.1", "3.0", "0.1", "1", vmm_dash
+	TFLV_Tooltip "$VMM_TT_DASH_FWD_DIST"
+	StaticText " "
+	StaticText "Side Rolls", "Gold"
+	Option "Enable Side Rolls",					"vmm_dash_side", "OnOff", vmm_dash
+	TFLV_Tooltip "$VMM_TT_DASH_SIDE_ENABLED"
+	Slider "Side Roll Distance",				"vmm_dash_side_mult", "0.1", "2.0", "0.1", "1", vmm_dash_side
+	TFLV_Tooltip "$VMM_TT_DASH_SIDE_DIST"
+	StaticText " "
+	StaticText "Back Roll", "Gold"
+	Option "Enable Back Roll",					"vmm_dash_back", "OnOff", vmm_dash
+	TFLV_Tooltip "$VMM_TT_DASH_BACK_ENABLED"
+	Slider "Back Roll Distance",				"vmm_dash_back_mult", "0.1", "2.0", "0.1", "1", vmm_dash_back
+	TFLV_Tooltip "$VMM_TT_DASH_BACK_DIST"
+	StaticText " "
+	StaticText "Dash Stamina Costs", "Gold"
+	Option "Dash Uses Stamina",					"vmm_dash_stamina", "OnOff", vmm_dash
+	TFLV_Tooltip "$VMM_TT_DASH_STAMINA"
+	Slider "Forward Dash Cost",					"vmm_dash_fwd_cost", "0", "100", "5", "0", vmm_dash_stamina
+	TFLV_Tooltip "$VMM_TT_DASH_FWD_COST"
+	Slider "Side Roll Cost",					"vmm_dash_side_cost", "0", "100", "5", "0", vmm_dash_stamina
+	TFLV_Tooltip "$VMM_TT_DASH_SIDE_COST"
+	Slider "Back Roll Cost",					"vmm_dash_back_cost", "0", "100", "5", "0", vmm_dash_stamina
+	TFLV_Tooltip "$VMM_TT_DASH_BACK_COST"
+	StaticText " "
+	Command "Reset Dash to Defaults",			"vmm_reset_dash"
+	TFLV_Tooltip "$VMM_TT_RESET_DASH"
+}
+
+OptionMenu "VMM_Stamina" {
+	class TFLV_TooltipOptionMenu
+	Title "Stamina"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Melee and Dash share a single stamina pool (0-100).", "Gold"
+	StaticText "Below 50: melee cooldown doubles. At 0: dashes blocked.", "DarkGrey"
+	StaticText "Stamina recovers 1 point per game tic automatically.", "DarkGrey"
+	StaticText "Berserk pack bypasses stamina drain for melee.", "DarkGrey"
+}
+
+OptionMenu "VMM_Melee" {
+	class TFLV_TooltipOptionMenu
+	Title "Melee Combat"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_melee is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Melee",						"vmm_melee", "OnOff"
+	TFLV_Tooltip "$VMM_TT_MELEE_ENABLED"
+	Control "Toggle Melee On/Off",				"netevent \"vmm_melee_toggle\""
+	TFLV_Tooltip "$VMM_TT_MELEE_TOGGLE_KEY"
+	StaticText " "
+	StaticText "Mode", "Gold"
+	Option "VR Mode",							"vmm_melee_vr_mode", "OnOff", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_VR_MODE"
+	Option "Key-Activated Mode",				"vmm_melee_key", "OnOff", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_KEY_MODE"
+	Control "Melee Attack Key",					"netevent \"vmm_melee_attack\""
+	TFLV_Tooltip "$VMM_TT_MELEE_ATTACK_KEY"
+	StaticText " "
+	StaticText "Feedback", "Gold"
+	Option "Play Punch Sound",					"vmm_melee_sound", "OnOff", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_SOUND"
+	Option "Show Hit Flash",					"vmm_melee_puff", "OnOff", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_PUFF"
+	StaticText " "
+	TFLV_AnimatedSubmenu "Strike Settings",					"VMM_MeleeStrike"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_STRIKE"
+	TFLV_AnimatedSubmenu "Stamina & Berserk",				"VMM_MeleeStamina"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_STAMINA_BERSERK"
+	TFLV_AnimatedSubmenu "Combo & Crits",					"VMM_MeleeCombo"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_COMBO"
+	TFLV_AnimatedSubmenu "Parry",							"VMM_MeleeParry"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_PARRY"
+	TFLV_AnimatedSubmenu "Weapon Slot 1 Mode",				"VMM_MeleeSlot1"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_SLOT1"
+	TFLV_AnimatedSubmenu "Range Indicator",					"VMM_MeleeIndicator"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_INDICATOR"
+}
+
+OptionMenu "VMM_MeleeStrike" {
+	class TFLV_TooltipOptionMenu
+	Title "Strike Settings"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Range", "Gold"
+	Slider "Attack Range",						"vmm_melee_range", 16, 256, 16, 0, vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_RANGE"
+	StaticText " "
+	StaticText "Damage", "Gold"
+	Option "Damage Preset",						"vmm_melee_preset", "AutoMeleeDamage", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_PRESET"
+	Slider "Minimum Hit Damage",				"vmm_melee_dmg_min", "1", "20", "1", "0", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_DMG_MIN"
+	Slider "Maximum Hit Damage",				"vmm_melee_dmg_max", "1", "20", "1", "0", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_DMG_MAX"
+	Slider "$VMM_MELEE_BASE_CD",		"vmm_melee_base_cooldown",	8, 60, 1, 0
+	TFLV_Tooltip "Base tic delay between auto-melee hits. Lower = faster attacks. Key mode uses ~63% of this value. Default 35 (~1 second)."
+	Slider "Damage Multiplier",					"vmm_melee_mult", "0.1", "5.0", "0.1", "1", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_MULT"
+	StaticText " "
+	Command "Reset Strike Settings to Defaults",	"vmm_reset_strike"
+	TFLV_Tooltip "$VMM_TT_RESET_STRIKE"
+}
+
+OptionMenu "VMM_MeleeStamina" {
+	class TFLV_TooltipOptionMenu
+	Title "Stamina & Berserk"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_melee is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Stamina", "Gold"
+	Option "Enable Stamina System",				"vmm_melee_stamina", "OnOff", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_STAMINA_TOGGLE"
+	StaticText " "
+	StaticText "Berserk Pack", "Gold"
+	Option "Enable Berserk Bonus",				"vmm_melee_berserk", "OnOff", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_BERSERK"
+	Slider "Berserk Damage Multiplier",			"vmm_melee_berserk_dmg", "1.0", "10.0", "0.5", "1", vmm_melee_berserk
+	TFLV_Tooltip "$VMM_TT_MELEE_BERSERK_DMG"
+	Slider "Berserk Cooldown Divisor",			"vmm_melee_berserk_cooldown", "1.0", "5.0", "0.5", "1", vmm_melee_berserk
+	TFLV_Tooltip "$VMM_TT_MELEE_BERSERK_COOLDOWN"
+	Slider "Berserk Stamina Reduction (%)",		"vmm_melee_berserk_stamina", "0", "100", "5", "0", vmm_melee_berserk
+	TFLV_Tooltip "$VMM_TT_MELEE_BERSERK_STAMINA"
+	StaticText " "
+	Command "Reset Stamina/Berserk to Defaults",	"vmm_reset_stamina"
+	TFLV_Tooltip "$VMM_TT_RESET_STAMINA"
+}
+
+OptionMenu "VMM_MeleeCombo" {
+	class TFLV_TooltipOptionMenu
+	Title "Combo & Crits"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_melee is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Combo", "Gold"
+	Option "Enable Combo",						"vmm_melee_combo", "OnOff", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_COMBO"
+	Slider "Minimum Combo Hits",				"vmm_melee_combohit", 2, 10, 1, 0, vmm_melee_combo
+	TFLV_Tooltip "$VMM_TT_MELEE_COMBOHIT"
+	StaticText " "
+	StaticText "Critical Hits", "Gold"
+	Option "Base Crit Chance",					"vmm_melee_combocrit", "MeleeComboChance", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_COMBOCRIT"
+	Option "Berserk Crit Bonus",				"vmm_melee_berserk_crit", "MeleeComboChance", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_BERSERK_CRIT"
+	StaticText " "
+	StaticText "Knockback", "Gold"
+	Slider "Knockback Strength",				"vmm_melee_knockback", "0", "4.0", "0.5", "1", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_KNOCKBACK"
+	Slider "Maximum Knockback Mass",			"vmm_melee_kb_mass", "100", "3000", "100", "0", vmm_melee
+	TFLV_Tooltip "$VMM_TT_MELEE_KB_MASS"
+	StaticText " "
+	StaticText "Stun", "Gold"
+	Option "Stun Chance",						"vmm_melee_stun", "MeleeComboChance", vmm_melee_combocrit
+	TFLV_Tooltip "$VMM_TT_MELEE_STUN"
+	Option "Berserk Stun Bonus",				"vmm_melee_berserk_stun", "MeleeComboChance", vmm_melee_combocrit
+	TFLV_Tooltip "$VMM_TT_MELEE_BERSERK_STUN"
+	StaticText " "
+	Command "Reset Combo & Crits to Defaults",	"vmm_reset_combo"
+	TFLV_Tooltip "$VMM_TT_RESET_COMBO"
+}
+
+OptionMenu "VMM_MeleeParry" {
+	class TFLV_TooltipOptionMenu
+	Title "Parry"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_melee is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Mode", "Gold"
+	Option "Enable Parry",						"vmm_melee_parry", "OnOff", vmm_melee
+	TFLV_Tooltip "$VMM_TT_PARRY_ENABLED"
+	Option "Key Mode",							"vmm_melee_key", "OnOff", vmm_melee_parry
+	TFLV_Tooltip "$VMM_TT_PARRY_KEY_MODE"
+	Option "Show Parry Indicator",				"vmm_hud_parry", "OnOff", vmm_melee_parry
+	TFLV_Tooltip "$VMM_TT_PARRY_HUD"
+	StaticText " "
+	StaticText "Trigger Chance", "Gold"
+	Option "Parry Probability",					"vmm_melee_parry_prob", "MeleeComboChance", vmm_melee_parry
+	TFLV_Tooltip "$VMM_TT_PARRY_PROB"
+	StaticText " "
+	StaticText "Damage Shield  (fires BEFORE hit)", "Gold"
+	Slider "Damage Reduction (%)",				"vmm_melee_parry_crit_resist", "10", "100", "5", "0", vmm_melee_parry
+	TFLV_Tooltip "$VMM_TT_PARRY_RESIST"
+	Slider "Immunity Window (ticks)",			"vmm_melee_parry_duration", "5", "70", "5", "0", vmm_melee_parry
+	TFLV_Tooltip "$VMM_TT_PARRY_DURATION"
+	StaticText " "
+	StaticText "Attacker Stun  (fires AFTER hit)", "Gold"
+	Slider "Min Stun (seconds)",				"vmm_melee_parry_stun_min", "0.1", "10.0", "0.1", "1", vmm_melee_parry
+	TFLV_Tooltip "$VMM_TT_PARRY_STUN_MIN"
+	Slider "Max Stun (seconds)",				"vmm_melee_parry_stun_max", "0.1", "15.0", "0.1", "1", vmm_melee_parry
+	TFLV_Tooltip "$VMM_TT_PARRY_STUN_MAX"
+	StaticText " "
+	Command "Reset Parry to Defaults",			"vmm_reset_parry"
+	TFLV_Tooltip "$VMM_TT_RESET_PARRY"
+}
+
+OptionMenu "VMM_MeleeSlot1" {
+	class TFLV_TooltipOptionMenu
+	Title "Weapon Slot 1 Mode"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Slot 1 Mode",				"vmm_melee_slot1_mode", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOT1_MODE"
+	StaticText " "
+	StaticText "Damage", "Gold"
+	Slider "Crit Bonus Min Damage",				"vmm_melee_slot1_crit_dmg_min", "1", "50", "1", "0", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_CRIT_MIN"
+	Slider "Crit Bonus Max Damage",				"vmm_melee_slot1_crit_dmg_max", "1", "100", "1", "0", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_CRIT_MAX"
+	StaticText " "
+	StaticText "Sounds & Effects", "Gold"
+	Option "Suppress Mod Sounds",				"vmm_melee_slot1_suppress_snd", "OnOff", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_SND"
+	StaticText " "
+	StaticText "Combo Tracking", "Gold"
+	Option "Enable Combo in Slot 1",			"vmm_melee_slot1_combo", "OnOff", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_COMBO"
+	Slider "Rapid Combo Rate (ticks)",			"vmm_melee_slot1_combo_rate", "1", "35", "1", "0", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_COMBO_RATE"
+	StaticText " "
+	StaticText "Rapid-Fire Detection", "Gold"
+	Slider "Rapid Threshold (hits)",			"vmm_melee_slot1_rapid_threshold", "1", "10", "1", "0", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_RAPID_THRESHOLD"
+	Slider "Rapid Window (ticks)",				"vmm_melee_slot1_rapid_window", "1", "35", "1", "0", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_RAPID_WINDOW"
+	Option "Rapid Crit Chance",					"vmm_melee_slot1_rapid_crit", "MeleeComboChance", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_RAPID_CRIT"
+	StaticText " "
+	StaticText "Other", "Gold"
+	Option "Enable Parry in Slot 1",			"vmm_melee_slot1_parry", "OnOff", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_PARRY"
+	Option "Show Indicator in Slot 1",			"vmm_melee_slot1_indicator", "OnOff", vmm_melee_slot1_mode
+	TFLV_Tooltip "$VMM_TT_SLOT1_INDICATOR"
+}
+
+OptionMenu "VMM_MeleeIndicator" {
+	class TFLV_TooltipOptionMenu
+	Title "Range Indicator"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Indicator Style",					"vmm_melee_indicator", "VRMeleeIndicator", vmm_melee
+	TFLV_Tooltip "$VMM_TT_INDICATOR_STYLE"
+	Option "Indicator Active",					"vmm_melee_indicator_on", "OnOff", vmm_melee
+	TFLV_Tooltip "$VMM_TT_INDICATOR_ACTIVE"
+	Control "Toggle Indicator",					"netevent \"vmm_indicator_toggle\""
+	TFLV_Tooltip "$VMM_TT_INDICATOR_TOGGLE"
+	Slider "Activation Distance",				"vmm_melee_indicator_range", "32", "1024", "32", "0", vmm_melee
+	TFLV_Tooltip "$VMM_TT_INDICATOR_RANGE"
+}
+
+OptionMenu "VMM_PlayerRules" {
+	class TFLV_TooltipOptionMenu
+	Title "Player Rules"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Damage", "Gold"
+	Slider "Weapon Damage Multiplier",			"vmm_damage_mult", "0.1", "10.0", "0.1", "1"
+	TFLV_Tooltip "$VMM_TT_DAMAGE_MULT"
+	Slider "Taken Damage Multiplier",			"vmm_taken_damage_mult", "0.1", "5.0", "0.1", "1"
+	TFLV_Tooltip "$VMM_TT_TAKEN_DAMAGE"
+	Slider "Self Damage Multiplier",			"vmm_self_damage_mult", "0.0", "5.0", "0.1", "1"
+	TFLV_Tooltip "$VMM_TT_SELF_DAMAGE"
+	StaticText " "
+	StaticText "Movement", "Gold"
+	StaticText " "
+	StaticText "Note: When hyperv_gb_agility is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	Slider "Jump Strength",						"vmm_jump_mult", "0.5", "5.0", "0.1", "1"
+	TFLV_Tooltip "$VMM_TT_JUMP_MULT"
+	Slider "Sprint Speed",						"vmm_speed_mult", "0.5", "3.0", "0.1", "1"
+	TFLV_Tooltip "$VMM_TT_SPEED_MULT"
+	StaticText " "
+	StaticText "Health", "Gold"
+	Slider "Max Health",						"vmm_max_health", "0", "500", "10", "0"
+	TFLV_Tooltip "$VMM_TT_MAX_HEALTH"
+	StaticText " "
+	StaticText "Start Conditions", "Gold"
+	Slider "Start Health",						"vmm_start_health", "0", "500", "10", "0"
+	TFLV_Tooltip "$VMM_TT_START_HEALTH"
+	Slider "Start Armor",						"vmm_start_armor", "0", "200", "5", "0"
+	TFLV_Tooltip "$VMM_TT_START_ARMOR"
+	StaticText " "
+	Command "Reset Player Rules to Defaults",	"vmm_reset_player_rules"
+	TFLV_Tooltip "$VMM_TT_RESET_PLAYER_RULES"
+}
+
+OptionMenu "VMM_WorldRules" {
+	class TFLV_TooltipOptionMenu
+	Title "World Rules"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Enemies", "Gold"
+	Slider "Enemy Health Multiplier",			"vmm_enemy_health_mult", "0.1", "10.0", "0.1", "1"
+	TFLV_Tooltip "$VMM_TT_ENEMY_HP_MULT"
+	Slider "Enemy Health Cap",					"vmm_enemy_health_max", "0", "10000", "100", "0"
+	TFLV_Tooltip "$VMM_TT_ENEMY_HP_CAP"
+	Slider "Enemy Speed Multiplier",			"vmm_enemy_speed_mult", "0.1", "5.0", "0.1", "1"
+	TFLV_Tooltip "$VMM_TT_ENEMY_SPD_MULT"
+	StaticText " "
+	StaticText "Friendly Monsters", "Gold"
+	Slider "Friend Health Multiplier",			"vmm_friend_health_mult", "0.1", "10.0", "0.1", "1"
+	TFLV_Tooltip "$VMM_TT_FRIEND_HP_MULT"
+	Slider "Friend Health Cap",					"vmm_friend_health_max", "0", "10000", "100", "0"
+	TFLV_Tooltip "$VMM_TT_FRIEND_HP_CAP"
+	Slider "Friend Speed Multiplier",			"vmm_friend_speed_mult", "0.1", "5.0", "0.1", "1"
+	TFLV_Tooltip "$VMM_TT_FRIEND_SPD_MULT"
+	StaticText " "
+	Command "Reset World Rules to Defaults",	"vmm_reset_world_rules"
+	TFLV_Tooltip "$VMM_TT_RESET_WORLD_RULES"
+}
+
+OptionMenu "VMM_Powerups" {
+	class TFLV_TooltipOptionMenu
+	Title "Permanent Powerups"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Topped up every second. Disabling removes immediately.", "DarkGrey"
+	StaticText " "
+	Option "Buddha",							"vmm_perm_buddha", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_BUDDHA"
+	Option "Damage",							"vmm_perm_damage", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_DAMAGE"
+	Option "Double Firing Speed",				"vmm_perm_doublefiring", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_DOUBLEFIRING"
+	Option "Drain",								"vmm_perm_drain", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_DRAIN"
+	Option "Flight",							"vmm_perm_flight", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_FLIGHT"
+	Option "Frightener",						"vmm_perm_frightener", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_FRIGHTENER"
+	Option "Ghost",								"vmm_perm_ghost", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_GHOST"
+	Option "High Jump",							"vmm_perm_highjump", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_HIGHJUMP"
+	Option "Infinite Ammo",						"vmm_perm_infiniteammo", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_INFINITEAMMO"
+	Option "Invisibility",						"vmm_perm_invisibility", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_INVISIBILITY"
+	Option "Invulnerability",					"vmm_perm_invulnerability", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_INVULN"
+	Option "Iron Feet",							"vmm_perm_ironfeet", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_IRONFEET"
+	Option "Light Amp",							"vmm_perm_lightamp", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_LIGHTAMP"
+	Option "Mask",								"vmm_perm_mask", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_MASK"
+	Option "Protection",						"vmm_perm_protection", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_PROTECTION"
+	Option "Regeneration",						"vmm_perm_regeneration", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_REGENERATION"
+	Option "Scanner",							"vmm_perm_scanner", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_SCANNER"
+	Option "Shadow",							"vmm_perm_shadow", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_SHADOW"
+	Option "Speed",								"vmm_perm_speed", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_SPEED"
+	Option "Strength",							"vmm_perm_strength", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_STRENGTH"
+	Option "Targeter",							"vmm_perm_targeter", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_TARGETER"
+	Option "Time Freezer",						"vmm_perm_timefreezer", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_TIMEFREEZER"
+	Option "Torch",								"vmm_perm_torch", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_TORCH"
+	Option "Weapon Level 2",					"vmm_perm_weaponlevel2", "OnOff"
+	TFLV_Tooltip "$VMM_TT_PERM_WEAPONLEVEL2"
+	StaticText " "
+	Command "Disable All Permanent Powerups",	"vmm_reset_powerups"
+	TFLV_Tooltip "$VMM_TT_RESET_POWERUPS"
+}
+
+OptionMenu "VMM_Regeneration" {
+	class TFLV_TooltipOptionMenu
+	Title "Regeneration"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	TFLV_AnimatedSubmenu "Health Regeneration",				"VMM_Health"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_HEALTH_REGEN"
+	TFLV_AnimatedSubmenu "Armor Regeneration",				"VMM_ArmorRegen"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_ARMOR_REGEN"
+	TFLV_AnimatedSubmenu "Ammo Regeneration",				"VMM_AmmoRegen"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_AMMO_REGEN"
+}
+
+OptionValue RegenType {
+	0, "Regeneration"
+	1, "Degeneration"
+}
+
+OptionMenu "VMM_Health" {
+	class TFLV_TooltipOptionMenu
+	Title "Health Regeneration"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_health_regen is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Health Regen",				"vmm_health_regen", "OnOff"
+	TFLV_Tooltip "$VMM_TT_HEALTH_REGEN"
+	Option "Type",								"vmm_regen_type", "RegenType", vmm_health_regen
+	TFLV_Tooltip "$VMM_TT_REGEN_TYPE"
+	Slider "Amount per Interval",				"vmm_regen_amount", "1", "50", "1", "0", vmm_health_regen
+	TFLV_Tooltip "$VMM_TT_REGEN_AMOUNT"
+	Slider "Interval (seconds)",				"vmm_regen_time", "0.5", "30.0", "0.5", "1", vmm_health_regen
+	TFLV_Tooltip "$VMM_TT_REGEN_TIME"
+	StaticText " "
+	StaticText "Range", "Gold"
+	Slider "Min HP (floor)",					"vmm_regen_min", "0", "200", "5", "0", vmm_health_regen
+	TFLV_Tooltip "$VMM_TT_REGEN_MIN"
+	Slider "Max HP (ceiling)",					"vmm_regen_max", "0", "200", "5", "0", vmm_health_regen
+	TFLV_Tooltip "$VMM_TT_REGEN_MAX"
+	StaticText " "
+	StaticText "Feedback", "Gold"
+	Slider "Sound Volume",						"vmm_regen_sound_vol", "0.0", "1.0", "0.1", "1", vmm_health_regen
+	TFLV_Tooltip "$VMM_TT_REGEN_SND"
+	Slider "Visual Intensity",					"vmm_regen_visual", "0.0", "1.0", "0.1", "1", vmm_health_regen
+	TFLV_Tooltip "$VMM_TT_REGEN_VISUAL"
+	ColorPicker "Visual Color",					"vmm_regen_color", vmm_health_regen
+	TFLV_Tooltip "$VMM_TT_REGEN_COLOR"
+	StaticText " "
+	Command "Reset Health Regen to Defaults",	"vmm_reset_health_regen"
+	TFLV_Tooltip "$VMM_TT_RESET_HEALTH_REGEN"
+}
+
+OptionMenu "VMM_ArmorRegen" {
+	class TFLV_TooltipOptionMenu
+	Title "Armor Regeneration"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_armor_regen is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Armor Regen",				"vmm_armor_regen", "OnOff"
+	TFLV_Tooltip "$VMM_TT_ARMOR_REGEN"
+	Option "Type",								"vmm_armor_regen_type", "RegenType", vmm_armor_regen
+	TFLV_Tooltip "$VMM_TT_ARMOR_REGEN_TYPE"
+	Slider "Amount per Interval",				"vmm_armor_regen_amount", "1", "50", "1", "0", vmm_armor_regen
+	TFLV_Tooltip "$VMM_TT_ARMOR_REGEN_AMOUNT"
+	Slider "Interval (seconds)",				"vmm_armor_regen_time", "0.5", "30.0", "0.5", "1", vmm_armor_regen
+	TFLV_Tooltip "$VMM_TT_ARMOR_REGEN_TIME"
+	StaticText " "
+	StaticText "Range", "Gold"
+	Slider "Min Armor (floor)",					"vmm_armor_regen_min", "0", "200", "5", "0", vmm_armor_regen
+	TFLV_Tooltip "$VMM_TT_ARMOR_REGEN_MIN"
+	Slider "Max Armor (ceiling)",				"vmm_armor_regen_max", "0", "200", "5", "0", vmm_armor_regen
+	TFLV_Tooltip "$VMM_TT_ARMOR_REGEN_MAX"
+	StaticText " "
+	StaticText "Feedback", "Gold"
+	Slider "Sound Volume",						"vmm_armor_regen_sound_vol", "0.0", "1.0", "0.1", "1", vmm_armor_regen
+	TFLV_Tooltip "$VMM_TT_ARMOR_REGEN_SND"
+	Slider "Visual Intensity",					"vmm_armor_regen_visual", "0.0", "1.0", "0.1", "1", vmm_armor_regen
+	TFLV_Tooltip "$VMM_TT_ARMOR_REGEN_VISUAL"
+	ColorPicker "Visual Color",					"vmm_armor_regen_color", vmm_armor_regen
+	TFLV_Tooltip "$VMM_TT_ARMOR_REGEN_COLOR"
+	StaticText " "
+	Command "Reset Armor Regen to Defaults",	"vmm_reset_armor_regen"
+	TFLV_Tooltip "$VMM_TT_RESET_ARMOR_REGEN"
+}
+
+OptionMenu "VMM_AmmoRegen" {
+	class TFLV_TooltipOptionMenu
+	Title "Ammo Regeneration"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_ammo_regen is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Ammo Regen",					"vmm_ammo_regen", "OnOff"
+	TFLV_Tooltip "$VMM_TT_AMMO_REGEN"
+	Slider "Interval (seconds)",				"vmm_ammo_regen_time", "1.0", "60.0", "1.0", "1", vmm_ammo_regen
+	TFLV_Tooltip "$VMM_TT_AMMO_REGEN_TIME"
+	Option "Backpack Required",					"vmm_ammo_regen_backpack", "OnOff", vmm_ammo_regen
+	TFLV_Tooltip "$VMM_TT_AMMO_REGEN_BACKPACK"
+	StaticText " "
+	StaticText "Feedback", "Gold"
+	Slider "Sound Volume",						"vmm_ammo_regen_sound_vol", "0.0", "1.0", "0.1", "1", vmm_ammo_regen
+	TFLV_Tooltip "$VMM_TT_AMMO_REGEN_SND"
+	Slider "Visual Intensity",					"vmm_ammo_regen_visual", "0.0", "1.0", "0.1", "1", vmm_ammo_regen
+	TFLV_Tooltip "$VMM_TT_AMMO_REGEN_VISUAL"
+	ColorPicker "Visual Color",					"vmm_ammo_regen_color", vmm_ammo_regen
+	TFLV_Tooltip "$VMM_TT_AMMO_REGEN_COLOR"
+	StaticText " "
+	Command "Reset Ammo Regen to Defaults",		"vmm_reset_ammo_regen"
+	TFLV_Tooltip "$VMM_TT_RESET_AMMO_REGEN"
+}
+
+OptionMenu "VMM_Teleport" {
+	class TFLV_TooltipOptionMenu
+	Title "Teleporter"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_teleporter is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Teleporter",					"vmm_teleport", "OnOff"
+	TFLV_Tooltip "$VMM_TT_TELEPORT_ENABLED"
+	Control "Teleport Key",						"tpmv"
+	TFLV_Tooltip "$VMM_TT_TELEPORT_KEY"
+	Control "Cancel Marker Key",				"netevent \"vmm_teleport_cancel\""
+	TFLV_Tooltip "$VMM_TT_TELEPORT_CANCEL"
+	StaticText " "
+	StaticText "Beam", "Gold"
+	Slider "Beam Speed",						"vmm_tp_beam_speed", "10", "80", "5", "0", vmm_teleport
+	TFLV_Tooltip "$VMM_TT_TP_BEAM_SPEED"
+	Slider "Max Range",							"vmm_tp_max_range", "256", "2048", "128", "0", vmm_teleport
+	TFLV_Tooltip "$VMM_TT_TP_MAX_RANGE"
+	StaticText " "
+	StaticText "Teleport", "Gold"
+	Slider "Cooldown (seconds)",				"vmm_tp_cooldown", "0", "5.0", "0.25", "2", vmm_teleport
+	TFLV_Tooltip "$VMM_TT_TP_COOLDOWN"
+	Option "Restricted Mode",					"vmm_tp_restrict", "OnOff", vmm_teleport
+	TFLV_Tooltip "$VMM_TT_TP_RESTRICT"
+	StaticText " "
+	Command "Reset Teleporter to Defaults",		"vmm_reset_teleport"
+	TFLV_Tooltip "$VMM_TT_RESET_TELEPORT"
+}
+
+OptionMenu "VMM_Hook" {
+	class TFLV_TooltipOptionMenu
+	Title "Grappling & Meat Hook"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_hook is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Hook",						"vmm_hook", "OnOff"
+	TFLV_Tooltip "$VMM_TT_HOOK_ENABLED"
+	Control "Throw Hook",						"netevent \"vmm_throwhook\""
+	TFLV_Tooltip "$VMM_TT_HOOK_THROW_KEY"
+	StaticText " "
+	StaticText "Behaviour", "Gold"
+	Option "Enable Meat Hook (Pull Enemies)",	"vmm_hook_pull", "OnOff", vmm_hook
+	TFLV_Tooltip "$VMM_TT_HOOK_PULL"
+	Slider "Hook Max Distance",					"vmm_hook_maxdist", "100", "2000", "100", "0", vmm_hook
+	TFLV_Tooltip "$VMM_TT_HOOK_MAXDIST"
+	Slider "Hook Cooldown (Sec)",				"vmm_hook_cooldown", "0", "5.0", "0.25", "2", vmm_hook
+	TFLV_Tooltip "$VMM_TT_HOOK_COOLDOWN"
+	StaticText " "
+	StaticText "Target Stun", "Gold"
+	Option "Enable Hook Stun",					"vmm_hook_stun", "OnOff", vmm_hook
+	TFLV_Tooltip "$VMM_TT_HOOK_STUN"
+	Slider "Min Stun Duration (Sec)",			"vmm_hook_stun_dur_min", "0.1", "10.0", "0.1", "1", vmm_hook_stun
+	TFLV_Tooltip "$VMM_TT_HOOK_STUN_MIN"
+	Slider "Max Stun Duration (Sec)",			"vmm_hook_stun_dur_max", "0.1", "15.0", "0.1", "1", vmm_hook_stun
+	TFLV_Tooltip "$VMM_TT_HOOK_STUN_MAX"
+	StaticText " "
+	Command "Reset Hook to Defaults",			"vmm_reset_hook"
+	TFLV_Tooltip "$VMM_TT_RESET_HOOK"
+}
+
+OptionValue DashPreset {
+	0, "Custom"
+	1, "Cautious   (Fwd 1.0 / Side 0.7 / Back 0.5)"
+	2, "Balanced   (Fwd 1.6 / Side 1.2 / Back 1.0)"
+	3, "Aggressive (Fwd 2.0 / Side 1.5 / Back 1.2)"
+	4, "Blink      (Fwd 2.5 / Side 2.0 / Back 1.5)"
+}
+
+OptionValue AutoMeleeDamage {
+	0, "Custom"
+	1, "Scratch  (1-3)"
+	2, "Light    (1-6)"
+	3, "Moderate (2-10)"
+	4, "Heavy    (4-14)"
+	5, "Brutal   (6-20)"
+}
+
+OptionValue VRMeleeIndicator {
+	0, "Off"
+	1, "Glow on Target"
+	2, "Ray to Target"
+	3, "Reticle Ring"
+	4, "Column Effect"
+}
+
+OptionValue MeleeComboChance {
+	0, "Disabled"
+	1, "10% Chance"
+	2, "20% Chance"
+	3, "30% Chance"
+	4, "40% Chance"
+	5, "50% Chance"
+	6, "60% Chance"
+	7, "70% Chance"
+	8, "80% Chance"
+	9, "90% Chance"
+	10, "100% Chance"
+}
+
+OptionMenu "VMM_Slomo" {
+	class TFLV_TooltipOptionMenu
+	Title "Slomo Bullet Time"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_slomo is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Slomo",						"sm_enabled", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_ENABLED"
+	Control "Toggle Slomo",						"netevent \"vmm_slomo_toggle\""
+	TFLV_Tooltip "$VMM_TT_SLOMO_KEY"
+	StaticText " "
+	TFLV_AnimatedSubmenu "Point Pool & Drain",				"VMM_SlomoPool"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_SLOMO_POOL"
+	TFLV_AnimatedSubmenu "Timing & Cooldown",				"VMM_SlomoCooldown"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_SLOMO_TIMING"
+	TFLV_AnimatedSubmenu "Berserk Bonuses",					"VMM_SlomoBerserk"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_SLOMO_BERSERK"
+	TFLV_AnimatedSubmenu "Invulnerability Bonuses",			"VMM_SlomoInvuln"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_SLOMO_INVULN"
+	TFLV_AnimatedSubmenu "Audio",							"VMM_SlomoAudio"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_SLOMO_AUDIO"
+	TFLV_AnimatedSubmenu "HUD & Messages",					"VMM_SlomoHud"
+	TFLV_Tooltip "$VMM_TT_SUBMENU_SLOMO_HUD"
+}
+
+OptionMenu "VMM_SlomoPool" {
+	class TFLV_TooltipOptionMenu
+	Title "Point Pool & Drain"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_slomo is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Pool Size", "Gold"
+	Slider "Total Slomo Points",				"sm_totalslomopoints", "50", "1000", "50", "0"
+	TFLV_Tooltip "$VMM_TT_SLOMO_TOTAL_PTS"
+	Slider "Minimum Points to Activate",		"sm_minimumslomopoints", "1", "200", "5", "0"
+	TFLV_Tooltip "$VMM_TT_SLOMO_MIN_PTS"
+	StaticText " "
+	StaticText "Drain", "Gold"
+	Option "Infinite Slomo",					"sm_noslomopointdrain", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_INFINITE"
+	Slider "Point Drain Delay (ticks)",			"sm_slomodraindelay", "0", "35", "1", "0"
+	TFLV_Tooltip "$VMM_TT_SLOMO_DRAIN_DELAY"
+	StaticText " "
+	StaticText "Recharge", "Gold"
+	Slider "Points Refilled Per Tick",			"sm_slomorefillamount", "1", "20", "1", "0"
+	TFLV_Tooltip "$VMM_TT_SLOMO_REFILL"
+	Slider "Recharge Delay (ticks)",			"sm_slomorechargedelay", "0", "70", "1", "0"
+	TFLV_Tooltip "$VMM_TT_SLOMO_RECHARGE_DELAY"
+}
+
+OptionMenu "VMM_SlomoCooldown" {
+	class TFLV_TooltipOptionMenu
+	Title "Timing & Cooldown"
+
+	StaticText " "
+	StaticText "Note: When hyperv_gb_slomo is ON, these settings", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "Slowdown Depth", "Gold"
+	Slider "Slowdown Depth (%)",				"sm_slowdown_depth", "10", "100", "10", "0"
+	TFLV_Tooltip "$VMM_TT_SLOMO_DEPTH"
+	StaticText " "
+	StaticText "Cooldown", "Gold"
+	Slider "Cooldown Time (ticks)",				"sm_slomocooldownticks", "0", "350", "5", "0"
+	TFLV_Tooltip "$VMM_TT_SLOMO_COOLDOWN"
+	Option "Cooldown Ready at Map Start",		"sm_cooldownreadyatstart", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_COOLDOWN_READY"
+	StaticText " "
+	StaticText "Behaviour", "Gold"
+	Option "Freeze Player Momentum",			"sm_enablefreezemomentum", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_FREEZE_MOM"
+}
+
+OptionMenu "VMM_SlomoBerserk" {
+	class TFLV_TooltipOptionMenu
+	Title "Berserk Bonuses"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Berserk Slomo Bonuses",		"sm_berserk_enabled", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_BERSERK"
+	StaticText " "
+	StaticText "Depth & Speed", "Gold"
+	Slider "Berserk Depth Bonus (%)",			"sm_berserk_depth_bonus", "0", "70", "10", "0", sm_berserk_enabled
+	TFLV_Tooltip "$VMM_TT_SLOMO_BERSERK_DEPTH"
+	StaticText " "
+	StaticText "Drain & Pool", "Gold"
+	Slider "Berserk Drain Reduction (%)",		"sm_berserk_drain_reduction", "0", "100", "5", "0", sm_berserk_enabled
+	TFLV_Tooltip "$VMM_TT_SLOMO_BERSERK_DRAIN"
+	Slider "Berserk Extra Points",				"sm_berserk_points_bonus", "0", "500", "25", "0", sm_berserk_enabled
+	TFLV_Tooltip "$VMM_TT_SLOMO_BERSERK_PTS"
+	StaticText " "
+	StaticText "Cooldown", "Gold"
+	Slider "Berserk Cooldown Reduction (%)",	"sm_berserk_cooldown_reduce", "0", "100", "5", "0", sm_berserk_enabled
+	TFLV_Tooltip "$VMM_TT_SLOMO_BERSERK_CD"
+}
+
+OptionMenu "VMM_SlomoInvuln" {
+	class TFLV_TooltipOptionMenu
+	Title "Invulnerability Bonuses"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Enable Invuln Slomo Bonuses",		"sm_invuln_enabled", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_INVULN"
+	StaticText " "
+	Slider "Slowdown Depth While Invuln (%)",	"sm_invuln_depth", "10", "100", "10", "0", sm_invuln_enabled
+	TFLV_Tooltip "$VMM_TT_SLOMO_INVULN_DEPTH"
+	Option "Infinite Slomo While Invuln",		"sm_invuln_infinite", "OnOff", sm_invuln_enabled
+	TFLV_Tooltip "$VMM_TT_SLOMO_INVULN_INF"
+	Option "Zero Cooldown While Invuln",		"sm_invuln_zero_cooldown", "OnOff", sm_invuln_enabled
+	TFLV_Tooltip "$VMM_TT_SLOMO_INVULN_CD"
+}
+
+OptionMenu "VMM_SlomoAudio" {
+	class TFLV_TooltipOptionMenu
+	Title "Audio"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Allow Music During Slomo",			"sm_pausemusic", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_MUSIC"
+	Option "Allow Sounds During Slomo",			"sm_pausesounds", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_SOUNDS"
+}
+
+OptionMenu "VMM_SlomoHud" {
+	class TFLV_TooltipOptionMenu
+	Title "HUD & Messages"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	StaticText "HUD Bar", "Gold"
+	Option "Show Slomo Bar in HUD",				"vmm_hud_slomo", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_HUD_BAR"
+	Option "Hide Bar When Fully Charged",		"sm_hidefullslomohud", "OnOff", vmm_hud_slomo
+	TFLV_Tooltip "$VMM_TT_SLOMO_HUD_HIDE_FULL"
+	Option "Blink Cooldown Indicator",			"vmm_hud_slomo_cd_blink", "OnOff", vmm_hud_slomo
+	TFLV_Tooltip "$VMM_TT_SLOMO_HUD_CD_BLINK"
+	StaticText " "
+	StaticText "On-Screen Messages", "Gold"
+	Option "Show Active Message",				"sm_enableactivemessage", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_MSG_ACTIVE"
+	Option "Show Status Messages",				"sm_enablecoolmessage", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_MSG_STATUS"
+	Option "Show Minimum Points Ready Message",	"sm_minimumpointreadymsg", "OnOff"
+	TFLV_Tooltip "$VMM_TT_SLOMO_MSG_READY"
+	Slider "Cooldown HUD Division Factor",		"sm_hudcooldowndivfactor", "1", "35", "1", "0"
+	TFLV_Tooltip "$VMM_TT_SLOMO_HUD_DIVFACTOR"
+}
+
+OptionMenu "VMM_Hud" {
+	class TFLV_TooltipOptionMenu
+	Title "Ability HUD"
+	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
+	TFLV_TooltipAppearance "", "Gold", ""
+	StaticText " "
+	Option "Show Ability HUD",					"vmm_hud", "OnOff"
+	TFLV_Tooltip "$VMM_TT_HUD_ENABLED"
+	StaticText " "
+	StaticText "Individual Bars", "Gold"
+	Option "Show Stamina Bar",					"vmm_hud_stamina", "OnOff", vmm_hud
+	TFLV_Tooltip "$VMM_TT_HUD_STAMINA"
+	Option "Show Slomo Bar",					"vmm_hud_slomo", "OnOff", vmm_hud
+	TFLV_Tooltip "$VMM_TT_HUD_SLOMO"
+	Option "Show Dash Cooldown Bar",			"vmm_hud_dash", "OnOff", vmm_hud
+	TFLV_Tooltip "$VMM_TT_HUD_DASH"
+	Option "Show Hook Cooldown Bar",			"vmm_hud_hook", "OnOff", vmm_hud
+	TFLV_Tooltip "$VMM_TT_HUD_HOOK"
+	Option "Show Parry Indicator",				"vmm_hud_parry", "OnOff", vmm_hud
+	TFLV_Tooltip "$VMM_TT_HUD_PARRY"
+	Option "Show Health Regen Indicator",		"vmm_hud_regen", "OnOff", vmm_hud
+	TFLV_Tooltip "$VMM_TT_HUD_REGEN"
+	StaticText " "
+	StaticText "Position (virtual 640x480 space)", "Gold"
+	Slider "Anchor X",							"vmm_hud_x", "0", "580", "4", "0"
+	TFLV_Tooltip "$VMM_TT_HUD_X"
+	Slider "Anchor Y",							"vmm_hud_y", "20", "475", "4", "0"
+	TFLV_Tooltip "$VMM_TT_HUD_Y"
+	StaticText " "
+	StaticText "Bar Dimensions", "Gold"
+	Slider "Bar Height",						"vmm_hud_bar_height", "1", "20", "1", "0"
+	TFLV_Tooltip "$VMM_TT_HUD_HEIGHT"
+	Slider "Bar Width",							"vmm_hud_bar_width", "40", "200", "4", "0"
+	TFLV_Tooltip "$VMM_TT_HUD_WIDTH"
+	Slider "Label Column Width",				"vmm_hud_label_width", "0", "80", "4", "0"
+	TFLV_Tooltip "$VMM_TT_HUD_LABEL_WIDTH"
+	Slider "Bar Gap",							"vmm_hud_bar_gap", "2", "30", "2", "0"
+	TFLV_Tooltip "$VMM_TT_HUD_GAP"
+	StaticText " "
+	Command "Reset HUD to Defaults",			"vmm_reset_hud"
+	TFLV_Tooltip "$VMM_TT_RESET_HUD"
+}

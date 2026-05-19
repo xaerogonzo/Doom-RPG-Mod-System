@@ -1,0 +1,10 @@
+# https://reuse.software/
+
+version = 1
+
+# 1000 basic English words
+# https://en.wiktionary.org/wiki/Appendix:1000_basic_English_words
+[[annotations]]
+path = "tt_1000.txt"
+SPDX-FileCopyrightText = "© 2004-2024 Wikipedia contributors"
+SPDX-License-Identifier = "CC-BY-SA-4.0"

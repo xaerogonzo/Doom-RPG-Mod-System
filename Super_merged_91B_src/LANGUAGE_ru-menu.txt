@@ -1,0 +1,32 @@
+// Localization strings for the Gun Bonsai in-game menu and HUD.
+[ru]
+// Abbreviation for integer and fractional meters.
+TFLV_TT_METERS_INT = "%d м";
+TFLV_TT_METERS_REAL = "%,1f м";
+// Abbreviation for integer and fractional seconds.
+TFLV_TT_SECONDS_INT = "%d сек.";
+TFLV_TT_SECONDS_REAL = "%,2f сек.";
+// Abbreviation for meters.
+// Used as the abbreviation for "level" in the HUD displaying player level.
+// Argument is current level.
+TFLV_HUD_LV = "Ур.%d";
+// Used for gun level and XP display. Arguments are current level, current XP,
+// and XP for next level up.
+TFLV_HUD_LVXP = "Ур.%d (%.0f/%.0f)";
+// Used for the HUD when you have a weapon selected that can't gain XP.
+TFLV_HUD_LV_IGNORED = "Ур.- (---/---)";
+// Displayed when you try to open the menu and it can't find any weapon stats.
+TFLV_MENU_NO_STATS_FOUND = "Нет статистики для текущего оружия.\nУбедитесь, что у вас есть оружие в руках.\nЕсли есть, выстрелите во что-нибудь из него и попробуйте снова.";
+// Headers for the status menu.
+TFLV_MENU_XP = "%d/%d опыта";  // Arguments are current XP and XP for next level.
+TFLV_MENU_TYPE = "Тип";
+TFLV_MENU_LEVEL = "%d-й уровень";  // Argument is current level.
+TFLV_MENU_STATUS_TITLE = "Статус";
+TFLV_MENU_HEADER_PLAYER_STATUS = "Статус игрока";
+TFLV_MENU_HEADER_WEAPON_STATUS = "Статус оружия";
+// headers for player/weapon levelup menus
+TFLV_MENU_PLAYER_LEVELUP_TITLE = "Уровень игрока повышен!";
+TFLV_MENU_WEAPON_LEVELUP_TITLE = "Уровень оружия повышен!";
+TFLV_MENU_PLAYER_LEVELUP = "Вы получили новый уровень!\nВыберите улучшение:";
+TFLV_MENU_WEAPON_LEVELUP = "«%s» получает новый уровень!\nВыберите улучшение:";
+TFLV_MENU_CURRENT_UPGRADES = "Имеющиеся улучшения:";

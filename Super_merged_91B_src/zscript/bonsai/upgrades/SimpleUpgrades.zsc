@@ -1,0 +1,144 @@
+// Simple upgrades that don't need any aux classes and have simple implementations
+// #namespace TFLV::Upgrade;
+
+class TFLV_Upgrade_BlastShaping : TFLV_Upgrade_BaseUpgrade {
+  override double ModifyDamageReceived(Actor pawn, Actor shot, Actor attacker, double damage, Name attacktype) {
+    if (pawn != attacker) return damage;
+    return damage * bonsai_stat_blast_shaping ** level;
+  }
+
+  override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const {
+    return true;
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("damage-reduction", AsPercentDecrease(bonsai_stat_blast_shaping**level));
+  }
+}
+
+class TFLV_Upgrade_BouncyShots : TFLV_Upgrade_BaseUpgrade {
+  override void OnProjectileCreated(Actor player, Actor shot) {
+    shot.bBOUNCEONWALLS = true;
+    shot.bBOUNCEONCEILINGS = true;
+    shot.bBOUNCEONFLOORS = true;
+    shot.bBOUNCEAUTOOFFFLOORONLY = true;
+    shot.BounceCount = max(shot.BounceCount, 2 + level);
+    shot.BounceFactor = 1.0;
+    if (level >= 3) {
+      shot.bALLOWBOUNCEONACTORS = true;
+      shot.bBOUNCEONACTORS = true;
+      shot.bBOUNCEONUNRIPPABLES = true;
+    }
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return info.IsSlowProjectile()
+      && !info.IsRipper()
+      && !info.IsBouncer(false);
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("count", ""..(1 + level));
+    if (level < 3) {
+      fields.insert("extra-effect", "");
+    } else {
+      fields.insert("extra-effect", GetTooltipFormat(1)); // "Shots bounce off enemies."
+    }
+  }
+}
+
+class TFLV_Upgrade_FastShots : TFLV_Upgrade_BaseUpgrade {
+  override void OnProjectileCreated(Actor player, Actor shot) {
+    shot.A_ScaleVelocity(1 + 0.5*level);
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return info.IsSlowProjectile();
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("v-multiplier", string.format("x%.1f", 1 + 0.5*level));
+  }
+}
+
+class TFLV_Upgrade_PiercingShots : TFLV_Upgrade_BaseUpgrade {
+  override void OnProjectileCreated(Actor player, Actor shot) {
+    shot.bRIPPER = true;
+  }
+
+  override double ModifyDamageDealt(Actor pawn, Actor shot, Actor target, double damage, Name attacktype) {
+    if (shot && shot.bRIPPER && shot.bMISSILE) {
+      // Flat per-hit damage reduction, applied once per enemy passed through.
+      // Formula: damage * factor^level — higher levels reduce the penalty.
+      // Speed-independent: whether the projectile is fast or slow it deals
+      // the same fraction per hit, so weapon speed doesn't skew the upgrade.
+      return damage * (bonsai_stat_piercing_damage ** level);
+    }
+    return damage;
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return info.IsProjectile()
+      && !info.IsRipper()
+      && !info.IsBouncer()
+      && info.upgrades.Level("TFLV_Upgrade_FragmentationShots") == 0;
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("damage-per-hit", AsPercent(bonsai_stat_piercing_damage ** level));
+  }
+}
+
+class TFLV_Upgrade_PlayerDamage : TFLV_Upgrade_BaseUpgrade {
+  override double ModifyDamageDealt(Actor pawn, Actor shot, Actor target, double damage, Name attacktype) {
+    double pct = bonsai_stat_player_damage;
+    double bonus = damage * (self.level * pct);
+    return damage + (bonus < self.level ? self.level : bonus);
+  }
+
+  override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const {
+    return true;
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    double pct = bonsai_stat_player_damage;
+    fields.insert("percent-bonus", AsPercentIncrease(1.0 + level*pct));
+    fields.insert("flat-bonus", "+"..level);
+  }
+}
+
+class TFLV_Upgrade_ToughAsNails : TFLV_Upgrade_BaseUpgrade {
+  override double ModifyDamageReceived(Actor pawn, Actor shot, Actor attacker, double damage, Name attacktype) {
+    double base = bonsai_stat_tough_as_nails;
+    double newdamage = damage * (base ** self.level);
+    return max(1, min(newdamage, damage - level));
+  }
+
+  override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const {
+    return true;
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    double base = bonsai_stat_tough_as_nails;
+    fields.insert("percent-bonus", AsPercentDecrease(base**level));
+    fields.insert("flat-bonus", "-"..level);
+  }
+}
+
+class TFLV_Upgrade_WeaponDamage : TFLV_Upgrade_BaseUpgrade {
+  override double ModifyDamageDealt(Actor pawn, Actor shot, Actor target, double damage, Name attacktype) {
+    double pct = bonsai_stat_weapon_damage;
+    double bonus = damage * (self.level * pct);
+    return damage + (bonus < self.level ? self.level : bonus);
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return true;
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    double pct = bonsai_stat_weapon_damage;
+    fields.insert("percent-bonus", AsPercentIncrease(1.0 + level*pct));
+    fields.insert("flat-bonus", "+"..level);
+  }
+}

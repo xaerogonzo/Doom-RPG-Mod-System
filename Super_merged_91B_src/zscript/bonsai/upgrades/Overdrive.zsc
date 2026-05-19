@@ -1,0 +1,87 @@
+// #namespace TFLV::Upgrade;
+// #debug off
+
+class TFLV_Upgrade_Overdrive : TFLV_Upgrade_BaseUpgrade {
+
+  int GetMaxStacks() {
+    // Lv1→3, Lv2→5, Lv3→7, … each level adds 2, capped by the CVar ceiling.
+    return min(1 + int(level) * 2, bonsai_stat_overdrive_max_stacks);
+  }
+
+  int GetWindowTics() {
+    CVar dp_cd = CVar.FindCVar("dp_bonus_countdown");
+    double secs = dp_cd ? dp_cd.GetFloat() : double(bonsai_stat_overdrive_window);
+    return max(35, int(secs * 35));
+  }
+
+  override void OnKill(PlayerPawn pawn, Actor shot, Actor target) {
+    if (!pawn) return;
+    let charge = TFLV_Upgrade_Overdrive_Charge(
+        pawn.FindInventory("TFLV_Upgrade_Overdrive_Charge"));
+    if (!charge) {
+      charge = TFLV_Upgrade_Overdrive_Charge(
+          Actor.Spawn("TFLV_Upgrade_Overdrive_Charge"));
+      if (!charge) return;
+      if (!charge.CallTryPickup(pawn)) { charge.Destroy(); return; }
+      charge = TFLV_Upgrade_Overdrive_Charge(
+          pawn.FindInventory("TFLV_Upgrade_Overdrive_Charge"));
+      if (!charge) return;
+    }
+    charge.AddCharge(GetMaxStacks(), GetWindowTics());
+    // VUAS achievement: fire when fully charged for the first time
+    if (charge.stacks >= GetMaxStacks())
+      EventHandler.SendNetworkEvent("vuas_event:overdrive_maxed");
+  }
+
+  override double ModifyDamageDealt(
+      Actor pawn, Actor shot, Actor target, double damage, Name attacktype) {
+    if (!pawn) return damage;
+    let charge = TFLV_Upgrade_Overdrive_Charge(
+        pawn.FindInventory("TFLV_Upgrade_Overdrive_Charge"));
+    if (!charge || charge.stacks <= 0) return damage;
+    return damage * (1.0 + double(bonsai_stat_overdrive_damage) * charge.stacks);
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return !info.IsMelee() && !info.IsWimpy();
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    int ms = GetMaxStacks();
+    fields.insert("maxstacks", ""..ms);
+    fields.insert("damage",    AsPercentIncrease(
+        1.0 + double(bonsai_stat_overdrive_damage) * ms));
+    fields.insert("perdmg",    AsPercentIncrease(
+        1.0 + double(bonsai_stat_overdrive_damage)));
+    CVar dp_cd = CVar.FindCVar("dp_bonus_countdown");
+    double secs = dp_cd ? dp_cd.GetFloat() : double(bonsai_stat_overdrive_window);
+    fields.insert("window", string.format("%.1fs", secs));
+  }
+}
+
+class TFLV_Upgrade_Overdrive_Charge : Inventory {
+  int stacks;
+  int countdown;
+
+  Default {
+    +Inventory.UNDROPPABLE;
+    +Inventory.UNTOSSABLE;
+    +Inventory.PERSISTENTPOWER;
+    Inventory.MaxAmount 1;
+  }
+
+  void AddCharge(int cap, int windowTics) {
+    stacks    = min(stacks + 1, cap);
+    countdown = windowTics;
+  }
+
+  override void DoEffect() {
+    super.DoEffect();
+    if (countdown > 0) {
+      --countdown;
+      if (countdown == 0) stacks = 0;
+    }
+  }
+
+  override bool ShouldStay() { return true; }
+}

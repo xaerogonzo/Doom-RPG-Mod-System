@@ -1,0 +1,2063 @@
+/*
+*
+* Dash script credits to Apeirogon
+* https://forum.zdoom.org/viewtopic.php?p=1059177#p1059177
+*
+* Ledge grab script credits to dodopod
+* https://forum.zdoom.org/viewtopic.php?f=105&t=59085
+*
+* Grappling/Meat-Hook script credits to Agent_Ash aka Jekyll Grim Payne
+* https://github.com/jekyllgrim/Grappling-Hook
+*
+* Double Jump, Teleport Move and Positional Melee script credits to Ermac
+* Everything is combined, modified and extended by Ermac
+* https://github.com/iAmErmac
+*
+*
+* You may use this in your project. Just leave this comment
+* at the top of this script and give credit please
+*
+*/
+
+class VMovesHandler : EventHandler
+{	
+	//Initialize default values
+	private void initEvent()
+	{
+		PlayerInfo player = players[consolePlayer];
+		if (player == null) { return; }
+		
+		_settings = vmm_Settings.of();
+		
+		player.mo.setinventory("V_Moves", 1, false); //Give player virtual item which grants all the abilities
+		
+		hyperv = player.mo.findinventory("V_Moves");
+		
+		UpdateVMoves(hyperv);
+		
+		//Reset some values to defaults
+		V_Moves(hyperv).dash_cooldown = 0;
+		V_Moves(hyperv).double_dash_available = false;
+		V_Moves(hyperv).jump_buttons_press = 0;
+		V_Moves(hyperv).MaxLedgeHeight = 48;
+		V_Moves(hyperv).ClimbSpeed = 2;
+		V_Moves(hyperv).melee_stamina_val = 100;
+		V_Moves(hyperv).melee_miss_streak = 0;
+		
+		_isInitialized = true;
+	}
+	
+	//Load up the cvar values
+	private void UpdateVMoves(Actor hyperv)
+	{
+		_settings = vmm_Settings.of();
+		PlayerInfo player = players[consolePlayer];
+
+		V_Moves(hyperv).double_dash		= _settings.doubleDashEnabled();
+		
+		V_Moves(hyperv).dash_enabled		= _settings.dashEnabled();
+		V_Moves(hyperv).dash_multiplier 	= _settings.dashMultiplier();
+		V_Moves(hyperv).dash_move_cooldown 	= Ceil(35 * _settings.dashCooldown());
+		V_Moves(hyperv).dash_fwd_leap		= _settings.dashFwdLeap();
+		V_Moves(hyperv).dash_side_enabled	= _settings.dashSideEnabled();
+		V_Moves(hyperv).dash_side_mult		= _settings.dashSideMult();
+		V_Moves(hyperv).dash_back_enabled	= _settings.dashBackEnabled();
+		V_Moves(hyperv).dash_back_mult		= _settings.dashBackMult();
+
+		// Dash distance presets — override individual mults if preset != 0
+		int dashPreset = CVar.FindCVar("vmm_dash_preset") ? CVar.FindCVar("vmm_dash_preset").GetInt() : 0;
+		switch(dashPreset)
+		{
+			case 1: // Cautious
+				V_Moves(hyperv).dash_multiplier = 1.0;
+				V_Moves(hyperv).dash_side_mult  = 0.7;
+				V_Moves(hyperv).dash_back_mult  = 0.5;
+				break;
+			case 2: // Balanced
+				V_Moves(hyperv).dash_multiplier = 1.6;
+				V_Moves(hyperv).dash_side_mult  = 1.2;
+				V_Moves(hyperv).dash_back_mult  = 1.0;
+				break;
+			case 3: // Aggressive
+				V_Moves(hyperv).dash_multiplier = 2.0;
+				V_Moves(hyperv).dash_side_mult  = 1.5;
+				V_Moves(hyperv).dash_back_mult  = 1.2;
+				break;
+			case 4: // Blink
+				V_Moves(hyperv).dash_multiplier = 2.5;
+				V_Moves(hyperv).dash_side_mult  = 2.0;
+				V_Moves(hyperv).dash_back_mult  = 1.5;
+				break;
+			default: break; // Custom — use slider values
+		}
+		V_Moves(hyperv).dash_stamina		= _settings.dashStaminaEnabled();
+		V_Moves(hyperv).dash_fwd_cost		= _settings.dashFwdCost();
+		V_Moves(hyperv).dash_side_cost		= _settings.dashSideCost();
+		V_Moves(hyperv).dash_back_cost		= _settings.dashBackCost();
+		V_Moves(hyperv).double_jumping 		= _settings.doubleJumpEnabled();
+		V_Moves(hyperv).ledge_climbing 		= _settings.ledgeClimbEnabled();
+		V_Moves(hyperv).melee_enabled			= _settings.meleeEnabled();
+		V_Moves(hyperv).melee_vr_mode			= _settings.meleeVRMode();
+		V_Moves(hyperv).melee_disabled			= _settings.hyperVMeleeDisabled();
+		V_Moves(hyperv).melee_key				= _settings.meleeKeyMode();
+		V_Moves(hyperv).melee_sound				= _settings.meleeSoundEnabled();
+		V_Moves(hyperv).melee_puff				= _settings.meleePuffEnabled();
+		V_Moves(hyperv).melee_stamina			= _settings.meleeStaminaEnabled();
+		V_Moves(hyperv).melee_berserk			= _settings.meleeBerserkEnabled();
+		V_Moves(hyperv).melee_range				= _settings.meleeRange();
+		V_Moves(hyperv).melee_mult				= _settings.meleeMult();
+		V_Moves(hyperv).melee_preset			= _settings.meleePreset();
+		V_Moves(hyperv).melee_dmg_min			= _settings.meleeDmgMin();
+		V_Moves(hyperv).melee_dmg_max			= _settings.meleeDmgMax();
+		V_Moves(hyperv).melee_base_cooldown		= _settings.meleeBaseCooldown();
+		V_Moves(hyperv).melee_indicator			= _settings.meleeIndicator();
+		V_Moves(hyperv).melee_indicator_on		= _settings.meleeIndicatorOn();
+		V_Moves(hyperv).melee_indicator_range	= _settings.meleeIndicatorRange();
+		V_Moves(hyperv).melee_combo				= _settings.meleeCombo();
+		V_Moves(hyperv).melee_combohits			= _settings.meleeComboHit();
+		V_Moves(hyperv).melee_combocrit			= _settings.meleeComboCrit();
+		V_Moves(hyperv).melee_knockback			= _settings.meleeKnockback();
+		V_Moves(hyperv).melee_kb_mass			= _settings.meleeKnockbackMass();
+		V_Moves(hyperv).melee_combostun			= _settings.meleeComboStun();
+		V_Moves(hyperv).parry_enabled			= _settings.parryEnabled();
+		V_Moves(hyperv).parry_duration			= _settings.parryDuration();
+		V_Moves(hyperv).parry_stun_min			= _settings.parryStunMin();
+		V_Moves(hyperv).parry_stun_max			= _settings.parryStunMax();
+		V_Moves(hyperv).parry_prob				= _settings.parryProb();
+		V_Moves(hyperv).parry_crit_resist		= _settings.parryCritResist();
+		V_Moves(hyperv).melee_berserk_crit_bonus		= _settings.meleeBerserkCrit();
+		V_Moves(hyperv).berserk_stamina			= _settings.meleeBerserkStamina();
+		V_Moves(hyperv).berserk_stun			= _settings.meleeBerserkStun();
+		V_Moves(hyperv).berserk_dmg_mult		= _settings.meleeBerserkDmg();
+		V_Moves(hyperv).berserk_cooldown_div	= _settings.meleeBerserkCooldown();
+		V_Moves(hyperv).slot1_mode				= _settings.slot1Mode();
+		V_Moves(hyperv).slot1_suppress_snd		= _settings.slot1SuppressSnd();
+		V_Moves(hyperv).slot1_combo				= _settings.slot1Combo();
+		V_Moves(hyperv).slot1_combo_rate		= _settings.slot1ComboRate();
+		V_Moves(hyperv).slot1_indicator			= _settings.slot1Indicator();
+		V_Moves(hyperv).slot1_parry				= _settings.slot1Parry();
+		V_Moves(hyperv).slot1_crit_dmg_min		= _settings.slot1CritDmgMin();
+		V_Moves(hyperv).slot1_crit_dmg_max		= _settings.slot1CritDmgMax();
+		V_Moves(hyperv).slot1_rapid_threshold	= _settings.slot1RapidThreshold();
+		V_Moves(hyperv).slot1_rapid_window		= _settings.slot1RapidWindow();
+		V_Moves(hyperv).slot1_rapid_crit		= _settings.slot1RapidCrit();
+		V_Moves(hyperv).hook_enabled		= _settings.ghookEnabled();
+		V_Moves(hyperv).hook_cooldown		= _settings.ghookCooldown();
+		V_Moves(hyperv).hook_maxdist		= _settings.ghookMaxDist();
+		V_Moves(hyperv).hook_pull			= _settings.ghookPullEnabled();
+		V_Moves(hyperv).hook_stun_enabled	= _settings.ghookStunEnabled();
+		V_Moves(hyperv).hook_stun_min		= _settings.ghookStunMin();
+		V_Moves(hyperv).hook_stun_max		= _settings.ghookStunMax();
+		V_Moves(hyperv).teleport_enabled		= _settings.teleportEnabled();
+		V_Moves(hyperv).teleport_restricted		= _settings.teleportRestricted();
+		V_Moves(hyperv).teleport_beam_speed		= _settings.teleportBeamSpeed();
+		V_Moves(hyperv).teleport_max_range		= _settings.teleportMaxRange();
+		V_Moves(hyperv).teleport_cooldown_max	= int(_settings.teleportCooldown() * 35);
+	}
+	
+	override void OnRegister()
+	{
+		_isInitialized = false;
+	}
+
+	override void WorldLoaded(WorldEvent event)
+	{
+		_isTitlemap = CheckTitlemap();
+		// Reset input state on map change — prevents stuck dash trigger
+		dash_triggered = false;
+		dash_mod_held  = false;
+	}
+	
+	//Action response to keybinds
+    override void NetworkProcess(ConsoleEvent e)
+    {
+        let plr = players[e.Player].mo;
+		if(!plr) return;
+		
+		if(!hyperv) return;
+		
+		// Modifier key release is handled in InputProcess (ui scope)
+		
+		// Directional dash events — WorldTick is the primary path now.
+		// These remain as fallback for external callers.
+		if(e.Name == "vmm_dash_fwd"     || e.Name == "vmm_dash_left"     ||
+		   e.Name == "vmm_dash_right"   || e.Name == "vmm_dash_back"     ||
+		   e.Name == "vmm_dash_fwdleft" || e.Name == "vmm_dash_fwdrght"  ||
+		   e.Name == "vmm_dash_bckleft" || e.Name == "vmm_dash_bckrght"  ||
+		   e.Name == "vmm_dash")
+		{
+			if(!hyperv || !V_Moves(hyperv).dash_enabled) return;
+			let vm = V_Moves(hyperv);
+
+			if     (e.Name == "vmm_dash_left")    { if(!vm.dash_side_enabled) return; vm.pending_dash = -1; }
+			else if(e.Name == "vmm_dash_right")   { if(!vm.dash_side_enabled) return; vm.pending_dash =  1; }
+			else if(e.Name == "vmm_dash_back")    { if(!vm.dash_back_enabled) return; vm.pending_dash =  2; }
+			else if(e.Name == "vmm_dash_fwdleft") { if(!vm.dash_side_enabled) return; vm.pending_dash =  3; }
+			else if(e.Name == "vmm_dash_fwdrght") { if(!vm.dash_side_enabled) return; vm.pending_dash =  4; }
+			else if(e.Name == "vmm_dash_bckleft") { if(!vm.dash_side_enabled || !vm.dash_back_enabled) return; vm.pending_dash = 5; }
+			else if(e.Name == "vmm_dash_bckrght") { if(!vm.dash_side_enabled || !vm.dash_back_enabled) return; vm.pending_dash = 6; }
+			else                                  { vm.pending_dash = 0; }
+
+			vm.forward_thrust = true;
+			return;
+		}
+
+		
+		
+		// Dash modifier key state — bridged from UI scope via network events
+		if(e.Name == "vmm_dash_mod_dn") { dash_mod_held = true;  return; }
+		if(e.Name == "vmm_dash_mod_up") { dash_mod_held = false; return; }
+
+		// Jump
+		if(e.Name == "vmm_jump")   
+		{
+			V_Moves(hyperv).jump_thrust = true;
+			V_Moves(hyperv).jump_buttons_press++;
+			countdown_for_djump_stop = 35;
+		}
+		
+		// Grapple hook
+		if(e.Name == "vmm_throwhook")   
+		{
+			if(V_Moves(hyperv).hook_enabled)
+				V_Moves(hyperv).Activate_Hook();
+		}
+		
+		// Melee attack key press
+		if(e.Name == "vmm_melee_attack")
+		{
+			V_Moves(hyperv).melee_key_pressed = true;
+			// Open parry window if parry enabled
+			if(V_Moves(hyperv).parry_enabled)
+				V_Moves(hyperv).parry_window = 8;
+		}
+		
+		// Toggle melee on/off at runtime
+		if(e.Name == "vmm_melee_toggle")
+		{
+			V_Moves(hyperv).melee_enabled = !V_Moves(hyperv).melee_enabled;
+		}
+		
+		// Toggle melee indicator on/off
+		if(e.Name == "vmm_indicator_toggle")
+		{
+			V_Moves(hyperv).melee_indicator_on = !V_Moves(hyperv).melee_indicator_on;
+		}
+		
+		// Teleport — tap to mark, tap again to go, tap while beam flies to cancel
+        if(e.Name == "vmm_teleport")
+        {
+			V_Moves(hyperv).TeleportKeyPress();
+		}
+
+		// Teleport cancel — clears marker or cancels beam without teleporting
+		if(e.Name == "vmm_teleport_cancel")
+		{
+			V_Moves(hyperv).TeleportCancel();
+		}
+    }
+	
+	// Handle dash modifier key and directional detection
+	override bool InputProcess(InputEvent e)
+	{
+		int key1, key2;
+		
+		if(e.Type == InputEvent.Type_KeyDown && automapactive == false)
+		{
+			// Jump interception
+			[key1, key2] = bindings.getKeysForCommand("+jump");
+			if(e.keyScan == key1 || e.keyScan == key2)
+			{
+				SendNetworkEvent("vmm_jump", e.KeyScan);
+			}
+			
+			// Dash modifier key pressed — set flag, WorldTick handles direction each tic
+			[key1, key2] = bindings.getKeysForCommand("+vmm_dash_mod");
+			if(e.keyScan == key1 || e.keyScan == key2)
+			{
+				SendNetworkEvent("vmm_dash_mod_dn");
+				return false;
+			}
+		}
+		
+		if(e.Type == InputEvent.Type_KeyUp)
+		{
+			// Clear modifier flag on release
+			[key1, key2] = bindings.getKeysForCommand("+vmm_dash_mod");
+			if(e.keyScan == key1 || e.keyScan == key2)
+			{
+				SendNetworkEvent("vmm_dash_mod_up");
+			}
+			
+			// Teleport release
+			[key1, key2] = bindings.getKeysForCommand("tpmv");
+			if(e.keyScan == key1 || e.keyScan == key2)
+			{
+				SendNetworkEvent("vmm_teleport", 1);
+			}
+		}
+		
+		return false;
+	}
+	
+	override void WorldTick()
+	{
+		if (_isTitlemap) { return; } //we dont need to initiate the mod if it's a titlemap
+
+		if (!_isInitialized) { initEvent(); }
+		
+		//make sure player can't spam jumps
+		if(countdown_for_djump_stop > 0)
+			countdown_for_djump_stop--;
+		else
+		{
+			V_Moves(hyperv).jump_thrust = false;
+			V_Moves(hyperv).jump_buttons_press = 0;
+		}
+		
+		//Update all stats — throttled to every 10 tics (~3x/sec)
+		// Fast enough to feel instant from the menu, cuts allocations by 70%
+		_updateTimer++;
+		if(_updateTimer >= 10)
+		{
+			UpdateVMoves(hyperv);
+			_updateTimer = 0;
+		}
+		
+		// Store current button state — must happen before dash detection below
+		PlayerInfo p = players[consolePlayer];
+		if(p != null) last_buttons = p.cmd.buttons;
+
+		// Dash direction detection — runs every tic when modifier is held.
+		// Reading last_buttons here is accurate since we just wrote it above.
+		// Diagonals checked first (higher priority than cardinals).
+		if(dash_mod_held && hyperv)
+		{
+			let vm = V_Moves(hyperv);
+			if(vm && vm.dash_enabled)
+			{
+				bool mv_fwd  = (last_buttons & BT_FORWARD)   != 0;
+				bool mv_back = (last_buttons & BT_BACK)       != 0;
+				bool mv_left = (last_buttons & BT_MOVELEFT)   != 0;
+				bool mv_rght = (last_buttons & BT_MOVERIGHT)  != 0;
+				bool anyDir  = mv_fwd || mv_back || mv_left || mv_rght;
+
+				// Reset trigger when ALL direction keys are released —
+				// player must let go and re-press to get another dash.
+				// This is the correct input model for both single and double dash.
+				if(!anyDir)
+					dash_triggered = false;
+
+				bool dashReady = vm.dash_cooldown <= 0 ||
+				                 (vm.double_dash && vm.double_dash_available);
+
+				if(!dash_triggered && dashReady && anyDir)
+				{
+					if(mv_fwd && mv_left  && !mv_back && !mv_rght && vm.dash_side_enabled)
+						{ vm.pending_dash = 3; vm.forward_thrust = true; dash_triggered = true; }
+					else if(mv_fwd && mv_rght && !mv_back && !mv_left && vm.dash_side_enabled)
+						{ vm.pending_dash = 4; vm.forward_thrust = true; dash_triggered = true; }
+					else if(mv_back && mv_left && !mv_fwd && !mv_rght && vm.dash_side_enabled && vm.dash_back_enabled)
+						{ vm.pending_dash = 5; vm.forward_thrust = true; dash_triggered = true; }
+					else if(mv_back && mv_rght && !mv_fwd && !mv_left && vm.dash_side_enabled && vm.dash_back_enabled)
+						{ vm.pending_dash = 6; vm.forward_thrust = true; dash_triggered = true; }
+					else if(mv_fwd  && !mv_back && !mv_left && !mv_rght)
+						{ vm.pending_dash = 0; vm.forward_thrust = true; dash_triggered = true; }
+					else if(mv_back && !mv_fwd  && !mv_left && !mv_rght && vm.dash_back_enabled)
+						{ vm.pending_dash = 2; vm.forward_thrust = true; dash_triggered = true; }
+					else if(mv_left && !mv_rght && !mv_fwd  && !mv_back && vm.dash_side_enabled)
+						{ vm.pending_dash = -1; vm.forward_thrust = true; dash_triggered = true; }
+					else if(mv_rght && !mv_left && !mv_fwd  && !mv_back && vm.dash_side_enabled)
+						{ vm.pending_dash = 1; vm.forward_thrust = true; dash_triggered = true; }
+				}
+			}
+		}
+		else
+		{
+			// Modifier released — reset trigger so next press can dash again
+			dash_triggered = false;
+		}
+	}
+
+	private static bool CheckTitlemap()
+	{
+		bool isTitlemap = (level.mapname == "TITLEMAP");
+		return isTitlemap;
+	}
+	
+	private bool _isInitialized;
+	private bool _isTitlemap;
+	private vmm_Settings _settings;
+	private int _updateTimer;
+	
+	private inventory hyperv;
+	private int countdown_for_djump_stop;
+	
+	bool dash_mod_held;     // set/cleared via network events from InputProcess
+	bool dash_triggered;    // prevents repeat dashes while modifier is held
+	int last_buttons;       // updated every tic in WorldTick, read by InputProcess
+	
+	// Stamina HUD moved to UnifiedHudHandler (unified_hud.txt)
+}
+
+
+class V_Moves : CustomInventory
+{
+    property MaxLedgeHeight: maxLedgeHeight;
+    property ClimbSpeed: climbSpeed;
+	
+	Default
+	{
+		Inventory.MaxAmount 1;
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.AUTOACTIVATE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.PERSISTENTPOWER;
+	}
+
+	override void doeffect()
+	{
+		super.DoEffect();
+		if (!owner || !owner.player) return;
+		if (owner.health <= 0) return;
+
+		// Update effective crit every tic so parry always has current value
+		// Base crit + berserk bonus (when berserk active and berserk option enabled)
+		bool _has_berserk = melee_berserk && !melee_vr_mode &&
+			owner.player.mo.FindInventory("PowerStrength") != null;
+		effective_crit = clamp(melee_combocrit + (_has_berserk ? melee_berserk_crit_bonus : 0), 0, 10);
+		effective_stun = clamp(melee_combostun + (_has_berserk ? berserk_stun : 0), 0, 10);
+	
+	//////////////////////////////////////
+	// Dash								//
+	//////////////////////////////////////
+	
+		if(dash_enabled && forward_thrust)
+		{
+			// Gate: cooldown (unless double-dash available) and stamina
+			bool cooldown_ok = (dash_cooldown <= 0) ||
+			                   (double_dash && double_dash_available);
+			
+			bool stamina_ok = true;
+			int cost = 0;
+			if(dash_stamina)
+			{
+				if(pending_dash == 0)      cost = dash_fwd_cost;
+				else if(pending_dash == 2) cost = dash_back_cost;
+				else if(pending_dash == 3 || pending_dash == 4) cost = (dash_fwd_cost  + dash_side_cost) / 2;
+				else if(pending_dash == 5 || pending_dash == 6) cost = (dash_back_cost + dash_side_cost) / 2;
+				else                       cost = dash_side_cost;
+				if(melee_stamina_val < cost) stamina_ok = false;
+			}
+			
+			if(cooldown_ok && stamina_ok)
+			{
+				double speed_base = 10.0;
+				double ang = owner.angle;
+				
+				if(pending_dash == 0) // Forward
+				{
+					owner.vel.x = cos(ang)       * speed_base * dash_multiplier;
+					owner.vel.y = sin(ang)       * speed_base * dash_multiplier;
+					if(dash_fwd_leap) owner.vel.z = 6.0;
+				}
+				else if(pending_dash == -1) // Left roll
+				{
+					owner.vel.x = cos(ang + 90)  * speed_base * dash_side_mult;
+					owner.vel.y = sin(ang + 90)  * speed_base * dash_side_mult;
+				}
+				else if(pending_dash == 1) // Right roll
+				{
+					owner.vel.x = cos(ang - 90)  * speed_base * dash_side_mult;
+					owner.vel.y = sin(ang - 90)  * speed_base * dash_side_mult;
+				}
+				else if(pending_dash == 2) // Back roll
+				{
+					owner.vel.x = cos(ang + 180) * speed_base * dash_back_mult;
+					owner.vel.y = sin(ang + 180) * speed_base * dash_back_mult;
+				}
+				else if(pending_dash == 3) // Forward-left diagonal
+				{
+					double diag_mult = (dash_multiplier + dash_side_mult) * 0.5;
+					owner.vel.x = cos(ang + 45)  * speed_base * diag_mult;
+					owner.vel.y = sin(ang + 45)  * speed_base * diag_mult;
+					if(dash_fwd_leap) owner.vel.z = 5.0;
+				}
+				else if(pending_dash == 4) // Forward-right diagonal
+				{
+					double diag_mult = (dash_multiplier + dash_side_mult) * 0.5;
+					owner.vel.x = cos(ang - 45)  * speed_base * diag_mult;
+					owner.vel.y = sin(ang - 45)  * speed_base * diag_mult;
+					if(dash_fwd_leap) owner.vel.z = 5.0;
+				}
+				else if(pending_dash == 5) // Back-left diagonal
+				{
+					double diag_mult = (dash_back_mult + dash_side_mult) * 0.5;
+					owner.vel.x = cos(ang + 135) * speed_base * diag_mult;
+					owner.vel.y = sin(ang + 135) * speed_base * diag_mult;
+				}
+				else if(pending_dash == 6) // Back-right diagonal
+				{
+					double diag_mult = (dash_back_mult + dash_side_mult) * 0.5;
+					owner.vel.x = cos(ang - 135) * speed_base * diag_mult;
+					owner.vel.y = sin(ang - 135) * speed_base * diag_mult;
+				}
+				
+				owner.bspectral = true;
+				
+				if(dash_stamina && cost > 0)
+					melee_stamina_val = clamp(melee_stamina_val - cost, 0, 100);
+				
+				// Double-dash: first dash opens the window; second dash closes it
+				if(double_dash)
+				{
+					if(double_dash_available)
+						double_dash_available = false; // used the second dash
+					else if(dash_cooldown <= 0)
+						double_dash_available = true;  // first dash — open window
+				}
+				
+				// Minimum 4-tic cooldown floor always applies
+				dash_cooldown = max(dash_move_cooldown, 4);
+			}
+			
+			// Always clear thrust after processing — whether we dashed or were blocked
+			forward_thrust = false;
+			pending_dash = 0;
+		}
+		
+		if(dash_cooldown > 0)
+		{
+			dash_cooldown--;
+			// Close double-dash window when cooldown expires
+			if(dash_cooldown == 0) double_dash_available = false;
+		}
+		
+		if(dash_cooldown <= randompick(6, 7, 8) && owner.bspectral == true)
+		{ owner.bspectral = false; }
+		
+	//////////////////////////////////////
+	// Double Jump						//
+	//////////////////////////////////////
+		
+		//Actual processing of double jump
+		//Double jump should be disabled in water or zero gravity environment
+		if(double_jumping && jump_thrust == true && WaterLevel < 2 && !bNOGRAVITY)
+		{
+			if(jump_buttons_press == 2)
+			{
+				owner.vel.z = 0; //cancel the actual jump for pressing jump button
+				owner.A_ChangeVelocity(0, 0, owner.player.mo.jumpZ);
+				jump_thrust = false;
+				jump_buttons_press = 0;
+
+				//owner.a_playsound("");
+			}
+		}
+		
+		//Actual processing of Ledge grabbing
+		if(ledge_climbing)
+		{
+			AttemptLedgeGrabbing();
+		}
+		if(hook_busy > 0)
+		{
+			hook_busy--;
+		}
+		else
+		{
+			hookFired = false;
+		}
+		
+		ActivateTeleporter();
+		Perform_Melee();
+		melee_key_pressed = false;
+
+		// --- Parry system ---
+		if(parry_enabled)
+		{
+			if(!melee_key)
+				parry_window = 1;
+			else if(parry_window > 0)
+				parry_window--;
+
+			// Tick down immunity window
+			if(parry_immune_timer > 0)
+			{
+				parry_immune_timer--;
+				if(parry_immune_timer <= 0)
+				{
+					owner.TakeInventory("ParryShieldCrit", 1);
+					parry_shield_timer  = 0;
+					parry_last_was_crit = false;
+					parry_hud_is_crit   = false;
+				}
+			}
+
+			// Proactive shield — throttle scan in passive mode to every 4 tics
+			if(parry_window > 0 && parry_immune_timer <= 0)
+			{
+				// Passive: scan every 4 tics. Key mode: scan every tic (window is short).
+				// Always scan when shield is active so we catch threats ending quickly.
+				bool shouldScan = melee_key || (level.time % 4) == 0 || parry_shield_timer > 0;
+				if(shouldScan)
+				{
+					bool threatFound = false;
+					BlockThingsIterator pit = BlockThingsIterator.Create(owner, int(melee_range));
+					while(pit.Next())
+					{
+						let mo = pit.thing;
+						if(mo == owner) continue;
+						if(!mo.bISMONSTER || !mo.bSHOOTABLE) continue;
+						if(owner.Distance3D(mo) > melee_range) continue;
+						if(mo.InStateSequence(mo.CurState, mo.FindState("Missile")) ||
+						   mo.InStateSequence(mo.CurState, mo.FindState("Melee")) ||
+						   (mo.target == owner && mo.InStateSequence(mo.CurState, mo.FindState("See")) &&
+						    owner.Distance3D(mo) <= melee_range * 0.75))
+						{
+							threatFound = true;
+							break;
+						}
+					}
+
+					if(threatFound)
+					{
+						if(owner.CountInv("ParryShieldCrit") < 1)
+						{
+							// Effective parry chance = (Base Crit * Parry Prob) / 10
+							int effectiveChance = (effective_crit * parry_prob) / 10;
+							if(effectiveChance > 0 && random(1, 10) <= effectiveChance)
+							{
+								owner.GiveInventory("ParryShieldCrit", 1);
+								let sc = ParryShieldCrit(owner.FindInventory("ParryShieldCrit"));
+								if(sc)
+								{
+									sc.resistPercent    = parry_crit_resist;
+									sc.immunityDuration = max(1, parry_duration);
+									sc.stunMin          = max(0.1, parry_stun_min);
+									sc.stunMax          = max(sc.stunMin, parry_stun_max);
+								}
+								parry_last_was_crit = true;
+								parry_shield_timer  = 1;
+							}
+						}
+						// Shield already present — keep it active
+					}
+					else
+					{
+						// No threat found — remove shield
+						if(parry_shield_timer > 0)
+						{
+							owner.TakeInventory("ParryShieldCrit", 1);
+							parry_shield_timer  = 0;
+							parry_last_was_crit = false;
+						}
+					}
+				} // end shouldScan
+			}
+		}
+		else if(parry_shield_timer > 0 || parry_last_was_crit)
+		{
+			// Parry disabled mid-fight — clean up any active state
+			owner.TakeInventory("ParryShieldCrit", 1);
+			parry_shield_timer  = 0;
+			parry_last_was_crit = false;
+			parry_hud_is_crit   = false;
+			parry_immune_timer  = 0;
+		}
+	}
+	
+	//////////////////////////////////////
+	// Ledge Climb						//
+	//////////////////////////////////////
+	
+	private void AttemptLedgeGrabbing()
+	{
+		if(!owner) return;
+		
+		double ledgeHeight;
+        {
+            vector3 oldPos = owner.pos;
+
+            owner.SetXyz(owner.pos + (0, 0, maxLedgeHeight));   // Account for thin 3D floors
+            ledgeHeight = owner.GetZAt(owner.radius + climbReach, 0) - oldPos.z;
+            owner.SetXyz(oldPos);
+        }
+
+        bool jump = owner.player.cmd.buttons & BT_JUMP;
+        double clearance = owner.GetZAt(owner.radius + climbReach, 0, 0, GZF_CEILING) - owner.GetZAt(owner.radius + climbReach, 0);
+
+        // Start/stop climbing
+        if (!climbing)
+        {
+            if (jump && ledgeHeight > owner.maxStepHeight && ledgeHeight <= maxLedgeHeight)
+            {
+                climbing = true;
+                //A_PlaySound("*Climb", CHAN_BODY);
+            }
+        }
+        else
+        {
+            if (!jump || ledgeHeight > maxLedgeHeight)  // Drop down/get knocked down from ledge
+            {
+                climbing = false;
+            }
+            else if (ledgeHeight <= owner.maxStepHeight && clearance >= 0.5 * owner.height)    // Reach top of ledge
+            {
+                climbing = false;
+
+                // Crouch, so player can fit into small spaces
+                owner.player.crouchFactor = 0.5;
+                owner.SetOrigin(owner.pos + (0, 0, 0.5 * owner.height), false);   // Keep view from jerking
+                owner.player.viewHeight *= 0.5;
+
+                owner.VelFromAngle(thrustSpeed, owner.angle);  // Thrust player onto ledge
+            }
+
+            if (!climbing)  // Exit climbing state
+            {
+                owner.player.SetPsprite(PSP_WEAPON, owner.player.readyWeapon.GetUpState());
+                owner.player.jumpTics = -1;
+            }
+        }
+
+        if (climbing)
+        {
+            // Weapon will reset to Ready state, so we need to set it to Down state every tic
+            owner.player.SetPsprite(PSP_WEAPON, owner.player.readyWeapon.GetDownState());
+
+            let psp = owner.player.GetPsprite(PSP_WEAPON);
+            if (psp.y == WEAPONTOP) // Keep weapon down
+            {
+                psp.y = WEAPONBOTTOM;
+            }
+            else    // Lower weapon twice as fast
+            {
+                psp.y += 6;
+            }
+
+            if (ledgeHeight <= owner.maxStepHeight) // Hold onto ledge at top, if player can't get on it
+            {
+                owner.vel = (0, 0, 0);
+            }
+            else    // Climb ledge
+            {
+                owner.vel = (0, 0, climbSpeed);
+            }
+        }
+	}
+
+	//////////////////////////////////////
+	// Grapple Hook						//
+	//////////////////////////////////////
+	
+	void Activate_Hook()
+	{
+		if (owner.health <= 0) return;
+		
+		if(!hook_busy && !hookFired)
+		{
+			owner.A_StartSound("HookLaunch",CHAN_AUTO);
+			vector2 ofs = FindHooktargetOfs();
+			hook = HookProjectile(owner.SpawnPlayerMissile("HookProjectile"));
+			
+			if(hook)
+			{
+				hook.maxdistance   = int(hook_maxdist);
+				hook.pull_enemy    = hook_pull;
+				hook.stun_enabled  = hook_stun_enabled;
+				hook.stun_dur_min  = hook_stun_min;
+				hook.stun_dur_max  = hook_stun_max;
+			}
+			
+			hookFired = true;
+			hook_busy = Ceil(35 * hook_cooldown);
+		}
+	}
+	
+	vector2 FindHooktargetOfs(int atkdist = 320) {
+		vector2 ofs;			
+		double closestDist = double.infinity;
+		BlockThingsIterator itr = BlockThingsIterator.Create(owner,atkdist);
+		while (itr.next()) {
+			let next = itr.thing;
+			if (next == owner)
+				continue; 
+			if (!next.bShootable || !(next.bIsMonster || (next is "PlayerPawn")))
+				continue;
+			double dist = owner.Distance3D(next);
+			if (dist > atkdist)
+				continue;
+			if (!owner.CheckSight(next,SF_IGNOREWATERBOUNDARY))
+				continue;
+			if (dist < closestDist)
+				closestDist = dist;
+			vector3 targetpos = LevelLocals.SphericalCoords((owner.pos.x,owner.pos.y,owner.player.viewz),next.pos+(0,0,next.default.height*0.5),(owner.angle,owner.pitch));	
+			if (abs(targetpos.x) > 11 || abs(targetpos.y) > 11) {
+				continue;
+			}
+			ofs = targetpos.xy;
+		}
+		return ofs;
+	}
+	
+	//////////////////////////////////////
+	// Teleport Move					//
+	//////////////////////////////////////
+	
+	private void ActivateTeleporter()
+	{
+		if(!owner) return;
+
+		// Tick cooldown
+		if(tp_state == 3)
+		{
+			if(tp_cooldown_timer > 0)
+				tp_cooldown_timer--;
+			else
+				tp_state = 0;
+			return;
+		}
+
+		// Track beam range while in flight
+		if(tp_state == 1 && tp_active_beam)
+		{
+			tp_beam_dist += tp_active_beam.vel.Length();
+			if(tp_beam_dist > teleport_max_range)
+			{
+				tp_active_beam.Destroy();
+				tp_active_beam = null;
+				tp_beam_dist = 0;
+				tp_state = 0;
+			}
+		}
+		else if(tp_state == 1 && !tp_active_beam)
+		{
+			// Beam destroyed itself on landing — state updated by OnBeamLanded/OnBeamExpired
+			tp_beam_dist = 0;
+		}
+	}
+
+	// Called by NetworkProcess on key press
+	void TeleportKeyPress()
+	{
+		if(!teleport_enabled) return;
+
+		if(tp_state == 0)
+		{
+			// Idle — fire beam
+			SpawnTeleporterBeam();
+			tp_state = 1;
+			owner.A_StartSound("weapons/pistol", CHAN_AUTO, CHANF_NOPAUSE, 0.6, ATTN_NORM, 1.4);
+		}
+		else if(tp_state == 1)
+		{
+			// Beam in flight — do nothing, wait for it to land
+			// Use the cancel key to abort
+		}
+		else if(tp_state == 2)
+		{
+			// Marker placed — teleport
+			Teleport_Player(owner.player.mo);
+			if(PortalCircle) { PortalCircle.Destroy(); PortalCircle = null; }
+			PortalPos = (0, 0, 0);
+			tp_state = 3;
+			tp_cooldown_timer = teleport_cooldown_max;
+			owner.A_StartSound("misc/teleport", CHAN_AUTO, CHANF_NOPAUSE);
+		}
+		// tp_state == 3 (cooldown): ignore press
+	}
+
+	// Dedicated cancel — clears beam or marker without teleporting.
+	// Cancelling a flying beam: free (no cooldown penalty).
+	// Cancelling a placed marker: half cooldown penalty to prevent free scouting.
+	void TeleportCancel()
+	{
+		if(tp_state == 1)
+		{
+			// Beam in flight — free cancel
+			if(tp_active_beam) { tp_active_beam.Destroy(); tp_active_beam = null; }
+			tp_beam_dist = 0;
+			tp_state     = 0;
+			PortalPos    = (0, 0, 0);
+			owner.A_StartSound("misc/chat", CHAN_AUTO, CHANF_NOPAUSE, 0.5);
+		}
+		else if(tp_state == 2)
+		{
+			// Marker placed — half cooldown penalty
+			if(PortalCircle) { PortalCircle.Destroy(); PortalCircle = null; }
+			PortalPos         = (0, 0, 0);
+			tp_state          = 3;
+			tp_cooldown_timer = teleport_cooldown_max / 2;
+			owner.A_StartSound("misc/chat", CHAN_AUTO, CHANF_NOPAUSE, 0.5);
+		}
+	}
+
+	// Called by Telebeam_Dummy when it lands
+	void OnBeamLanded(Vector3 landPos)
+	{
+		if(tp_state != 1) return;
+
+		PortalPos      = landPos;
+		tp_active_beam = null;
+		tp_beam_dist   = 0;
+		tp_state       = 2;
+
+		if(!PortalCircle) PortalCircle = Actor.Spawn("PortalIndicator");
+		PortalCircle.bInvisible = false;
+		PortalCircle.SetOrigin(landPos, true);
+		owner.A_StartSound("misc/spawn", CHAN_AUTO, CHANF_NOPAUSE, 0.7);
+	}
+
+	// Called by Telebeam_Dummy when it expires without landing
+	void OnBeamExpired()
+	{
+		if(tp_state == 1)
+		{
+			tp_active_beam = null;
+			tp_beam_dist   = 0;
+			tp_state       = 0;
+		}
+	}
+
+	void SpawnTeleporterBeam()
+	{
+		if(!owner) return;
+		let plr = owner.player.mo;
+		Actor beam = plr.SpawnPlayerMissile("Telebeam_Dummy");
+		if(beam)
+		{
+			beam.master    = self;
+			beam.Speed     = teleport_beam_speed;
+			double len     = beam.vel.Length();
+			if(len > 0) beam.vel = beam.vel * (teleport_beam_speed / len);
+			tp_active_beam = beam;
+			tp_beam_dist   = 0;
+		}
+	}
+
+	void Teleport_Player(PlayerPawn plr)
+	{
+		if(PortalPos == (0, 0, 0)) return;
+		plr.TeleportMove(PortalPos, false);
+	}
+
+	//////////////////////////////////////
+	// Unified Melee					//
+	//////////////////////////////////////
+
+	void Perform_Melee()
+	{
+		if(!melee_enabled || melee_disabled) return;
+		
+		Double b_angle = owner.angle;
+		double pitch = owner.AimTarget() ? owner.BulletSlope(null, ALF_PORTALRESTRICT) : owner.pitch;
+		int attack_range = int(melee_range);
+
+		// --- Slot 1 detection (only when slot1_mode enabled) ---
+		if(slot1_mode)
+		{
+			slot1_active = false;
+			let rw = owner.player.ReadyWeapon;
+			if(rw != null)
+			{
+				// Walk slot 1 entries and compare against ready weapon class
+				class<Weapon> rwClass = rw.GetClass();
+				for(int i = 0; i < 8; i++)
+				{
+					let slotWeap = owner.player.weapons.GetWeapon(1, i);
+					if(slotWeap == null) break;
+					if(slotWeap == rwClass) { slot1_active = true; break; }
+				}
+			}
+			// Rapid-fire window decay
+			if(slot1_rapid_timer > 0)
+				slot1_rapid_timer--;
+			else
+				slot1_rapid_counter = 0;
+			slot1_is_rapid = slot1_active &&
+			                 (slot1_rapid_counter >= max(1, slot1_rapid_threshold));
+			// Combo throttle decay
+			if(slot1_combo_timer > 0) slot1_combo_timer--;
+		}
+		else
+		{
+			slot1_active   = false;
+			slot1_is_rapid = false;
+		}
+		
+		// Stamina recovery — every tic regardless of attacking
+		if(melee_stamina && !melee_vr_mode)
+		{
+			if(melee_stamina_val < 100) melee_stamina_val++;
+		}
+		else
+		{
+			melee_stamina_val = 100;
+		}
+		
+		// Retaliation window countdown
+		if(player_hurt_tics > 0) player_hurt_tics--;
+		
+		// --- Indicator scan (wide radius, no cone) ---
+		// Suppressed in slot1 mode if slot1_indicator is off
+		Actor indicator_target;
+		bool runIndicator = melee_indicator > 0 && melee_indicator_on &&
+		                    (!slot1_active || slot1_indicator);
+		if(runIndicator)
+		{
+			double best_ind_dist = double.infinity;
+			BlockThingsIterator ind_itr = BlockThingsIterator.Create(owner, melee_indicator_range);
+			while(ind_itr.Next())
+			{
+				let c = ind_itr.thing;
+				if(c == owner) continue;
+				if(!c.bShootable || !c.bIsMonster) continue;
+				double dist = owner.Distance3D(c);
+				if(dist > melee_indicator_range) continue;
+				if(dist < best_ind_dist) { best_ind_dist = dist; indicator_target = c; }
+			}
+		}
+		
+		if(indicator_target && runIndicator)
+		{
+			if(!vr_indicator_tracker || vr_indicator_tracker.bDestroyed)
+				vr_indicator_tracker = vrMeleeIndicatorTracker(Actor.Spawn("vrMeleeIndicatorTracker", owner.pos));
+			if(vr_indicator_tracker)
+			{
+				vr_indicator_tracker.ind_target    = indicator_target;
+				vr_indicator_tracker.master        = owner;
+				vr_indicator_tracker.style         = melee_indicator;
+				vr_indicator_tracker.attack_range  = attack_range;
+				vr_indicator_tracker.b_angle       = b_angle;
+			}
+		}
+		else if(vr_indicator_tracker && !vr_indicator_tracker.bDestroyed)
+		{
+			vr_indicator_tracker.Destroy();
+			vr_indicator_tracker = null;
+		}
+		
+		// --- Fire mode ---
+		// VR mode: always passive, fixed 22-tic cooldown, no stamina/berserk complexity
+		// Normal mode: key or passive, dynamic cooldown with all modifiers
+		bool should_fire;
+		if(melee_vr_mode)
+			should_fire = true;
+		else
+			should_fire = melee_key ? melee_key_pressed : true;
+		
+		if(!should_fire) return;
+		
+		if(melee_delay > 0) { melee_delay--; return; }
+		
+		// --- Damage ---
+		bool has_berserk = melee_berserk && !melee_vr_mode &&
+			owner.player.mo.FindInventory("PowerStrength") != null;
+		
+		int m_damage;
+		if(melee_vr_mode)
+		{
+			// VR mode: simple random damage scaled by mult, berserk x10
+			m_damage = (random(1, 10) * int(melee_mult)) << 1;
+			if(owner.player.mo.FindInventory("PowerStrength")) m_damage *= 10;
+		}
+		else
+		{
+			// Normal mode: preset/custom min-max, float mult, berserk x3
+			int dmg_lo, dmg_hi;
+			switch(melee_preset)
+			{
+			case 1: dmg_lo=1;  dmg_hi=3;  break;
+			case 2: dmg_lo=1;  dmg_hi=6;  break;
+			case 3: dmg_lo=2;  dmg_hi=10; break;
+			case 4: dmg_lo=4;  dmg_hi=14; break;
+			case 5: dmg_lo=6;  dmg_hi=20; break;
+			default:
+				dmg_lo = clamp(melee_dmg_min, 1, melee_dmg_max);
+				dmg_hi = max(melee_dmg_max, dmg_lo);
+				break;
+			}
+			m_damage = int(random(dmg_lo, dmg_hi) * melee_mult);
+			if(m_damage < 1) m_damage = 1;
+			if(has_berserk) m_damage = int(m_damage * berserk_dmg_mult);
+		}
+		
+		// --- Cooldown ---
+		int base_cooldown;
+		if(melee_vr_mode)
+		{
+			base_cooldown = max(8, int(melee_base_cooldown * 0.63));
+		}
+		else
+		{
+			base_cooldown = melee_base_cooldown;
+			if(has_berserk) base_cooldown = int(base_cooldown / berserk_cooldown_div);
+			if(player_hurt_tics > 0) base_cooldown = int(base_cooldown * 0.55);
+			double speed = sqrt(owner.vel.x * owner.vel.x + owner.vel.y * owner.vel.y);
+			if(speed > 6.0) base_cooldown -= 8;
+			else if(speed > 3.0) base_cooldown -= 4;
+			if(melee_stamina && melee_stamina_val < 50) base_cooldown *= 2;
+			if(base_cooldown < 8) base_cooldown = 8;
+		}
+		
+		// --- Attack scan (cone) ---
+		Actor hit_target;
+		double hit_angle;
+		double best_dist = double.infinity;
+		
+		BlockThingsIterator itr = BlockThingsIterator.Create(owner, attack_range);
+		while(itr.Next())
+		{
+			let candidate = itr.thing;
+			if(candidate == owner) continue;
+			if(!candidate.bShootable || !candidate.bIsMonster) continue;
+			double dist = owner.Distance3D(candidate);
+			if(dist > attack_range) continue;
+			if(!owner.CheckSight(candidate, SF_IGNOREWATERBOUNDARY)) continue;
+			double ang_diff = abs(deltaangle(owner.angle, owner.AngleTo(candidate)));
+			if(ang_diff > 30.0) continue;
+			if(dist < best_dist) { best_dist = dist; hit_target = candidate; hit_angle = owner.AngleTo(candidate); }
+		}
+		
+		if(hit_target)
+		{
+			melee_miss_streak = 0;
+
+			if(slot1_active)
+			{
+				// -------------------------------------------------------
+				// SLOT 1 MODE — weapon does its own damage
+				// Mod only contributes additive crit bonus and combo tracking
+				// -------------------------------------------------------
+
+				// Track rapid-fire window
+				slot1_rapid_counter++;
+				slot1_rapid_timer = max(1, slot1_rapid_window);
+
+				// Combo tracking — throttled in rapid mode
+				bool s1_did_crit = false;
+				if(slot1_combo && (!slot1_is_rapid || slot1_combo_timer <= 0))
+				{
+					int saved_crit  = effective_crit;
+					int saved_stun  = effective_stun;
+					effective_crit  = slot1_is_rapid ? slot1_rapid_crit : effective_crit;
+					effective_stun  = slot1_is_rapid ? 0 : effective_stun;
+					s1_did_crit     = CheckMeleeCombo(hit_target);
+					effective_crit  = saved_crit;
+					effective_stun  = saved_stun;
+					if(slot1_is_rapid) slot1_combo_timer = max(1, slot1_combo_rate);
+				}
+
+				// Additive crit bonus — only fires on a crit, never base damage
+				if(s1_did_crit)
+				{
+					int crit_lo    = max(1, slot1_crit_dmg_min);
+					int crit_hi    = max(crit_lo, slot1_crit_dmg_max);
+					int crit_bonus = random(crit_lo, crit_hi);
+					if(has_berserk) crit_bonus = int(crit_bonus * berserk_dmg_mult);
+					owner.LineAttack(hit_angle, attack_range, pitch, crit_bonus,
+					                 "None", "vmDummyPuff", LAF_NORANDOMPUFFZ);
+					// Crit sound only if suppress_snd is off
+					if(!slot1_suppress_snd)
+						hit_target.A_PlaySound("vrfist/strong", 6);
+					if(melee_puff) Actor.Spawn("autoMeleeFlashTracker",
+						hit_target.pos + (0, 0, hit_target.default.height * 0.5));
+				}
+				// No crit = no mod output at all. Weapon handles everything else.
+
+				// Stamina drain still applies in slot 1 mode
+				if(melee_stamina && !melee_vr_mode)
+				{
+					int cost = 20;
+					if(has_berserk && melee_berserk)
+						cost = cost - (cost * berserk_stamina / 100);
+					if(cost > 0)
+						melee_stamina_val = clamp(melee_stamina_val - cost, 0, 100);
+				}
+				melee_delay = base_cooldown;
+			}
+				else
+				{
+					// -------------------------------------------------------
+					// NORMAL MODE
+					// -------------------------------------------------------
+					// Combo OFF: crit rolls on every hit
+					// Combo ON:  crit rolls only after N consecutive hits on same target
+					bool did_combo_crit = CheckMeleeCombo(hit_target);
+					bool did_standalone_crit = !did_combo_crit && !melee_combo &&
+					                           effective_crit > 0 &&
+					                           (random(1, 10) <= effective_crit);
+					bool did_crit = did_combo_crit || did_standalone_crit;
+
+					m_damage = did_crit ? int(m_damage * frandom(1.5, 3.0)) : m_damage;
+					owner.LineAttack(hit_angle, attack_range, pitch, m_damage,
+					                 "None", "vmDummyPuff", LAF_NORANDOMPUFFZ);
+
+					if(did_crit)
+					{
+						hit_target.A_PlaySound("vrfist/strong", 6);
+						if(melee_knockback > 0 && hit_target.mass <= melee_kb_mass)
+							hit_target.A_Recoil(10 * melee_knockback);
+						if(effective_stun > 0 && random(1, 10) <= effective_stun)
+							hit_target.GiveInventory("vrMeleeComboStunner", 1);
+					}
+					else if(melee_sound)
+						hit_target.A_PlaySound("vrfist/punch", 6);
+
+					if(melee_puff) Actor.Spawn("autoMeleeFlashTracker",
+						hit_target.pos + (0, 0, hit_target.default.height * 0.5));
+					if(melee_stamina && !melee_vr_mode)
+					{
+						int cost = 20;
+						if(has_berserk && melee_berserk)
+							cost = cost - (cost * berserk_stamina / 100);
+						if(cost > 0)
+							melee_stamina_val = clamp(melee_stamina_val - cost, 0, 100);
+					}
+					melee_delay = base_cooldown;
+				}
+		}
+		else if(!melee_vr_mode)
+		{
+			melee_miss_streak++;
+			if(melee_miss_streak >= 3) { melee_delay = 15; melee_miss_streak = 0; }
+		}
+	}
+	
+	private bool CheckMeleeCombo(Actor target)
+	{
+		if(!melee_combo) return false;
+		
+		target.GiveInventory("meleeComboMarker", 1);
+		int hitcount = target.CountInv("meleeComboMarker");
+		bool is_critical_hit = false;
+		
+		if(hitcount >= melee_combohits)
+		{
+			target.TakeInventory("meleeComboMarker", 10);
+			if(random(1, 10) <= effective_crit)
+			{
+				is_critical_hit = true;
+				target.A_PlaySound("vrfist/strong", 6);
+				if(random(1, 10) <= effective_stun)
+				{
+					target.GiveInventory("vrMeleeComboStunner", 1);
+					target.A_Quake(random(1,2), 22, 0, 64, "");
+					target.A_PlaySound("vrfist/rip", 5);
+					target.A_PlaySound("vrfist/beat", 7);
+				}
+			}
+		}
+		return is_critical_hit;
+	}
+
+	States
+	{
+	Use:
+		TNT1 A 0;
+		Fail;
+	Pickup:
+		TNT1 A 0
+		{
+			return true;
+		}
+		Stop;
+	}
+	
+	//Dash
+	bool dash_enabled; //set by cvar
+	bool double_dash; //set by cvar
+	bool dash_fwd_leap; //set by cvar
+	bool dash_side_enabled; //set by cvar
+	double dash_side_mult; //set by cvar
+	bool dash_back_enabled; //set by cvar
+	double dash_back_mult; //set by cvar
+	bool dash_stamina; //set by cvar
+	int dash_fwd_cost; //set by cvar
+	int dash_side_cost; //set by cvar
+	int dash_back_cost; //set by cvar
+	bool forward_thrust;
+	int pending_dash; // 0=fwd, -1=left, 1=right, 2=back
+	int dash_move_cooldown; //set by cvar
+	double dash_multiplier; //set by cvar
+	int dash_cooldown;
+	bool double_dash_available;
+	
+	//Double Jump
+	bool double_jumping; //set by cvar
+	bool jump_thrust;
+	int jump_buttons_press;
+	
+	//Ledge Climb
+	bool ledge_climbing; //set by cvar
+	const climbReach = 64;
+    const thrustSpeed = 4;
+    bool climbing;
+	int maxLedgeHeight;
+    int climbSpeed;
+	
+	//Grappling Hook
+	bool hook_enabled; //set by cvar
+	double hook_cooldown; //set by cvar
+	double hook_maxdist; //set by cvar
+	bool hook_pull; //set by cvar
+	double hook_busy;
+	bool hookFired;
+	HookProjectile hook;
+	bool   hook_stun_enabled;  // set by cvar
+	double hook_stun_min;      // set by cvar
+	double hook_stun_max;      // set by cvar
+	
+	//Teleport Move
+	bool    teleport_enabled;       // set by cvar
+	bool    teleport_restricted;    // set by cvar
+	double  teleport_beam_speed;    // set by cvar
+	double  teleport_max_range;     // set by cvar
+	int     teleport_cooldown_max;  // set by cvar (seconds * 35)
+
+	// Teleport state machine
+	// 0=idle, 1=beam in flight, 2=marker placed, 3=cooldown
+	int     tp_state;
+	int     tp_cooldown_timer;      // counts down from teleport_cooldown_max
+	double  tp_beam_dist;           // accumulated distance of active beam
+	Actor   tp_active_beam;         // reference to flying beam actor
+	Vector3 PortalPos;
+	Actor   PortalCircle;
+	
+	//Melee
+	bool melee_enabled; //set by cvar
+	bool melee_vr_mode; //set by cvar
+	bool melee_disabled; //set by external cvar
+	bool melee_key; //set by cvar
+	bool melee_sound; //set by cvar
+	bool melee_puff; //set by cvar
+	bool melee_stamina; //set by cvar
+	bool melee_berserk; //set by cvar
+	bool melee_key_pressed; //set by network event
+	double melee_range; //set by cvar
+	double melee_mult; //set by cvar
+	int melee_preset; //set by cvar
+	int melee_dmg_min; //set by cvar
+	int melee_dmg_max; //set by cvar
+	int melee_base_cooldown; //set by cvar
+	int melee_indicator; //set by cvar
+	bool melee_indicator_on; //set by cvar and toggle key
+	double melee_indicator_range; //set by cvar
+	bool melee_combo; //set by cvar
+	int melee_combohits; //set by cvar
+	int melee_combocrit; //set by cvar
+	float melee_knockback; //set by cvar
+	int melee_kb_mass; //set by cvar
+	int melee_combostun; //set by cvar
+	int melee_delay;
+	int melee_miss_streak;
+	int melee_stamina_val;
+	vrMeleeIndicatorTracker vr_indicator_tracker;
+	
+	// Shared state written by VPlayerPropModifier
+	int player_hurt_tics;
+	bool regen_active;  // true on the tic health regen fires — read by HUD
+
+	// Slot 1 weapon mode
+	bool slot1_mode;           //set by cvar
+	bool slot1_suppress_snd;   //set by cvar
+	bool slot1_combo;          //set by cvar
+	int  slot1_combo_rate;     //set by cvar
+	bool slot1_indicator;      //set by cvar
+	bool slot1_parry;          //set by cvar
+	int  slot1_crit_dmg_min;   //set by cvar
+	int  slot1_crit_dmg_max;   //set by cvar
+	int  slot1_rapid_threshold;//set by cvar
+	int  slot1_rapid_window;   //set by cvar
+	int  slot1_rapid_crit;     //set by cvar
+	// Slot 1 runtime state
+	bool slot1_active;         // true this tic if slot 1 weapon is ready
+	bool slot1_is_rapid;       // true if rapid fire detected
+	int  slot1_rapid_counter;  // hit count within window
+	int  slot1_rapid_timer;    // window countdown
+	int  slot1_combo_timer;    // throttle timer for rapid combo ticks
+	bool parry_enabled; //set by cvar
+	int  parry_duration;       // immunity window length in tics
+	double parry_stun_min;     // min stun seconds (float)
+	double parry_stun_max;     // max stun seconds (float)
+	int  parry_prob;           // parry probability multiplier (0-10)
+	int  parry_window;
+	int  parry_immune_timer;
+	int  parry_crit_resist;    // crit parry resist %
+	int  melee_berserk_crit_bonus;   // bonus crit chance when berserk active
+	int  parry_shield_timer;   // 1 = shield active, 0 = no shield
+	int  berserk_stamina;      // stamina cost reduction % when berserk active
+	int  berserk_stun;         // bonus stun chance when berserk active
+	double berserk_dmg_mult;   // damage multiplier when berserk active
+	double berserk_cooldown_div; // cooldown divisor when berserk active
+	bool parry_last_was_crit;
+	bool parry_hud_is_crit;    // persists for full immunity window, used by HUD
+	int  effective_crit;       // computed each tic, shared by melee and parry
+	int  effective_stun;       // computed each tic, berserk-boosted stun chance
+}
+
+Class meleeComboMarker : Inventory
+{
+	Default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.PERSISTENTPOWER;
+		inventory.maxamount 10;
+	}
+}
+
+Class vrMeleeComboStunner : Inventory
+{
+	double stunMin;  // seconds — float supported (0.1 = ~3 ticks). 0 = use defaults
+	double stunMax;
+
+	Default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.PERSISTENTPOWER;
+		inventory.maxamount 1;
+	}
+			
+	override void DoEffect()
+	{
+		super.DoEffect();
+		
+		if(!is_initialized) InitStunner();
+		
+		if(GetAge() < stun_duration && owner.health > 0)
+		{
+			owner.tics = -1;
+			owner.bNOPAIN = true;
+			if(owner.FindState("Pain"))
+				owner.setState(owner.findState("Pain"));
+			else
+				owner.setState(owner.findState("Spawn"));
+		}
+		else
+		{
+			owner.tics = 1;
+			owner.bNOPAIN = owner.default.bNOPAIN;
+			destroy();
+		}
+	}
+	
+	private void InitStunner()
+	{
+		double sMin = stunMin > 0 ? stunMin : 3.0;
+		double sMax = stunMax > stunMin ? stunMax : 5.0;
+		stun_duration = ceil(frandom(sMin, sMax) * 35);
+		is_initialized = true;
+	}
+	
+	private bool is_initialized;
+	private int stun_duration;
+}
+
+// ParryShieldCrit — given proactively when a crit parry roll succeeds.
+// ModifyDamage fires during damage resolution — before health changes.
+// All player feedback (sound, HUD timer) happens here, not in WorldTick.
+Class ParryShieldCrit : Inventory
+{
+	int resistPercent;
+	int immunityDuration;  // tics for immunity window
+	int stunMin;           // min stun seconds
+	int stunMax;           // max stun seconds
+
+	Default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.PERSISTENTPOWER;
+		inventory.maxamount 1;
+	}
+
+	override void ModifyDamage(int damage, Name damageType, out int newdamage,
+	                           bool passive, Actor inflictor, Actor source, int flags)
+	{
+		if(!passive || damage <= 0 || resistPercent <= 0) return;
+
+		newdamage = max(0, damage * (100 - resistPercent) / 100);
+		owner.A_StartSound("parry/crit", 7, CHANF_NOPAUSE);
+
+		let vm = V_Moves(owner.FindInventory("V_Moves"));
+		if(vm)
+		{
+			vm.parry_immune_timer  = immunityDuration > 0 ? immunityDuration : 20;
+			vm.parry_last_was_crit = true;
+			vm.parry_hud_is_crit   = true;
+		}
+	}
+}
+
+	//////////////////////////////////////
+	// Grappling Hook Actors			//
+	//////////////////////////////////////
+
+Class HookProjectile : Actor {
+
+	property maxdistance : maxdistance;
+
+	Default
+	{
+		HookProjectile.maxdistance 720;
+		projectile;
+		damage 0;
+		speed 25;
+		+HITTRACER;
+		+BLOODLESSIMPACT;
+	}
+
+	override void PostBeginPlay()
+	{
+		super.PostBeginPlay();
+		spawnPos = pos;
+	}
+
+	override void Tick()
+	{
+		super.Tick();
+		if (isFrozen()) return;
+
+		A_SpawnParticle("DB 9D 00", SPF_FULLBRIGHT, 100, 4, 0, 0, 0, 0);
+
+		if (level.Vec3Diff(pos, spawnPos).length() > maxdistance && !inStateSequence(curstate,FindState("Flyback")))
+			SetStateLabel("Flyback");
+	}
+
+	// Apply lingering stun to a monster after hook releases
+	void ApplyLingeringStun(Actor target)
+	{
+		if(!stun_enabled || !target || !target.bISMONSTER) return;
+		double sMin = max(0.1, stun_dur_min);
+		double sMax = max(sMin, stun_dur_max);
+		target.GiveInventory("vrMeleeComboStunner", 1);
+		let st = vrMeleeComboStunner(target.FindInventory("vrMeleeComboStunner"));
+		if(st)
+		{
+			st.stunMin = sMin;
+			st.stunMax = sMax;
+		}
+	}
+
+	states
+	{
+	Spawn:
+		HOOK A 1;
+		loop;
+	Death:
+		TNT1 A 0 A_PlaySound("HookWall", 7);
+		HOOK B 1
+		{
+			if (target && target.player)
+			{
+				target.speed = 0;
+				target.vel = target.Vec3To(self).Unit() * 25;
+				if (Distance3D(target) <= 64)
+				{
+					target.speed = target.default.speed;
+					destroy();
+				}
+			}
+			if(GetAge() > 35*5) destroy();
+		}
+		wait;
+	XDeath:
+		TNT1 A 0 A_PlaySound("HookMeat", 7);
+		TNT1 A 0
+		{
+			if(tracer && tracer.bIsMonster)
+			{
+				if(pull_enemy)
+				{
+					// Give HookControl — stuns while dragging
+					tracer.GiveInventory("HookControl", 1);
+					control = HookControl(tracer.FindInventory("HookControl"));
+					if(control)
+					{
+						control.master       = self;
+						control.stun_enabled = stun_enabled;
+					}
+				}
+				else if(stun_enabled)
+				{
+					// Pull disabled but stun enabled — stun immediately on hit
+					ApplyLingeringStun(tracer);
+				}
+			}
+		}
+		goto Flyback;
+	Flyback:
+		TNT1 A 0 A_PlaySound("HookFailed", 7);
+		HOOK B 1
+		{
+			if (target)
+			{
+				flytime++;
+				vel = Vec3To(target).Unit() * 30;
+
+				// Drag hooked monster toward player
+				if(tracer && tracer.bIsMonster && pull_enemy)
+				{
+					tracer.vel = tracer.Vec3To(target).Unit() * 28;
+				}
+
+				if (Distance3D(target) <= 64 || flytime > 35*5)
+				{
+					// Apply lingering stun before releasing
+					if(tracer) ApplyLingeringStun(tracer);
+					if(tracer) tracer.TakeInventory("HookControl", 1);
+					destroy();
+				}
+			}
+		}
+		wait;
+	}
+
+	vector3 spawnPos;
+	int  maxdistance;
+	int  flytime;
+	bool pull_enemy;
+	bool   stun_enabled;
+	double stun_dur_min;
+	double stun_dur_max;
+	HookControl control;
+}
+
+Class HookControl : Inventory
+{
+	Default
+	{
+		+INVENTORY.UNDROPPABLE;
+		+INVENTORY.UNTOSSABLE;
+		+INVENTORY.UNCLEARABLE;
+		+INVENTORY.PERSISTENTPOWER;
+		inventory.maxamount 1;
+	}
+
+	bool stun_enabled; // passed from HookProjectile
+
+	override void DoEffect()
+	{
+		super.DoEffect();
+		if (!owner || !master)
+		{
+			destroy();
+			return;
+		}
+		// Drag owner to hook position
+		owner.SetOrigin(master.pos-(0,0,owner.default.height*0.5), true);
+		// Freeze enemy while being dragged
+		if(stun_enabled && owner.bISMONSTER && owner.health > 0)
+		{
+			owner.tics = -1;
+			owner.bNOPAIN = true;
+		}
+	}
+}
+
+	//////////////////////////////////////
+	// Teleport Beam Dummy Actors		//
+	//////////////////////////////////////
+
+//Dummy actor to use for teleport beam
+class Telebeam_Dummy : Actor
+{
+	int bounceCount;
+
+	Default
+	{
+		Damage 0;
+		Radius 1;
+		Height 1;
+		Speed 40;
+		Mass 0;
+		Gravity 0.4;
+		Projectile;
+		+Missile;
+		+NoBlockMap;
+		+DontSplash;
+		+GHOST;
+		-NOGRAVITY;
+		+NOTELEPORT;
+		// BounceType "None" enables the bounce system without
+		// predetermining surfaces — then we set walls/ceilings only.
+		// Floor contact is NOT bounced, so it still triggers Death normally.
+		BounceType "None";
+		BounceFactor 0.65;
+		WallBounceFactor 0.65;
+		+BOUNCEONWALLS;
+		+BOUNCEONCEILINGS;
+	}
+	
+	States
+	{
+	Spawn:
+		TNT1 A 1
+		{
+			// Dense cyan trail — 3 particles per tic at varying offsets
+			A_SpawnParticle("00 FF FF", SPF_FULLBRIGHT, 12, 6, 0, 0, 0, 0, 0, 0, 0, -0.5, -0.5, -0.5);
+			A_SpawnParticle("00 CCFF", SPF_FULLBRIGHT, 8,  4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			A_SpawnParticle("FFFFFF",  SPF_FULLBRIGHT, 5,  2, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0.5);
+		}
+		Loop;
+	Bounce:
+		TNT1 A 0
+		{
+			// Bounce particle burst
+			A_SpawnParticle("00 FF FF", SPF_FULLBRIGHT, 18, 8, 0, 0, 0, 0, 0, frandom(-2,2), frandom(-2,2));
+			A_SpawnParticle("FFFFFF",  SPF_FULLBRIGHT, 10, 5, 0, 0, 0, 0, 0, frandom(-2,2), frandom(-2,2));
+			A_SpawnParticle("00 CCFF", SPF_FULLBRIGHT, 14, 6, 0, 0, 0, 0, 0, frandom(-1,1), frandom(-1,1));
+			A_PlaySound("misc/spawn", CHAN_AUTO, 0.4, false, ATTN_NORM);
+
+			// Cap bounces — expire after 3 to prevent infinite bouncing
+			invoker.bounceCount++;
+			if(invoker.bounceCount >= 3 && invoker.master)
+			{
+				V_Moves(invoker.master).OnBeamExpired();
+				return ResolveState("Null");
+			}
+			return ResolveState("Spawn");
+		}
+	Death:
+		TNT1 A 0 
+		{
+			// Restricted mode — reject slopes and stairs
+			if(invoker.master && V_Moves(invoker.master).teleport_restricted &&
+			   (GetZAt(24,0) != floorz || GetZAt(-24,0) != floorz ||
+			    GetZAt(0,24) != floorz || GetZAt(0,-24) != floorz))
+			{
+				V_Moves(invoker.master).OnBeamExpired();
+				return ResolveState("Null");
+			}
+
+			// Restricted mode — require line of sight
+			Actor plr;
+			if(invoker.master)
+			{
+				plr = V_Moves(invoker.master).owner;
+				if(V_Moves(invoker.master).teleport_restricted &&
+				   plr && !plr.CheckSight(invoker, SF_IGNOREWATERBOUNDARY))
+				{
+					V_Moves(invoker.master).OnBeamExpired();
+					return ResolveState("Null");
+				}
+			}
+
+			// Valid landing — check move
+			if(invoker.master)
+			{
+				let vm = V_Moves(invoker.master);
+				if(vm.teleport_restricted && vm.owner && !vm.owner.CheckMove(invoker.pos.xy))
+				{
+					vm.OnBeamExpired();
+					return ResolveState("Null");
+				}
+				vm.OnBeamLanded(invoker.pos);
+			}
+			return ResolveState(null);
+		}
+		TNT1 A 0 A_CheckCeiling("Crash");
+		TNT1 A 0 A_CheckFloor("Portal");
+		TNT1 A 0 A_MakePortalCircle();
+		Stop;
+	XDeath:
+	Crash:
+		TNT1 A 0;
+		Stop;
+	Portal:
+		TNT1 A 1 A_MakePortalCircle();
+		Stop;
+	}
+	
+	action void A_MakePortalCircle()
+	{
+		// Visual only — state already set by OnBeamLanded in Death
+		if(invoker.master && V_Moves(invoker.master).PortalCircle)
+		{
+			Actor.Spawn("PortalIndicatorLight", self.pos);
+		}
+	}
+}
+
+//Dummy actor to use for teleport circle
+class PortalIndicator : Actor
+{
+	Default
+	{
+		Radius 1;
+		Height 1;
+		Speed 0;
+		Mass 0;
+		Gravity 1;
+		+NoBlockMap;
+		+DontSplash;
+		+CLIENTSIDEONLY;
+		+THRUACTORS;
+		+GHOST;
+		-NOGRAVITY;
+		+THRUGHOST;
+		+NOTELEPORT;
+		RenderStyle "Shaded";
+		StencilColor "00 FF FF";
+		Alpha 1;
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		PRTL A 1 Bright;
+		Wait;
+	}
+}
+class PortalIndicatorLight : PortalIndicator
+{
+	States
+	{
+	Spawn:
+		TNT1 A 2;
+		Stop;
+	}
+}
+
+// Armor bonus item for armor regen — respects existing save percent
+class vmm_ArmorBonus : BasicArmorBonus
+{
+	Default
+	{
+		Armor.SaveAmount    1;
+		Armor.MaxSaveAmount 0x7FFFFFFF;
+		Armor.SavePercent   33.3;
+	}
+}
+
+//Dummy puff used by vr melee
+Class vmDummyPuff : BulletPuff
+{
+	Default
+	{
+	+NOGRAVITY;
+	+DONTSPLASH;
+	Renderstyle "None";
+	Damage 0;
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Stop;
+	}
+}
+
+//Invisible puff used by auto melee — no visuals, no blood, no decals
+Class autoMeleePuff : BulletPuff
+{
+	Default
+	{
+	+NOGRAVITY;
+	+DONTSPLASH;
+	+NODECAL;
+	+NOBLOOD;
+	Renderstyle "None";
+	Damage 0;
+	}
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Stop;
+	XDeath:
+		TNT1 A 1;
+		Stop;
+	}
+}
+
+//////////////////////////////////////
+// VR Melee Indicator Tracker		//
+//////////////////////////////////////
+
+Class vrMeleeIndicatorTracker : Actor
+{
+	Actor ind_target;
+	int style;
+	double attack_range;
+	double b_angle;
+	
+	Default
+	{
+		Projectile;
+		Damage 0;
+		Speed 0;
+		Radius 1;
+		Height 1;
+		Mass 0;
+		+DONTSPLASH;
+		+NOCLIP;
+		+THRUACTORS;
+		+THRUGHOST;
+		+BLOODLESSIMPACT;
+		RenderStyle "None";
+	}
+	
+	override void Tick()
+	{
+		super.Tick();
+		if(isFrozen()) return;
+		if(!ind_target || ind_target.health <= 0 || !master) { Destroy(); return; }
+		
+		vector3 mpos  = master.pos;
+		// Floor-level base: player feet + tiny offset so particles sit just above ground
+		double floor_z = master.floorz - mpos.z + 4;
+		// Use attack_range directly — no artificial minimum so indicators match range exactly
+		double display_range = double(attack_range);
+		if(display_range < 32) display_range = 32; // only prevent zero/tiny range being invisible
+		
+		// Precompute the three zone endpoint offsets from player feet
+		double fx0 = cos(b_angle)       * display_range;
+		double fy0 = sin(b_angle)       * display_range;
+		double fxL = cos(b_angle - 30)  * display_range;
+		double fyL = sin(b_angle - 30)  * display_range;
+		double fxR = cos(b_angle + 30)  * display_range;
+		double fyR = sin(b_angle + 30)  * display_range;
+		
+		SetOrigin(mpos, false);
+		
+		switch(style)
+		{
+		case 1: // Three small floor-level glows at each zone endpoint
+			A_SpawnParticle("00 CC FF", SPF_FULLBRIGHT, 20, 5, 0, fx0, fy0, floor_z);
+			A_SpawnParticle("00 99 CC", SPF_FULLBRIGHT, 20, 5, 0, fxL, fyL, floor_z);
+			A_SpawnParticle("00 99 CC", SPF_FULLBRIGHT, 20, 5, 0, fxR, fyR, floor_z);
+			break;
+		case 2: // Floor-level dots tracing all three rays from feet to endpoints
+		{
+			int steps = int(display_range / 20);
+			for(int i = 1; i <= steps; i++)
+			{
+				double t = double(i) / double(steps);
+				A_SpawnParticle("00 AA CC", SPF_FULLBRIGHT, 18, 4, 0,
+					fx0 * t, fy0 * t, floor_z);
+				A_SpawnParticle("00 88 AA", SPF_FULLBRIGHT, 18, 4, 0,
+					fxL * t, fyL * t, floor_z);
+				A_SpawnParticle("00 88 AA", SPF_FULLBRIGHT, 18, 4, 0,
+					fxR * t, fyR * t, floor_z);
+			}
+			break;
+		}
+		case 3: // Three small horizontal rings, one centered on each zone endpoint
+		{
+			int ring_pts = 8;
+			double ring_r = 10.0; // small tight ring around each zone point
+			double perp_angle = b_angle + 90;
+			for(int i = 0; i < ring_pts; i++)
+			{
+				double ra = i * (360.0 / ring_pts);
+				// Each ring point is offset perpendicular and forward from the zone endpoint
+				double side = cos(ra) * ring_r;
+				double fwd  = sin(ra) * ring_r;
+				double px = cos(perp_angle) * side + cos(b_angle) * fwd;
+				double py = sin(perp_angle) * side + sin(b_angle) * fwd;
+				// Centre zone ring — slightly brighter
+				A_SpawnParticle("00 FF CC", SPF_FULLBRIGHT, 20, 4, 0,
+					fx0 + px, fy0 + py, floor_z);
+				// Left zone ring
+				A_SpawnParticle("00 CC AA", SPF_FULLBRIGHT, 20, 4, 0,
+					fxL + px, fyL + py, floor_z);
+				// Right zone ring
+				A_SpawnParticle("00 CC AA", SPF_FULLBRIGHT, 20, 4, 0,
+					fxR + px, fyR + py, floor_z);
+			}
+			break;
+		}
+		case 4: // Columns — minimal: just 2 stacked particles per zone, barely above floor
+			A_SpawnParticle("DB 9D 00", SPF_FULLBRIGHT, 50, 5, 0, fx0, fy0, floor_z + 2);
+			A_SpawnParticle("DB 9D 00", SPF_FULLBRIGHT, 50, 5, 0, fx0, fy0, floor_z + 18);
+			A_SpawnParticle("DB 9D 00", SPF_FULLBRIGHT, 50, 5, 0, fxL, fyL, floor_z + 2);
+			A_SpawnParticle("DB 9D 00", SPF_FULLBRIGHT, 50, 5, 0, fxL, fyL, floor_z + 18);
+			A_SpawnParticle("DB 9D 00", SPF_FULLBRIGHT, 50, 5, 0, fxR, fyR, floor_z + 2);
+			A_SpawnParticle("DB 9D 00", SPF_FULLBRIGHT, 50, 5, 0, fxR, fyR, floor_z + 18);
+			break;
+		}
+	}
+	
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Loop;
+	}
+}
+
+//////////////////////////////////////
+// Melee Hit Impact Tracker		//
+//////////////////////////////////////
+
+Class autoMeleeFlashTracker : Actor
+{
+	Default
+	{
+		Projectile;
+		Damage 0;
+		Speed 0;
+		Radius 1;
+		Height 1;
+		Mass 0;
+		+DONTSPLASH;
+		+NOCLIP;
+		+THRUACTORS;
+		+THRUGHOST;
+		+BLOODLESSIMPACT;
+		RenderStyle "None";
+	}
+	
+	override void Tick()
+	{
+		super.Tick();
+		if(isFrozen()) return;
+		
+		// One-shot burst on first tic — scatter particles in random directions
+		// Grey-white semi-transparent sweat/moisture droplets
+		int i;
+		for(i = 0; i < 12; i++)
+		{
+			// Random angle and random radius for each particle
+			double ra    = random(0, 359);
+			double rdist = random(4, 18);
+			double rz    = random(-8, 8);
+			double ox    = cos(ra) * rdist;
+			double oy    = sin(ra) * rdist;
+			// Vary color between bright white and medium grey
+			int grey = random(160, 255);
+			string col;
+			if     (grey >= 230) col = "FF FF FF";
+			else if(grey >= 200) col = "CC CC CC";
+			else if(grey >= 175) col = "AA AA AA";
+			else                 col = "88 88 88";
+			
+			int sz = random(3, 7);
+			int lt = random(10, 22);
+			A_SpawnParticle(col, SPF_FULLBRIGHT, lt, sz, 0, ox, oy, rz);
+		}
+		
+		// A few brighter white core particles near the impact centre
+		A_SpawnParticle("FF FF FF", SPF_FULLBRIGHT, 8,  8, 0,
+			random(-4, 4), random(-4, 4), random(-3, 3));
+		A_SpawnParticle("EE EE EE", SPF_FULLBRIGHT, 6,  5, 0,
+			random(-3, 3), random(-3, 3), random(-3, 3));
+		
+		Destroy();
+	}
+	
+	States
+	{
+	Spawn:
+		TNT1 A 1;
+		Stop;
+	}
+}

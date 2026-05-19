@@ -1,0 +1,57 @@
+// =============================================================================
+// Supermerged VUAS Bridge — CVars
+// Achievement bonus point values and run-tracking state.
+// These only matter when both VUAS and this bridge are loaded.
+// =============================================================================
+
+// Per-player UI preferences — stay as user (included in userinfo packet)
+user bool   dp_ach_repeat_toast       = true;   // Show achievement toast again when bonus fires on repeat runs
+
+// Game-wide switches — server type so they are NOT included in the userinfo packet
+server bool   dp_ach_enabled          = true;   // Master switch for achievement bonus points
+server int    dp_ach_xp_per_100pts    = 50;     // Weapon XP awarded per 100 Doom Points bonus (0 = no XP reward)
+
+// Session mirror of SM_RunProgress.paidIDs. Read-only for display/logic; written by
+// SM_RunProgressHandler. nosave (no user/server) keeps it out of the userinfo packet
+// entirely. All code accesses it via CVar.FindCVar(), which works for any CVar type.
+nosave string sm_run_paid_ids         = "";
+
+// Achievement bonus point values — server type (balance settings, not per-player prefs).
+// Changing user -> server removes all 32 of these from the userinfo packet, which was
+// the primary cause of the "User info descriptor too big" crash with large mod stacks.
+
+// VUAS default achievement bonuses
+server int dp_ach_first_blood         = 100;   // First Blood - kill first enemy
+server int dp_ach_kill_50             = 250;   // Warrior - kill 50 enemies
+server int dp_ach_kill_100_imps       = 300;   // Imp Slayer
+server int dp_ach_kill_100_zombiemen  = 300;   // Zombie Slayer
+server int dp_ach_secret_hunter       = 400;   // Secret Hunter - find 10 secrets
+server int dp_ach_uv_warrior          = 500;   // Ultraviolent
+server int dp_ach_hidden_gem          = 1000;  // Hidden Gem (hidden)
+
+// Supermerged achievement bonuses
+server int dp_ach_wpn_first_level     = 250;   // Baptism of Fire
+server int dp_ach_wpn_level_5         = 500;   // Sharpshooter
+server int dp_ach_wpn_level_10        = 1000;  // Master Armourer
+server int dp_ach_player_first_level  = 250;   // Growing Pains
+server int dp_ach_player_level_5      = 500;   // Seasoned Veteran
+server int dp_ach_player_level_10     = 1000;  // Legendary
+server int dp_ach_first_upgrade       = 100;   // Enhancement Protocol
+server int dp_ach_upgrade_level_3     = 500;   // Perfection
+server int dp_ach_elemental_synthesis = 300;   // Grand Synthesis
+server int dp_ach_all_elements        = 500;   // Elemental Master
+server int dp_ach_overdrive_maxed     = 300;   // Overdrive
+server int dp_ach_all_upgrades        = 500;   // Arsenal (hidden)
+server int dp_ach_kills_100           = 250;   // Century
+server int dp_ach_kills_1000          = 1000;  // Exterminatus
+server int dp_ach_ricochet_chain      = 300;   // Billiards
+server int dp_ach_kill_streak_5       = 200;   // On a Roll
+server int dp_ach_kill_streak_10      = 500;   // Unstoppable
+server int dp_ach_kill_streak_25      = 2000;  // Untouchable (hidden)
+server int dp_ach_companion_survives  = 300;   // Faithful Companion
+server int dp_ach_companion_resurrect = 300;   // Back from the Dead
+server int dp_ach_no_death_map        = 750;   // Deathless
+server int dp_ach_indestructible_used = 100;   // Safety Net
+server int dp_ach_xp_comeback         = 500;   // Baptism by Fire (hidden)
+server int dp_ach_secret_finder       = 150;   // Secret Finder
+server int dp_ach_perfect_map         = 750;   // No Stone Unturned

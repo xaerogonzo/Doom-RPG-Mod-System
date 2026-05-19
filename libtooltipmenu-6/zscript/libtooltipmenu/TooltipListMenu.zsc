@@ -1,0 +1,99 @@
+// TooltipListMenu.zsc
+// Drop-in replacement for ListMenu with tooltip support.
+
+class TFLV_TooltipListMenu : ListMenu {
+  mixin TFLV_TooltipMenu;
+
+  void InitDynamic(Menu parent, ListMenuDescriptor desc) {
+    desc.mItems.Clear();
+    self.tooltip_settings = GetDefaults();
+    super.Init(parent, desc);
+  }
+
+  override void Init(Menu parent, ListMenuDescriptor desc) {
+    super.Init(parent, desc);
+    tooltip_settings = GetDefaults();
+    if (desc.mItems.size() == 0) return;
+
+    let tail = ListMenuItemTFLV_TooltipHolder(desc.mItems[desc.mItems.size()-1]);
+    if (tail) {
+      tooltips.copy(tail.tooltips);
+      return;
+    }
+
+    MenuItemBase selected = null;
+    if (desc.mSelectedItem >= 0 && desc.mSelectedItem < desc.mItems.size()) {
+      int i = desc.mSelectedItem;
+      while (i >= 0 && !desc.mItems[i].Selectable()) { --i; }
+      if (i >= 0) selected = desc.mItems[i];
+    }
+
+    array<ListMenuItem> items;
+    items.Move(desc.mItems);
+
+    int  startblock   = -1;
+    bool tooltip_mode = true;
+
+    for (int i = 0; i < items.size(); ++i) {
+      if (items[i] is "ListMenuItemTFLV_TooltipID") {
+        TooltipID(ListMenuItemTFLV_TooltipID(items[i]).mod_id);
+      } else if (items[i] is "ListMenuItemTFLV_Tooltip") {
+        let tt = ListMenuItemTFLV_Tooltip(items[i]);
+        if (tt.tooltip == "" && !tooltip_mode) {
+          startblock = desc.mItems.size();
+        } else {
+          AddTooltip(startblock, desc.mItems.size()-1, tt.tooltip);
+          tooltip_mode = true;
+        }
+      } else if (items[i] is "ListMenuItemTFLV_TooltipGeometry") {
+        ListMenuItemTFLV_TooltipGeometry(items[i]).CopyTo(tooltip_settings);
+      } else if (items[i] is "ListMenuItemTFLV_TooltipAppearance") {
+        ListMenuItemTFLV_TooltipAppearance(items[i]).CopyTo(tooltip_settings);
+      } else {
+        if (tooltip_mode) {
+          startblock   = desc.mItems.size();
+          tooltip_mode = false;
+        }
+        desc.mItems.push(items[i]);
+      }
+    }
+
+    desc.mItems.push(ListMenuItemTFLV_TooltipHolder(
+        new("ListMenuItemTFLV_TooltipHolder").Init(tooltips)));
+
+    if (selected) {
+      for (int i = 0; i < desc.mItems.size(); ++i) {
+        if (desc.mItems[i] == selected) { desc.mSelectedItem = i; break; }
+      }
+    }
+  }
+}
+
+class ListMenuItemTFLV_TooltipHolder : ListMenuItem {
+  mixin TFLV_TooltipHolder;
+}
+
+class ListMenuItemTFLV_Tooltip : ListMenuItem {
+  mixin TFLV_TooltipItem;
+}
+
+class ListMenuItemTFLV_TooltipGeometry : ListMenuitem {
+  mixin TFLV_TooltipGeometry;
+}
+
+class ListMenuItemTFLV_TooltipAppearance : ListMenuitem {
+  mixin TFLV_TooltipAppearance;
+}
+
+class ListMenuItemTFLV_TooltipID : ListMenuItem {
+  string mod_id;
+  string menu_page;
+
+  Object Init(string mod_id, string menu_page = "") {
+    self.mod_id    = mod_id;
+    self.menu_page = menu_page;
+    return self;
+  }
+
+  override bool Selectable() { return false; }
+}

@@ -1,0 +1,891 @@
+// SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+// SPDX-License-Identifier: BSD-3-Clause
+
+// 
+// LazyPoints module version: 0.6.5
+// LazyPoints is a part of DoomToolbox: https://github.com/mmaulwurff/doom-toolbox/
+// 
+// Point scoring for UZDoom. Do things, get points!
+// 
+// License:
+// SPDX-FileCopyrightText: © 2025 Alexander Kromm <mmaulwurff@gmail.com>
+// SPDX-License-Identifier: BSD-3-Clause
+// 
+// Scoring:
+// - Damage: equal to damage amount.
+// - Telefrag: equal to enemy starting health.
+// - Kills: 10% of starting health of killed enemy;
+// - Chain kills: 10 points for each enemy killed in 3 seconds after previous kill.
+// - Secrets: 250 points.
+// - Map items: 5 points.
+// - Keys: 250 points.
+// - Barrels: 5 points.
+// - Player with 50% and more health gets kill points (with chain kill bonus)
+//   multiplied by 1.5, with 100% and more - by 2.
+// 
+// Scoring system is based on ScoreDoom: https://zdoom.org/wiki/ScoreDoom.
+// 
+// To use (besides ZScript code):
+// - define cvars:
+//   
+//   nosave string tt_lp_score = "";
+//   user   bool   tt_lp_show  = true;
+//   server string tt_lp_parameters_class = "tt_lp_Parameters";
+// 
+// - add event handlers in mapinfo:
+//   
+//   GameInfo { EventHandlers = "tt_lp_Dispatcher", "tt_lp_StaticView" }
+// 
+// - add access to top scores menu (add it to a menu or add a key). Menudef:
+//   
+//   OptionMenu tt_lp_TopMenu
+//   {
+//     class tt_lp_Top
+//     Title "Top Points"
+//   }
+
+// LazyPoints customization.
+class tt_lp_Parameters
+{
+  // This font is used for drawing score points and info on bonuses.
+  virtual Font getFont() const { return Font.getFont("BigFont"); }
+
+  // This is a time in seconds, during which kills provide a bonus.
+  virtual int getBonusCountdown() const { return 3; }
+
+  // This is an offset in pixels from the top of the screen for all score info.
+  virtual ui int getYOffset() const { return 10; }
+
+  // Scale multiplier for all score info.
+  virtual ui int getScale() const { return 1; }
+
+  // Tells if score points are given for picking up items.
+  virtual bool isPickupBonusEnabled() const { return true; }
+
+  // Tells if score points are given now.
+  virtual bool isScoringEnabledNow() const { return true; }
+}
+
+// This class is an entry point for LazyPoints.
+class tt_lp_Dispatcher : EventHandler
+{
+  override void onRegister() { _spawner = new ("tt_lp_Spawner").init(); }
+
+  override void playerEntered(PlayerEvent event)
+  {
+    if (_parameters == NULL)
+      _parameters = tt_lp_Parameters(new(tt_lp_parameters_class));
+
+    if (_mapScore == NULL)
+      _mapScore = new ("tt_lp_MapScore").init();
+
+    _playerScores[event.playerNumber] =
+      new("tt_lp_PlayerScore").init(event.playerNumber, _parameters);
+  }
+
+  override void renderOverlay(RenderEvent event)
+  {
+    if (menuActive || automapActive) return;
+
+    _playerScores[consolePlayer].show(event.fracTic);
+  }
+
+  override void worldThingDamaged(WorldEvent event)
+  {
+    if (event.inflictor == NULL) return;
+
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+      if (_playerScores[i] != NULL && players[i].mo == event.damageSource)
+        _playerScores[i].countDamage(event.thing, event.damage, event.damageType);
+    }
+  }
+
+  override void worldThingDied(WorldEvent event)
+  {
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+      if (_playerScores[i] != NULL && players[i].mo == event.thing.target)
+        _playerScores[i].countDeath(event.thing);
+    }
+  }
+
+  override void worldTick()
+  {
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+      if (_playerScores[i] != NULL)
+        _playerScores[i].tick();
+    }
+  }
+
+  override void worldThingSpawned(WorldEvent event)
+  {
+    if (_parameters.isPickupBonusEnabled())
+      _spawner.spawnScoreFor(event.thing);
+  }
+
+  override void worldUnloaded(WorldEvent event)
+  {
+    _mapScore.save();
+  }
+
+  private tt_lp_Spawner _spawner;
+  private tt_lp_PlayerScore _playerScores[MAXPLAYERS];
+  private tt_lp_Parameters _parameters;
+  private tt_lp_MapScore _mapScore;
+}
+
+class tt_lp_BonusView
+{
+  tt_lp_BonusView init(tt_lp_TimerBonus timerBonus,
+                           tt_lp_HealthBonus healthBonus,
+                           tt_lp_Parameters parameters)
+  {
+    _timerBonus  = timerBonus;
+    _healthBonus = healthBonus;
+    _parameters  = parameters;
+
+    return self;
+  }
+
+  ui int show(int y, int scale)
+  {
+    loadFont();
+
+    int lineHeight = _font.GetHeight();
+    y += MARGIN;
+
+    int bonus         = _timerBonus.getBonus();
+    double multiplier = _healthBonus.getMultiplier();
+
+    if (bonus == 0 && multiplier == 1.0) return 0;
+
+    String bonusString;
+    if (bonus) bonusString.appendFormat("+%d", bonus);
+
+    if (multiplier != 1.0)
+    {
+      if (bonusString.length()) bonusString.appendFormat(" ");
+      bonusString.appendFormat("x%.1f", multiplier);
+    }
+
+    int bonusWidth = _font.StringWidth(bonusString) * scale;
+    int x          = (Screen.GetWidth() - bonusWidth) / 2;
+    Screen.drawText(_font,
+                    Font.CR_Blue,
+                    x,
+                    y,
+                    bonusString,
+                    DTA_ScaleX, scale,
+                    DTA_ScaleY, scale);
+
+    return lineHeight * 2 * scale;
+  }
+
+  const MARGIN = 10;
+
+  mixin tt_lp_FontUser;
+
+  private tt_lp_TimerBonus _timerBonus;
+  private tt_lp_HealthBonus _healthBonus;
+}
+
+class tt_lp_Counter
+{
+  tt_lp_Counter init(int playerNumber,
+                         tt_lp_TimerBonus timerBonus,
+                         tt_lp_HealthBonus healthBonus,
+                         tt_lp_Parameters parameters)
+  {
+    _player         = players[playerNumber];
+    _oldSecretCount = 0;
+    _timerBonus     = timerBonus;
+    _healthBonus    = healthBonus;
+    _parameters     = parameters;
+
+    return self;
+  }
+
+  play void countDamage(Actor damaged, int damage, Name damageType)
+  {
+    if (damageType == "Telefrag") damage = damaged.getSpawnHealth();
+    if (damaged && damaged.bIsMonster) addPoints(damage);
+  }
+
+  play void countDeath(Actor died)
+  {
+    addPoints(calculatePointsFor(died));
+    _timerBonus.registerKill();
+  }
+
+  play void countSecrets()
+  {
+    int newSecretCount = _player.SecretCount;
+    if (newSecretCount > _oldSecretCount)
+    {
+      addPoints(250);
+      _oldSecretCount = newSecretCount;
+    }
+  }
+
+  private play void addPoints(int points)
+  {
+    if (_parameters.isScoringEnabledNow())
+      _player.mo.score += points;
+  }
+
+  private play int calculatePointsFor(Actor died)
+  {
+    int result =
+      (died.bIsMonster ? (died.SpawnHealth() / 10 + _timerBonus.getBonus()) : 5) *
+      int(round(_healthBonus.getMultiplier()));
+
+    return result;
+  }
+
+  private PlayerInfo _player;
+  private int _oldSecretCount;
+  private tt_lp_TimerBonus _timerBonus;
+  private tt_lp_HealthBonus _healthBonus;
+  private tt_lp_Parameters _parameters;
+}
+
+mixin class tt_lp_FontUser
+{
+  private ui void loadFont()
+  {
+    if (_font == NULL) _font = _parameters.getFont();
+  }
+
+  private transient Font _font;
+  private tt_lp_Parameters _parameters;
+}
+
+// Health Bonus is a multiplier, which value depends on player health.
+//
+// [100%, +inf) - x2
+// [ 50%, 100%) - x1.5
+// (  0%,  50%) - x1
+//
+// Credits to ZikShadow for an idea.
+class tt_lp_HealthBonus
+{
+  tt_lp_HealthBonus init(int playerNumber)
+  {
+    _player = players[playerNumber];
+
+    return self;
+  }
+
+  double getMultiplier()
+  {
+    int healthPercent = _player.health * 100 / _player.mo.GetMaxHealth();
+
+    if (healthPercent >= 100) return 2.0;
+    else if (healthPercent >= 50) return 1.5;
+
+    return 1.0;
+  }
+
+  private PlayerInfo _player;
+}
+
+class tt_lp_MapScore
+{
+  tt_lp_MapScore init()
+  {
+    _startingScore = players[consolePlayer].mo.score;
+    return self;
+  }
+
+  void save()
+  {
+    int score       = players[consolePlayer].mo.score - _startingScore;
+    string checksum = Level.getChecksum();
+
+    tt_lp_ScoreStorage.saveScore(checksum, score);
+  }
+
+  private int _startingScore;
+}
+
+class tt_lp_MapScoreItem : ScoreItem
+{
+  tt_lp_MapScoreItem init(int n)
+  {
+    amount = n;
+
+    return self;
+  }
+
+  Default
+  {
+    -CountItem;
+    +Inventory.Quiet;
+  }
+}
+
+// This class is similar to OptionMenuItemTextField. The difference is that this
+// class doesn't use a CVar.
+//
+// Code is partially borrowed from
+// wadsrc/static/zscript/ui/menu/optionmenuitems.zs.
+class OptionMenuScoreItem : OptionMenuItem
+{
+
+  OptionMenuScoreItem init(String label, String name, int index, bool isLatest)
+  {
+    Super.init(label, "");
+
+    _name     = name;
+    _index    = index;
+    _enter    = NULL;
+    _isLatest = isLatest;
+
+    return self;
+  }
+
+  override int draw(OptionMenuDescriptor d, int y, int indent, bool selected)
+  {
+    if (_enter)
+    {
+      // reposition the text so that the cursor is visible when in entering mode.
+      int tLen      = Menu.OptionWidth(_name) * CleanXfac_1;
+      int newIndent = screen.GetWidth() - tLen - CursorSpace();
+
+      if (newIndent < indent)
+      {
+        indent = newIndent;
+      }
+    }
+
+    String display = _enter
+      ? (_enter.GetText() .. Menu.OptionFont().GetCursor())
+      : _name;
+
+    int unselectedColor = _isLatest ? Font.CR_BLUE : Font.CR_WHITE;
+    int selectedColor   = OptionMenuSettings.mFontColorSelection;
+    int color           = selected ? selectedColor : unselectedColor;
+
+    drawLabel(indent, y, color);
+    drawValue(indent, y, color, display);
+
+    return indent;
+  }
+
+  override bool, string getString(int i)
+  {
+    if (i == 0)
+    {
+      return true, _name;
+    }
+
+    return false, "";
+  }
+
+  override bool setString(int i, String s)
+  {
+    _name = s;
+    tt_lp_ScoreStorage.rename(Level.GetChecksum(), _index, _name);
+    return true;
+  }
+
+  override bool menuEvent (int mKey, bool fromController)
+  {
+    if (mKey == Menu.MKey_Enter)
+    {
+      bool b;
+      String s;
+      [b, s] = getString(0);
+      Menu.menuSound("menu/choose");
+      _enter = TextEnterMenu.openTextEnter(Menu.getCurrentMenu(),
+                                           Menu.optionFont(),
+                                           s,
+                                           -1,
+                                           fromController);
+      _enter.activateMenu();
+      return true;
+    }
+    else if (mKey == Menu.MKey_Input)
+    {
+      SetString(0, _enter.GetText());
+      _enter = NULL;
+      return true;
+    }
+    else if (mKey == Menu.MKey_Abort)
+    {
+      _enter = NULL;
+      return true;
+    }
+
+    return Super.MenuEvent(mkey, fromController);
+  }
+
+  private String _name;
+  private int    _index;
+  private bool   _isLatest;
+
+  private TextEnterMenu _enter;
+}
+
+class tt_lp_PlayerScore
+{
+  tt_lp_PlayerScore init(int playerNumber, tt_lp_Parameters parameters)
+  {
+    _playerNumber = playerNumber;
+    _parameters   = parameters;
+
+    _timer = new ("tt_lp_Timer").init(TICRATE * parameters.getBonusCountdown());
+    _timerBonus  = new ("tt_lp_TimerBonus").init(_timer);
+    _healthBonus = new ("tt_lp_HealthBonus").init(playerNumber);
+    _counter = new("tt_lp_Counter").init(playerNumber,
+                                             _timerBonus,
+                                             _healthBonus,
+                                             parameters);
+
+    if (playerNumber == consolePlayer)
+    {
+      _view      = new ("tt_lp_View").init(parameters);
+      _timerView = new ("tt_lp_TimerView").init(_timer);
+      _bonusView = new ("tt_lp_BonusView").init(_timerBonus,
+                                                    _healthBonus,
+                                                    parameters);
+    }
+
+    return self;
+  }
+
+  ui void show(double fracTic)
+  {
+    if (gameState == gs_TitleLevel || _view == NULL) return;
+
+    if (!isVisible()) return;
+
+    int y = _parameters.getYOffset();
+    int scale = _parameters.getScale();
+
+    y += _view.show(y, scale);
+    y += _timerView.show(y, scale, fracTic);
+    y += _bonusView.show(y, scale);
+  }
+
+  play void countDamage(Actor damaged, int damage, Name damageType)
+  {
+    _counter.countDamage(damaged, damage, damageType);
+  }
+
+  play void countDeath(Actor died) { _counter.countDeath(died); }
+
+  play void tick()
+  {
+    _counter.countSecrets();
+
+    _timer.update();
+    _timerBonus.update();
+  }
+
+  int getPlayerNumber() const { return _playerNumber; }
+
+  private bool isVisible()
+  {
+    if (_isVisible == NULL)
+      _isVisible = CVar.GetCVar("tt_lp_show", players[_playerNumber]);
+
+    return _isVisible.GetBool();
+  }
+
+  private int _playerNumber;
+  private tt_lp_Parameters _parameters;
+
+  private tt_lp_Timer _timer;
+  private tt_lp_TimerBonus _timerBonus;
+  private tt_lp_HealthBonus _healthBonus;
+  private tt_lp_Counter _counter;
+
+  private tt_lp_View _view;
+  private tt_lp_TimerView _timerView;
+  private tt_lp_BonusView _bonusView;
+
+  transient CVar _isVisible;
+}
+
+class tt_lp_ScoreStorage
+{
+  static void saveScore(String mapChecksum, int score)
+  {
+    CVar scoreCVar     = CVar.FindCVar(STORAGE_CVAR_NAME);
+    String scoreString = scoreCVar.GetString();
+    let scoreDict      = Dictionary.FromString(scoreString);
+
+    String mapScoresString = scoreDict.At(mapChecksum);
+
+    Array<int> scores;
+    Array<bool> isLatest;
+    Array<String> names;
+
+    read(mapScoresString, scores, isLatest, names);
+
+    for (int i = 0; i < N_TOP; ++i)
+      isLatest[i] = false;
+
+    for (int i = 0; i < N_TOP; ++i)
+    {
+      if (score > scores[i])
+      {
+        scores.insert(i, score);
+        isLatest.insert(i, true);
+        names.insert(i, "");
+        break;
+      }
+    }
+
+    String newMapScoresString = write(scores, isLatest, names);
+    scoreDict.Insert(mapChecksum, newMapScoresString);
+
+    String newScoreString = scoreDict.ToString();
+    scoreCVar.SetString(newScoreString);
+  }
+
+  static void rename(String mapChecksum, int index, String name)
+  {
+    CVar scoreCVar     = CVar.FindCVar(STORAGE_CVAR_NAME);
+    String scoreString = scoreCVar.GetString();
+    let scoreDict      = Dictionary.FromString(scoreString);
+
+    String mapScoresString = scoreDict.At(mapChecksum);
+
+    Array<int> scores;
+    Array<bool> isLatest;
+    Array<String> names;
+
+    read(mapScoresString, scores, isLatest, names);
+
+    names[index] = name;
+
+    String newMapScoresString = write(scores, isLatest, names);
+    scoreDict.Insert(mapChecksum, newMapScoresString);
+
+    String newScoreString = scoreDict.ToString();
+    scoreCVar.SetString(newScoreString);
+  }
+
+  static void loadScores(String mapChecksum,
+                         out Array<int> scores,
+                         out Array<bool> isLatest,
+                         out Array<String> names)
+  {
+    CVar scoreCVar     = CVar.findCVar(STORAGE_CVAR_NAME);
+    String scoreString = scoreCVar.getString();
+    let scoreDict      = Dictionary.fromString(scoreString);
+
+    String mapScoresString = scoreDict.at(mapChecksum);
+
+    read(mapScoresString, scores, isLatest, names);
+  }
+
+  // Format:
+  // <score>\n<is_latest>\n<name>\n
+  // repeated N_TOP times.
+  private static void read(String scoresString,
+                           out Array<int> scores,
+                           out Array<bool> isLatest,
+                           out Array<String> names)
+  {
+    if (scoresString.Length() == 0)
+    {
+      for (int i = 0; i < N_TOP; ++i)
+      {
+        scores.Push(0);
+        isLatest.Push(0);
+        names.Push("");
+      }
+      return;
+    }
+
+    Array<String> tokens;
+    scoresString.Split(tokens, "\n");
+
+    int tokenIndex = 0;
+    for (int i = 0; i < N_TOP; ++i)
+    {
+      scores.Push(tokens[tokenIndex++].ToInt());
+      isLatest.Push(tokens[tokenIndex++].ToInt());
+      names.Push(tokens[tokenIndex++]);
+    }
+  }
+
+  private static string
+  write(Array<int> scores, Array<bool> isLatest, Array<String> names)
+  {
+    String result;
+    for (int i = 0; i < N_TOP; ++i)
+      result.appendFormat("%d\n%d\n%s\n", scores[i], isLatest[i], names[i]);
+
+    return result;
+  }
+
+  const N_TOP = 10;
+
+  const STORAGE_CVAR_NAME = "tt_lp_score";
+}
+
+class tt_lp_Spawner
+{
+  tt_lp_Spawner init() { return self; }
+
+  play void spawnScoreFor(Actor thing)
+  {
+    if (thing && thing.bCountItem)
+    {
+      tt_lp_MapScoreItem(Actor.Spawn("tt_lp_MapScoreItem", thing.pos))
+          .init(5);
+    }
+    else if (thing is "Key")
+    {
+      tt_lp_MapScoreItem(Actor.Spawn("tt_lp_MapScoreItem", thing.pos))
+          .init(250);
+    }
+  }
+}
+
+class tt_lp_StaticView : StaticEventHandler
+{
+  override void onRegister() { _topHintView = new ("tt_lp_TopHintView").init(); }
+
+  override void uiTick() { _topHintView.show(); }
+
+  private tt_lp_TopHintView _topHintView;
+}
+
+// This class counts down ticks.
+class tt_lp_Timer
+{
+  // Initializes an object with count - number of ticks to count.
+  tt_lp_Timer init(int count)
+  {
+    _count        = count;
+    _currentCount = 0;
+
+    return self;
+  }
+
+  void update()
+  {
+    if (_currentCount) --_currentCount;
+  }
+
+  void reset() { _currentCount = _count; }
+
+  int getCount() const { return _currentCount; }
+
+  int getMaxCount() const { return _count; }
+
+  private int _count;
+  private int _currentCount;
+}
+
+// Timer bonus is an additive bonus. It simply provides additional points if a
+// kill is registered in limited time frame (provided by tt_lp_Timer).
+class tt_lp_TimerBonus
+{
+  tt_lp_TimerBonus init(tt_lp_Timer timer)
+  {
+    _bonus = 0;
+    _timer = timer;
+
+    return self;
+  }
+
+  void update()
+  {
+    if (!_timer.getCount()) _bonus = 0;
+  }
+
+  void registerKill()
+  {
+    _bonus = min(MAX_TIMER_BONUS, _bonus + TIMER_BONUS_STEP);
+    _timer.reset();
+  }
+
+  int getBonus() const { return _bonus; }
+
+  const MAX_TIMER_BONUS  = 500;
+  const TIMER_BONUS_STEP = 10;
+
+  private int _bonus;
+  private tt_lp_Timer _timer;
+}
+
+class tt_lp_TimerView
+{
+  tt_lp_TimerView init(tt_lp_Timer timer)
+  {
+    _timer = timer;
+
+    return self;
+  }
+
+  ui int show(int y, int scale, double fracTic)
+  {
+    int scaledThickness = BAR_THICKNESS * scale;
+
+    if (_timer.getCount() == 0) return scaledThickness * 2;
+
+    int screenWidth  = Screen.GetWidth();
+    double ratio     = (_timer.getCount() - fracTic) / _timer.GetMaxCount();
+    int middleWidth  = screenWidth / 2;
+    int halfBarWidth = int(round(screenWidth / 8 * ratio));
+
+    y += MARGIN;
+
+    Screen.drawThickLine(middleWidth - halfBarWidth,
+                         y,
+                         middleWidth + halfBarWidth,
+                         y,
+                         scaledThickness,
+                         BAR_COLOR);
+
+    return scaledThickness * 2;
+  }
+
+  const BAR_THICKNESS = 3;
+  const BAR_COLOR     = "gray";
+  const MARGIN        = 10;
+
+  private tt_lp_Timer _timer;
+}
+
+class tt_lp_Top : OptionMenu
+{
+  override void Init(Menu parent, OptionMenuDescriptor desc)
+  {
+    Super.Init(parent, desc);
+    mDesc.mItems.Clear();
+
+    if (gameState != GS_LEVEL && gameState != GS_INTERMISSION)
+    {
+      String label = "No map detected.";
+      addLabel(label);
+      return;
+    }
+
+    String checksum = Level.GetChecksum();
+
+    Array<int> scores;
+    Array<bool> isLatest;
+    Array<String> names;
+
+    tt_lp_ScoreStorage.loadScores(checksum, scores, isLatest, names);
+
+    int maxLength = 0;
+    for (int i = 0; i < tt_lp_ScoreStorage.N_TOP; ++i)
+    {
+      int length = String.Format("%d", scores[i]).Length();
+      if (length > maxLength) maxLength = length;
+    }
+
+    // %% will become %. Adds spacing to string output.
+    String format = String.Format("%%d. %%%dd", maxLength);
+
+    for (int i = 0; i < tt_lp_ScoreStorage.N_TOP; ++i)
+    {
+      String label = String.Format(format, i + 1, scores[i]);
+      addCommand(label, names[i], i, isLatest[i]);
+    }
+  }
+
+  private void addLabel(String label)
+  {
+    mDesc.mItems.Push(
+        new ("OptionMenuItemStaticText").InitDirect(label, Font.CR_WHITE));
+  }
+
+  private void addCommand(String label, String name, int index, bool isLatest)
+  {
+    mDesc.mItems.Push(
+        new ("OptionMenuScoreItem").Init(label, name, index, isLatest));
+  }
+}
+
+class tt_lp_TopHintView
+{
+
+  tt_lp_TopHintView init()
+  {
+    _showed = false;
+
+    return self;
+  }
+
+  void show()
+  {
+    if (gameState != GS_Intermission)
+    {
+      _showed = false;
+      return;
+    }
+
+    if (_showed) return;
+
+    _showed = true;
+
+    int key1;
+    int key2;
+    [key1, key2] = Bindings.GetKEysForCommand("tt_lp_top");
+
+    if (key1 == 0 && key2 == 0) return;
+
+    String keyString  = KeyBindings.NameKeys(key1, key2);
+    String hintString = String.Format("\cfPress \ct\"%s\"\cf to show score points.", keyString);
+    Console.Printf(hintString);
+  }
+
+  private bool _showed;
+}
+
+class tt_lp_View
+{
+  tt_lp_View init(tt_lp_Parameters parameters)
+  {
+    _player       = players[consolePlayer];
+    _interpolator = DynamicValueInterpolator.Create(0, 0.1, 1, 1000000);
+    _parameters   = parameters;
+
+    return self;
+  }
+
+  ui int show(int y, int scale)
+  {
+    loadFont();
+
+    int lineHeight = _font.getHeight();
+
+    if (!_player.mo) return lineHeight * scale;
+
+    y += MARGIN;
+
+    _interpolator.update(_player.mo.score);
+
+    let scoreString = string.format("%d", _interpolator.getValue());
+    int scoreWidth  = _font.stringWidth(scoreString) * scale;
+    int x           = (Screen.GetWidth() - scoreWidth) / 2;
+    Screen.drawText(_font,
+                    Font.CR_Blue,
+                    x,
+                    y,
+                    scoreString,
+                    DTA_ScaleX, scale,
+                    DTA_ScaleY, scale);
+
+    return lineHeight * scale;
+  }
+
+  const MARGIN = 10;
+
+  mixin tt_lp_FontUser;
+
+  private PlayerInfo _player;
+
+  private DynamicValueInterpolator _interpolator;
+}

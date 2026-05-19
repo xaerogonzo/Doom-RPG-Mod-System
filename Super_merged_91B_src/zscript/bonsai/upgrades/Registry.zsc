@@ -1,0 +1,233 @@
+// #namespace TFLV::Upgrade;
+// #debug off
+
+class TFLV_Upgrade_Registry : Object play {
+  array<string> upgrade_names;
+  array<string> unregistered;
+  array<TFLV_Upgrade_BaseUpgrade> upgrades;
+
+  static TFLV_Upgrade_Registry GetRegistry() {
+    let reg = TFLV_EventHandler(StaticEventHandler.Find("TFLV_EventHandler"));
+    if (!reg) return null;
+    return reg.UPGRADE_REGISTRY;
+  }
+
+  int FindRegistration(string upgrade) {
+    let idx = upgrade_names.find(upgrade);
+    if (idx == upgrade_names.size()) return -1;
+    return idx;
+  }
+
+  TFLV_Upgrade_BaseUpgrade FindUpgrade(string upgrade) {
+    let idx = FindRegistration(upgrade);
+    if (idx < 0) return null;
+    return upgrades[idx];
+  }
+
+  bool IsUnregistered(string upgrade) {
+    return unregistered.find(upgrade) != unregistered.size();
+  }
+
+  bool Register(string upgrade) {
+//    DEBUG("Register: %s", upgrade);
+    if (IsUnregistered(upgrade)) {
+      // Disabled by BONSAIRC.
+      return false;
+    }
+    if (FindRegistration(upgrade) >= 0) {
+      // Double-registrations are a no-op to make BONSAIRC more forgiving, and
+      // are reported as successful.
+      return true;
+    }
+    upgrade_names.push(upgrade);
+    upgrades.push(TFLV_Upgrade_BaseUpgrade(new(upgrade)));
+    return true;
+  }
+
+  void Unregister(string upgrade) {
+//    DEBUG("Unregister: %s", upgrade);
+
+    if (IsUnregistered(upgrade)) return;
+    unregistered.push(upgrade);
+
+    let idx = FindRegistration(upgrade);
+    if (idx < 0) return;
+    upgrade_names.delete(idx);
+    upgrades.delete(idx);
+  }
+
+  // Returns true if Indestructible has delegated management of lives to Gun Bonsai.
+  static bool IsIndestructibleDelegated() {
+    return CVar.FindCVar("indestructible_starting_lives").GetInt() == 0
+      && CVar.FindCVar("indestructible_lives_per_level").GetInt() == 0
+      && CVar.FindCVar("indestructible_max_lives_per_level").GetInt() == 0;
+  }
+
+  //// Upgrade candidate list logic below this point. ////
+  //
+  // The basic concept for both player and weapon upgrades is to create a candidate
+  // list of eligible upgrades, then randomly pick a subset of those for the list
+  // of upgrades actually generated and presented to the player. However, the ability
+  // to force upgrades into the list complicates this slightly.
+  //
+  // So the actual behaviour is:
+  // - start with an empty list of generated upgrades and an empty list of candidates;
+  // - populate the generated list with all eligible forced upgrades;
+  // - populate the candidate list with all eligible upgrades not already in the generated list;
+  // - pick upgrades from the candidate list at random, without replacement, and add them
+  //   to the generated list until its cardinality is ≥ the requested upgrade count.
+
+  // Weighted random selection — picks up to n upgrades from src into dst.
+  // Each upgrade's weight determines its relative probability.
+  void PickWeighted(
+      Array<TFLV_Upgrade_BaseUpgrade> dst,
+      Array<TFLV_Upgrade_BaseUpgrade> src,
+      Array<int> weights, uint n) {
+    while (src.Size() > 0 && dst.Size() < n) {
+      int total = 0;
+      for (uint i = 0; i < src.Size(); ++i) total += weights[i];
+      if (total <= 0) break;
+      int roll = random[TFLV_Upgrade_RNG_UpgradePicker](0, total - 1);
+      int acc = 0;
+      uint picked = 0;
+      for (uint i = 0; i < src.Size(); ++i) {
+        acc += weights[i];
+        if (roll < acc) { picked = i; break; }
+      }
+      dst.Push(src[picked]);
+      src.Delete(picked);
+      weights.Delete(picked);
+    }
+  }
+
+  // Returns the effective pool weight for an upgrade.
+  // 0 = disabled (never appears). Higher = more likely.
+  // Reads the per-upgrade tier CVar, maps it to the corresponding weight CVar.
+  // Also checks elemental category master switches — if the master is disabled,
+  // individual upgrades in that family are also disabled regardless of tier.
+  int GetUpgradeWeight(string classname) {
+    // Check elemental category master switches first.
+    // Fire family
+    if (classname == "TFLV_Upgrade_IncendiaryShots" || classname == "TFLV_Upgrade_BurningTerror"
+        || classname == "TFLV_Upgrade_Conflagration" || classname == "TFLV_Upgrade_InfernalKiln") {
+      let cv_fire = CVar.FindCVar("bonsai_upg_fire_all");
+      if (cv_fire && cv_fire.GetInt() == 0) return 0;
+    }
+    // Poison family
+    if (classname == "TFLV_Upgrade_PoisonShots" || classname == "TFLV_Upgrade_Weakness"
+        || classname == "TFLV_Upgrade_Putrefaction" || classname == "TFLV_Upgrade_Hallucinogens") {
+      let cv_poison = CVar.FindCVar("bonsai_upg_poison_all");
+      if (cv_poison && cv_poison.GetInt() == 0) return 0;
+    }
+    // Acid family
+    if (classname == "TFLV_Upgrade_CorrosiveShots" || classname == "TFLV_Upgrade_ConcentratedAcid"
+        || classname == "TFLV_Upgrade_AcidSpray" || classname == "TFLV_Upgrade_Embrittlement") {
+      let cv_acid = CVar.FindCVar("bonsai_upg_acid_all");
+      if (cv_acid && cv_acid.GetInt() == 0) return 0;
+    }
+    // Lightning family
+    if (classname == "TFLV_Upgrade_ShockingInscription" || classname == "TFLV_Upgrade_Revivification"
+        || classname == "TFLV_Upgrade_ChainLightning" || classname == "TFLV_Upgrade_Thunderbolt") {
+      let cv_lightning = CVar.FindCVar("bonsai_upg_lightning_all");
+      if (cv_lightning && cv_lightning.GetInt() == 0) return 0;
+    }
+
+    // Get individual tier CVar
+    string suffix = classname;
+    if (suffix.IndexOf("TFLV_Upgrade_") == 0) suffix = suffix.Mid(13);
+    suffix = suffix.MakeLower();
+    let cv = CVar.FindCVar("bonsai_upg_"..suffix);
+    int tier = cv ? cv.GetInt() : 4; // default Common if CVar missing
+
+    // Map tier index to weight CVar
+    static const String WEIGHT_CVARS[] = {
+      "bonsai_weight_disabled",  // 0
+      "bonsai_weight_veryrare",  // 1
+      "bonsai_weight_rare",      // 2
+      "bonsai_weight_uncommon",  // 3
+      "bonsai_weight_common",    // 4
+      "bonsai_weight_favored"    // 5
+    };
+    if (tier < 0 || tier > 5) tier = 4;
+    let wcv = CVar.FindCVar(WEIGHT_CVARS[tier]);
+    return wcv ? max(0, wcv.GetInt()) : 0;
+  }
+
+  // Legacy compatibility: returns true if weight > 0.
+  bool IsUpgradeToggledOn(string classname) {
+    return GetUpgradeWeight(classname) > 0;
+  }
+
+  void AddEligibleUpgrades(
+      TFLV_PerPlayerStats stats, TFLV_WeaponInfo info, Array<string> names,
+      Array<TFLV_Upgrade_BaseUpgrade> upgrades, Array<int> upgrade_weights,
+      Array<TFLV_Upgrade_BaseUpgrade> exclude) {
+    for (int i = 0; i < names.Size(); ++i) {
+      let upgrade = FindUpgrade(names[i]);
+      if (!upgrade) {
+        console.printf("Warning: unknown upgrade name: %s", names[i]);
+        continue;
+      }
+      int w = GetUpgradeWeight(names[i]);
+      if (w <= 0) continue;
+      if (exclude && exclude.Find(upgrade) < exclude.Size()) continue;
+      if (stats && !upgrade.IsSuitableForPlayer(stats)) continue;
+      if (info && !(upgrade.IsSuitableForWeapon(info) && info.CanAcceptUpgrade(names[i]))) continue;
+      upgrades.Push(upgrade);
+      upgrade_weights.Push(w);
+    }
+  }
+
+  void AddForcedUpgrades(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info, Array<TFLV_Upgrade_BaseUpgrade> generated) {
+    Array<string> forced_names;
+    Array<int> dummy_weights;
+    bonsai_forced_upgrades.Split(forced_names, " ", TOK_SKIPEMPTY);
+    AddEligibleUpgrades(stats, info, forced_names, generated, dummy_weights, generated);
+  }
+
+  void GenerateUpgradesForPlayer(
+      TFLV_PerPlayerStats stats, Array<TFLV_Upgrade_BaseUpgrade> generated) {
+    Array<TFLV_Upgrade_BaseUpgrade> candidates;
+    Array<int> weights;
+    let nrof = bonsai_upgrade_choices_per_player_level;
+
+    if (nrof == -2) {
+      // Debug mode -- return all upgrades, even invalid ones.
+      generated.Copy(upgrades);
+      return;
+    }
+
+    AddForcedUpgrades(stats, null, generated);
+    AddEligibleUpgrades(stats, null, upgrade_names, candidates, weights, generated);
+
+    if (nrof == -1) {
+      // "All upgrades" mode
+      generated.Append(candidates);
+    } else {
+      PickWeighted(generated, candidates, weights, nrof);
+    }
+  }
+
+  void GenerateUpgradesForWeapon(
+      TFLV_WeaponInfo info, Array<TFLV_Upgrade_BaseUpgrade> generated) {
+    Array<TFLV_Upgrade_BaseUpgrade> candidates;
+    Array<int> weights;
+    let nrof = bonsai_upgrade_choices_per_gun_level;
+
+    if (nrof == -2) {
+      // Debug mode -- return all upgrades, even invalid ones.
+      generated.Copy(upgrades);
+      return;
+    }
+
+    AddForcedUpgrades(null, info, generated);
+    AddEligibleUpgrades(null, info, upgrade_names, candidates, weights, generated);
+
+    if (nrof == -1) {
+      // "All upgrades" mode
+      generated.Append(candidates);
+    } else {
+      PickWeighted(generated, candidates, weights, nrof);
+    }
+  }
+}

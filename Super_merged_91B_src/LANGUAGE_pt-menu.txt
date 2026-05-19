@@ -1,0 +1,13 @@
+[pt]
+// Displayed when you try to open the menu and it can't find any weapon stats.
+TFLV_MENU_NO_STATS_FOUND = "Nenhuma estatística disponível para a arma atual.\nTenha certeza que você tem um arma equipada.\nSe você tiver, atire em alguma coisa com ela e tente novamente.";
+// Headers for the status menu.
+TFLV_MENU_STATUS_TITLE = "Estatísticas";
+TFLV_MENU_HEADER_PLAYER_STATUS = "Estatísticas do Jogador";
+TFLV_MENU_HEADER_WEAPON_STATUS = "Estatísticas da Arma";
+// headers for player/weapon levelup menus
+TFLV_MENU_PLAYER_LEVELUP_TITLE = "Jogador Subiu de Nível!";
+TFLV_MENU_WEAPON_LEVELUP_TITLE = "Arma Subiu de Nível!";
+TFLV_MENU_PLAYER_LEVELUP = "Você ganhou um nível!\nEscolha uma melhoria:";
+TFLV_MENU_WEAPON_LEVELUP = "Seu %s ganhou um nível!\nEscolha uma melhoria:";
+TFLV_MENU_CURRENT_UPGRADES = "Melhorias Atuais:";

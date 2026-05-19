@@ -1,0 +1,9 @@
+// Registers SM_Achievements alongside VUAS_AchievementSetup.
+// Both run: base provides VUAS default achievements (8),
+// SM_Achievements provides Supermerged achievements (25).
+// SM_Achievements fires second and wins the cachedSetup slot,
+// so OnAchievementUnlocked callbacks route to our override correctly.
+GameInfo
+{
+    AddEventHandlers = "SM_Achievements", "SM_RunProgressHandler"
+}

@@ -1,0 +1,919 @@
+// =============================================================================
+// Gun Bonsai - Unified CVARINFO
+// Combines: Gun Bonsai, Indestructible, and Doom Points CVars
+// =============================================================================
+
+// =============================================================================
+// Master Switches
+// =============================================================================
+server bool bonsai_enabled = true;
+server bool indestructible_enabled = true;
+server bool companions_enabled = true;
+// dp_enabled already exists below in the Doom Points section
+
+// =============================================================================
+// Gun Bonsai - HUD Configuration
+// =============================================================================
+user float bonsai_hud_x = 0.01;
+user float bonsai_hud_y = 0.02;
+user float bonsai_hud_size = 0.15;
+user float bonsai_hud_alpha = 1.0;
+user color bonsai_hud_rgb_frame = "00 FF FF";
+user color bonsai_hud_rgb_weapon = "00 80 FF";
+user color bonsai_hud_rgb_player = "00 FF 80";
+user int bonsai_hud_mirror = 2;
+user int bonsai_hud_skin = 1;
+
+// Gun Bonsai - UI Settings
+user bool bonsai_levelup_flash = true;
+user color bonsai_levelup_flash_rgb = "FF FF FF";
+user int bonsai_levelup_sound_mode = 1;
+user string bonsai_levelup_sound = "";
+user int bonsai_vfx_mode = 2;              // global VFX level: 0=off 1=reduced 2=full
+// Per-feature VFX overrides. -1 = follow global setting, 0 = off, 1 = reduced, 2 = full.
+user int bonsai_vfx_dot        = -1;       // DoT tick particles (fire/poison/acid/lightning)
+user int bonsai_vfx_frag       = -1;       // Fragmentation shot trails
+user int bonsai_vfx_lightning  = -1;       // Lightning arc/thunderbolt particles
+user int bonsai_vfx_ricochet   = -1;       // Ricochet hit particles
+user int bonsai_vfx_synthesis  = -1;       // Elemental Synthesis particles
+
+// Gun Bonsai - Upgrade/Balance Settings
+server int bonsai_upgrade_choices_per_gun_level = 4;
+server int bonsai_upgrade_choices_per_player_level = 4;
+server int bonsai_gun_levels_per_player_level = 7;
+server string bonsai_forced_upgrades = "";
+server int bonsai_base_level_cost = 1200;
+server int bonsai_xp_curve = 0;  // 0=Custom Power, 1=Custom Exp, 2=Hybrid
+server float bonsai_level_cost_mul_for_melee = 0.5;
+server float bonsai_level_cost_mul_for_wimpy = 0.5;
+server float bonsai_damage_to_xp_factor = 1.0;
+server float bonsai_score_to_xp_factor = 0.0;
+
+// XP curve indices (bonsai_xp_curve):
+//   0 = Custom Power (base*level^x)  — exponent 0 gives flat/constant cost
+//   1 = Custom Exponential (base*x^level)
+//   2 = Hybrid (blends 0 into 1 with smooth transition)
+
+// Custom Power curve (index 1): base_cost * level^exponent
+server float bonsai_power_curve_exponent   = 2.0;  // 1=linear, 2=quadratic, 3=cubic equiv, any decimal
+
+// Custom Exponential curve (index 2): base_cost * base^(level-1)
+server float bonsai_exp_curve_base         = 1.5;  // 1.5=gentle exp equiv, 2.0=steep exp equiv
+
+// Hybrid curve (index 2): blends component A at low levels into component B at high levels
+// Component types: 0=Power (base_cost x level^x), 1=Exponential (base_cost x base^(level-1))
+server int   bonsai_hybrid_component_a      = 1;    // component at low levels (default: Exponential)
+server int   bonsai_hybrid_component_b      = 0;    // component at high levels (default: Power)
+server float bonsai_hybrid_exp_base_a       = 1.5;  // exp base for component A
+server float bonsai_hybrid_exp_base_b       = 2.0;  // exp base for component B
+server float bonsai_hybrid_power_a          = 1.5;  // power exponent for component A
+server float bonsai_hybrid_power_b          = 2.0;  // power exponent for component B
+server int   bonsai_hybrid_transition_start = 3;    // level where blend begins
+server int   bonsai_hybrid_transition_end   = 10;   // level where blend ends
+server float bonsai_hybrid_bias             = 0.0;  // smoothstep bias -2..2: <0=fast start, >0=slow start
+server int   bonsai_hybrid_smooth           = 0;    // window half-size for transition smoothing (0=off, 1-15)
+
+// Gun Bonsai - Weapon Binding
+server int bonsai_upgrade_binding_mode = 1;
+server bool bonsai_ignore_death_exits = true;
+server bool bonsai_use_builtin_actors = true;
+server bool bonsai_ammoless_weapons_are_wimpy = true;
+server int bonsai_respec_interval = 0;
+server bool bonsai_autosave_after_level = true;
+
+// =============================================================================
+// Indestructible - Theme Settings
+// =============================================================================
+user int indestructible_screen_effect = 6;
+user color indestructible_lifegain_flash_rgb = "FF FF 00";
+
+// Indestructible - Lives Configuration
+server int indestructible_starting_lives = 1;
+server int indestructible_min_lives_per_level = 1;
+server int indestructible_max_lives = 0;
+server int indestructible_lives_per_level = 1;
+server int indestructible_completion_requirement = 0;
+server int indestructible_lives_per_boss = 0;
+server int indestructible_damage_per_bonus_life = 0;
+
+// Indestructible - Buff Settings
+server int indestructible_duration = 10;
+server int indestructible_restore_hp = 50;
+server bool indestructible_invincibility = true;
+server bool indestructible_damage_bonus = true;
+server int indestructible_slomo = 1;
+
+// Indestructible - Compatibility
+server bool indestructible_ignore_death_exits = true;
+server bool indestructible_gun_bonsai_mode = false;
+
+// =============================================================================
+// Doom Points (formerly Lazy Points) - Score Storage
+// =============================================================================
+nosave string dp_score = "";
+
+// Doom Points - Scoring Mode
+user bool dp_enabled  = true;           // master toggle for all Doom Points scoring
+user bool dp_realtime_scoring = true;   // true = score per damage point in real time; false = score only on kill
+user bool dp_show    = true;
+
+// Doom Points - HUD Position
+user float dp_hud_x         = 50.0;
+user int dp_hud_anchor       = 0;
+user int dp_hud_y_offset     = 10;
+
+// Doom Points - HUD Appearance
+user float dp_hud_scale      = 1.0;
+user float dp_hud_opacity    = 1.0;
+user int dp_hud_color        = 7;
+
+// Doom Points - HUD Elements Visibility
+user bool dp_hud_show_score      = true;
+user bool dp_hud_show_streak_bar = true;
+user bool dp_hud_show_bonus      = true;
+user bool dp_hud_show_tally      = true;
+user bool dp_hud_show_label      = false;
+
+// Doom Points - Kill Scoring
+user bool dp_health_multiplier   = true;
+user bool dp_timer_bonus         = true;
+user float dp_bonus_countdown    = 3.0;
+user int dp_non_monster_points   = 5;
+server int dp_streak_max_bonus     = 500;  // max bonus points per kill streak
+server int dp_streak_bonus_step    = 10;   // bonus points added per kill in streak
+// Streak kill count milestones — thresholds for netevent firing (used by VUAS bridge etc.)
+server int dp_streak_threshold_1   = 5;    // kill count for first streak milestone
+server int dp_streak_threshold_2   = 10;   // kill count for second streak milestone
+server int dp_streak_threshold_3   = 25;   // kill count for third streak milestone (hidden)
+
+// Doom Points - Pickup Scoring Toggles
+user bool dp_items_enabled       = true;
+user bool dp_keys_enabled        = true;
+user bool dp_powerups_enabled    = true;
+user bool dp_healtharmor_enabled = true;
+
+// Doom Points - Pickup Scoring Point Values
+user int dp_item_points          = 5;
+user int dp_key_points           = 250;
+user int dp_powerup_points       = 100;
+user int dp_healthbonus_points   = 1;
+user int dp_armorbonus_points    = 1;
+
+// Doom Points - Secret Scoring
+user bool dp_secrets_enabled     = true;
+user int dp_secret_points        = 250;
+
+// Doom Points - Completion Bonuses
+user bool dp_completion_enabled  = true;
+user int dp_allkills_bonus       = 1000;
+user int dp_allsecrets_bonus     = 1000;
+user int dp_allitems_bonus       = 500;
+
+// =============================================================================
+// Gun Bonsai - Individual Upgrade Toggles
+// Set to false to remove an upgrade from the roll pool entirely.
+// =============================================================================
+// Player Upgrades
+// Upgrade tier weights — controls how likely each tier is to appear in the pool.
+// Weight 0 = never appears. Higher = more likely relative to other upgrades.
+user   int bonsai_weight_disabled = 0;
+user   int bonsai_weight_veryrare = 1;
+user   int bonsai_weight_rare     = 3;
+user   int bonsai_weight_uncommon = 6;
+user   int bonsai_weight_common   = 10;
+user   int bonsai_weight_favored  = 20;
+
+user   int bonsai_upg_ammoleech = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_armourleech = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_bandoliers = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_blastshaping = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_ecm = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_hazardsuit = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_indestructible = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_companions     = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_intuition = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_juggler = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_lifeleech = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_playerdamage = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_thorns = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_toughasnails = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+// Weapon Upgrades - General
+user   int bonsai_upg_aggressivedefence = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_bouncyshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_cleave = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_darkharvest = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_decoyflares = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_explosivedeath = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_explosiveshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_fastshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_fragmentationshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_homingshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_piercingshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_ricochetshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_rapidfire = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_shield = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_submunitions = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_sweep = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_swiftness = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_weapondamage = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+// Weapon Upgrades - Fire
+user   int bonsai_upg_incendiaryshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_burningterror = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_conflagration = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_infernalkiln = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+// Weapon Upgrades - Poison
+user   int bonsai_upg_poisonshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_weakness = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_putrefaction = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_hallucinogens = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+// Weapon Upgrades - Acid
+user   int bonsai_upg_corrosiveshots = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_concentratedacid = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_acidspray = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_embrittlement = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+// Weapon Upgrades - Lightning
+user   int bonsai_upg_shockinginscription = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_revivification = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_chainlightning = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_thunderbolt = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+// Weapon Upgrades - Elemental Synthesis
+user   int bonsai_upg_elementalbeam = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_elementalblast = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_elementalwave = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+// Elemental Category Master Switches
+user   int bonsai_upg_fire_all = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_poison_all = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_acid_all = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+user   int bonsai_upg_lightning_all = 4;  // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+
+// Ricochet Shots - hitscan ricochet upgrade
+server float bonsai_stat_ricochet_damage = 0.50; // damage fraction per bounce (stacks: dmg * this^bounces)
+server int   bonsai_stat_ricochet_range       = 512;  // max range per bounce in map units (~4 metres)
+server float bonsai_stat_ricochet_spread      = 25.0; // base spread in degrees at level 1
+server float bonsai_stat_ricochet_spread_step = 1.5;  // divisor applied per level above 1 (1.5 = 25->17->11->7...)
+server float bonsai_stat_ricochet_bounces     = 1.0;  // bounce multiplier: floor(level * this), min 1
+
+// Piercing Shots - damage fraction per hit (lower = less damage each pass)
+server float bonsai_stat_piercing_damage = 0.60;  // 60% damage per pierce hit at level 1
+
+// Overdrive - kill streak damage charge upgrade
+server float bonsai_stat_overdrive_damage  = 0.08; // damage multiplier added per charge stack (+8% default)
+server float bonsai_stat_overdrive_window  = 3.0;  // streak window in seconds (syncs with dp_bonus_countdown if dp is enabled)
+server int   bonsai_stat_overdrive_max_stacks = 10; // hard ceiling on charge stacks; formula gives Lv1→3, Lv2→5, Lv3→7, … (+2/level)
+user   int   bonsai_upg_overdrive = 4;             // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+
+// Gun Bonsai - Progression Controls
+server bool bonsai_freeze_progression = false;
+server bool bonsai_keep_upgrades_on_death = false;
+// Death penalty: fraction of current weapon XP lost on death (0.0 = none, 0.25 = lose 25%)
+server float bonsai_death_xp_penalty = 0.0;
+// Death penalty: flat score points deducted on death (Doom Points). 0 = no penalty.
+user int dp_death_score_penalty = 0;
+// =============================================================================
+// Companions System (formerly Universal Friend Enhancer)
+// =============================================================================
+
+// Integration mode
+server bool companions_gun_bonsai_mode = false; // if true, ally count scales from Companions upgrade
+server int  companions_compat          = 1;     // 0=Doom1, 1=Doom2, 2=Heretic, 3=Hexen, 4=Chex Quest 3, 5=Strife
+server bool companions_strife_rebels = true;   // Strife: include Rebel soldiers in companion pool
+server bool companions_strife_order  = true;   // Strife: include Order enemies in companion pool
+
+// Standalone mode settings (used when companions_gun_bonsai_mode = false)
+server int  companions_ally_count   = 0;       // allies spawned at level start (0 = none)
+server bool companions_bosses       = true;    // bosses can spawn
+server bool companions_archviles    = true;    // archviles can spawn
+server int  companions_boss_chance  = 8;       // boss spawn chance out of 256
+
+// Gun Bonsai upgrade scaling (used when companions_gun_bonsai_mode = true)
+server int  bonsai_companions_max_level           = 6;
+server int  bonsai_companions_base_allies         = 1;  // allies at upgrade level 1
+server int  bonsai_companions_allies_per_level    = 1;  // allies gained per additional level
+server int  bonsai_companions_max_allies          = 8;  // hard cap on companions
+server int  bonsai_companions_boss_min_level      = 3;  // upgrade level to unlock boss spawns (0=disabled)
+server int  bonsai_companions_archvile_min_level  = 2;  // upgrade level to unlock archvile (0=disabled)
+server int  bonsai_companions_base_revives        = 1;  // resurrections at level 1
+server int  bonsai_companions_revives_per_level   = 1;  // additional resurrections per level
+
+// Behavior — tunable regardless of mode
+server bool  F_Targetting      = true;
+server bool  F_AttackAlert     = true;
+server bool  F_Colored         = true;
+server color F_Color           = "63fc4c";
+server bool  F_Pointer         = true;
+server float F_PointerScale    = 0.25;
+server int   F_Fasters         = 1;
+server float F_HPMult          = 1.0;
+server float F_DamageFactor    = 1.0;
+server float F_DamageMult      = 1.0;
+server bool  F_Resize          = true;
+server bool  F_Walkable        = true;
+server int   F_WalkableRange   = 136;
+server bool  F_TranslucentProx = false;
+server bool  F_Teleport        = true;
+server bool  F_WarpPush        = true;
+server bool  F_FogTel          = true;
+server bool  F_TeleportNoSight = true;
+server int   F_TeleportRange   = 1280;
+server int   F_TeleportDelay   = 5;
+server int   F_Healing         = 2;
+server int   F_HealRange       = 128;
+server int   F_HealRate        = 35;
+server bool  F_Follow          = true;
+server bool  F_Idle            = true;
+server int   F_IdleRange       = 128;
+server bool  F_Strafing        = true;
+server bool  F_NoFriendlyFire  = true;
+server bool  F_Revive          = true;
+server bool  F_ReviveMsg       = true;
+server float F_ReviveSpeed     = 1.0;
+server int   F_ReviveWarmup    = 70;
+server int   F_ReviveLimit     = 0;   // used in standalone mode only (upgrade mode uses bonsai_companions_*)
+
+// =============================================================================
+// Gun Bonsai - Balance Profiles
+// Profile selector and custom profile storage.
+// =============================================================================
+user int bonsai_active_profile = 0;              // display-only: tracks last applied profile (0=Default..5=Brutal)
+// saveable profile storage (nosave = config file only, never in saves)
+server string bonsai_profile_0 = "";      // saved Default profile values (comma-delimited)
+server string bonsai_profile_1 = "";      // saved Balanced profile values (comma-delimited)
+server string bonsai_profile_2 = "";      // saved Challenging profile values
+server string bonsai_profile_3 = "";      // saved Punishing profile values
+server string bonsai_profile_4 = "";      // saved Custom profile values
+server string bonsai_profile_5 = "";      // saved Brutal Mode profile values
+
+// =============================================================================
+// =============================================================================
+// Gun Bonsai - Legendoom Integration
+// These have no effect when Legendoom is not installed.
+// =============================================================================
+// How many gun levels between each LD effect grant. 0 = disabled.
+server int  bonsai_gun_levels_per_ld_effect = 3;
+// Which guns can learn new LD effects (TFLV_WhichGuns: 0=none 1=basic 2=legendary 3=all)
+server int  bonsai_which_guns_can_learn   = 3;
+// Which guns can replace old LD effects once slots are full
+server int  bonsai_which_guns_can_replace = 2;
+// Base effect slots for non-legendary guns (rarity -1)
+server int  bonsai_base_ld_effect_slots   = 2;
+// Bonus slots per rarity level (Common=1 .. Epic=4)
+server int  bonsai_bonus_ld_effect_slots  = 1;
+// If true, guns can learn effects of any rarity regardless of spawn rarity
+server bool bonsai_ignore_gun_rarity      = false;
+
+// Gun Bonsai - Upgrade Stat Adjustments
+// Tweak the balance of individual upgrades via sliders.
+// =============================================================================
+// Damage upgrades - % bonus per level
+server float bonsai_stat_player_damage = 0.10;
+server float bonsai_stat_weapon_damage = 0.20;
+// Defence upgrades - reduction base per level (lower = stronger)
+server float bonsai_stat_tough_as_nails = 0.90;
+server float bonsai_stat_blast_shaping = 0.50;
+// RapidFire - tics removed per 2 levels (default 1.0 = 1 tic per 2 levels)
+server float bonsai_stat_rapid_fire = 1.0;
+// Explosive Shots - damage % per level and base radius
+server float bonsai_stat_explosive_damage = 0.10;
+server int bonsai_stat_explosive_radius = 64;
+// Fragmentation - base fragment count and per-level growth
+server int bonsai_stat_frag_base_count = 6;
+server float bonsai_stat_frag_damage = 0.20;
+server int bonsai_stat_frag_per_level = 2;       // fragments added per upgrade level
+server float bonsai_stat_frag_arc = 1.0;          // 1.0 = full 360° ring, 0.5 = 180° arc, etc.
+// Submunitions - base count, health scaling, bonus flat damage, and lifetime
+server int bonsai_stat_submunitions_base = 3;
+server float bonsai_stat_submunitions_health_scale = 0.8; // base for exponential health scaling (lower = more damage)
+server int bonsai_stat_submunitions_bonus_damage = 4;     // flat bonus damage per bomblet per upgrade level
+server float bonsai_stat_submunitions_lifetime = 1.0;     // multiplier on bomblet lifetime (level*5 seconds * this)
+// Explosive Shots - per-level radius growth
+server int bonsai_stat_explosive_radius_per_level = 16;   // map units added to radius per level
+// Explosive Death - health scaling base
+server float bonsai_stat_explosivedeath_scale = 0.8;      // same curve as submunitions; lower = more damage
+// Homing Shots - base lock-on range and terminal turn rate
+server int bonsai_stat_homing_base_range = 64;            // base range in map units (adds this per level too)
+server float bonsai_stat_homing_turn_rate = 1.0;          // multiplier on terminal homing turn speed (deg/tic)
+// Decoy Flares - base distraction range and decay rate
+server int bonsai_stat_flare_base_range = 768;            // base range in map units
+server float bonsai_stat_flare_decay = 0.875;             // range multiplier per level (lower = shorter range falloff)
+// Aggressive Defence - base radius and bonus per level
+server int bonsai_stat_agdef_base_radius = 64;            // base projectile-kill radius
+server int bonsai_stat_agdef_radius_per_level = 32;       // radius added per upgrade level
+// ECM - base intercept range and lock-on range
+server int bonsai_stat_ecm_base_range = 192;              // base intercept range in map units
+server int bonsai_stat_ecm_range_per_level = 64;          // range added per upgrade level
+server int bonsai_stat_ecm_lock_base = 128;               // base lock-on range for redirecting missiles
+server int bonsai_stat_ecm_lock_per_level = 32;           // lock range added per level
+// Shield - melee and ranged damage reduction bases
+server float bonsai_stat_shield_melee_base = 0.70;        // damage factor base for melee reduction per level
+server float bonsai_stat_shield_ranged_base = 0.90;       // damage factor base for ranged reduction per level
+// Sweep - damage multiplier base
+server float bonsai_stat_sweep_base = 0.8;                // sweep damage formula: base - (decay^level)
+server float bonsai_stat_sweep_decay = 0.6;               // decay rate in sweep formula
+// Cleave - overkill and health multipliers
+server float bonsai_stat_cleave_overkill = 0.25;          // bonus overkill multiplier per level (+1.0 base)
+server float bonsai_stat_cleave_health_cap = 0.5;         // maximum health% contribution cap
+// Thorns - min and max retaliation range per level
+server int bonsai_stat_thorns_min_range = 192;            // min range per level (map units)
+server int bonsai_stat_thorns_max_range = 1024;           // max range per level (map units)
+// Swiftness - base duration and combo bonus
+server float bonsai_stat_swiftness_base_tics = 28.0;      // base freeze duration in tics at level 1
+server float bonsai_stat_swiftness_level_tics = 7.0;      // tics added per upgrade level
+server float bonsai_stat_swiftness_combo_tics = 5.0;      // tics added per kill combo stack
+// Dark Harvest - base leech amount and cap scaling
+server float bonsai_stat_darkharvest_cap_per_level = 0.2; // how much the HP/armour cap grows per level (0.2 = +20%/level)
+// Life Leech / Armour Leech - boss kill bonus
+server int bonsai_stat_lifeleech_boss_mul = 10;           // boss kill HP drop multiplier (normal = level, boss = level*this)
+server int bonsai_stat_armourleech_boss_mul = 10;         // boss kill armour drop multiplier
+// Bandoliers - ammo bonus per level
+server float bonsai_stat_bandoliers_bonus = 0.5;          // ammo capacity increase per level (0.5 = +50%/level)
+// Elemental Synthesis - AoE radius multipliers
+server float bonsai_stat_elemblast_radius = 7.0;  // radius multiplier relative to target's radius
+server float bonsai_stat_elemwave_radius = 10.0;   // radius multiplier relative to player's radius
+// =============================================================================
+// Elemental DoT - Fine-grained tuning per element and per upgrade tier
+// =============================================================================
+
+// --- Fire ---
+// Output multiplier (legacy, still applied on top of everything else)
+server float bonsai_stat_fire_mult = 1.0;
+// IncendiaryShots (apprentice)
+server float bonsai_stat_fire_stack_rate = 0.2;     // stacks applied per point of damage dealt
+// FireDot behaviour
+server float bonsai_stat_fire_cutoff = 0.5;          // HP% below which fire goes dormant (BASE_FIRE_FACTOR)
+server float bonsai_stat_fire_heat_factor = 0.9;     // exponential "zoom" toward cutoff (HEAT_FACTOR); lower = faster burn
+server float bonsai_stat_fire_damage_per_stack = 4.0;// damage per stack per DoT tick (×5 = DPS/stack)
+// BurningTerror (journeyman)
+server float bonsai_stat_fire_terror_base = 0.7;     // flee-threshold base per (stacks+terror); lower = easier to trigger
+server float bonsai_stat_fire_terror_damage = 1.0;   // flat fire damage bonus per BurningTerror level (default +1/level)
+
+// --- Poison ---
+// Output multiplier
+server float bonsai_stat_poison_mult = 1.0;
+// PoisonShots (apprentice)
+server float bonsai_stat_poison_stacks_per_hit = 1.0;  // stacks applied per hit (multiplied by upgrade level)
+server float bonsai_stat_poison_softcap_factor = 10.0; // softcap = level * this
+// PoisonDot behaviour
+server float bonsai_stat_poison_drain_rate = 0.2;    // stacks drained per DoT tick (5 ticks/sec = 1/sec at default)
+// Weakness (journeyman)
+server float bonsai_stat_poison_weakness_base = 0.99;  // damage reduction base per (stacks * level); lower = stronger debuff
+// Hallucinogens (mastery)
+server float bonsai_stat_poison_hallu_damage = 0.01;   // outgoing damage bonus per stack per level while hallucinating
+server float bonsai_stat_poison_hallu_armour = 0.95;   // incoming damage reduction base per (stacks * level)
+server float bonsai_stat_poison_hallu_drain = 0.5;     // poison drain rate multiplier while hallucinating (base^level)
+// Putrefaction (mastery)
+server float bonsai_stat_poison_putref_transfer = 0.5; // fraction of stacks NOT transferred per level (1 - 0.5^level)
+server int   bonsai_stat_poison_putref_radius = 100;   // spread cloud radius in map units
+
+// --- Acid ---
+// Output multiplier
+server float bonsai_stat_acid_mult = 1.0;
+// CorrosiveShots (apprentice)
+server float bonsai_stat_acid_stack_base = 0.5;      // base stack conversion (50% of damage at level 0)
+server float bonsai_stat_acid_stack_per_level = 0.1; // additional conversion per upgrade level (+10%/level)
+// AcidDot behaviour
+server float bonsai_stat_acid_base_threshold = 0.5;  // HP% base at which damage starts accelerating
+server float bonsai_stat_acid_dps_above = 1.0;       // DPS per level above the threshold (×5 per tick)
+server float bonsai_stat_acid_dps_mult = 6.0;        // max DPS multiplier below threshold (dps_above * this * level)
+// ConcentratedAcid (journeyman)
+server float bonsai_stat_acid_concentration_threshold = 0.8; // threshold curve base (lower = threshold rises faster)
+server float bonsai_stat_acid_concentration_drain = 0.9;     // drain rate modifier base per concentration level
+// AcidSpray (mastery)
+server int   bonsai_stat_acid_spray_base_range = 64;         // base splash range in map units
+server int   bonsai_stat_acid_spray_range_per_level = 32;    // range added per Acid Spray upgrade level
+// Embrittlement (mastery)
+server float bonsai_stat_acid_embrit_damage = 0.01;  // damage bonus per acid stack per Embrittlement level
+
+// --- Lightning ---
+// Output multiplier
+server float bonsai_stat_lightning_mult = 1.0;
+// ShockingInscription (apprentice)
+server float bonsai_stat_lightning_stack_rate = 0.2;   // stacks per point of damage (×level multiplied in code)
+server float bonsai_stat_lightning_softcap = 5.0;      // softcap = level * this (in tics; ×35 = seconds)
+// Thunderbolt (journeyman)
+server float bonsai_stat_lightning_tbolt_stun_base = 5.0;  // base stun duration in tics at level 0
+server float bonsai_stat_lightning_tbolt_stun_per_level = 5.0; // stun tics added per level
+server int   bonsai_stat_lightning_tbolt_radius_base = 64;  // base AoE radius in map units
+server int   bonsai_stat_lightning_tbolt_radius_per_level = 64; // radius added per level
+server float bonsai_stat_lightning_tbolt_cap_base = 0.9;    // cap multiplier exponent base (1.0 + base^level)
+// Chain Lightning (mastery)
+server float bonsai_stat_lightning_chain_radius = 3.0; // arc radius multiplier per level (victim_radius * (base + level))
+// Revivification (mastery)
+server float bonsai_stat_lightning_reviv_damage = 0.2; // minion damage bonus per level
+server float bonsai_stat_lightning_reviv_armour = 0.8; // minion incoming damage factor per level (base^level)
+
+// --- Blood ---
+// Output multiplier
+server float bonsai_stat_blood_mult = 1.0;
+// SanguineShots (apprentice)
+server float bonsai_stat_blood_stacks_per_damage = 0.5;  // stacks applied per point of damage dealt
+server float bonsai_stat_blood_softcap = 20.0;           // softcap = level * this
+// BloodDot behaviour
+server float bonsai_stat_blood_drain_pct = 0.015;        // damage dealt = current_hp * drain_pct * level per tick
+server float bonsai_stat_blood_stack_drain_rate = 0.2;   // stacks consumed per tick (5 ticks/sec = 1/sec)
+server float bonsai_stat_blood_heal_ratio = 0.4;         // player healed as a fraction of damage dealt per tick
+// VitalDrain (journeyman)
+server float bonsai_stat_blood_vitaldrain_bonus = 0.5;   // added to heal_ratio per VitalDrain level
+// Exsanguinate (master)
+server float bonsai_stat_blood_burst_ratio = 0.02;       // burst heal = spawn_health * burst_ratio * level on kill
+
+// Indestructible - Gun Bonsai Integration Tuning
+server int bonsai_indestructible_max_level = 4;
+server bool bonsai_indestructible_lives_on_clear = true;
+server int bonsai_indestructible_base_lives_per_clear = 1;
+server bool bonsai_indestructible_lives_on_boss = true;
+server int bonsai_indestructible_boss_kill_level = 3;
+server bool bonsai_indestructible_lives_on_damage = true;
+server int bonsai_indestructible_damage_per_life = 400;
+server int bonsai_indestructible_base_max_lives = 1;
+server int bonsai_rejection_mode = 0;
+// 0=Relative (% of max), 1=Absolute (raw XP values)
+server int bonsai_graph_mode = 0;
+// Number of weapon levels shown on the graph X axis (2-100)
+server int bonsai_graph_max_level = 25;
+
+// =============================================================================
+// Hyper-V — Master Toggle
+// =============================================================================
+server bool hyperv_enabled = true;  // Master switch for all Hyper-V systems
+user   bool hyperv_loaded  = true;  // Detection flag for other mods
+
+// =============================================================================
+// Hyper-V — All CVars
+// =============================================================================
+user float 	vmm_damage_mult 	= 1.0;
+user float 	vmm_jump_mult 		= 1.0;
+user float 	vmm_speed_mult 		= 1.0;
+
+// Dash
+user bool	vmm_dash				= true;
+user float	vmm_dash_mult			= 1.6;
+user float	vmm_dash_cooldown		= 1.0;
+user bool	vmm_double_dash			= false;
+user bool	vmm_dash_fwd_leap		= true;
+user bool	vmm_dash_side			= true;
+user float	vmm_dash_side_mult		= 1.2;
+user bool	vmm_dash_back			= true;
+user float	vmm_dash_back_mult		= 1.0;
+user bool	vmm_dash_stamina		= true;
+user int	vmm_dash_fwd_cost		= 10;
+user int	vmm_dash_side_cost		= 15;
+user int	vmm_dash_back_cost		= 20;
+
+// Stamina HUD
+
+// Movement
+user bool	vmm_double_jump			= false;
+user bool	vmm_ledge_climb			= false;
+
+// Health Regeneration
+// Health Regeneration
+user bool	vmm_health_regen		= false;
+user int	vmm_regen_amount		= 1;
+user int	vmm_regen_type			= 0;
+user float	vmm_regen_time			= 5.0;
+user int	vmm_regen_min			= 0;
+user int	vmm_regen_max			= 0;
+user float	vmm_regen_sound_vol		= 0.0;
+user float	vmm_regen_visual		= 0.0;
+user color	vmm_regen_color			= "00 CC 44";
+
+// Armor Regeneration
+user bool	vmm_armor_regen			= false;
+user int	vmm_armor_regen_amount		= 1;
+user int	vmm_armor_regen_type		= 0;
+user float	vmm_armor_regen_time		= 5.0;
+user int	vmm_armor_regen_min			= 0;
+user int	vmm_armor_regen_max			= 100;
+user float	vmm_armor_regen_sound_vol	= 0.0;
+user float	vmm_armor_regen_visual		= 0.0;
+user color	vmm_armor_regen_color		= "44 88 FF";
+
+// Ammo Regeneration
+user bool	vmm_ammo_regen			= false;
+user float	vmm_ammo_regen_time			= 10.0;
+user bool	vmm_ammo_regen_backpack		= false;
+user float	vmm_ammo_regen_sound_vol	= 0.0;
+user float	vmm_ammo_regen_visual		= 0.0;
+user color	vmm_ammo_regen_color		= "FF DD 00";
+
+// Melee
+user bool	vmm_melee					= true;
+user bool	vmm_melee_vr_mode			= false;
+user bool	vmm_melee_key				= false;
+user bool	vmm_melee_sound				= true;
+user bool	vmm_melee_puff				= false;
+user bool	vmm_melee_stamina			= true;
+user bool	vmm_melee_berserk			= true;
+user float	vmm_melee_range				= 64;
+user float	vmm_melee_mult				= 1.0;
+user int	vmm_melee_preset			= 2;
+user int	vmm_melee_dmg_min			= 1;
+user int	vmm_melee_dmg_max			= 6;
+user int	vmm_melee_indicator			= 1;
+user bool	vmm_melee_indicator_on		= true;
+user float	vmm_melee_indicator_range	= 256;
+user bool	vmm_melee_combo				= true;
+user int	vmm_melee_combohit			= 3;
+user int	vmm_melee_combocrit			= 4;
+user float	vmm_melee_knockback			= 1.0;
+user float	vmm_melee_kb_mass			= 600;
+user int	vmm_melee_stun				= 2;
+
+// Grappling Hook
+user bool	vmm_hook			= true;
+user float 	vmm_hook_cooldown 	= 1.0;
+user float	vmm_hook_maxdist	= 720;
+user bool	vmm_hook_pull		= true;
+
+// Teleport
+user bool	vmm_teleport			= true;
+user bool	vmm_tp_restrict			= true;
+user float	vmm_tp_beam_speed		= 40.0;
+user float	vmm_tp_max_range		= 1024.0;
+user float	vmm_tp_cooldown			= 1.5;
+
+// interface for other mods
+// (hyperv_loaded declared in Master Toggles above)
+// Slomo Bullet Time
+server bool	sm_allowslomohud			= true;
+server bool	sm_hidefullslomohud			= true;
+server bool	sm_enablecoolmessage		= false;
+server bool	sm_enablefreezemomentum		= false;
+server bool	sm_noslomopointdrain		= false;
+server bool	sm_pausemusic				= false;
+server bool	sm_pausesounds				= false;
+server bool	sm_enableactivemessage		= true;
+server bool	sm_usebigfont				= false;
+server bool	sm_minimumpointreadymsg		= false;
+server bool	sm_cooldownreadyatstart		= false;
+server int	sm_totalslomopoints			= 200;
+server int	sm_minimumslomopoints		= 1;
+server int	sm_giveslomointerval		= 1;
+server int	sm_slomoitemduration		= 3;
+server int	sm_slomocooldownticks		= 0;
+server int	sm_slomorechargedelay		= 0;
+server int	sm_slomodraindelay			= 0;
+server int	sm_slomorefillamount		= 2;
+server int	sm_hudcooldowndivfactor		= 1;
+server bool	m8f_sm_externaltoggle		= false;
+
+// Slomo audio bridge — written by ZScript, read by ACS
+server bool	sm_audio_active				= false;
+
+// Public API for other mods
+server bool	hyperv_slomo_active			= false;
+
+
+// Unified HUD
+user bool	vmm_hud					= true;
+
+// Unified HUD position (virtual 640x480 coords)
+user int	vmm_hud_x				= 8;
+user int	vmm_hud_y				= 462;
+user int	vmm_hud_bar_width		= 100;
+user int	vmm_hud_label_width		= 36;
+user int	vmm_hud_bar_gap			= 10;
+
+// Per-bar HUD toggles
+user bool	vmm_hud_stamina			= true;
+user bool	vmm_hud_slomo			= true;
+user bool	vmm_hud_slomo_cd_blink	= false;  // blink "CD" pip while slomo is on cooldown
+user bool	vmm_hud_dash			= true;
+user bool	vmm_hud_hook			= false;
+
+// Slomo master enable
+server bool	sm_enabled				= true;
+user int	vmm_hud_bar_height		= 5;
+
+// Parry system
+user bool	vmm_melee_parry				= true;
+user bool	vmm_hud_parry				= true;
+user int	vmm_melee_parry_crit_resist	= 50;
+user int	vmm_melee_berserk_crit		= 3;
+user int	vmm_melee_berserk_stamina	= 50;
+user int	vmm_melee_berserk_stun		= 2;
+user float	vmm_melee_berserk_dmg		= 3.0;
+user float	vmm_melee_berserk_cooldown	= 2.0;
+
+// Berserk slomo bonuses
+server bool	sm_berserk_enabled			= true;
+server int	sm_berserk_drain_reduction	= 50;
+server int	sm_berserk_points_bonus		= 100;
+
+// Slomo depth
+server int	sm_slowdown_depth			= 100;
+
+// Berserk slomo depth and cooldown
+server int	sm_berserk_depth_bonus		= 30;
+server int	sm_berserk_cooldown_reduce	= 50;
+
+// Invulnerability sphere slomo bonuses
+server bool	sm_invuln_enabled			= true;
+server int	sm_invuln_depth				= 100;
+server bool	sm_invuln_infinite			= true;
+server bool	sm_invuln_zero_cooldown		= true;
+
+// Weapon Slot 1 mode
+user bool	vmm_melee_slot1_mode			= false;
+user bool	vmm_melee_slot1_suppress_snd	= true;
+user bool	vmm_melee_slot1_combo			= true;
+user int	vmm_melee_slot1_combo_rate		= 8;
+user bool	vmm_melee_slot1_indicator		= false;
+user bool	vmm_melee_slot1_parry			= true;
+user int	vmm_melee_slot1_crit_dmg_min	= 10;
+user int	vmm_melee_slot1_crit_dmg_max	= 30;
+user int	vmm_melee_slot1_rapid_threshold	= 3;
+user int	vmm_melee_slot1_rapid_window	= 10;
+user int	vmm_melee_slot1_rapid_crit		= 0;
+user int	vmm_melee_parry_prob		= 10;
+user int	vmm_melee_parry_duration	= 20;
+user float	vmm_melee_parry_stun_min	= 3.0;
+user float	vmm_melee_parry_stun_max	= 5.0;
+user int	vmm_dash_preset			= 0;
+user bool	vmm_hud_regen			= true;
+user bool	vmm_hook_stun			= true;
+user float	vmm_hook_stun_dur_min	= 2.0;
+user float	vmm_hook_stun_dur_max	= 4.0;
+
+// Player Rules
+user float	vmm_taken_damage_mult		= 1.0;
+user float	vmm_self_damage_mult		= 1.0;
+user float	vmm_friction_mult			= 1.0;
+user int	vmm_max_health				= 0;
+user int	vmm_start_health			= 0;
+user int	vmm_start_armor				= 0;
+
+// World Rules — applied on actor spawn
+user float	vmm_enemy_health_mult		= 1.0;
+user int	vmm_enemy_health_max		= 0;
+user float	vmm_enemy_speed_mult		= 1.0;
+user float	vmm_friend_health_mult		= 1.0;
+user int	vmm_friend_health_max		= 0;
+user float	vmm_friend_speed_mult		= 1.0;
+
+// Permanent Powerups
+user bool	vmm_perm_buddha				= false;
+user bool	vmm_perm_damage				= false;
+user bool	vmm_perm_doublefiring		= false;
+user bool	vmm_perm_drain				= false;
+user bool	vmm_perm_flight				= false;
+user bool	vmm_perm_frightener			= false;
+user bool	vmm_perm_ghost				= false;
+user bool	vmm_perm_highjump			= false;
+user bool	vmm_perm_infiniteammo		= false;
+user bool	vmm_perm_invisibility		= false;
+user bool	vmm_perm_invulnerability	= false;
+user bool	vmm_perm_ironfeet			= false;
+user bool	vmm_perm_lightamp			= false;
+user bool	vmm_perm_mask				= false;
+user bool	vmm_perm_protection			= false;
+user bool	vmm_perm_regeneration		= false;
+user bool	vmm_perm_scanner			= false;
+user bool	vmm_perm_shadow				= false;
+user bool	vmm_perm_speed				= false;
+user bool	vmm_perm_strength			= false;
+user bool	vmm_perm_targeter			= false;
+user bool	vmm_perm_timefreezer		= false;
+user bool	vmm_perm_torch				= false;
+user bool	vmm_perm_weaponlevel2		= false;
+
+// =============================================================================
+// Hyper-V x Gun Bonsai Integration Modes
+// Each toggle independently gates that feature behind a Gun Bonsai upgrade.
+// When OFF, the feature behaves as normal standalone Hyper-V.
+// =============================================================================
+server bool hyperv_gb_mobility     = true;   // Gate dash/jump/crouch/ledge/doublejump behind upgrade
+server bool hyperv_gb_melee        = true;   // Gate auto-melee/combo/parry behind upgrade
+server bool hyperv_gb_slomo        = true;   // Gate bullet time behind upgrade (also disables Swiftness)
+server bool hyperv_gb_health_regen = true;   // Gate health regen behind upgrade
+server bool hyperv_gb_armor_regen  = true;   // Gate armor regen behind upgrade
+server bool hyperv_gb_ammo_regen   = true;   // Gate ammo regen behind upgrade
+server bool hyperv_gb_agility      = true;   // Gate speed/jump mult behind upgrade
+server bool hyperv_gb_hook         = true;   // Gate grappling hook behind weapon upgrade
+server bool hyperv_gb_teleporter   = true;   // Gate teleporter behind weapon upgrade
+
+// =============================================================================
+// Hyper-V Upgrade Pool Rarity Tiers
+// 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored
+// =============================================================================
+server int bonsai_upg_hyperv_mobility     = 4;   // Mobility (dash/jump) rarity
+server int bonsai_upg_hyperv_melee        = 4;   // Melee rarity
+server int bonsai_upg_hyperv_bullettime   = 3;   // Bullet Time rarity (Uncommon — powerful)
+server int bonsai_upg_hyperv_healthregen  = 4;   // Health Regen rarity
+server int bonsai_upg_hyperv_armorregen   = 3;   // Armor Regen rarity
+server int bonsai_upg_hyperv_ammoregen    = 3;   // Ammo Regen rarity
+server int bonsai_upg_hyperv_agility      = 4;   // Agility rarity
+server int bonsai_upg_hyperv_hook         = 4;   // Hook rarity
+server int bonsai_upg_hyperv_teleporter   = 3;   // Teleporter rarity
+
+// =============================================================================
+// Hyper-V — Melee Base Cooldown (new CVar replacing hardcoded values)
+// =============================================================================
+user int vmm_melee_base_cooldown = 35;  // Base tic delay between auto-melee hits (key mode uses ~63% of this)
+
+// =============================================================================
+// Hyper-V x Gun Bonsai — Max Level CVars
+// =============================================================================
+server int bonsai_hyperv_mobility_max_level    = 3;   // Max level for Mobility upgrade
+server int bonsai_hyperv_melee_max_level       = 6;   // Max level for Combat Training (3 unlock + 3 scaling)
+server int bonsai_hyperv_slomo_max_level       = 4;   // Max level for Bullet Time (2 unlock + 2 scaling)
+server int bonsai_hyperv_hregen_max_level      = 5;   // Max level for Health Regen (3 unlock + 2 scaling)
+server int bonsai_hyperv_aregen_max_level      = 4;   // Max level for Armor Regen (2 unlock + 2 scaling)
+server int bonsai_hyperv_ammoregen_max_level   = 3;   // Max level for Ammo Regen (2 unlock + 1 scaling)
+server int bonsai_hyperv_agility_max_level     = 4;   // Max level for Agility (2 unlock + 2 scaling)
+server int bonsai_hyperv_hook_max_level        = 2;   // Max level for Hook (feature only, no scaling)
+server int bonsai_hyperv_tp_max_level          = 2;   // Max level for Teleporter (feature only, no scaling)
+
+// =============================================================================
+// Hyper-V x Gun Bonsai — Per-Level Scaling CVars
+// These control how much each level above the feature-unlock threshold improves stats.
+// =============================================================================
+
+// Mobility scaling (above Lv3)
+server float bonsai_hyperv_mobility_cd_per_level = 0.1;  // Dash cooldown reduction per level (multiplier subtracted from 1.0)
+
+// Melee scaling (above Lv3 — parry unlock)
+server int   bonsai_hyperv_melee_dmg_per_level   = 2;    // Bonus added to both dmg_min and dmg_max per scaling level
+server float bonsai_hyperv_melee_cd_per_level    = 0.1;  // Cooldown multiplier reduction per scaling level (e.g. 0.1 = 10% faster)
+server int   bonsai_hyperv_melee_crit_per_level  = 1;    // Bonus to crit chance (out of 10) per scaling level
+server int   bonsai_hyperv_melee_parry_per_level = 5;    // Bonus to parry probability per scaling level
+
+// Bullet Time scaling
+server int   bonsai_hyperv_slomo_pts_per_level   = 80;   // Additional slomo points per level above 1
+server int   bonsai_hyperv_slomo_depth_per_level = 10;   // Additional slowdown depth % per scaling level
+
+// Health Regen scaling
+server int   bonsai_hyperv_hregen_cap_per_level  = 15;   // Additional HP cap per scaling level
+server float bonsai_hyperv_hregen_tick_per_level = 1.25; // Tick interval reduction per level above 1 (seconds)
+
+// Armor Regen scaling
+server int   bonsai_hyperv_aregen_cap_per_level  = 50;   // Additional armor cap per level above 1
+server float bonsai_hyperv_aregen_tick_per_level = 2.0;  // Tick interval reduction per level above 1 (seconds)
+server float bonsai_hyperv_aregen_min_tick       = 1.0;  // Minimum armor regen interval floor (seconds)
+
+// Ammo Regen scaling
+server float bonsai_hyperv_ammoregen_tick_per_level = 4.0; // Tick interval reduction per level above 1 (seconds)
+
+// Teleporter scaling
+server int   bonsai_hyperv_tp_range_per_level    = 1024; // Additional teleport range per level above 1 (map units)
+server float bonsai_hyperv_tp_cd_per_level       = 0.75; // Cooldown reduction per level above 1 (seconds)
+server float bonsai_hyperv_tp_cd_min             = 0.25; // Minimum teleport cooldown floor (seconds)
+
+// Agility scaling (above Lv2)
+server float bonsai_hyperv_agility_speed_per_level = 0.05; // Additional speed multiplier per scaling level
+server float bonsai_hyperv_agility_jump_per_level  = 0.05; // Additional jump multiplier per scaling level
+
+// =============================================================================
+// Hyper-V x Gun Bonsai — Base Value CVars
+// These control the starting/unlock-level values for each upgrade.
+// Previously hardcoded; now tunable for balance profiles.
+// =============================================================================
+
+// Mobility base values
+server float bonsai_hyperv_mobility_base_cooldown = 1.0;  // Dash cooldown at Lv1 (seconds)
+server float bonsai_hyperv_mobility_min_cooldown  = 0.2;  // Minimum dash cooldown floor (seconds)
+
+// Melee base values (at Lv1 unlock)
+server int   bonsai_hyperv_melee_base_dmg_min  = 1;   // Base minimum damage per hit
+server int   bonsai_hyperv_melee_base_dmg_max  = 6;   // Base maximum damage per hit
+server int   bonsai_hyperv_melee_base_tics     = 35;  // Base cooldown in tics between hits
+server int   bonsai_hyperv_melee_base_crit     = 4;   // Base crit chance at Lv2 (out of 10)
+server int   bonsai_hyperv_melee_base_parry    = 10;  // Base parry probability at Lv3 (%)
+
+// Bullet Time base values
+server int   bonsai_hyperv_slomo_pts_base      = 120; // Slomo point pool at Lv1; scales by slomo_pts_per_level each level
+server int   bonsai_hyperv_slomo_base_depth    = 100; // Base slowdown depth % (scales above Lv1)
+
+// Health Regen base values
+server int   bonsai_hyperv_hregen_cap_base     = 25;  // HP cap gained per unlock level (Lv1=25, Lv2=50, …)
+server float bonsai_hyperv_hregen_tick_base    = 5.0; // Regen interval at Lv1; scales by hregen_tick_per_level each level
+server float bonsai_hyperv_hregen_min_tick     = 1.0; // Minimum regen interval floor (seconds)
+
+// Armor Regen base values
+server int   bonsai_hyperv_aregen_cap_base     = 50;  // Armor cap at Lv1; scales by aregen_cap_per_level each level
+server float bonsai_hyperv_aregen_tick_base    = 6.0; // Regen interval at Lv1; scales by aregen_tick_per_level each level
+
+// Ammo Regen base values
+server float bonsai_hyperv_ammoregen_tick_base = 10.0; // Regen interval at Lv1; scales by ammoregen_tick_per_level each level
+server float bonsai_hyperv_ammoregen_min_tick  = 2.0;  // Minimum regen interval floor (seconds)
+
+// Agility base values
+server float bonsai_hyperv_agility_base_speed  = 1.25; // Speed multiplier at Lv1
+server float bonsai_hyperv_agility_base_jump   = 1.35; // Jump multiplier at Lv2
+
+// Teleporter base values
+server int   bonsai_hyperv_tp_range_base       = 1024; // Teleport range at Lv1; scales by tp_range_per_level each level
+server float bonsai_hyperv_tp_cd_base          = 1.5;  // Teleport cooldown at Lv1; scales by tp_cd_per_level each level
+
+// Bullet Time weapon restriction
+server bool  bonsai_hyperv_slomo_any_weapon    = false; // If true, BulletTime upgrade allows all weapon types (not just melee/wimpy)
+
+// Health / Armor regen amount per tick
+server int   bonsai_hyperv_hregen_amount       = 1;    // HP restored per health regen tick
+server int   bonsai_hyperv_aregen_amount       = 1;    // Armor restored per armor regen tick
+
+// Hook stun scaling (Lv2+)
+server float bonsai_hyperv_hook_stun_min_base       = 2.0; // Min stun duration at Lv2 (seconds)
+server float bonsai_hyperv_hook_stun_max_base       = 4.0; // Max stun duration at Lv2 (seconds)
+server float bonsai_hyperv_hook_stun_min_per_level  = 0.5; // Bonus to min stun per level above 2
+server float bonsai_hyperv_hook_stun_max_per_level  = 1.0; // Bonus to max stun per level above 2

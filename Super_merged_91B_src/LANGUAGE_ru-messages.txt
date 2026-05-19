@@ -1,0 +1,7 @@
+[ru]
+TFLV_MSG_LEVELUP_REJECTED = "Уровень отклонён!";
+TFLV_MSG_PLAYER_LEVELUP  = "Вы получили новый уровень «%s»!";
+TFLV_MSG_PLAYER_LEVELUP_READY = "Вы готовы к повышению уровня!";
+TFLV_MSG_PLAYERSTATS_MISSING = "Нет информации об игроке %d";
+TFLV_MSG_WEAPON_LEVELUP = "«%s» получает новый уровень «%s»!";
+TFLV_MSG_WEAPON_LEVELUP_READY = "«%s» готов к повышению уровня!";

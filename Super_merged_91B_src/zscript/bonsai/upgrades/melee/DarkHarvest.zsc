@@ -1,0 +1,62 @@
+// #namespace TFLV::Upgrade;
+// #debug off;
+
+class TFLV_Upgrade_DarkHarvest : TFLV_Upgrade_BaseUpgrade {
+  override void OnKill(PlayerPawn player, Actor shot, Actor target) {
+    let amount = target.bBOSS ? level*10 : level;
+    uint hp_cap = player.GetMaxHealth(true) * (1.0 + bonsai_stat_darkharvest_cap_per_level*(level-1));
+
+    // Use the player's current BasicArmor MaxSaveAmount as the armour cap.
+    // This reflects whatever armour class they currently have (none=0, green=100,
+    // blue=200) and updates if they upgrade or lose their armour.
+    // Fall back to hp_cap if they have no armour item at all.
+    uint ap_cap = hp_cap;
+    let ba = BasicArmor(player.FindInventory("BasicArmor"));
+    if (ba && ba.MaxAmount > 0)
+      ap_cap = ba.MaxAmount * (1.0 + bonsai_stat_darkharvest_cap_per_level*(level-1));
+
+    let hp = Health(player.Spawn("TFLV_Upgrade_DarkHarvest_Health"));
+    if (hp) {
+      hp.Amount = amount;
+      hp.MaxAmount = hp_cap;
+      GiveItem(player, hp);
+    }
+
+    let ap = BasicArmorBonus(player.Spawn("TFLV_Upgrade_DarkHarvest_Armour"));
+    if (ap) {
+      ap.SaveAmount = amount;
+      ap.MaxSaveAmount = ap_cap;
+      GiveItem(player, ap);
+    }
+  }
+
+  void GiveItem(PlayerPawn player, Inventory item) {
+    item.ClearCounters();
+    if (!item.CallTryPickup(player)) item.Destroy();
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return info.IsMelee() || info.IsWimpy();
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("leech", "+"..level);
+    fields.insert("cap", AsPercent(1.0 + bonsai_stat_darkharvest_cap_per_level*level));
+  }
+}
+
+class TFLV_Upgrade_DarkHarvest_Health : HealthBonus {
+  Default {
+    Inventory.Amount 1;
+    Inventory.MaxAmount 200;
+    Inventory.PickupMessage "";
+  }
+}
+
+class TFLV_Upgrade_DarkHarvest_Armour : BasicArmorBonus {
+  Default {
+    Armor.SaveAmount 1;
+    Armor.MaxSaveAmount 200;
+    Inventory.PickupMessage "";
+  }
+}

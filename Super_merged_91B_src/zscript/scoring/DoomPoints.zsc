@@ -1,0 +1,1123 @@
+// =============================================================================
+// Doom Points - Scoring System (formerly Lazy Points / Doom Scoring)
+// All classes use dp_ prefix. CVars use dp_ prefix.
+// =============================================================================
+
+// =============================================================================
+// Parameters (default constants, fallbacks when CVars unavailable)
+// =============================================================================
+
+class dp_Parameters
+{
+  const FONT = "OriginalBigFont";
+  const BONUS_COUNTDOWN = 3;
+  const Y_OFFSET = 10;
+  const SECRET_POINTS = 250;
+  const ITEM_POINTS = 5;
+  const KEY_POINTS = 250;
+  const NON_MONSTER_KILL_POINTS = 5;
+  const MONSTER_HEALTH_DIVISOR = 10;
+  const POWERUP_POINTS = 100;
+  const HEALTHBONUS_POINTS = 1;
+  const ARMORBONUS_POINTS = 1;
+  const ALLKILLS_BONUS = 1000;
+  const ALLSECRETS_BONUS = 1000;
+  const ALLITEMS_BONUS = 500;
+}
+
+// =============================================================================
+// Timer
+// =============================================================================
+
+class dp_Timer
+{
+  dp_Timer init(int count)
+  {
+    _count        = count;
+    _currentCount = 0;
+    return self;
+  }
+
+  void update()
+  {
+    if (_currentCount) { --_currentCount; }
+  }
+
+  void reset()       { _currentCount = _count; }
+  int getCount()     const { return _currentCount; }
+  int getMaxCount()  const { return _count; }
+
+  private int _count;
+  private int _currentCount;
+}
+
+// =============================================================================
+// TimerBonus
+// =============================================================================
+
+class dp_TimerBonus
+{
+  dp_TimerBonus init(dp_Timer timer)
+  {
+    _bonus = 0;
+    _timer = timer;
+    return self;
+  }
+
+  void registerKill()
+  {
+    _bonus = min(dp_streak_max_bonus, _bonus + dp_streak_bonus_step);
+    ++_killCount;
+    _timer.reset();
+  }
+
+  void update()
+  {
+    if (!_timer.getCount())
+    {
+      _bonus     = 0;
+      _killCount = 0;
+    }
+  }
+
+  int getBonus()     const { return _bonus; }
+  int getKillCount() const { return _killCount; }
+
+  private int      _bonus;
+  private int      _killCount;
+  private dp_Timer _timer;
+}
+
+// =============================================================================
+// HealthBonus (score multiplier based on player health)
+// =============================================================================
+
+class dp_HealthBonus
+{
+  dp_HealthBonus init(int playerNumber)
+  {
+    _player = players[playerNumber];
+    return self;
+  }
+
+  double getMultiplier()
+  {
+    if (!_player.mo) return 1.0;
+    int healthPercent = _player.health * 100 / _player.mo.GetMaxHealth();
+    if      (healthPercent >= 100) return 2.0;
+    else if (healthPercent >=  50) return 1.5;
+    return 1.0;
+  }
+
+  private PlayerInfo _player;
+}
+
+// =============================================================================
+// Counter (tracks kills, secrets, completion bonuses)
+// =============================================================================
+
+class dp_Counter
+{
+  dp_Counter init(int playerNumber, dp_TimerBonus timerBonus, dp_HealthBonus healthBonus)
+  {
+    _player         = players[playerNumber];
+    _playerNumber   = playerNumber;
+    _oldSecretCount = 0;
+    _timerBonus     = timerBonus;
+    _healthBonus    = healthBonus;
+    return self;
+  }
+
+  // Cache all CVar pointers lazily — called once, then skipped every subsequent call.
+  private void cacheVars()
+  {
+    if (_cached) return;
+    _cached            = true;
+    _cv_enabled        = CVar.GetCVar("dp_enabled",           _player);
+    _cv_realtime       = CVar.GetCVar("dp_realtime_scoring",  _player);
+    _cv_timer_bonus    = CVar.GetCVar("dp_timer_bonus",       _player);
+    _cv_health_mul     = CVar.GetCVar("dp_health_multiplier", _player);
+    _cv_secrets        = CVar.GetCVar("dp_secrets_enabled",   _player);
+    _cv_completion     = CVar.GetCVar("dp_completion_enabled",_player);
+    _cv_secret_pts     = CVar.GetCVar("dp_secret_points",     _player);
+    _cv_nonmonster_pts = CVar.GetCVar("dp_non_monster_points",_player);
+    _cv_allkills       = CVar.GetCVar("dp_allkills_bonus",    _player);
+    _cv_allsecrets     = CVar.GetCVar("dp_allsecrets_bonus",  _player);
+    _cv_allitems       = CVar.GetCVar("dp_allitems_bonus",    _player);
+    _cv_streak_t1      = CVar.FindCVar("dp_streak_threshold_1");
+    _cv_streak_t2      = CVar.FindCVar("dp_streak_threshold_2");
+    _cv_streak_t3      = CVar.FindCVar("dp_streak_threshold_3");
+  }
+
+  private bool getBool(CVar cv, bool fallback)
+  { return cv ? cv.GetBool() : fallback; }
+  private int getInt(CVar cv, int fallback)
+  { return cv ? cv.GetInt() : fallback; }
+
+  // Override this in a subclass to gate scoring to a specific game state.
+  // Return false to suppress all scoring. Default always returns true.
+  virtual bool isScoringAllowed() const { return true; }
+
+  play void countDamage(Actor damaged, int damage, Name damageType, Actor damageSource)
+  {
+    cacheVars();
+    if (!getBool(_cv_enabled,  true)) return;
+    if (!isScoringAllowed()) return;
+    if (!getBool(_cv_realtime, true)) return;
+    if (!damaged || !damaged.bIsMonster || damaged.bFRIENDLY) return;
+    if (!isMe(damageSource)) return;
+    if (damageType == "Telefrag")
+    {
+      damage = damaged.getSpawnHealth();
+    }
+    else
+    {
+      // GZDoom passes raw pre-resistance damage, which can vastly exceed the
+      // HP the enemy actually lost with high-damage weapons or overhaul mods.
+      // Cap to the enemy's spawn health — a single hit can never legitimately
+      // score more than the target was worth at full health.
+      damage = min(damage, damaged.getSpawnHealth());
+    }
+    addPoints(damage);
+  }
+
+  play void countDeath(Actor died)
+  {
+    cacheVars();
+    if (!getBool(_cv_enabled, true)) return;
+    if (!isScoringAllowed()) return;
+    if (!(died && isMe(died.target))) return;
+
+    if (getBool(_cv_realtime, true)) {
+      // Real-time mode: damage was already scored point-by-point.
+      // countDeath only awards the kill streak/timer bonus on top.
+      int timerBonus = 0;
+      if (getBool(_cv_timer_bonus, true))
+        timerBonus = _timerBonus.getBonus();
+      _timerBonus.registerKill();
+      if (timerBonus > 0) addPoints(timerBonus);
+    } else {
+      // Kill-only mode: award the full kill score now.
+      addPoints(calculatePointsFor(died));
+    }
+
+    // Fire netevent for kill streak milestones so VUAS bridge and other
+    // systems can listen without coupling directly to DoomPoints internals.
+    // Only fires when streak tracking is enabled.
+    if (getBool(_cv_timer_bonus, true))
+    {
+      int kc = _timerBonus.getKillCount();
+      int t1 = _cv_streak_t1 ? _cv_streak_t1.GetInt() : 5;
+      int t2 = _cv_streak_t2 ? _cv_streak_t2.GetInt() : 10;
+      int t3 = _cv_streak_t3 ? _cv_streak_t3.GetInt() : 25;
+      if (kc == t1) EventHandler.SendNetworkEvent("dp_streak", kc);
+      if (kc == t2) EventHandler.SendNetworkEvent("dp_streak", kc);
+      if (kc == t3) EventHandler.SendNetworkEvent("dp_streak", kc);
+    }
+  }
+
+  play void countSecrets()
+  {
+    cacheVars();
+    if (!getBool(_cv_enabled, true)) return;
+    if (!isScoringAllowed()) return;
+    if (!getBool(_cv_secrets, true)) return;
+
+    int newSecretCount = _player.SecretCount;
+    if (newSecretCount > _oldSecretCount)
+    {
+      addPoints(getInt(_cv_secret_pts, dp_Parameters.SECRET_POINTS));
+      _oldSecretCount = newSecretCount;
+    }
+  }
+
+  play void checkCompletionBonuses()
+  {
+    cacheVars();
+    if (!getBool(_cv_enabled,    true)) return;
+    if (!isScoringAllowed()) return;
+    if (!getBool(_cv_completion, true)) return;
+
+    if (Level.killed_monsters >= Level.total_monsters && Level.total_monsters > 0)
+      addPoints(getInt(_cv_allkills,   dp_Parameters.ALLKILLS_BONUS));
+    if (Level.found_secrets >= Level.total_secrets && Level.total_secrets > 0)
+      addPoints(getInt(_cv_allsecrets, dp_Parameters.ALLSECRETS_BONUS));
+    if (Level.found_items >= Level.total_items && Level.total_items > 0)
+      addPoints(getInt(_cv_allitems,   dp_Parameters.ALLITEMS_BONUS));
+  }
+
+  private bool isMe(Actor other) { return (other && other == _player.mo); }
+  private play void addPoints(int points) { if (_player.mo) _player.mo.score += points; }
+
+  private play int calculatePointsFor(Actor died)
+  {
+    int timerBonus = 0;
+    if (getBool(_cv_timer_bonus, true))
+      timerBonus = _timerBonus.getBonus();
+
+    int result = died.bIsMonster
+      ? (died.SpawnHealth() / dp_Parameters.MONSTER_HEALTH_DIVISOR + timerBonus)
+      : getInt(_cv_nonmonster_pts, dp_Parameters.NON_MONSTER_KILL_POINTS);
+
+    if (getBool(_cv_health_mul, true))
+      result *= int(round(_healthBonus.getMultiplier()));
+
+    _timerBonus.registerKill();
+    return result;
+  }
+
+  private PlayerInfo     _player;
+  private int            _playerNumber;
+  private int            _oldSecretCount;
+  private dp_TimerBonus  _timerBonus;
+  private dp_HealthBonus _healthBonus;
+
+  // Cached CVar pointers — transient so they survive frame-to-frame but
+  // are cleared on save/load, causing a one-time re-cache on next use.
+  transient bool _cached;
+  transient CVar _cv_enabled, _cv_realtime, _cv_timer_bonus;
+  transient CVar _cv_health_mul, _cv_secrets, _cv_completion;
+  transient CVar _cv_secret_pts, _cv_nonmonster_pts;
+  transient CVar _cv_allkills, _cv_allsecrets, _cv_allitems;
+  transient CVar _cv_streak_t1, _cv_streak_t2, _cv_streak_t3;
+}
+
+// =============================================================================
+// MapScore & ScoreStorage
+// =============================================================================
+
+class dp_MapScore
+{
+  dp_MapScore init(int playerNumber)
+  {
+    _playerNumber  = playerNumber;
+    if (players[_playerNumber].mo)
+      _startingScore = players[_playerNumber].mo.score;
+    return self;
+  }
+
+  void save()
+  {
+    if (_playerNumber != consolePlayer) return;
+    if (!players[_playerNumber].mo) return;
+    int    score    = players[_playerNumber].mo.score - _startingScore;
+    String checksum = Level.GetChecksum();
+    dp_ScoreStorage.saveScore(checksum, score);
+  }
+
+  private int _playerNumber;
+  private int _startingScore;
+}
+
+class dp_ScoreStorage
+{
+  static void saveScore(String mapChecksum, int score)
+  {
+    CVar   scoreCVar   = CVar.FindCVar(STORAGE_CVAR_NAME);
+    String scoreString = scoreCVar.GetString();
+    let    scoreDict   = Dictionary.FromString(scoreString);
+    String mapScoresString = scoreDict.At(mapChecksum);
+
+    Array<int>    scores;
+    Array<bool>   isLatests;
+    Array<String> names;
+    read(mapScoresString, scores, isLatests, names);
+
+    for (int i = 0; i < N_TOP; ++i) { isLatests[i] = false; }
+
+    for (int i = 0; i < N_TOP; ++i)
+    {
+      if (score > scores[i])
+      {
+        scores   .Insert(i, score);
+        isLatests.Insert(i, true);
+        names    .Insert(i, "");
+        break;
+      }
+    }
+
+    String newMapScoresString = write(scores, isLatests, names);
+    scoreDict.Insert(mapChecksum, newMapScoresString);
+    scoreCVar.SetString(scoreDict.ToString());
+  }
+
+  static void rename(String mapChecksum, int index, String name)
+  {
+    CVar   scoreCVar   = CVar.FindCVar(STORAGE_CVAR_NAME);
+    String scoreString = scoreCVar.GetString();
+    let    scoreDict   = Dictionary.FromString(scoreString);
+    String mapScoresString = scoreDict.At(mapChecksum);
+
+    Array<int>    scores;
+    Array<bool>   isLatests;
+    Array<String> names;
+    read(mapScoresString, scores, isLatests, names);
+
+    names[index] = name;
+
+    String newMapScoresString = write(scores, isLatests, names);
+    scoreDict.Insert(mapChecksum, newMapScoresString);
+    scoreCVar.SetString(scoreDict.ToString());
+  }
+
+  static void loadScores(String mapChecksum, out Array<int> scores, out Array<bool> isLatests, out Array<String> names)
+  {
+    CVar   scoreCVar   = CVar.FindCVar(STORAGE_CVAR_NAME);
+    String scoreString = scoreCVar.GetString();
+    let    scoreDict   = Dictionary.FromString(scoreString);
+    String mapScoresString = scoreDict.At(mapChecksum);
+    read(mapScoresString, scores, isLatests, names);
+  }
+
+  private static void read(String scoresString, out Array<int> scores, out Array<bool> isLatests, out Array<String> names)
+  {
+    if (scoresString.Length() == 0)
+    {
+      for (int i = 0; i < N_TOP; ++i)
+      {
+        scores.Push(0); isLatests.Push(0); names.Push("");
+      }
+      return;
+    }
+    Array<String> tokens;
+    scoresString.Split(tokens, "\n");
+    int tokenIndex = 0;
+    for (int i = 0; i < N_TOP; ++i)
+    {
+      scores   .Push(tokens[tokenIndex++].ToInt());
+      isLatests.Push(tokens[tokenIndex++].ToInt());
+      names    .Push(tokens[tokenIndex++]);
+    }
+  }
+
+  private static String write(Array<int> scores, Array<bool> isLatests, Array<String> names)
+  {
+    String result;
+    for (int i = 0; i < N_TOP; ++i)
+      result.appendFormat("%d\n%d\n%s\n", scores[i], isLatests[i], names[i]);
+    return result;
+  }
+
+  const N_TOP = 10;
+  const STORAGE_CVAR_NAME = "dp_score";
+}
+
+// =============================================================================
+// MapScoreItem & Spawner (pickup scoring)
+// =============================================================================
+
+class dp_MapScoreItem : ScoreItem
+{
+  dp_MapScoreItem init(int n) { amount = n; return self; }
+  Default
+  {
+    -CountItem;
+    +Inventory.Quiet;
+  }
+}
+
+class dp_Spawner
+{
+  dp_Spawner init() { return self; }
+
+  // Cache all CVar pointers lazily on first spawn call.
+  // All dp_ CVars are declared in CVARINFO so FindCVar never returns null after
+  // the mod loads — the sentinel (_cv_enabled != null) is always reliable.
+  private void cacheVars()
+  {
+    if (_cv_enabled) return;
+    _cv_enabled        = CVar.FindCVar("dp_enabled");
+    _cv_healtharmor    = CVar.FindCVar("dp_healtharmor_enabled");
+    _cv_powerups       = CVar.FindCVar("dp_powerups_enabled");
+    _cv_keys           = CVar.FindCVar("dp_keys_enabled");
+    _cv_items          = CVar.FindCVar("dp_items_enabled");
+    _cv_healthbonus_pts = CVar.FindCVar("dp_healthbonus_points");
+    _cv_armorbonus_pts  = CVar.FindCVar("dp_armorbonus_points");
+    _cv_powerup_pts    = CVar.FindCVar("dp_powerup_points");
+    _cv_key_pts        = CVar.FindCVar("dp_key_points");
+    _cv_item_pts       = CVar.FindCVar("dp_item_points");
+  }
+
+  play void spawnScoreFor(Actor thing)
+  {
+    if (!thing) return;
+    // Fast-reject: missiles and no-interaction actors (VFX, sub-projectiles, etc.)
+    // can never be pickups. Skip them before any CVar lookups or type checks.
+    if (thing.bMISSILE || thing.bNOINTERACTION) return;
+    cacheVars();
+    if (!_cv_enabled.GetBool()) return;
+
+    if (thing is "HealthBonus")
+    {
+      if (_cv_healtharmor.GetBool())
+      {
+        int pts = _cv_healthbonus_pts.GetInt();
+        if (pts > 0) spawnScoreItem(thing, pts);
+      }
+      return;
+    }
+    if (thing is "ArmorBonus")
+    {
+      if (_cv_healtharmor.GetBool())
+      {
+        int pts = _cv_armorbonus_pts.GetInt();
+        if (pts > 0) spawnScoreItem(thing, pts);
+      }
+      return;
+    }
+    if (thing is "PowerupGiver")
+    {
+      if (_cv_powerups.GetBool())
+      {
+        int pts = _cv_powerup_pts.GetInt();
+        if (pts > 0) spawnScoreItem(thing, pts);
+      }
+      return;
+    }
+    if (thing is "Key")
+    {
+      if (_cv_keys.GetBool())
+      {
+        int pts = _cv_key_pts.GetInt();
+        if (pts > 0) spawnScoreItem(thing, pts);
+      }
+      return;
+    }
+    if (thing.bCountItem)
+    {
+      if (_cv_items.GetBool())
+      {
+        int pts = _cv_item_pts.GetInt();
+        if (pts > 0) spawnScoreItem(thing, pts);
+      }
+      return;
+    }
+  }
+
+  private play void spawnScoreItem(Actor thing, int pts)
+  {
+    dp_MapScoreItem(Actor.Spawn("dp_MapScoreItem", thing.pos)).init(pts);
+  }
+
+  // Cached CVar pointers — transient so they are cleared on save/load and
+  // re-cached on next use, avoiding stale pointers across sessions.
+  transient CVar _cv_enabled;
+  transient CVar _cv_healtharmor, _cv_powerups, _cv_keys, _cv_items;
+  transient CVar _cv_healthbonus_pts, _cv_armorbonus_pts, _cv_powerup_pts;
+  transient CVar _cv_key_pts, _cv_item_pts;
+}
+
+// =============================================================================
+// PlayerScore (ties everything together per-player)
+// =============================================================================
+
+class dp_PlayerScore
+{
+  // Public entry point for external bonus point awards (e.g. VUAS achievements).
+  // Uses _playerNumber (already stored on the instance) to access the player.
+  play void AwardBonus(int points)
+  {
+    if (points <= 0) return;
+    let mo = players[_playerNumber].mo;
+    if (mo) mo.score += points;
+  }
+
+  dp_PlayerScore init(int playerNumber)
+  {
+    _playerNumber = playerNumber;
+    _timer       = new("dp_Timer"      ).init(TICKS_IN_SECOND * dp_Parameters.BONUS_COUNTDOWN);
+    _timerBonus  = new("dp_TimerBonus" ).init(_timer);
+    _healthBonus = new("dp_HealthBonus").init(playerNumber);
+    _counter     = makeCounter(playerNumber, _timerBonus, _healthBonus);
+    _mapScore    = new("dp_MapScore"   ).init(playerNumber);
+
+    if (playerNumber == consolePlayer)
+    {
+      _hud         = new("dp_HudHelper");
+      _view        = new("dp_View"     ).init(_hud);
+      _timerView   = new("dp_TimerView").init(_timer, _hud);
+      _bonusView   = new("dp_BonusView").init(_timerBonus, _healthBonus, _hud);
+      _tallyView   = new("dp_TallyView").init(_hud);
+    }
+    return self;
+  }
+
+  // Override to supply a dp_Counter subclass (e.g. to add a scoring gate).
+  virtual dp_Counter makeCounter(int playerNumber, dp_TimerBonus timerBonus, dp_HealthBonus healthBonus)
+  {
+    return new("dp_Counter").init(playerNumber, timerBonus, healthBonus);
+  }
+
+  ui void show(double fracTic)
+  {
+    if (gameState == gs_TitleLevel || _view == NULL) return;
+    if (!isVisible()) return;
+
+    int y = _hud.getBaseY();
+    y += _view     .show(y);
+    y += _timerView.show(y, fracTic);
+    y += _bonusView.show(y);
+    y += _tallyView.show(y);
+  }
+
+  play void countDamage(Actor damaged, int damage, Name damageType, Actor damageSource)
+    { _counter.countDamage(damaged, damage, damageType, damageSource); }
+  play void countDeath(Actor died) { _counter.countDeath(died); }
+
+  play void tick()
+  {
+    _counter.countSecrets();
+    _timer     .update();
+    _timerBonus.update();
+  }
+
+  int getPlayerNumber() const { return _playerNumber; }
+
+  play void saveMapScore()
+  {
+    _counter.checkCompletionBonuses();
+    _mapScore.save();
+  }
+
+  private bool isVisible()
+  {
+    if (_isVisible == NULL) _isVisible = CVar.GetCVar("dp_show", players[_playerNumber]);
+    return _isVisible.GetBool();
+  }
+
+  const TICKS_IN_SECOND = 35;
+
+  private int _playerNumber;
+  private dp_Timer       _timer;
+  private dp_TimerBonus  _timerBonus;
+  private dp_HealthBonus _healthBonus;
+  private dp_Counter     _counter;
+  private dp_MapScore    _mapScore;
+  private dp_HudHelper   _hud;
+  private dp_View        _view;
+  private dp_TimerView   _timerView;
+  private dp_BonusView   _bonusView;
+  private dp_TallyView   _tallyView;
+  transient CVar _isVisible;
+}
+
+// =============================================================================
+// HUD Helper
+// =============================================================================
+
+class dp_HudHelper
+{
+  // All CVar pointers cached as transient fields.
+  // Populated lazily on first use, re-cached after save/load.
+  transient bool _cached;
+  transient CVar cv_x, cv_anchor, cv_y_offset, cv_scale, cv_opacity, cv_color;
+  transient CVar cv_show_score, cv_show_streak, cv_show_bonus, cv_show_tally, cv_show_label;
+
+  clearscope void cacheVars()
+  {
+    if (_cached) return;
+    _cached        = true;
+    cv_x           = CVar.FindCVar("dp_hud_x");
+    cv_anchor      = CVar.FindCVar("dp_hud_anchor");
+    cv_y_offset    = CVar.FindCVar("dp_hud_y_offset");
+    cv_scale       = CVar.FindCVar("dp_hud_scale");
+    cv_opacity     = CVar.FindCVar("dp_hud_opacity");
+    cv_color       = CVar.FindCVar("dp_hud_color");
+    cv_show_score  = CVar.FindCVar("dp_hud_show_score");
+    cv_show_streak = CVar.FindCVar("dp_hud_show_streak_bar");
+    cv_show_bonus  = CVar.FindCVar("dp_hud_show_bonus");
+    cv_show_tally  = CVar.FindCVar("dp_hud_show_tally");
+    cv_show_label  = CVar.FindCVar("dp_hud_show_label");
+  }
+
+  clearscope int getX(int textWidth)
+  {
+    cacheVars();
+    double xPercent = cv_x ? clamp(cv_x.GetFloat(), 0.0, 100.0) : 50.0;
+    int screenW = Screen.GetWidth();
+    return int((screenW - textWidth) * xPercent / 100.0);
+  }
+
+  // Returns the horizontal center coordinate for the HUD anchor point.
+  // Used by dp_TimerView to centre the streak bar on the same x as other elements.
+  clearscope int getCenterX()
+  {
+    cacheVars();
+    double xPercent = cv_x ? clamp(cv_x.GetFloat(), 0.0, 100.0) : 50.0;
+    return int(Screen.GetWidth() * xPercent / 100.0);
+  }
+
+  clearscope int getBaseY()
+  {
+    cacheVars();
+    int anchor  = cv_anchor   ? cv_anchor.GetInt()   : 0;
+    int yOffset = cv_y_offset ? cv_y_offset.GetInt() : 10;
+    int screenH = Screen.GetHeight();
+    int baseY;
+    if (anchor == 1)      baseY = screenH / 2;
+    else if (anchor == 2) baseY = screenH - 100;
+    else                  baseY = 0;
+    return baseY + yOffset;
+  }
+
+  clearscope double getScale()   { cacheVars(); return clamp(cv_scale   ? cv_scale.GetFloat()   : 1.0,  0.5, 3.0); }
+  clearscope double getOpacity() { cacheVars(); return clamp(cv_opacity ? cv_opacity.GetFloat() : 1.0,  0.0, 1.0); }
+  clearscope int    getColor()   { cacheVars(); return clamp(cv_color   ? cv_color.GetInt()     : 7,    0,   24);   }
+
+  clearscope bool showScore()     { cacheVars(); return cv_show_score  ? cv_show_score.GetBool()  : true;  }
+  clearscope bool showStreakBar() { cacheVars(); return cv_show_streak ? cv_show_streak.GetBool() : true;  }
+  clearscope bool showBonus()     { cacheVars(); return cv_show_bonus  ? cv_show_bonus.GetBool()  : true;  }
+  clearscope bool showTally()     { cacheVars(); return cv_show_tally  ? cv_show_tally.GetBool()  : true;  }
+  clearscope bool showLabel()     { cacheVars(); return cv_show_label  ? cv_show_label.GetBool()  : false; }
+}
+
+// =============================================================================
+// FontUser mixin
+// =============================================================================
+
+mixin class dp_FontUser
+{
+  private ui void loadFont()
+  {
+    if (_font == NULL) _font = Font.GetFont(dp_Parameters.FONT);
+  }
+  private transient Font _font;
+}
+
+// =============================================================================
+// View classes (HUD rendering)
+// =============================================================================
+
+class dp_View
+{
+  dp_View init(dp_HudHelper hud)
+  {
+    _hud          = hud;
+    _player       = players[consolePlayer];
+    // 0.5 factor: snappy interpolation so real-time damage increments are visible.
+    _interpolator = DynamicValueInterpolator.Create(0, 0.5, 1, 1000000);
+    return self;
+  }
+
+  ui int show(int y)
+  {
+    if (!_hud.showScore()) return 0;
+    loadFont();
+
+    double scale      = _hud.getScale();
+    double opacity    = _hud.getOpacity();
+    int    color      = _hud.getColor();
+    int    lineHeight = int(_font.GetHeight() * CleanYFac_1 * scale);
+    if (!_player.mo) return lineHeight;
+
+    y += MARGIN + lineHeight / 2;
+    _interpolator.update(_player.mo.score);
+
+    String scoreString;
+    if (_hud.showLabel())
+      scoreString = String.Format("SCORE: %d", _interpolator.getValue());
+    else
+      scoreString = String.Format("%d", _interpolator.getValue());
+
+    int scoreWidth = int(_font.StringWidth(scoreString) * CleanXFac_1 * scale);
+    int x          = _hud.getX(scoreWidth);
+
+    Screen.DrawText(_font, color, x, y, scoreString,
+      DTA_CleanNoMove_1, true, DTA_ScaleX, scale, DTA_ScaleY, scale, DTA_Alpha, opacity);
+    return int(lineHeight * 2);
+  }
+
+  const MARGIN = 10;
+  mixin dp_FontUser;
+  private dp_HudHelper _hud;
+  private PlayerInfo _player;
+  private DynamicValueInterpolator _interpolator;
+}
+
+class dp_TimerView
+{
+  dp_TimerView init(dp_Timer timer, dp_HudHelper hud) { _timer = timer; _hud = hud; return self; }
+
+  ui int show(int y, double fracTic)
+  {
+    if (!_hud.showStreakBar()) return 0;
+    if (_timer.GetCount() == 0) return BAR_THICKNESS;
+
+    double scale       = _hud.getScale();
+    int    screenWidth = Screen.GetWidth();
+    double ratio       = (_timer.GetCount() - fracTic) / _timer.GetMaxCount();
+    int    barMaxWidth = int(screenWidth / 4 * scale);
+    int    halfBarW    = int(barMaxWidth * ratio / 2);
+    int    centerX     = _hud.getCenterX();
+    y += MARGIN;
+
+    Screen.DrawThickLine(centerX - halfBarW, y, centerX + halfBarW, y, BAR_THICKNESS, BAR_COLOR);
+    return BAR_THICKNESS;
+  }
+
+  const BAR_THICKNESS = 2.0;
+  const BAR_COLOR     = "gray";
+  const MARGIN        = 10;
+  private dp_Timer     _timer;
+  private dp_HudHelper _hud;
+}
+
+class dp_BonusView
+{
+  dp_BonusView init(dp_TimerBonus timerBonus, dp_HealthBonus healthBonus, dp_HudHelper hud)
+  {
+    _timerBonus  = timerBonus;
+    _healthBonus = healthBonus;
+    _hud         = hud;
+    return self;
+  }
+
+  ui int show(int y)
+  {
+    if (!_hud.showBonus()) return 0;
+    loadFont();
+
+    double scale      = _hud.getScale();
+    double opacity    = _hud.getOpacity();
+    int    color      = _hud.getColor();
+    int    lineHeight = int(_font.GetHeight() * CleanYFac_1 * scale);
+    y += MARGIN + lineHeight / 2;
+
+    int    bonus      = _timerBonus.getBonus();
+    int    killCount  = _timerBonus.getKillCount();
+    double multiplier = _healthBonus.getMultiplier();
+    if (bonus == 0 && multiplier == 1.0 && killCount == 0) return 0;
+
+    String bonusString;
+    if (killCount > 0) bonusString.appendFormat("%dx ", killCount);
+    if (bonus) bonusString.appendFormat("+%d", bonus);
+    if (multiplier != 1.0)
+    {
+      if (bonusString.length()) bonusString.appendFormat(" ");
+      bonusString.appendFormat("x%.1f", multiplier);
+    }
+
+    int bonusWidth = int(_font.StringWidth(bonusString) * CleanXFac_1 * scale);
+    int x          = _hud.getX(bonusWidth);
+
+    Screen.DrawText(_font, color, x, y, bonusString,
+      DTA_CleanNoMove_1, true, DTA_ScaleX, scale, DTA_ScaleY, scale, DTA_Alpha, opacity);
+    return int(lineHeight * 2);
+  }
+
+  const MARGIN = 10;
+  mixin dp_FontUser;
+  private dp_HudHelper   _hud;
+  private dp_TimerBonus  _timerBonus;
+  private dp_HealthBonus _healthBonus;
+}
+
+class dp_TallyView
+{
+  dp_TallyView init(dp_HudHelper hud) { _hud = hud; return self; }
+
+  ui int show(int y)
+  {
+    if (!_hud.showTally()) return 0;
+
+    double scale   = _hud.getScale();
+    double opacity = _hud.getOpacity();
+    int    color   = _hud.getColor();
+
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+      if (!playerInGame[i] || i == consolePlayer) continue;
+      PlayerInfo player   = players[i];
+      if (!player.mo) continue;
+      String playerString = String.Format("%s: %d", player.GetUserName(), player.mo.score);
+      int    playerWidth  = int(OriginalSmallFont.StringWidth(playerString) * CleanXFac_1 * scale);
+      int    x            = _hud.getX(playerWidth);
+      Screen.DrawText(OriginalSmallFont, color, x, y, playerString,
+        DTA_CleanNoMove_1, true, DTA_ScaleX, scale, DTA_ScaleY, scale, DTA_Alpha, opacity);
+    }
+    return int(OriginalSmallFont.GetHeight() * CleanYFac_1 * scale);
+  }
+
+  private dp_HudHelper _hud;
+}
+
+// =============================================================================
+// Dispatcher (EventHandler for Doom Points scoring)
+// Now integrated into the main TFLV_EventHandler, but kept as a helper class.
+// The main EventHandler calls into dp_ScoringSystem methods.
+// =============================================================================
+
+class dp_ScoringSystem play
+{
+  dp_Spawner spawner;
+  // playerScores is NOT serialized — it's rebuilt fresh on every map load via
+  // WorldLoaded(). The actual score lives on player.mo.score which GZDoom saves.
+  // This avoids a save/load timing bug where PlayerEntered fires before save data
+  // is restored, leaving the array empty after loading a save from a cold start.
+  transient Array<dp_PlayerScore> playerScores;
+
+  dp_ScoringSystem init()
+  {
+    spawner = new("dp_Spawner").init();
+    return self;
+  }
+
+  // Override to supply a dp_PlayerScore subclass.
+  // Performs a soft dependency check for the Typist bridge pk3: if
+  // tt_TypistPlayerScore exists in the class registry (i.e. the bridge is
+  // loaded), it is used automatically. Falls back to dp_PlayerScore otherwise.
+  // No CVars, no patching, no second archive required.
+  // Note: the String variable intermediate is required — a string literal
+  // inline in a class<> cast is resolved at compile time, not runtime.
+  // Assigning to a String first defers the lookup to runtime (same pattern
+  // used by have_legendoom() to detect LDPistol).
+  virtual dp_PlayerScore makePlayerScore(int playerNumber)
+  {
+    String bridgeName = "tt_TypistPlayerScore";
+    let bridgeClass = (class<dp_PlayerScore>)(bridgeName);
+    if (bridgeClass)
+      return dp_PlayerScore(new(bridgeClass)).init(playerNumber);
+    return new("dp_PlayerScore").init(playerNumber);
+  }
+
+  // Called every map load (including save loads). Rebuilds playerScores for all
+  // currently active players. Safe to call multiple times — clears first.
+  void WorldLoaded()
+  {
+    playerScores.Clear();
+    for (int i = 0; i < MAXPLAYERS; ++i)
+    {
+      if (playeringame[i])
+        playerScores.push(makePlayerScore(i));
+    }
+  }
+
+  void PlayerEntered(int playerNumber)
+  {
+    // Only add if not already present (WorldLoaded may have already added them).
+    for (uint i = 0; i < playerScores.size(); ++i)
+      if (playerScores[i].getPlayerNumber() == playerNumber) return;
+    playerScores.push(makePlayerScore(playerNumber));
+  }
+
+  void PlayerDisconnected(int playerNumber)
+  {
+    for (uint i = 0; i < playerScores.size(); ++i)
+    {
+      if (playerNumber == playerScores[i].getPlayerNumber())
+      {
+        playerScores.delete(i);
+        return;
+      }
+    }
+  }
+
+  ui void RenderOverlay(double fracTic)
+  {
+    for (uint i = 0; i < playerScores.size(); ++i)
+      playerScores[i].show(fracTic);
+  }
+
+  void WorldThingDamaged(Actor thing, int damage, Name damageType, Actor damageSource)
+  {
+    for (uint i = 0; i < playerScores.size(); ++i)
+      playerScores[i].countDamage(thing, damage, damageType, damageSource);
+  }
+
+  void WorldThingDied(Actor thing)
+  {
+    for (uint i = 0; i < playerScores.size(); ++i)
+      playerScores[i].countDeath(thing);
+  }
+
+  void WorldTick()
+  {
+    for (uint i = 0; i < playerScores.size(); ++i)
+      playerScores[i].tick();
+  }
+
+  void WorldThingSpawned(Actor thing)
+  {
+    spawner.spawnScoreFor(thing);
+  }
+
+  // Public method for awarding bonus points to a specific player.
+  // Called by Supermerged's EventHandler when a VUAS achievement unlocks.
+  // Safe to call even if dp is disabled — callers gate on DoomPointsEnabled().
+  play void AwardBonusPoints(int playerNumber, int points)
+  {
+    if (points <= 0) return;
+    // playerNumber may be -1 when called from StaticEventHandler context.
+    // In that case award to consoleplayer (always correct in singleplayer).
+    int targetPlayer = (playerNumber >= 0) ? playerNumber : consoleplayer;
+    for (uint i = 0; i < playerScores.Size(); ++i)
+    {
+      let ps = playerScores[i];
+      if (!ps) continue;
+      if (ps.getPlayerNumber() == targetPlayer)
+      {
+        ps.AwardBonus(points);
+        return;
+      }
+    }
+    // Fallback: if still not found, award directly to consoleplayer's actor
+    if (players[targetPlayer].mo)
+      players[targetPlayer].mo.score += points;
+  }
+
+  void WorldUnloaded()
+  {
+    for (uint i = 0; i < playerScores.size(); ++i)
+      playerScores[i].saveMapScore();
+  }
+}
+
+// =============================================================================
+// StaticView (intermission hint - separate StaticEventHandler)
+// =============================================================================
+
+class dp_TopHintView
+{
+  dp_TopHintView init() { _showed = false; return self; }
+
+  void show()
+  {
+    if (gameState != GS_Intermission) { _showed = false; return; }
+    if (_showed) return;
+    _showed = true;
+
+    int key1, key2;
+    [key1, key2] = Bindings.GetKeysForCommand("dp_top");
+    if (key1 == 0 && key2 == 0) return;
+
+    String keyString  = KeyBindings.NameKeys(key1, key2);
+    Console.Printf("\cfPress \ct\"%s\"\cf to show score points.", keyString);
+  }
+
+  bool _showed;
+}
+
+class dp_StaticView : StaticEventHandler
+{
+  override void OnRegister()
+  {
+    _topHintView = new("dp_TopHintView").init();
+  }
+
+  override void UiTick()
+  {
+    _topHintView.show();
+  }
+
+  dp_TopHintView _topHintView;
+}
+
+// =============================================================================
+// Top Scores Menu
+// =============================================================================
+
+class dp_Top : OptionMenu
+{
+  override void Init(Menu parent, OptionMenuDescriptor desc)
+  {
+    Super.Init(parent, desc);
+    mDesc.mItems.Clear();
+
+    if (gameState != GS_LEVEL && gameState != GS_INTERMISSION)
+    {
+      addLabel("No map detected.");
+      return;
+    }
+
+    String checksum = Level.GetChecksum();
+    Array<int>    scores;
+    Array<bool>   isLatests;
+    Array<String> names;
+    dp_ScoreStorage.loadScores(checksum, scores, isLatests, names);
+
+    int maxLength = 0;
+    for (int i = 0; i < dp_ScoreStorage.N_TOP; ++i)
+    {
+      int length = String.Format("%d", scores[i]).Length();
+      if (length > maxLength) maxLength = length;
+    }
+
+    String format = String.Format("%%d. %%%dd", maxLength);
+    for (int i = 0; i < dp_ScoreStorage.N_TOP; ++i)
+    {
+      String label = String.Format(format, i + 1, scores[i]);
+      addCommand(label, names[i], i, isLatests[i]);
+    }
+  }
+
+  private void addLabel(String label)
+  {
+    mDesc.mItems.Push(new("OptionMenuItemStaticText").InitDirect(label, Font.CR_WHITE));
+  }
+
+  private void addCommand(String label, String name, int index, bool isLatest)
+  {
+    mDesc.mItems.Push(new("dp_OptionMenuScoreItem").Init(label, name, index, isLatest));
+  }
+}
+
+// =============================================================================
+// dp_OptionMenuScoreItem (for Top Scores editable name field)
+// =============================================================================
+
+class dp_OptionMenuScoreItem : OptionMenuItem
+{
+  String mText;
+  int mIndex;
+  bool mIsLatest;
+  TextEnterMenu mEnter;
+
+  dp_OptionMenuScoreItem Init(String label, String text, int index, bool isLatest)
+  {
+    Super.Init(label, "");
+    mText     = text;
+    mIndex    = index;
+    mIsLatest = isLatest;
+    return self;
+  }
+
+  override bool Selectable() { return true; }
+
+  override int Draw(OptionMenuDescriptor d, int y, int indent, bool selected)
+  {
+    if (mEnter)
+    {
+      drawLabel(indent, y, selected ? Font.CR_YELLOW : Font.CR_GOLD);
+      drawValue(indent, y, Font.CR_YELLOW, mEnter.GetText() .. "_");
+    }
+    else
+    {
+      drawLabel(indent, y, mIsLatest ? Font.CR_GREEN : Font.CR_GOLD);
+      drawValue(indent, y, Font.CR_WHITE, mText);
+    }
+    return indent;
+  }
+
+  override bool MenuEvent(int mkey, bool fromcontroller)
+  {
+    if (mkey == Menu.MKey_Enter && !mEnter)
+    {
+      Menu.MenuSound("menu/choose");
+      mEnter = TextEnterMenu.OpenTextEnter(Menu.GetCurrentMenu(), NewSmallFont, mText, -1);
+      mEnter.ActivateMenu();
+      return true;
+    }
+    else if (mEnter)
+    {
+      mText = mEnter.GetText();
+    }
+    return Super.MenuEvent(mkey, fromcontroller);
+  }
+
+  override bool MouseEvent(int type, int x, int y)
+  {
+    if (type == Menu.MOUSE_Release)
+      return MenuEvent(Menu.MKey_Enter, true);
+    return Super.MouseEvent(type, x, y);
+  }
+}

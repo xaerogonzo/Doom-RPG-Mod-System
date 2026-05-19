@@ -1,0 +1,46 @@
+bonsai/gunlevelup win_loud
+// TODO: include a sound effect here that will work with non-doom iwads
+$alias bonsai/smallboom imp/shotx
+
+// Companions system sounds
+f_ally/down   AL_DOW
+f_ally/attempt AL_TRYR
+f_ally/revive  AL_RES
+f_ally/pulse   AL_PUL
+
+// =============================================================================
+// Hyper-V sounds
+// =============================================================================
+HookWall    "sounds/HookWall.ogg"
+HookMeat    "sounds/HookMeat.ogg"
+HookFailed  "sounds/HookFailed.ogg"
+HookLaunch  "sounds/HookLaunch.ogg"
+
+$random vrfist/punch { vrfist/punch1 vrfist/punch2 vrfist/punch3 }
+vrfist/punch1   FISTPUN1
+vrfist/punch2   FISTPUN2
+vrfist/punch3   FISTPUN3
+
+$random vrfist/strong { vrfist/strong1 vrfist/strong2 vrfist/strong3 }
+vrfist/strong1  FISTSTR1
+vrfist/strong2  FISTSTR2
+vrfist/strong3  FISTSTR3
+
+$random vrfist/rip { vrfist/rip1 vrfist/rip2 }
+vrfist/rip1     DSRIP1
+vrfist/rip2     DSRIP2
+
+$random vrfist/beat { hbeat1 hbeat2 hbeat3 }
+hbeat1  hbeat1
+hbeat2  hbeat2
+hbeat3  hbeat3
+
+Slomo_on    "sounds/SLOWENTR.ogg"
+Slomo_off   "sounds/SLOWEXIT.ogg"
+Slomo_loop  "sounds/SLOWLOOP.wav"
+$volume Slomo_loop 0.4
+
+$random parry/crit   { parry/crit1 }
+$random parry/normal { parry/normal1 }
+parry/crit1     "sounds/chord.ogg"
+parry/normal1   "sounds/Windows XP Ding.ogg"

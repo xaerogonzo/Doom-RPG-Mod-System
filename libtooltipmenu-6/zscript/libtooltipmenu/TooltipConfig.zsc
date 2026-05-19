@@ -1,0 +1,104 @@
+// TooltipConfig.zsc
+// Global tooltip override configuration menu.
+// All ui scope. Single page, no per-mod registration needed.
+
+class TFLV_TooltipConfigMenu : TFLV_TooltipOptionMenu {
+
+  override void Init(Menu parent, OptionMenuDescriptor desc) {
+    InitDynamic(parent, desc);
+
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('', Font.CR_BLACK));
+    desc.mItems.push(new("OptionMenuItemOption").Init(
+        'Tooltip Overrides', 'tflv_tt_override_enabled', 'OnOff', null, 0));
+    PushTooltip("Master switch. When Off, all mods ignore the global overrides below and draw tooltips using their own built-in appearance.");
+    desc.mItems.push(new("OptionMenuItemStaticText").Init(
+        'Off = all mods use their original tooltip appearance.', Font.CR_DARKGRAY));
+
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('', Font.CR_BLACK));
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('LAYOUT PRESET', Font.CR_RED));
+    desc.mItems.push(new("OptionMenuItemStaticText").Init(
+        'Picking a preset sets all geometry automatically.', Font.CR_DARKGRAY));
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('', Font.CR_BLACK));
+    desc.mItems.push(new("OptionMenuItemOption").Init(
+        'Preset', 'tflv_tt_preset', 'TFLV_TTPresets', null, 0));
+    PushTooltip("Applies a pre-built layout. Left Panel and Right Panel anchor the tooltip to the side of the screen at mid-height. Bottom Bar and Top Bar span the full width. Centre Box places it in the middle.\n\nWhile a preset is active, the individual geometry sliders below are ignored.");
+
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('', Font.CR_BLACK));
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('GEOMETRY', Font.CR_RED));
+    desc.mItems.push(new("OptionMenuItemStaticText").Init(
+        "Set to -1 to use each mod's own default. Ignored when a preset is active.",
+        Font.CR_DARKGRAY));
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('', Font.CR_BLACK));
+
+    desc.mItems.push(new("OptionMenuItemSlider").Init(
+        'X Position', 'tflv_tt_x', -1.0, 1.0, 0.05, 2));
+    PushTooltip("Horizontal anchor point. 0.0 = left edge of screen, 0.5 = centred, 1.0 = right edge. The tooltip box is positioned so this fraction of the remaining horizontal space falls to its left.\n\n-1 = use the mod's own default.");
+
+    desc.mItems.push(new("OptionMenuItemSlider").Init(
+        'Y Position', 'tflv_tt_y', -1.0, 1.0, 0.05, 2));
+    PushTooltip("Vertical anchor point. 0.0 = top of screen, 0.5 = middle, 1.0 = bottom edge. The tooltip box is positioned so this fraction of the remaining vertical space falls above it.\n\n-1 = use the mod's own default.");
+
+    desc.mItems.push(new("OptionMenuItemSlider").Init(
+        'Width',      'tflv_tt_w', -1.0, 1.0, 0.05, 2));
+    PushTooltip("Maximum width of the tooltip as a fraction of the virtual screen width. Text is word-wrapped to fit. The box shrinks to the longest line if text is shorter than this.\n\n-1 = use the mod's own default.");
+
+    desc.mItems.push(new("OptionMenuItemSlider").Init(
+        'H Padding',  'tflv_tt_xpad', -1.0, 4.0, 0.25, 2));
+    PushTooltip("Horizontal padding inside the tooltip box, measured in em-widths (the width of the letter 'm' in the tooltip font). Increase to add breathing room between the text and the left/right edges of the background.\n\n-1 = use the mod's own default.");
+
+    desc.mItems.push(new("OptionMenuItemSlider").Init(
+        'V Padding',  'tflv_tt_ypad', -1.0, 2.0, 0.25, 2));
+    PushTooltip("Vertical padding inside the tooltip box, measured in line-heights. Increase to add space above the first line and below the last.\n\n-1 = use the mod's own default.");
+
+    desc.mItems.push(new("OptionMenuItemSlider").Init(
+        'Scale',      'tflv_tt_scale', -1.0, 3.0, 0.25, 2));
+    PushTooltip("Scales the entire tooltip render target. Values above 1.0 make the tooltip larger and coarser; values below 1.0 make it smaller and finer. This affects both text size and background size together.\n\n-1 = use the mod's own default.");
+
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('', Font.CR_BLACK));
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('APPEARANCE', Font.CR_RED));
+    desc.mItems.push(new("OptionMenuItemStaticText").Init(
+        "Leave blank to use each mod's own default.", Font.CR_DARKGRAY));
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('', Font.CR_BLACK));
+
+    desc.mItems.push(new("OptionMenuItemTextField").Init(
+        'Font',    'tflv_tt_font'));
+    PushTooltip("Name of the font to use for tooltip text (e.g. SmallFont, NewSmallFont, BigFont). Leave blank to use each mod's own font.");
+
+    desc.mItems.push(new("OptionMenuItemTextField").Init(
+        'Colour',  'tflv_tt_colour'));
+    PushTooltip("Font colour name for tooltip text (e.g. White, Gold, Green, Purple). Must match a colour defined in FONTDEFS or a built-in GZDoom colour name. Leave blank to use each mod's own colour.");
+
+    desc.mItems.push(new("OptionMenuItemTextField").Init(
+        'Texture', 'tflv_tt_texture'));
+    PushTooltip("Lump name of the background texture drawn behind tooltip text (e.g. TBLACK, BOSSBACK). The texture is stretched to fit the tooltip box. Leave blank to use each mod's own background.");
+
+    desc.mItems.push(new("OptionMenuItemStaticText").Init('', Font.CR_BLACK));
+    desc.mItems.push(new("OptionMenuItemTFLV_ResetGlobal").Init());
+    PushTooltip("Resets all geometry sliders to -1 and clears the font, colour, and texture fields. The preset is also set back to Custom. Each mod will then draw tooltips using its own built-in defaults.");
+  }
+}
+
+// Reset button — writes all sentinels and clears preset.
+class OptionMenuItemTFLV_ResetGlobal : OptionMenuItem {
+
+  OptionMenuItemTFLV_ResetGlobal Init() {
+    super.Init("Reset to Mod Defaults", 'None');
+    return self;
+  }
+
+  override bool Activate() {
+    let pcv = CVar.FindCVar("tflv_tt_preset");
+    if (pcv) pcv.SetInt(0);
+    static const string geo[] = { "x", "y", "w", "xpad", "ypad", "scale" };
+    for (int i = 0; i < geo.size(); ++i) {
+      let cv = CVar.FindCVar("tflv_tt_" .. geo[i]);
+      if (cv) cv.SetFloat(-1.0);
+    }
+    static const string app[] = { "font", "colour", "texture" };
+    for (int i = 0; i < app.size(); ++i) {
+      let cv = CVar.FindCVar("tflv_tt_" .. app[i]);
+      if (cv) cv.SetString("");
+    }
+    return true;
+  }
+}

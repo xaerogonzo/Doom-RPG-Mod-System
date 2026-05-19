@@ -1,0 +1,17 @@
+version "4.2.0"
+
+// ============================================================================
+// Vortex's Universal Achievement System (VUAS)
+// ============================================================================
+// Include order matters: Data first, then handler, then supporting classes.
+// AchievementData.zs must be first (defines VUAS_AchievementData used by all).
+// Persistence (encode/decode/serialize) lives directly on the handler (play scope).
+// ============================================================================
+#include "ZSCRIPT/Achievements/AchievementData.zs"
+#include "ZSCRIPT/Achievements/AchievementHandler.zs"
+#include "ZSCRIPT/Achievements/AchievementPersistentTracker.zs"
+#include "ZSCRIPT/Achievements/AchievementSetup.zs"
+#include "ZSCRIPT/Achievements/AchievementCommands.zs"
+#include "ZSCRIPT/Achievements/AchievementNotification.zs"
+#include "ZSCRIPT/Achievements/AchievementRenderer.zs"
+#include "ZSCRIPT/Achievements/AchievementMenu.zs"

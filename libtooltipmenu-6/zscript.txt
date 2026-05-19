@@ -1,0 +1,6 @@
+version "2.5"
+
+#include "zscript/libtooltipmenu/Tooltips.zsc"
+#include "zscript/libtooltipmenu/TooltipOptionMenu.zsc"
+#include "zscript/libtooltipmenu/TooltipListMenu.zsc"
+#include "zscript/libtooltipmenu/TooltipConfig.zsc"

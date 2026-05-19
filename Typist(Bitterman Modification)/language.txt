@@ -1,0 +1,27 @@
+// SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+// SPDX-License-Identifier: BSD-3-Clause
+
+[enu default]
+
+TT_TITLE  = "Typist.pk3 ⧆";
+
+TT_UNLOCK = "Unlock Game Mode";
+TT_COMBAT = "Force Combat Mode";
+TT_EMERGENCY = "Emergency Exit (bypass lock)";
+TT_SCORE  = "Open Score";
+
+TT_CUSTOM_LESSON_HELP_TEXT = "\
+1. Find any text or book in a .txt file (ASCII or UTF-8).\
+2. Rename text file to `typist_custom_text.txt`.\
+3. Load `typist_custom_text.txt` alongside Typist.pk3.\
+4. Enable Custom Text in this menu.";
+
+TT_RANDOM_LESSON_UPPERCASE = "A-Z";
+TT_RANDOM_LESSON_LOWERCASE = "a-z";
+
+TT_FALLBACK_QUESTION = "<empty lesson>";
+
+[ru]
+
+// Note: plain text in menus is translatable.
+TT_CONTROLS = "Управление";

@@ -1,0 +1,56 @@
+// #namespace TFLV::Upgrade;
+// #debug off;
+
+class TFLV_Upgrade_RapidFire : TFLV_Upgrade_BaseUpgrade {
+  void SpeedUp(Weapon owner, PSprite psp, uint n) {
+//    DEBUG("rapidfire: state %p, tics %d - %d", psp.CurState, psp.tics, n);
+	//(!psp.CurState.InStateSequence(last_st)))
+	if (!psp.CurState) { Return; }
+	if (psp.CurState.InStateSequence(owner.ResolveState("AltFireDropSequence"))) { Return; }
+	
+    for (uint i = 0; i < n; ++i) {
+      if (psp.tics) {
+        psp.tics--;
+        while (psp.tics == 0) {
+          psp.SetState(psp.CurState.NextState, true);
+//          DEBUG("rapidfire: advance state to %p tics = %d to remove = %d", psp.CurState, psp.tics, n - i);
+        }
+      }
+    }
+  }
+
+  override void Tick(Actor owner) {
+    let psp = owner.player.GetPSprite(PSP_WEAPON);
+    if (psp.tics != -1) {
+      // Scale effective level by the stat CVar.
+      // Default 1.0 = normal. 0.5 = half speed gain. 2.0 = double speed gain.
+      // Note: we intentionally allow effective_level to reach 0 so that very
+      // low CVar values (e.g. 0.25 at level 1) produce no speed-up at all,
+      // matching what the balance tuning menu advertises.
+      int effective_level = int(level * bonsai_stat_rapid_fire);
+      if (effective_level > 0)
+        SpeedUp(owner.player.readyweapon, psp, effective_level/2 + (effective_level % 2) * (gametic % 2));
+    }
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return info.upgrades.Level("TFLV_Upgrade_RapidFire") < 10
+      && (info.wpn.AmmoType1 || info.wpn.AmmoType2);
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    // Use continuous formula for the display value. The actual in-game speedup
+    // uses integer truncation on the effective level, which can show 1.0x at
+    // low stat values even when there IS some effect building up. The continuous
+    // value better represents the upgrade's power trajectory.
+    double speedup = 1.0 + (level * bonsai_stat_rapid_fire) / 2.0;
+    fields.insert("speedup", string.format("x%.2f", speedup));
+    int effective_level = int(level * bonsai_stat_rapid_fire);
+    fields.insert("effective-level", ""..effective_level);
+  }
+}
+
+// Kept around for compatibility with older saves.
+class TFLV_Upgrade_RapidFire_Power : PowerDoubleFiringSpeed {
+  Default { Powerup.Duration 1; }
+}

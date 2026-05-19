@@ -1,0 +1,79 @@
+// Localization strings for Indestructible.
+[en default]
+TFIS_HEADER_OPTIONS = "Indestructible Options";
+
+TFIS_HEADER_COMPATIBILITY = "Compatibility";
+TFIS_OPT_IGNORE_DEATH_EXITS = "Ignore death exit/pistol start";
+TFIS_TT_IGNORE_DEATH_EXITS = "If on, level transitions that remove your inventory will not affect how many lives you have. If off it will treat it as if you started a new game and give you the 'starting lives' amount.";
+TFIS_OPT_GUN_BONSAI_MODE = "Gun Bonsai integration";
+TFIS_TT_GUN_BONSAI_MODE = "If on, normal functionality is disabled, and Indestructible instead becomes available as a player upgrade in Gun Bonsai.";
+
+// Appearance options
+TFIS_HEADER_APPEARANCE = "Appearance";
+TFIS_OPT_SCREEN_EFFECT = "Screen Effect";
+TFIS_TT_SCREEN_EFFECT = "What colour to turn the screen when indestructibility triggers.";
+TFIS_OPT_LIFEGAIN_FLASH = "Screenflash when lives gained";
+TFIS_TT_LIFEGAIN_FLASH = "What colour to flash when you gain more lives. Set to black to disable.";
+
+// Buff effect options
+TFIS_HEADER_BUFF_CONFIG = "Buff Configuration";
+TFIS_OPT_DURATION = "Indestructability duration";
+TFIS_TT_DURATION = "On-death buff lasts this many seconds.";
+TFIS_OPT_HEAL = "Restore health";
+TFIS_TT_HEAL = "Restore this much HP instead of dying.";
+TFIS_OPT_INVINCIBLE = "Invincibility";
+TFIS_TT_INVINCIBLE = "Buff makes you invincibile.";
+TFIS_OPT_DAMAGEBUFF = "Damage Bonus";
+TFIS_TT_DAMAGEBUFF = "Buff makes you do double damage.";
+TFIS_OPT_SLOMO = "Slomo Effect";
+TFIS_TT_SLOMO = "Buff slows or stops time for most enemies and projectiles.";
+
+// Extra lives amount options
+TFIS_HEADER_LIVES_CONFIG = "Initial Conditions";
+TFIS_OPT_INITIAL_LIVES = "Lives when starting a new game";
+TFIS_TT_INITIAL_LIVES = "How many lives you start the game with. Set to -1 to have unlimited extra lives.";
+TFIS_OPT_LEVEL_LIVES_MIN = "Min lives when entering a level";
+TFIS_TT_LEVEL_LIVES_MIN = "You will always start a level with at least this many lives. This is checked after 'bonus lives for level clear' are applied, if any.";
+
+TFIS_HEADER_LIVES_CONFIG_BONUSES = "Bonus Lives";
+TFIS_OPT_LIVES_MAX = "Maximum extra lives";
+TFIS_TT_LIVES_MAX = "You won't gain bonus lives if you already have at least this many. Set to 0 for unlimited. Does not apply to game start/level start lives above.";
+TFIS_OPT_LEVEL_LIVES_GRANT = "Lives gained per level clear";
+TFIS_TT_LEVEL_LIVES_GRANT = "How many extra lives you're given when exiting a level. Lives are only awarded once per level in games like Hexen which use hubmaps.";
+TFIS_OPT_LEVEL_COMPLETION_REQUIREMENT = "Completion requirements";
+TFIS_TT_LEVEL_COMPLETION_REQUIREMENT = "Additional requirements to be awarded extra lives at the end of a level. \c[CYAN]None\c- gives you lives just for reaching the exit. \c[CYAN]Either\c- requires either one; the \c[CYAN]stacking\c- version gives you twice as many lives if you get both. \c[CYAN]Both\c- requires 100% kills and 100% secrets.";
+TFIS_OPT_BOSS_LIVES_GRANT = "Extra lives per boss kill";
+TFIS_TT_BOSS_LIVES_GRANT = "How many extra lives you're given after killing a boss.";
+TFIS_OPT_DAMAGE_TO_LIVES_RATIO = "Take damage to gain lives";
+TFIS_TT_DAMAGE_TO_LIVES_RATIO = "How much damage you have to survive to gain a bonus life. Only damage taken to health counts, not damage absorbed by armour.";
+
+// Colour enum
+TFIS_ENUM_NONE = "None";
+TFIS_ENUM_RED = "Red";
+TFIS_ENUM_GOLD = "Gold";
+TFIS_ENUM_GREEN = "Green";
+TFIS_ENUM_BLUE = "Blue";
+TFIS_ENUM_INVERSE = "Inverse";
+TFIS_ENUM_REDWHITE = "Red & White";
+TFIS_ENUM_GREYSCALE = "Desaturate";
+
+// Speed enum
+TFIS_ENUM_HALF_SPEED = "1/2 speed";
+TFIS_ENUM_QUARTER_SPEED = "1/4 speed";
+TFIS_ENUM_EIGHTH_SPEED = "1/8 speed";
+TFIS_ENUM_TIME_STOP = "Stop time entirely";
+
+// Level clear requirements enum
+TFIS_ENUM_ALL_KILLS = "100% kills";
+TFIS_ENUM_ALL_SECRETS = "100% secrets";
+TFIS_ENUM_KILLS_OR_SECRETS = "either kills or secrets (non-stacking)";
+TFIS_ENUM_KILLS_OR_SECRETS_STACKING = "either kills or secrets (stacking)";
+TFIS_ENUM_KILLS_AND_SECRETS = "both kills and secrets";
+
+// Gameplay messages. %d is going to be the quantity of lives, as a non-negative
+// integer.
+TFIS_MSG_ACTIVATED = "\c[RED]INDESTRUCTABLE!";
+TFIS_MSG_UNLIMITED_LIVES = "Lives remaining: \c[GOLD]unlimited\c-";
+TFIS_MSG_REDUCED_LIVES = "Lives remaining: \c[RED]%d\c-";
+TFIS_MSG_INCREASED_LIVES = "Lives remaining: \c[CYAN]%d\c-";
+TFIS_MSG_UNCHANGED_LIVES = "Lives remaining: \c[GOLD]%d\c-";

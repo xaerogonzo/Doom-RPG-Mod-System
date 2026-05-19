@@ -1,0 +1,178 @@
+// #namespace TFLV::Upgrade;
+// #debug off
+
+// =============================================================================
+// Ricochet Shots
+// Hitscan-only upgrade. On hitting an enemy, the shot ricochets toward the
+// nearest additional enemy within range.
+//
+// Bounces: floor(level * bonsai_stat_ricochet_bounces), minimum 1.
+//   Like Rapid Fire, the multiplier means extra bounces only unlock at higher
+//   levels when the multiplier is below 1.0.
+//
+// Spread: bonsai_stat_ricochet_spread / (bonsai_stat_ricochet_spread_step ^ (level-1))
+//   Level 1 = full spread. Each level divides by the step, so progression is
+//   gradual rather than a hard cliff. Default step 1.5: 25 -> 17 -> 11 -> 7...
+//
+// Damage decay: bonsai_stat_ricochet_damage per bounce, multiplicative.
+// =============================================================================
+
+class TFLV_Upgrade_RicochetShots : TFLV_Upgrade_BaseUpgrade {
+  override TFLV_Upgrade_UpgradePriority Priority() { return TFLV_Upgrade_PRI_EXPLOSIVE; }
+
+  // Effective bounce count at the current upgrade level.
+  int EffectiveBounces() {
+    int b = int(double(level) * bonsai_stat_ricochet_bounces);
+    return max(1, b);
+  }
+
+  // Effective spread in degrees at the current upgrade level.
+  double EffectiveSpread() {
+    if (level <= 1) return double(bonsai_stat_ricochet_spread);
+    double step = max(1.0, double(bonsai_stat_ricochet_spread_step));
+    double s = double(bonsai_stat_ricochet_spread);
+    for (uint i = 1; i < level; ++i) s /= step;
+    return max(0.0, s);
+  }
+
+  override void OnDamageDealt(Actor pawn, Actor shot, Actor target, int damage) {
+    if (!shot || !target) return;
+    if (!CheckPriority(shot)) return;
+
+    let ricochet = TFLV_Upgrade_RicochetShots_Arc(
+        pawn.Spawn("TFLV_Upgrade_RicochetShots_Arc", shot.pos));
+    if (!ricochet) return;
+    ricochet.weaponspecial = Priority();
+    ricochet.target   = pawn;
+    ricochet.tracer   = target;
+    ricochet.damage   = max(1, int(damage * bonsai_stat_ricochet_damage));
+    ricochet.bounces  = EffectiveBounces();
+    ricochet.spread   = EffectiveSpread();  // computed once from level, not bounces
+    ricochet.range    = bonsai_stat_ricochet_range;
+    ricochet.angle    = pawn.AngleTo(target);
+    ricochet.pitch    = pawn.PitchTo(target);
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return info.IsHitscan() && !info.IsMelee();
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    int   b  = max(1, int(double(level) * bonsai_stat_ricochet_bounces));
+    double step = max(1.0, double(bonsai_stat_ricochet_spread_step));
+    double sp = double(bonsai_stat_ricochet_spread);
+    for (uint i = 1; i < level; ++i) sp /= step;
+    sp = max(0.0, sp);
+    fields.insert("bounces", ""..b);
+    fields.insert("damage",  AsPercent(bonsai_stat_ricochet_damage ** b));
+    fields.insert("range",   AsMeters(bonsai_stat_ricochet_range));
+    fields.insert("spread",  string.format("%.0f", sp) .. "deg");
+  }
+}
+
+// =============================================================================
+// Arc actor — spawned at hit point, finds nearest valid target, fires beam,
+// then spawns another Arc if bounces remain.
+// =============================================================================
+
+class TFLV_Upgrade_RicochetShots_Arc : Actor {
+  int    damage;
+  int    bounces;
+  int    range;
+  double spread;   // degrees
+  int    chainHits; // total targets hit so far in this ricochet chain — computed from level in OnDamageDealt, not from bounces
+
+  Default {
+    +NOBLOCKMAP;
+    +NOGRAVITY;
+    +NOINTERACTION;
+    RenderStyle "None";
+  }
+
+  States {
+    Spawn:
+      TNT1 A 1 NoDelay FireArc();
+      STOP;
+  }
+
+  void FireArc() {
+    if (bounces <= 0 || !target) return;
+
+    Array<Actor> candidates;
+    TFLV_Util.MonstersInRadius(self, range, candidates);
+
+    Actor best      = null;
+    double bestDist = range + 1;
+    for (uint i = 0; i < candidates.size(); ++i) {
+      let candidate = candidates[i];
+      if (candidate == tracer) continue;
+      if (candidate.health <= 0) continue;
+      if (!CheckSight(candidate)) continue;
+
+      double dist = Distance3D(candidate);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best     = candidate;
+      }
+    }
+
+    if (!best) return;
+
+    // Apply spread — value was computed from upgrade level in OnDamageDealt
+    // and stored here, so it stays consistent across the whole bounce chain.
+    A_Face(best, 0, 180);
+    if (spread > 0.0)
+    {
+      angle += FRandom[TFLV_Upgrade_RNG_Ricochet](-spread, spread);
+      pitch += FRandom[TFLV_Upgrade_RNG_Ricochet](-spread * 0.5, spread * 0.5);
+    }
+
+    bool particles = TFLV_Settings.vfx_for("bonsai_vfx_ricochet") == TFLV_VFX_FULL;
+    A_CustomRailgun(
+      damage, 0,
+      particles ? "cyan" : "",
+      particles ? "white" : "",
+      RGF_FULLBRIGHT,
+      0, 0,
+      "TFLV_Upgrade_RicochetShots_Puff",
+      0, 0,
+      int(bestDist));
+
+    if (bounces > 1) {
+      let next = TFLV_Upgrade_RicochetShots_Arc(
+          Spawn("TFLV_Upgrade_RicochetShots_Arc", best.pos));
+      if (next) {
+        next.weaponspecial = weaponspecial;
+        next.target   = target;
+        next.tracer   = best;
+        next.damage   = max(1, int(damage * bonsai_stat_ricochet_damage));
+        next.bounces  = bounces - 1;
+        next.spread   = spread;
+        next.range    = range;
+        next.angle    = angle;
+        next.pitch    = pitch;
+        next.chainHits = chainHits + 1;
+        // VUAS achievement: ricochet chain hit 3+ targets
+        if (next.chainHits >= 3)
+          EventHandler.SendNetworkEvent("vuas_event:ricochet_chain");
+      }
+    }
+  }
+}
+
+// =============================================================================
+// Puff spawned by each ricochet hit — triggers OnDamageDealt on the victim
+// so elemental upgrades and other riders fire on ricocheted targets too.
+// =============================================================================
+
+class TFLV_Upgrade_RicochetShots_Puff : BulletPuff {
+  property UpgradePriority: weaponspecial;
+  Default {
+    TFLV_Upgrade_RicochetShots_Puff.UpgradePriority TFLV_Upgrade_PRI_EXPLOSIVE;
+    +PUFFONACTORS;
+    +HITTRACER;
+    Alpha 0.7;
+    RenderStyle "Add";
+    Scale 0.5;
+  }
+}

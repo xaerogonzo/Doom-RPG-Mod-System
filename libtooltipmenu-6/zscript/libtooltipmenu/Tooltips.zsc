@@ -1,0 +1,312 @@
+// Tooltips.zsc
+// Common code shared between TooltipListMenu and TooltipOptionMenu.
+// Global override system: applied at Draw() time, one set of CVars for all
+// tooltip-using menus. No per-mod registration required.
+
+class TFLV_Tooltip : Object ui {
+  double x, y, w, xpad, ypad, scale;
+  int first, last;
+  Font font;
+  Color colour;
+  TextureID texture;
+  string text;
+
+  void CopyFrom(TFLV_Tooltip settings) {
+    self.x       = settings.x;
+    self.y       = settings.y;
+    self.w       = settings.w;
+    self.xpad    = settings.xpad;
+    self.ypad    = settings.ypad;
+    self.scale   = settings.scale;
+    self.font    = settings.font;
+    self.colour  = settings.colour;
+    self.texture = settings.texture;
+  }
+
+  int GetX(uint screen_width, uint width) {
+    if (width > screen_width) return 0;
+    return (screen_width - width) * self.x;
+  }
+
+  int GetY(uint screen_height, uint height) {
+    if (height > screen_height) return 0;
+    return (screen_height - height) * self.y;
+  }
+
+  // Draw() is the single override point for the global system.
+  // Reads global CVars right before rendering — no menu-level state needed.
+  void Draw() {
+    // Check master switch first — if off, draw as-is with mod's own settings.
+    let master = CVar.FindCVar("tflv_tt_override_enabled");
+    if (master && master.GetBool()) {
+      TFLV_GlobalOverride.Apply(self);
+    }
+
+    uint virtual_height = screen.GetHeight() / CleanYFac_1 / self.scale;
+    let aspect          = screen.GetAspectRatio();
+    let virtual_width   = virtual_height * aspect;
+    let em              = self.font.GetCharWidth(0x6D);
+    let lh              = self.font.GetHeight();
+    let nominal_width   = virtual_width * self.w;
+    let lines           = self.font.BreakLines(self.text, nominal_width);
+
+    uint actual_width = 0;
+    for (int i = 0; i < lines.count(); ++i)
+      actual_width = max(actual_width, self.font.StringWidth(lines.StringAt(i)));
+    actual_width += self.xpad * 2.0 * em;
+
+    uint actual_height = self.font.GetHeight() * (self.ypad * 2.0 + lines.count());
+
+    uint x = GetX(virtual_width,  actual_width);
+    uint y = GetY(virtual_height, actual_height);
+
+    Screen.DrawTexture(texture, true, x, y,
+        DTA_VirtualWidthF, virtual_width, DTA_VirtualHeight, virtual_height,
+        DTA_KeepRatio,   true,
+        DTA_LeftOffset,  0, DTA_TopOffset, 0,
+        DTA_DestWidth,   actual_width, DTA_DestHeight, actual_height);
+
+    for (int i = 0; i < lines.count(); ++i) {
+      screen.DrawText(
+        self.font, self.colour,
+        x + self.xpad * em,
+        y + i * lh + self.ypad * lh,
+        lines.StringAt(i),
+        DTA_VirtualWidthF, virtual_width, DTA_VirtualHeight, virtual_height,
+        DTA_KeepRatio, true);
+    }
+  }
+}
+
+// =============================================================================
+// Global override — applied at Draw() time
+// =============================================================================
+// Reads global CVars and overlays non-sentinel values onto the tooltip
+// immediately before it draws. Sentinels: -1.0 for floats, "" for strings.
+// Preset (tflv_tt_preset) is checked first; if nonzero it supplies all
+// geometry and individual float CVars are ignored.
+
+class TFLV_GlobalOverride ui {
+
+  static void Apply(TFLV_Tooltip tt) {
+    // Preset takes priority over individual geometry CVars.
+    let pcv = CVar.FindCVar("tflv_tt_preset");
+    if (pcv && pcv.GetInt() != 0) {
+      double x, y, w, xpad, ypad, scale;
+      if (ResolvePreset(pcv.GetInt(), x, y, w, xpad, ypad, scale)) {
+        tt.x     = x;
+        tt.y     = y;
+        tt.w     = w;
+        tt.xpad  = xpad;
+        tt.ypad  = ypad;
+        tt.scale = scale;
+        // Still apply appearance overrides.
+        ApplyAppearance(tt);
+        return;
+      }
+    }
+
+    // No preset — apply individual geometry CVars.
+    ReadFloat("tflv_tt_x",     tt.x,    0.0);
+    ReadFloat("tflv_tt_y",     tt.y,    0.0);
+    ReadFloat("tflv_tt_w",     tt.w,    0.0);
+    ReadFloat("tflv_tt_xpad",  tt.xpad, 0.0);
+    ReadFloat("tflv_tt_ypad",  tt.ypad, 0.0);
+    ReadFloatPos("tflv_tt_scale", tt.scale);
+    ApplyAppearance(tt);
+  }
+
+  private static void ApplyAppearance(TFLV_Tooltip tt) {
+    let cf = CVar.FindCVar("tflv_tt_font");
+    let cc = CVar.FindCVar("tflv_tt_colour");
+    let cx = CVar.FindCVar("tflv_tt_texture");
+    if (cf && cf.GetString() != "") tt.font    = Font.GetFont(cf.GetString());
+    if (cc && cc.GetString() != "") tt.colour  = Font.FindFontColor(cc.GetString());
+    if (cx && cx.GetString() != "") tt.texture = TexMan.CheckForTexture(cx.GetString(), TexMan.TYPE_ANY);
+  }
+
+  // Preset geometry table.
+  // 0=Custom, 1=Left Panel, 2=Right Panel, 3=Bottom Bar, 4=Top Bar, 5=Centre Box
+  static bool ResolvePreset(int preset,
+      out double x, out double y, out double w,
+      out double xpad, out double ypad, out double scale) {
+    switch (preset) {
+      case 1: x=0.0; y=0.5; w=0.30; xpad=1.0;  ypad=0.5;  scale=1.0; return true;
+      case 2: x=1.0; y=0.5; w=0.30; xpad=1.0;  ypad=0.5;  scale=1.0; return true;
+      case 3: x=0.5; y=1.0; w=0.70; xpad=1.5;  ypad=0.5;  scale=1.0; return true;
+      case 4: x=0.5; y=0.0; w=0.70; xpad=1.5;  ypad=0.5;  scale=1.0; return true;
+      case 5: x=0.5; y=0.5; w=0.40; xpad=1.5;  ypad=0.75; scale=1.0; return true;
+      default: return false;
+    }
+  }
+
+  private static void ReadFloat(string name, out double dest, double minval) {
+    let cv = CVar.FindCVar(name);
+    if (cv && cv.GetFloat() >= minval) dest = cv.GetFloat();
+  }
+
+  private static void ReadFloatPos(string name, out double dest) {
+    let cv = CVar.FindCVar(name);
+    if (cv && cv.GetFloat() > 0.0) dest = cv.GetFloat();
+  }
+}
+
+// =============================================================================
+// Core tooltip menu mixin — identical to original libtooltipmenu-3
+// TooltipID is kept as a silent no-op for backwards compatibility
+// =============================================================================
+
+mixin class TFLV_TooltipMenu {
+  array<TFLV_Tooltip> tooltips;
+  TFLV_Tooltip tooltip_settings;
+  string tooltip_mod_id; // kept for compat, no longer used by override system
+
+  TFLV_Tooltip GetDefaults() {
+    let tt    = TFLV_Tooltip(new("TFLV_Tooltip"));
+    tt.x      = 0.0;
+    tt.y      = 0.5;
+    tt.w      = 0.3;
+    tt.xpad   = 1.0;
+    tt.ypad   = 0.5;
+    tt.scale  = 1.0;
+    tt.font   = newsmallfont;
+    tt.colour = Font.CR_WHITE;
+    return tt;
+  }
+
+  TFLV_Tooltip AppendableTooltip(uint first, uint last) {
+    if (tooltips.size() <= 0) return null;
+    let tt = tooltips[tooltips.size()-1];
+    if (tt.first == first) return tt;
+    return null;
+  }
+
+  TFLV_Tooltip AddTooltip(uint first, uint last, string tooltip) {
+    if (first < 0) ThrowAbortException("Tooltip must have at least one menu item preceding it!");
+    let localtooltip = Stringtable.localize(tooltip);
+    let tt = AppendableTooltip(first, last);
+    if (tt) {
+      tt.text = tt.text .. "\n" .. localtooltip;
+      return tt;
+    }
+    tt = new("TFLV_Tooltip");
+    tt.CopyFrom(tooltip_settings);
+    tt.first = first;
+    tt.last  = last;
+    tt.text  = localtooltip;
+    tooltips.push(tt);
+    return tt;
+  }
+
+  TFLV_Tooltip FindTooltipFor(int item) {
+    if (item < 0 || item >= mDesc.mItems.size()) return null;
+    if (!mDesc.mItems[item].Selectable()) return null;
+    for (int i = 0; i < tooltips.size(); ++i) {
+      if (tooltips[i].first <= item && item <= tooltips[i].last)
+        return tooltips[i];
+    }
+    return null;
+  }
+
+  override void Drawer() {
+    super.Drawer();
+    let tt = FindTooltipFor(mDesc.mSelectedItem);
+    if (tt) tt.Draw();
+  }
+
+  TFLV_Tooltip PushTooltip(String tooltip, uint n=1) {
+    if (!tooltip) return null;
+    if (n < 1) ThrowAbortException("Tooltip must apply to at least one menu item!");
+    return AddTooltip(mDesc.mItems.size()-n, mDesc.mItems.size()-1, tooltip);
+  }
+
+  // Silent no-ops — kept for backwards compatibility with existing MEUNDEFs.
+  void TooltipID(string mod_id, string menu_page = "") { tooltip_mod_id = mod_id; }
+  void TooltipPage(string menu_page) {}
+
+  void TooltipAppearance(string myfont="", string colour="", string texture="") {
+    if (myfont   != "") tooltip_settings.font    = Font.GetFont(myfont);
+    if (colour   != "") tooltip_settings.colour  = Font.FindFontColor(colour);
+    if (texture  != "") tooltip_settings.texture = TexMan.CheckForTexture(texture, TexMan.TYPE_ANY);
+  }
+
+  void TooltipGeometry(
+      double x=-1.0, double y=-1.0, double w=-1.0,
+      double xpad=-1.0, double ypad=-1.0, double scale=-1.0) {
+    if (x     >= 0) tooltip_settings.x     = x;
+    if (y     >= 0) tooltip_settings.y     = y;
+    if (w     >= 0) tooltip_settings.w     = w;
+    if (xpad  >= 0) tooltip_settings.xpad  = xpad;
+    if (ypad  >= 0) tooltip_settings.ypad  = ypad;
+    if (scale >  0) tooltip_settings.scale = scale;
+  }
+}
+
+// ── Mixin: tooltip holder item ────────────────────────────────────────────────
+
+mixin class TFLV_TooltipHolder {
+  array<TFLV_Tooltip> tooltips;
+
+  Object Init(array<TFLV_Tooltip> tts) {
+    self.tooltips.copy(tts);
+    return self;
+  }
+
+  override bool Selectable() { return false; }
+}
+
+// ── Mixin: inline tooltip text item ──────────────────────────────────────────
+
+mixin class TFLV_TooltipItem {
+  string tooltip;
+
+  Object Init(string tooltip) {
+    self.tooltip = tooltip.filter();
+    return self;
+  }
+}
+
+// ── Mixin: inline geometry override item ─────────────────────────────────────
+
+mixin class TFLV_TooltipGeometry {
+  double x, y, w, xpad, ypad, scale;
+
+  Object Init(
+      double x=-1.0, double y=-1.0, double w=-1.0,
+      double xpad=-1.0, double ypad=-1.0,
+      double scale=-1.0) {
+    self.x     = x;    self.y    = y;    self.w    = w;
+    self.xpad  = xpad; self.ypad = ypad; self.scale = scale;
+    return self;
+  }
+
+  void CopyTo(TFLV_Tooltip settings) {
+    if (self.x     >= 0) settings.x     = self.x;
+    if (self.y     >= 0) settings.y     = self.y;
+    if (self.w     >= 0) settings.w     = self.w;
+    if (self.xpad  >= 0) settings.xpad  = self.xpad;
+    if (self.ypad  >= 0) settings.ypad  = self.ypad;
+    if (self.scale >  0) settings.scale = self.scale;
+  }
+}
+
+// ── Mixin: inline appearance override item ───────────────────────────────────
+
+mixin class TFLV_TooltipAppearance {
+  Font myfont;
+  Color colour;
+  TextureID texture;
+
+  Object Init(string myfont="", string colour="", string texture="") {
+    if (myfont  != "") self.myfont  = Font.GetFont(myfont);
+    if (colour  != "") self.colour  = Font.FindFontColor(colour);
+    if (texture != "") self.texture = TexMan.CheckForTexture(texture, TexMan.TYPE_ANY);
+    return self;
+  }
+
+  void CopyTo(TFLV_Tooltip settings) {
+    if (self.myfont)   settings.font    = self.myfont;
+    if (self.colour)   settings.colour  = self.colour;
+    if (self.texture)  settings.texture = self.texture;
+  }
+}

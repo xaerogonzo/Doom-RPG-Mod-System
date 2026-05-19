@@ -1,0 +1,65 @@
+// Gun Bonsai - Unified KEYCONF
+// Combines: Gun Bonsai, Indestructible, and Doom Points key bindings
+
+// --- Gun Bonsai ---
+addkeysection "Gun Bonsai" GunBonsai
+
+addmenukey "Display Info" bonsai-show-info
+alias bonsai-show-info "netevent bonsai-show-info"
+alias bonsai-dump "netevent bonsai-debug,info"
+defaultbind I bonsai-show-info
+
+// --- Doom Points ---
+Alias dp_top "OpenMenu dp_TopMenu"
+
+AddKeySection "Doom Points" "dp_keys"
+AddMenuKey    "Open Score" "dp_top"
+
+// --- LegenDoom Integration ---
+Alias bonsai_cycle_ld_effect "netevent bonsai-cycle-ld-effect"
+AddKeySection "Gun Bonsai — LegenDoom" "bonsai_ld_keys"
+AddMenuKey    "Cycle Legendoom Weapon Effect" "bonsai_cycle_ld_effect"
+DefaultBind   P "bonsai_cycle_ld_effect"
+
+// --- Hyper-V Movement ---
+addkeysection "Other Keybindings [Hyper-V]" [Hyper-V]
+
+addmenukey "Dash / Roll Modifier" "+vmm_dash_mod"
+addmenukey "Teleport Move" tpmv
+addmenukey "Cancel Teleport Marker" +tpcancel_dn
+alias +tpcancel_dn "netevent \"vmm_teleport_cancel\""
+alias -tpcancel_dn ""
+addmenukey "Throw Hook" "netevent \"vmm_throwhook\""
+addmenukey "Melee Attack Key" "netevent \"vmm_melee_attack\""
+addmenukey "Toggle Melee On/Off" "netevent \"vmm_melee_toggle\""
+addmenukey "Toggle Slomo" "netevent \"vmm_slomo_toggle\""
+addmenukey "Toggle Melee Indicator" "netevent \"vmm_indicator_toggle\""
+
+alias tpmv "netevent \"vmm_teleport\""
+alias +vmm_dash_mod "netevent \"vmm_dashmod_down\""
+alias -vmm_dash_mod ""
+
+alias vmm_reset_dash "vmm_dash_preset 2; vmm_dash_mult 1.6; vmm_dash_side_mult 1.2; vmm_dash_back_mult 1.0; vmm_dash_cooldown 1.0; vmm_double_dash false; vmm_dash_fwd_leap true; vmm_dash_side true; vmm_dash_back true; vmm_dash_stamina true; vmm_dash_fwd_cost 10; vmm_dash_side_cost 15; vmm_dash_back_cost 20"
+alias vmm_reset_strike "vmm_melee_range 64; vmm_melee_preset 2; vmm_melee_dmg_min 1; vmm_melee_dmg_max 6; vmm_melee_mult 1.0; vmm_melee_knockback 1.0; vmm_melee_kb_mass 600"
+alias vmm_reset_stamina "vmm_melee_stamina true; vmm_melee_berserk true; vmm_melee_berserk_dmg 3.0; vmm_melee_berserk_cooldown 2.0; vmm_melee_berserk_stamina 50; vmm_melee_berserk_crit 3; vmm_melee_berserk_stun 2"
+alias vmm_reset_combo "vmm_melee_combo true; vmm_melee_combohit 3; vmm_melee_combocrit 4; vmm_melee_berserk_crit 3; vmm_melee_knockback 1.0; vmm_melee_kb_mass 600; vmm_melee_stun 2; vmm_melee_berserk_stun 2"
+alias vmm_reset_parry "vmm_melee_parry true; vmm_hud_parry true; vmm_tp_beam_speed 40.0; vmm_tp_max_range 1024.0; vmm_tp_cooldown 1.5; vmm_tp_restrict true; vmm_melee_parry_prob 10; vmm_melee_parry_crit_resist 50; vmm_melee_parry_duration 20; vmm_melee_parry_stun_min 3.0; vmm_melee_parry_stun_max 5.0"
+alias vmm_reset_teleport "vmm_teleport true; vmm_tp_restrict true; vmm_tp_beam_speed 40.0; vmm_tp_max_range 1024.0; vmm_tp_cooldown 1.5"
+alias vmm_reset_player_rules "vmm_damage_mult 1.0; vmm_taken_damage_mult 1.0; vmm_self_damage_mult 1.0; vmm_jump_mult 1.0; vmm_speed_mult 1.0; vmm_friction_mult 1.0; vmm_max_health 0; vmm_start_health 0; vmm_start_armor 0"
+alias vmm_reset_world_rules "vmm_enemy_health_mult 1.0; vmm_enemy_health_max 0; vmm_enemy_speed_mult 1.0; vmm_friend_health_mult 1.0; vmm_friend_health_max 0; vmm_friend_speed_mult 1.0"
+alias vmm_reset_powerups_a "vmm_perm_buddha false; vmm_perm_damage false; vmm_perm_doublefiring false; vmm_perm_drain false; vmm_perm_flight false; vmm_perm_frightener false; vmm_perm_ghost false; vmm_perm_highjump false; vmm_perm_infiniteammo false; vmm_perm_invisibility false; vmm_perm_invulnerability false; vmm_perm_ironfeet false; vmm_perm_lightamp false"
+alias vmm_reset_powerups_b "vmm_perm_mask false; vmm_perm_protection false; vmm_perm_regeneration false; vmm_perm_scanner false; vmm_perm_shadow false; vmm_perm_speed false; vmm_perm_strength false; vmm_perm_targeter false; vmm_perm_timefreezer false; vmm_perm_torch false; vmm_perm_weaponlevel2 false"
+alias vmm_reset_powerups "vmm_reset_powerups_a; vmm_reset_powerups_b"
+alias vmm_reset_health_regen "vmm_health_regen false; vmm_regen_amount 1; vmm_regen_type 0; vmm_regen_time 5.0; vmm_regen_min 0; vmm_regen_max 0; vmm_regen_sound_vol 0.0; vmm_regen_visual 0.0"
+alias vmm_reset_armor_regen "vmm_armor_regen false; vmm_armor_regen_amount 1; vmm_armor_regen_type 0; vmm_armor_regen_time 5.0; vmm_armor_regen_min 0; vmm_armor_regen_max 100; vmm_armor_regen_sound_vol 0.0; vmm_armor_regen_visual 0.0"
+alias vmm_reset_ammo_regen "vmm_ammo_regen false; vmm_ammo_regen_time 10.0; vmm_ammo_regen_backpack false; vmm_ammo_regen_sound_vol 0.0; vmm_ammo_regen_visual 0.0"
+alias vmm_reset_hook "vmm_hook true; vmm_hook_pull true; vmm_hook_maxdist 720; vmm_hook_cooldown 1.0; vmm_hook_stun true; vmm_hook_stun_dur_min 2.0; vmm_hook_stun_dur_max 4.0"
+alias vmm_reset_hud "vmm_hud true; vmm_hud_stamina true; vmm_hud_slomo true; vmm_hud_dash true; vmm_hud_hook false; vmm_hud_parry true; vmm_hud_regen true; vmm_hud_x 8; vmm_hud_y 462; vmm_hud_bar_width 100; vmm_hud_label_width 36; vmm_hud_bar_gap 10; vmm_hud_bar_height 5"
+alias vmm_reset_all_a "vmm_damage_mult 1.0; vmm_jump_mult 1.0; vmm_speed_mult 1.0; vmm_dash_preset 2; vmm_dash_mult 1.6; vmm_dash_side_mult 1.2; vmm_dash_back_mult 1.0; vmm_dash_cooldown 1.0; vmm_double_dash false; vmm_dash_fwd_leap true; vmm_dash_side true; vmm_dash_back true; vmm_dash_stamina true; vmm_dash_fwd_cost 10; vmm_dash_side_cost 15; vmm_dash_back_cost 20"
+alias vmm_reset_all_b "vmm_melee_range 64; vmm_melee_preset 2; vmm_melee_dmg_min 1; vmm_melee_dmg_max 6; vmm_melee_mult 1.0; vmm_melee_stamina true; vmm_melee_berserk true; vmm_melee_berserk_dmg 3.0; vmm_melee_berserk_cooldown 2.0; vmm_melee_berserk_stamina 50; vmm_melee_berserk_crit 3; vmm_melee_berserk_stun 2"
+alias vmm_reset_all_d "vmm_melee_combo true; vmm_melee_combohit 3; vmm_melee_combocrit 4; vmm_melee_knockback 1.0; vmm_melee_kb_mass 600; vmm_melee_stun 2; vmm_melee_parry true; vmm_hud_parry true; vmm_melee_parry_prob 10; vmm_melee_parry_crit_resist 50; vmm_melee_parry_duration 20; vmm_melee_parry_stun_min 3.0; vmm_melee_parry_stun_max 5.0"
+alias vmm_reset_all_e "vmm_tp_beam_speed 40.0; vmm_tp_max_range 1024.0; vmm_tp_cooldown 1.5; vmm_tp_restrict true; vmm_hook_stun true; vmm_hook_stun_dur_min 2.0; vmm_hook_stun_dur_max 4.0"
+alias vmm_reset_all_c "vmm_hud true; vmm_hud_stamina true; vmm_hud_slomo true; vmm_hud_dash true; vmm_hud_hook false; vmm_hud_parry true; vmm_hud_regen true; vmm_hud_x 8; vmm_hud_y 462; vmm_hud_bar_width 100; vmm_hud_label_width 36; vmm_hud_bar_gap 10; vmm_hud_bar_height 5"
+alias vmm_reset_all_f "vmm_health_regen false; vmm_regen_amount 1; vmm_regen_type 0; vmm_regen_time 5.0; vmm_regen_min 0; vmm_regen_max 0; vmm_armor_regen false; vmm_armor_regen_amount 1; vmm_armor_regen_time 5.0; vmm_ammo_regen false; vmm_ammo_regen_time 10.0"
+alias vmm_reset_all_g "vmm_taken_damage_mult 1.0; vmm_self_damage_mult 1.0; vmm_friction_mult 1.0; vmm_max_health 0; vmm_start_health 0; vmm_start_armor 0; vmm_enemy_health_mult 1.0; vmm_enemy_health_max 0; vmm_enemy_speed_mult 1.0; vmm_friend_health_mult 1.0; vmm_friend_health_max 0; vmm_friend_speed_mult 1.0"
+alias vmm_reset_all "vmm_reset_all_a; vmm_reset_all_b; vmm_reset_all_d; vmm_reset_all_e; vmm_reset_all_f; vmm_reset_all_g; vmm_reset_all_c"

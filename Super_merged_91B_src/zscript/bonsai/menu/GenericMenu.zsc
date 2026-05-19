@@ -1,0 +1,737 @@
+// #namespace TFLV::Menu;
+
+class TFLV_Menu_GenericMenu : TFLV_TooltipOptionMenu {
+  override int GetIndent() {
+    return super.GetIndent() - 200 * CleanXFac_1;
+  }
+
+  void PushText(string text, uint colour) {
+    Array<string> lines;
+    StringTable.Localize(text).Split(lines, "\n");
+    for (uint i = 0; i < lines.size(); ++i) {
+      mDesc.mItems.Push(new("OptionMenuItemStaticText").InitDirect(lines[i], colour));
+    }
+  }
+
+  void PushKeyValueText(string key, string value, uint colour = Font.CR_DARKRED) {
+    mDesc.mItems.Push(new("TFLV_Menu_KeyValueText").Init(key, value, colour));
+  }
+
+  void PushKeyValueOption(
+      string key, string value, string command, int index,
+      uint idle = Font.CR_DARKRED, uint hot = Font.CR_RED) {
+    mDesc.mItems.Push(new("TFLV_Menu_KeyValueOption").Init(key, value, command, index, idle, hot));
+  }
+
+  void PushUpgradeToggle(TFLV_Upgrade_BaseUpgrade upgrade, uint bag_index, uint index) {
+    let toggle = new("TFLV_Menu_UpgradeToggle").Init(upgrade, bag_index, index);
+    mDesc.mItems.Push(toggle);
+    toggle.tt = PushTooltip(upgrade.GetTooltip(upgrade.level));
+  }
+}
+
+class TFLV_Menu_GenericLevelUpMenu : TFLV_Menu_GenericMenu {
+  bool pendingReject;       // true after first back-press, waiting for confirm
+  bool _confirmItemsAdded;  // true while the confirm items are in mDesc.mItems
+
+  void PushUpgrade(TFLV_Upgrade_UpgradeBag upgrades, TFLV_Upgrade_BaseUpgrade upgrade, int index) {
+    PushKeyValueOption(
+      upgrade.GetName(), upgrade.GetDesc(),
+      "bonsai-choose-level-up-option",
+      index);
+    let lvl = upgrades.Level(upgrade.GetClassName());
+    PushTooltip(upgrade.GetTooltipDiff(lvl, lvl+1));
+  }
+
+  void PushRejectConfirm() {
+    PushText("", Font.CR_DARKRED);
+    PushKeyValueOption(
+      "$TFLV_MENU_REJECT_CONFIRM", "",
+      "bonsai-choose-level-up-option",
+      -1);
+    PushText("$TFLV_MENU_REJECT_HINT", Font.CR_DARKGRAY);
+    _confirmItemsAdded = true;
+  }
+
+  void RemoveRejectConfirm() {
+    if (!_confirmItemsAdded) return;
+    // PushRejectConfirm adds 3 items (blank, confirm, hint).
+    // Pop them from the end of the items array.
+    int n = mDesc.mItems.Size();
+    if (n >= 3) mDesc.mItems.Resize(n - 3);
+    _confirmItemsAdded = false;
+  }
+
+  override bool MenuEvent(int key, bool fromController) {
+    if (key == Menu.MKey_Back) {
+      if (CVar.FindCVar("bonsai_rejection_mode").GetInt() <= 0) {
+        Menu.SetMenu("Mainmenu");
+        return true;
+      } else {
+        if (!pendingReject) {
+          pendingReject = true;
+          PushRejectConfirm();
+          Menu.MenuSound("menu/cursor");
+          return true;
+        }
+        // Second back-press confirms rejection
+        RemoveRejectConfirm();
+        pendingReject = false;
+        EventHandler.SendNetworkEvent("bonsai-choose-level-up-option", -1);
+        return super.MenuEvent(key, fromController);
+      }
+    }
+
+    // Player selected an upgrade while confirm was showing — clear it cleanly
+    if (pendingReject && key == Menu.MKey_Enter) {
+      RemoveRejectConfirm();
+      pendingReject = false;
+    }
+
+    return super.MenuEvent(key, fromController);
+  }
+}
+
+class TFLV_Menu_KeyValueText : OptionMenuItem {
+  string key;
+  string value;
+  uint colour;
+
+  TFLV_Menu_KeyValueText Init(string key_, string value_, uint colour_) {
+    key = key_;
+    value = value_;
+    colour = colour_;
+    super.Init(key, "");
+    return self;
+  }
+
+  override bool Selectable() { return false; }
+
+  override int Draw(OptionMenuDescriptor d, int y, int indent, bool selected) {
+    drawLabel(indent, y, colour);
+    drawValue(indent, y, colour, value);
+    return indent;
+  }
+}
+
+class TFLV_Menu_UpgradeToggle : TFLV_Menu_KeyValueText {
+  TFLV_Upgrade_BaseUpgrade upgrade;
+  uint bag_index;
+  uint index;
+  TFLV_Tooltip tt;
+
+  TFLV_Menu_UpgradeToggle Init(TFLV_Upgrade_BaseUpgrade upgrade, uint bag_index, uint index) {
+    self.upgrade = upgrade;
+    self.bag_index = bag_index;
+    self.index = index;
+    super.Init(
+      string.format("%s (%d)", upgrade.GetName(), upgrade.level),
+      upgrade.GetDesc(),
+      Font.CR_WHITE);
+    return self;
+  }
+
+  string GetLabel() {
+    if (upgrade.level == upgrade.max_level) {
+      return string.format("%s (%d)", upgrade.GetName(), upgrade.level);
+    } else {
+      return string.format("%s \c[DARKGREY](%d/%d)\c-",
+          upgrade.GetName(), upgrade.level, upgrade.max_level);
+    }
+  }
+
+  override bool Selectable() { return true; }
+
+  override int Draw(OptionMenuDescriptor d, int y, int indent, bool selected) {
+    // Update the tooltip, since it's going to change if the user has wiggled
+    // the effective upgrade level.
+    if (tt) tt.text = upgrade.GetTooltip(upgrade.level);
+    self.mLabel = GetLabel();
+
+    if (!upgrade.enabled) {
+      drawLabel(indent, y, font.CR_DARKRED);
+      drawValue(indent, y, selected ? font.CR_DARKGRAY : font.CR_BLACK,
+        string.format("\c[BLACK][OFF]\c- %s", self.value));
+    } else {
+      drawLabel(indent, y, font.CR_DARKRED);
+      drawValue(indent, y, selected ? font.CR_RED : font.CR_DARKRED, self.value);
+    }
+    return indent;
+  }
+
+  override bool MenuEvent(int key, bool fromController) {
+    if (key == Menu.MKey_Left) {
+      Menu.MenuSound("menu/change");
+      EventHandler.SendNetworkEvent("bonsai-tune-upgrade", bag_index, index, -1);
+    } else if (key == Menu.MKey_Right) {
+      Menu.MenuSound("menu/change");
+      EventHandler.SendNetworkEvent("bonsai-tune-upgrade", bag_index, index, 1);
+    } else if (key == Menu.MKey_Enter) {
+      Menu.MenuSound("menu/choose");
+      EventHandler.SendNetworkEvent("bonsai-toggle-upgrade", bag_index, index);
+    } else {
+      return super.MenuEvent(key, fromController);
+    }
+    return true;
+  }
+}
+
+class TFLV_Menu_KeyValueOption : TFLV_Menu_KeyValueText {
+  string command;
+  int index;
+  uint idle_colour;
+  uint hot_colour;
+
+  TFLV_Menu_KeyValueOption Init(string key, string value, string command_, int index_, uint idle, uint hot) {
+    super.Init(key, value, idle);
+    command = command_;
+    index = index_;
+    idle_colour = idle;
+    hot_colour = hot;
+    return self;
+  }
+
+  override bool Selectable() { return true; }
+
+  override int Draw(OptionMenuDescriptor d, int y, int indent, bool selected) {
+    colour = selected ? hot_colour : idle_colour;
+    return super.Draw(d, y, indent, selected);
+  }
+
+  override bool MenuEvent(int key, bool fromController) {
+    if (key != Menu.MKey_Enter)
+      return super.MenuEvent(key, fromController);
+
+    Menu.MenuSound("menu/choose");
+    EventHandler.SendNetworkEvent(command, index);
+    Menu.GetCurrentMenu().Close();
+    return true;
+  }
+}
+
+// =============================================================================
+// TFLV_Menu_AnimatedSubmenu
+//
+// A submenu item whose label has a single character highlighted in gold that
+// sweeps across the text character by character, then pauses before repeating.
+// Draws attention to important submenus that might otherwise be overlooked.
+// Adapted from OptionMenuItemtt_AnimatedSubmenu by Alexander Kromm (BSD-3).
+// =============================================================================
+
+class OptionMenuItemTFLV_AnimatedSubmenu : OptionMenuItemSubmenu
+{
+  // Rainbow colour codes cycling through the spectrum.
+  // GZDoom font colour escapes: \cc=red \cf=orange \cd=gold \ch=yellow
+  //   \cg=green \ck=dark green \cl=blue \cm=steel \ca=tan \c-=reset
+  static string GetRainbowCode(int idx)
+  {
+    switch (idx % 8) {
+      case 0: return "\cc";  // red
+      case 1: return "\cf";  // orange
+      case 2: return "\cd";  // gold
+      case 3: return "\ch";  // yellow
+      case 4: return "\cg";  // green
+      case 5: return "\ck";  // dark green
+      case 6: return "\cl";  // blue
+      default: return "\cm"; // steel blue
+    }
+  }
+
+  OptionMenuItemTFLV_AnimatedSubmenu Init(string label, Name command, int param = 0, bool centered = false)
+  {
+    Super.Init(label, command, param, centered);
+    _originalLabel  = StringTable.Localize(label);
+    _originalLength = _originalLabel.CodePointCount();
+    _period         = DELAY_TICS + _originalLength * CHAR_TICS;
+    // Randomise starting phase so multiple animated submenus are never in sync.
+    // Seed from first character of label — deterministic but different per label.
+    int seed = 0;
+    int dummy;
+    [seed, dummy] = _originalLabel.GetNextCodePoint(0);
+    _state = (seed * 17) % _period;
+    return self;
+  }
+
+  override int Draw(OptionMenuDescriptor desc, int y, int indent, bool selected)
+  {
+    int hi = _state / CHAR_TICS;
+
+    if (hi < _originalLength)
+    {
+      // Build the label with ONE highlighted character in its rainbow colour.
+      // The colour index advances with the sweep position, so each pass through
+      // the label uses a different colour — giving a true rainbow wave effect.
+      int letterCode, charPos;
+      for (int i = 0; i < hi; ++i)
+        [letterCode, charPos] = _originalLabel.GetNextCodePoint(charPos);
+
+      string left           = _originalLabel.Left(charPos);
+      [letterCode, charPos] = _originalLabel.GetNextCodePoint(charPos);
+      string right          = _originalLabel.Mid(charPos, _originalLabel.Length() - charPos);
+
+      // Colour cycles with both sweep position AND which pass through the label
+      // we're on (derived from total _state / _period cycles completed).
+      int passIndex = _state / _period;
+      string col    = GetRainbowCode(hi + passIndex);
+
+      mLabel = string.format("%s%s%c\c-%s", left, col, letterCode, right);
+    }
+    else
+    {
+      mLabel = _originalLabel;
+    }
+
+    if (++_state >= _period) _state = 0;
+
+    return Super.Draw(desc, y, indent, selected);
+  }
+
+  // 5 second pause between sweeps; each character highlighted for 3 tics
+  const DELAY_TICS = 5 * TICRATE;
+  const CHAR_TICS  = 3;
+
+  private int    _state;
+  private int    _period;
+  private string _originalLabel;
+  private int    _originalLength;
+}
+
+// =============================================================================
+// TFLV_Menu_PreviewSubmenu
+//
+// Submenu link that shows a live preview of relevant CVar values to the right
+// of the label — so the user can see current settings without entering the
+// submenu. Three modes:
+//   0 = Custom Power   → shows bonsai_power_curve_exponent
+//   1 = Custom Exp     → shows bonsai_exp_curve_base
+//   2 = Hybrid         → shows "A_type:A_param → B_type:B_param"
+// =============================================================================
+
+class OptionMenuItemTFLV_PreviewSubmenu : OptionMenuItemTFLV_AnimatedSubmenu
+{
+  int _mode;  // 0=power, 1=exp, 2=hybrid
+
+  OptionMenuItemTFLV_PreviewSubmenu Init(string label, Name command, int mode, int param = 0)
+  {
+    Super.Init(label, command, 0, false);
+    _mode = mode;
+    return self;
+  }
+
+  private static string ShortTypeName(int compType)
+  {
+    return (compType == 1) ? "E" : "P";
+  }
+
+  private static double ActiveParam(int compType, double expBase, double powerExp)
+  {
+    return (compType == 1) ? expBase : powerExp;
+  }
+
+  override int Draw(OptionMenuDescriptor d, int y, int indent, bool selected)
+  {
+    // Let the animated parent draw the (possibly mid-sweep) label first.
+    int ret = Super.Draw(d, y, indent, selected);
+
+    string preview;
+    switch (_mode) {
+      case 0:  // Custom Power
+        preview = string.format("%.1f", TFLV_Settings.GetDouble("bonsai_power_curve_exponent"));
+        break;
+      case 1:  // Custom Exponential
+        preview = string.format("%.2f", TFLV_Settings.GetDouble("bonsai_exp_curve_base"));
+        break;
+      case 2:  // Hybrid
+      {
+        int    compA   = TFLV_Settings.GetInt   ("bonsai_hybrid_component_a");
+        int    compB   = TFLV_Settings.GetInt   ("bonsai_hybrid_component_b");
+        double expA    = TFLV_Settings.GetDouble("bonsai_hybrid_exp_base_a");
+        double powA    = TFLV_Settings.GetDouble("bonsai_hybrid_power_a");
+        double expB    = TFLV_Settings.GetDouble("bonsai_hybrid_exp_base_b");
+        double powB    = TFLV_Settings.GetDouble("bonsai_hybrid_power_b");
+        double paramA  = ActiveParam(compA, expA, powA);
+        double paramB  = ActiveParam(compB, expB, powB);
+        preview = string.format("%s:%.1f Â» %s:%.1f",
+          ShortTypeName(compA), paramA,
+          ShortTypeName(compB), paramB);
+        break;
+      }
+      default:
+        preview = "";
+    }
+
+    if (preview.Length() > 0)
+      drawValue(indent, y, selected ? Font.CR_YELLOW : Font.CR_DARKGRAY, preview);
+
+    return ret;
+  }
+}
+
+// =============================================================================
+// TFLV_Menu_XPCurveGraph
+//
+// A menu item that renders a small live XP curve graph inside the option menu.
+// Samples the currently configured XP curve over levels 1..MAX_LEVEL and draws
+// connecting line segments using Screen.DrawLine(). Reads CVars each Draw()
+// call so it reflects slider changes in real time. Draw() only runs when the
+// menu is open — zero in-game performance impact.
+// =============================================================================
+
+class TFLV_Menu_XPCurveGraph : OptionMenuItem {
+  const GRAPH_W    = 360;  // graph box width  in virtual pixels
+  const GRAPH_H    = 110;  // graph box height in virtual pixels
+  const MAX_LEVEL  = 100;  // physical max samples in cache array
+  const ITEM_LINES = 16;   // menu line-heights reserved (spacers)
+  const Y_MARGIN   = 40;   // left margin for Y axis labels (virtual px)
+
+  // Cache fields — resampling only happens when a CVar value changes.
+  double _cachedCosts[101]; // [1..100] indexed by level
+  double _cachedMaxCost;
+  int    _cacheValid;       // gametic when cache was last built; 0 = never
+  // Snapshot of CVar values used in last sample — compare each frame.
+  int    _lastCurve;
+  int    _lastBase;
+  int    _lastMaxLevel;
+  double _lastPower;
+  double _lastExpBase;
+  int    _lastHybridCompA;
+  int    _lastHybridCompB;
+  double _lastHybridExpA;
+  double _lastHybridExpB;
+  double _lastHybridPowA;
+  double _lastHybridPowB;
+  int    _lastHybridStart;
+  int    _lastHybridEnd;
+  double _lastHybridBias;
+  int    _lastHybridSmooth;
+
+  TFLV_Menu_XPCurveGraph Init() {
+    super.Init("", "");
+    _cacheValid = 0;  // 0 = not yet built
+    return self;
+  }
+
+  override bool Selectable() { return false; }
+
+  // Returns true if any CVar relevant to the current curve has changed.
+  // Uses exact int comparison for int CVars and exact double comparison for
+  // floats — sliders produce discrete steps so exact equality is reliable here.
+  private bool CacheIsDirty() {
+    int curve = TFLV_Settings.GetInt("bonsai_xp_curve");
+    int base  = TFLV_Settings.GetInt("bonsai_base_level_cost");
+    if (curve != _lastCurve || base != _lastBase) return true;
+    if (TFLV_Settings.GetInt("bonsai_graph_max_level") != _lastMaxLevel) return true;
+    // Always check the active curve's CVars regardless of which submenu we're in.
+    switch (curve) {
+      case 0:
+        return TFLV_Settings.GetDouble("bonsai_power_curve_exponent") != _lastPower;
+      case 1:
+        return TFLV_Settings.GetDouble("bonsai_exp_curve_base") != _lastExpBase;
+      case 2:
+        return
+          TFLV_Settings.GetInt   ("bonsai_hybrid_component_a")      != _lastHybridCompA  ||
+          TFLV_Settings.GetInt   ("bonsai_hybrid_component_b")      != _lastHybridCompB  ||
+          TFLV_Settings.GetDouble("bonsai_hybrid_exp_base_a")       != _lastHybridExpA   ||
+          TFLV_Settings.GetDouble("bonsai_hybrid_exp_base_b")       != _lastHybridExpB   ||
+          TFLV_Settings.GetDouble("bonsai_hybrid_power_a")          != _lastHybridPowA   ||
+          TFLV_Settings.GetDouble("bonsai_hybrid_power_b")          != _lastHybridPowB   ||
+          TFLV_Settings.GetInt   ("bonsai_hybrid_transition_start") != _lastHybridStart  ||
+          TFLV_Settings.GetInt   ("bonsai_hybrid_transition_end")   != _lastHybridEnd    ||
+          TFLV_Settings.GetDouble("bonsai_hybrid_bias")             != _lastHybridBias   ||
+          TFLV_Settings.GetInt   ("bonsai_hybrid_smooth")           != _lastHybridSmooth;
+    }
+    return false;
+  }
+
+  private void RebuildCache() {
+    _cachedMaxCost = 1.0;
+    for (int lv = 1; lv <= MAX_LEVEL; ++lv) {
+      _cachedCosts[lv] = SampleCost(lv);
+      if (_cachedCosts[lv] > _cachedMaxCost) _cachedMaxCost = _cachedCosts[lv];
+    }
+    // Snapshot current CVar values
+    _lastCurve       = TFLV_Settings.GetInt("bonsai_xp_curve");
+    _lastBase        = TFLV_Settings.GetInt("bonsai_base_level_cost");
+    _lastMaxLevel    = TFLV_Settings.GetInt("bonsai_graph_max_level");
+    _lastPower       = TFLV_Settings.GetDouble("bonsai_power_curve_exponent");
+    _lastExpBase     = TFLV_Settings.GetDouble("bonsai_exp_curve_base");
+    _lastHybridCompA  = TFLV_Settings.GetInt   ("bonsai_hybrid_component_a");
+    _lastHybridCompB  = TFLV_Settings.GetInt   ("bonsai_hybrid_component_b");
+    _lastHybridExpA   = TFLV_Settings.GetDouble("bonsai_hybrid_exp_base_a");
+    _lastHybridExpB   = TFLV_Settings.GetDouble("bonsai_hybrid_exp_base_b");
+    _lastHybridPowA   = TFLV_Settings.GetDouble("bonsai_hybrid_power_a");
+    _lastHybridPowB   = TFLV_Settings.GetDouble("bonsai_hybrid_power_b");
+    _lastHybridStart  = TFLV_Settings.GetInt   ("bonsai_hybrid_transition_start");
+    _lastHybridEnd    = TFLV_Settings.GetInt   ("bonsai_hybrid_transition_end");
+    _lastHybridBias   = TFLV_Settings.GetDouble("bonsai_hybrid_bias");
+    _lastHybridSmooth = TFLV_Settings.GetInt   ("bonsai_hybrid_smooth");
+    _cacheValid      = 1;  // mark as built; dirty check handles invalidation
+  }
+
+  // Cost of a single component at a given level (mirrors WeaponInfo.ComponentCost).
+  private static double ComponentCostUI(int type, double baseCost,
+                                        double expBase, double powerExp, int level) {
+    if (level <= 0) return 0.0;
+    if (type == 1) return baseCost * (expBase ** (level - 1));  // exponential
+    return baseCost * (level ** powerExp);                       // power (default)
+  }
+
+  // Raw hybrid cost at a given level (no smoothing). Used by SampleCost case 2.
+  private static double HybridSampleAt(int level, double baseCost) {
+    int    compA    = TFLV_Settings.GetInt   ("bonsai_hybrid_component_a");
+    int    compB    = TFLV_Settings.GetInt   ("bonsai_hybrid_component_b");
+    double expBaseA = TFLV_Settings.GetDouble("bonsai_hybrid_exp_base_a");
+    double expBaseB = TFLV_Settings.GetDouble("bonsai_hybrid_exp_base_b");
+    double powerA   = TFLV_Settings.GetDouble("bonsai_hybrid_power_a");
+    double powerB   = TFLV_Settings.GetDouble("bonsai_hybrid_power_b");
+    double tStart   = TFLV_Settings.GetInt   ("bonsai_hybrid_transition_start");
+    double tEnd     = TFLV_Settings.GetInt   ("bonsai_hybrid_transition_end");
+    double bias     = TFLV_Settings.GetDouble("bonsai_hybrid_bias");
+
+    double costA = ComponentCostUI(compA, baseCost, expBaseA, powerA, level);
+    double costB = ComponentCostUI(compB, baseCost, expBaseB, powerB, level);
+
+    double t = (tEnd > tStart)
+      ? (double(level) - tStart) / (tEnd - tStart)
+      : (level >= tEnd ? 1.0 : 0.0);
+    t = clamp(t, 0.0, 1.0);
+    double s = t * t * (3.0 - 2.0 * t);
+    if (abs(bias) > 0.001) {
+      double bp = (bias >= 0) ? 1.0 + bias * 9.0 : 1.0 / (1.0 - bias * 9.0);
+      s = s ** bp;
+    }
+    return costA * (1.0 - s) + costB * s;
+  }
+
+  // Mirrors WeaponInfo.GetXPForLevel with static CVar reads.
+  // Kept in sync with the play-scope version in WeaponInfo.zsc.
+  // Curve indices: 0=Custom Power, 1=Custom Exponential, 2=Hybrid
+  private static double SampleCost(int level) {
+    if (level <= 0) return 0.0;
+
+    int    curve    = TFLV_Settings.GetInt("bonsai_xp_curve");
+    double baseCost = max(1, TFLV_Settings.GetInt("bonsai_base_level_cost"));
+
+    switch (curve) {
+      case 0:  // custom power: base_cost * level^exponent (exponent 0 = constant)
+      {
+        double exp = TFLV_Settings.GetDouble("bonsai_power_curve_exponent");
+        return baseCost * (level ** exp);
+      }
+      case 1:  // custom exponential: base_cost * base^(level-1)
+      {
+        double b = TFLV_Settings.GetDouble("bonsai_exp_curve_base");
+        return baseCost * (b ** (level - 1));
+      }
+      case 2:  // hybrid: blends component A → component B with biased smoothstep
+      {
+        int smooth = clamp(TFLV_Settings.GetInt("bonsai_hybrid_smooth"), 0, 15);
+        if (smooth == 0)
+          return HybridSampleAt(level, baseCost);
+        double total = 0.0, wTotal = 0.0;
+        for (int k = -smooth; k <= smooth; ++k) {
+          int lv2 = max(1, level + k);
+          double w = smooth + 1 - abs(k);
+          total  += w * HybridSampleAt(lv2, baseCost);
+          wTotal += w;
+        }
+        return total / wTotal;
+      }
+    }
+    return baseCost;
+  }
+
+  override int Draw(OptionMenuDescriptor d, int y, int indent, bool selected) {
+    // ---- coordinate setup ------------------------------------------------
+    // y is in real screen pixels. All drawing uses real screen pixels.
+    // DTA_VirtualWidth/Height = screen size makes DrawText accept the same
+    // coordinate space as DrawLine — no CleanXFac scaling confusion.
+    int sw = Screen.GetWidth();
+    int sh = Screen.GetHeight();
+
+    // Y label margin: fixed pixel amount, enough for "100%" at SmallFont size
+    int margin = 48;
+
+    // Graph box: sized as % of screen, capped to prevent overlap at small resolutions.
+    int gw = sw * 68 / 100;
+    int gh = min(sh * 25 / 100, sh * 55 / 100 - y - 30); // cap: never push below 55% of sh
+    gh = max(gh, sh * 10 / 100); // minimum height: 10% of screen
+    int gx = margin + (sw - gw - margin * 2) / 2;
+    int gy = max(y + 6, 6); // never above top of screen
+
+    // ---- sample the curve (cached — only recomputes when CVars change) ---
+    if (_cacheValid == 0 || CacheIsDirty()) RebuildCache();
+    // Dynamic level count — user-configurable, clamped to physical array size.
+    int dynMax = clamp(TFLV_Settings.GetInt("bonsai_graph_max_level"), 2, 100);
+    // maxCost reflects only the visible range (dynMax levels), not the full cache.
+    // This makes the Y axis rescale when the levels-shown slider changes.
+    double maxCost = 1.0;
+    for (int lv = 1; lv <= dynMax; ++lv)
+      if (_cachedCosts[lv] > maxCost) maxCost = _cachedCosts[lv];
+
+    // ---- determine graph mode and Y normalisation ------------------------
+    // Mode 0 = Relative: normalise to maxCost — % labels, shape only.
+    //   Changing base cost has no visual effect (shape is identical).
+    // Mode 1 = Absolute: also normalise to maxCost, but Y axis labels show
+    //   real XP values instead of percentages. Changing base cost shifts ALL
+    //   label values simultaneously, making its effect visible.
+    // Both modes use maxCost as the Y ceiling — no early clipping.
+    int graphMode = TFLV_Settings.GetInt("bonsai_graph_mode");
+    int baseCost  = max(1, TFLV_Settings.GetInt("bonsai_base_level_cost"));
+    double yCap   = maxCost;  // always the actual max — no artificial cap
+
+    // ---- draw border box -------------------------------------------------
+    uint borderCol = 0xFF505050;
+    Screen.DrawLine(gx,      gy,      gx + gw, gy,      borderCol);
+    Screen.DrawLine(gx,      gy + gh, gx + gw, gy + gh, borderCol);
+    Screen.DrawLine(gx,      gy,      gx,      gy + gh, borderCol);
+    Screen.DrawLine(gx + gw, gy,      gx + gw, gy + gh, borderCol);
+
+    // ---- horizontal grid lines at 25%, 50%, 75% --------------------------
+    uint gridCol = 0xFF2A2A2A;
+    for (int g = 1; g <= 3; ++g) {
+      int yg = gy + gh * g / 4;
+      Screen.DrawLine(gx + 1, yg, gx + gw - 1, yg, gridCol);
+    }
+
+    Font fnt = SmallFont;
+
+    // ---- Y axis labels ---------------------------------------------------
+    // "XP Cost" title above graph — add mode hint
+    string modeHint = (graphMode == 1) ? "XP Cost (abs)" : "XP Cost (rel)";
+    Screen.DrawText(fnt, Font.CR_GRAY,
+      gx - margin, gy - 13,
+      modeHint,
+      DTA_VirtualWidth, sw, DTA_VirtualHeight, sh);
+
+    // Relative: 25/50/75/100% labels.
+    // Absolute: real XP values at each grid line, formatted for readability:
+    //   >= 1,000,000 → "1.2M", >= 10,000 → "18k", otherwise raw integer.
+    static const double Y_FRACS[] = { 1.0, 0.75, 0.5, 0.25 };
+    static const string Y_REL_LABELS[] = { "100%", "75%", "50%", "25%" };
+    for (int g = 0; g < 4; ++g) {
+      int labelY = gy + int(gh * (1.0 - Y_FRACS[g]));
+      Screen.DrawLine(gx - 4, labelY, gx, labelY, borderCol);
+      string label;
+      if (graphMode == 0) {
+        label = Y_REL_LABELS[g];
+      } else {
+        double xpVal = yCap * Y_FRACS[g];
+        if (xpVal >= 1.0e12)
+          label = string.format("%.1fT", xpVal / 1.0e12);
+        else if (xpVal >= 1.0e9)
+          label = string.format("%.1fG", xpVal / 1.0e9);
+        else if (xpVal >= 1.0e6)
+          label = string.format("%.1fM", xpVal / 1.0e6);
+        else if (xpVal >= 1.0e4)
+          label = string.format("%.0fk", xpVal / 1.0e3);
+        else
+          label = string.format("%.0f", xpVal);
+      }
+      Screen.DrawText(fnt, Font.CR_DARKGRAY,
+        gx - margin + 4, labelY - 4,
+        label,
+        DTA_VirtualWidth, sw, DTA_VirtualHeight, sh);
+    }
+
+    // ---- curve colour by type --------------------------------------------
+    int curve = TFLV_Settings.GetInt("bonsai_xp_curve");
+    uint lineCol;
+    switch (curve) {
+      case 0:  lineCol = 0xFF4488FF; break; // custom power   — blue
+      case 1:  lineCol = 0xFFFFAA22; break; // custom exp     — amber
+      case 2:  lineCol = 0xFF22DDCC; break; // hybrid         — teal
+      default: lineCol = 0xFFFFFFFF; break;
+    }
+
+    // ---- draw the curve --------------------------------------------------
+    // In absolute mode, costs above yCap are clamped to the top of the box,
+    // which visually shows the curve "maxing out" — useful information.
+    int prevX = -1, prevY = -1;
+    int innerH = gh - 4;
+    for (int lv = 1; lv <= dynMax; ++lv) {
+      int px = gx + (lv - 1) * gw / max(1, dynMax - 1);
+      double normCost = _cachedCosts[lv] / yCap;
+      int py = gy + gh - int(normCost * innerH) - 2;
+
+      Screen.DrawLine(px - 1, py,     px + 1, py,     lineCol);
+      Screen.DrawLine(px,     py - 1, px,     py + 1, lineCol);
+
+      if (prevX >= 0)
+        Screen.DrawLine(prevX, prevY, px, py, lineCol);
+
+      prevX = px;
+      prevY = py;
+    }
+
+    // ---- X axis labels ---------------------------------------------------
+    int tickStep = max(1, dynMax / 12);
+    for (int lv = 1; lv <= dynMax; lv += tickStep) {
+      int px = gx + (lv - 1) * gw / max(1, dynMax - 1);
+      Screen.DrawLine(px, gy + gh, px, gy + gh + 3, borderCol);
+      Screen.DrawText(fnt, Font.CR_DARKGRAY,
+        px - 3, gy + gh + 4,
+        string.format("%d", lv),
+        DTA_VirtualWidth, sw, DTA_VirtualHeight, sh);
+    }
+
+    // "Weapon Level" centred below
+    Screen.DrawText(fnt, Font.CR_GRAY,
+      gx + gw / 2 - 28, gy + gh + 14,
+      "Weapon Level",
+      DTA_VirtualWidth, sw, DTA_VirtualHeight, sh);
+
+    // ---- curve name in top-left corner -----------------------------------
+    static const string CURVE_NAMES[] = {
+      "Custom Power", "Custom Exponential", "Hybrid"
+    };
+    string curveName = (curve >= 0 && curve <= 2) ? CURVE_NAMES[curve] : "?";
+    Screen.DrawText(fnt, Font.CR_WHITE,
+      gx + gw / 2 - 20, gy - 13,
+      curveName,
+      DTA_VirtualWidth, sw, DTA_VirtualHeight, sh);
+
+    return indent;
+  }
+}
+
+// Thin subclass used by GunBonsaiXPPacing and GunBonsaiHybridCurve menus.
+// Inserts the graph + spacers once, guarded against re-insertion on re-open.
+class TFLV_Menu_XPPacingMenu : TFLV_TooltipOptionMenu {
+  override void Init(Menu parent, OptionMenuDescriptor desc) {
+    super.Init(parent, desc);
+
+    // Guard: only insert if the first item is not already the graph.
+    if (mDesc.mItems.Size() > 0 &&
+        mDesc.mItems[0] is "TFLV_Menu_XPCurveGraph")
+      return;
+
+    // Calculate spacers needed before inserting, so we know the total offset.
+    int sh      = Screen.GetHeight();
+    int sy      = CleanYFac_1;
+    int lineH   = max(1, OptionMenuSettings.mLinespacing * sy);
+    int graphTotalH = sh * 25 / 100 + 57;
+    int spacers = max(1, (graphTotalH + lineH - 1) / lineH) - 1;
+    int inserted = 1 + spacers; // graph item + spacers
+
+    // Insert graph at position 0 and spacers at 1..spacers.
+    mDesc.mItems.Insert(0, new("TFLV_Menu_XPCurveGraph").Init());
+    for (int i = 0; i < spacers; ++i)
+      mDesc.mItems.Insert(1, new("OptionMenuItemStaticText").InitDirect("", Font.CR_BLACK));
+
+    // The tooltip system (libtooltipmenu) stores absolute item indices in
+    // TFLV_Tooltip.first/last. Inserting items at index 0 shifts all
+    // existing indices up by `inserted`. Fix them by finding the tooltip
+    // holder (always the last item) and offsetting every stored range.
+    int last = mDesc.mItems.Size() - 1;
+    if (last >= 0) {
+      let holder = OptionMenuItemTFLV_TooltipHolder(mDesc.mItems[last]);
+      if (holder) {
+        for (int i = 0; i < holder.tooltips.Size(); ++i) {
+          holder.tooltips[i].first += inserted;
+          holder.tooltips[i].last  += inserted;
+        }
+      }
+    }
+  }
+}

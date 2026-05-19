@@ -1,0 +1,156 @@
+[en default]
+TFLV_OPT_TITLE = "Gun Bonsai Options";
+
+// Strings for option headers
+
+TFLV_OPT_HEADER_UI = "UI Settings";
+TFLV_OPT_HEADER_COMPATIBILITY = "Compatibility Settings";
+TFLV_OPT_HEADER_XP_SOURCE = "XP Source Settings";
+TFLV_OPT_HEADER_XP_BALANCE = "XP Balance Settings";
+TFLV_OPT_HEADER_LEVELING_MODES = "Alternate Leveling Modes";
+TFLV_OPT_HEADER_AUTOAUTOSAVE = "AutoAutoSave Integration";
+
+// Strings for option names and tooltips
+
+// UI options
+TFLV_OPT_NAME_HUD_SKIN = "HUD skin";
+TFLV_OPT_TT_HUD_SKIN = "What graphics to use for the HUD. You can also disable it entirely if you want your levelups to be a surprise.";
+TFLV_OPT_NAME_HUD_X = "HUD X position";
+TFLV_OPT_NAME_HUD_Y = "HUD Y position";
+TFLV_OPT_TT_HUD_XY =
+  "Position of the Gun Bonsai HUD on the screen, as a proportion of total screen size. 0.0 is top left, 1.0 is bottom right.\n"
+  "You can also set a pixel-perfect position by setting bonsai_hud_x and bonsai_hud_y to your desired coordinates.";
+TFLV_OPT_NAME_HUD_SIZE = "HUD size";
+TFLV_OPT_TT_HUD_SIZE = "Height of the Gun Bonsai HUD, as a fraction of screen height.";
+TFLV_OPT_NAME_HUD_ALPHA = "HUD opacity";
+TFLV_OPT_TT_HUD_ALPHA = "Opacity of the HUD, from 0 (invisible) to 1 (fully opaque).";
+TFLV_OPT_NAME_HUD_MIRROR = "HUD mirroring";
+TFLV_OPT_TT_HUD_MIRROR = "Whether to mirror the hud. Default has the level box on the left and the XP bars on the bottom.";
+TFLV_OPT_NAME_HUD_RGB_FRAME = "HUD frame colour";
+TFLV_OPT_TT_HUD_RGB_FRAME = "Colour of the HUD frame.";
+TFLV_OPT_NAME_HUD_RGB_WEAPON = "Weapon info colour";
+TFLV_OPT_TT_HUD_RGB_WEAPON = "Colour of the weapon XP bar and weapon name, level, and XP indicator text.";
+TFLV_OPT_NAME_HUD_RGB_PLAYER = "Player info colour";
+TFLV_OPT_TT_HUD_RGB_PLAYER = "Colour of the player XP bar and player level text.";
+TFLV_OPT_NAME_VFX_MODE = "Visual effects";
+TFLV_OPT_TT_VFX_MODE =
+  "Setting this to 'reduced' or 'minimal' may help performance, especially on maps featuring large groups of enemies.\n"
+  "\c[CYAN]Full\c- uses a mix of particles and sprites. \c[CYAN]Reduced\c- turns off all particle effects, and replaces some of them with sprite shading effects instead. \c[CYAN]Minimal\c- turns off sprite shading as well.\n";
+TFLV_OPT_NAME_LEVELUP_FLASH = "Flash on level-up";
+TFLV_OPT_TT_LEVELUP_FLASH = "Whether to flash the screen when your weapon gains a level.";
+TFLV_OPT_NAME_LEVELUP_FLASH_RGB = "Flash colour";
+TFLV_OPT_NAME_LEVELUP_SOUND_MODE = "Sound on level-up";
+TFLV_OPT_TT_LEVELUP_SOUND_MODE = "What sound to play when your weapon gains a level. If set to 'custom' it will use whatever the value of the 'bonsai_levelup_sound' cvar is.";
+TFLV_OPT_NAME_LEVELUP_SOUND = "Custom level-up sound";
+TFLV_OPT_TT_LEVELUP_SOUND = "The sound to play on level-up when 'Sound on level-up' is set to 'custom'. Enter a sound name as defined in SNDINFO, e.g. 'misc/secret'. Only used when the mode above is set to custom.";
+
+// Compatibility options
+TFLV_OPT_NAME_AUTOSAVE_AFTER_LEVEL = "Autosave after level-up";
+TFLV_OPT_TT_AUTOSAVE_AFTER_LEVEL = "Autosave after choosing your upgrades for a level-up (i.e. as soon as the level-up menu closes). This requires \c[GOLD]AutoAutoSave\c- installed to do anything, and the 'autosave when important item is found' setting needs to be on.";
+TFLV_OPT_NAME_UPGRADE_BINDING_MODE = "Weapon upgrades bind to";
+TFLV_OPT_TT_UPGRADE_BINDING_MODE =
+  "Determines how weapon upgrades behave when you drop a weapon or are carrying multiple weapons of the same type.\n"
+  "\c[CYAN]Individual weapon\c- ties upgrades to the specific weapon that earned them. If you have multiple copies of the weapon they each have separate upgrades, and if you drop one its upgrades are gone with it. \c[CYAN]Individual with inheritance\c- is similar, but if you drop a weapon and later pick up a new one of the same type, it will 'inherit' the upgrades of its predecessor.\n"
+  "\c[CYAN]Weapon class\c- shares upgrades between all weapons of the same type, even if you have more than one of that weapon, and remembers those upgrades even if you drop the weapon.";
+TFLV_OPT_NAME_IGNORE_DEATH_EXITS = "Keep upgrades on death exit/pistol start";
+TFLV_OPT_TT_IGNORE_DEATH_EXITS = "If on, you'll keep your upgrades on level transition even if you lose your inventory (subject to the upgrades-bind-to setting above). If off, level transitions that take your inventory will also cost you your upgrades.";
+TFLV_OPT_NAME_USE_BUILTIN_ACTORS = "Use builtin actors for Scavenge drops";
+TFLV_OPT_TT_USE_BUILTIN_ACTORS =
+  "Whether the Scavenge Blood and Scavenge Steel upgrades should use actors built into Gun Bonsai, or the generic Doom 2 HealthBonus and ArmorBonus actors.\n"
+  "The builtins should work in any IWAD. The generic ones are more likely to 'blend in' when playing with mods that define replacements for the generic bonuses, but (depending on the mod) may no longer give the correct amounts of health/armour.";
+TFLV_OPT_NAME_AMMOLESS_WEAPONS_ARE_WIMPY = "Treat weapons that don't use ammo as wimpy";
+TFLV_OPT_TT_AMMOLESS_WEAPONS_ARE_WIMPY = "By default, weapons that don't use ammo are considered to be 'peashooter' type weapons which can get some upgrades specific to weaker or difficult-to-use weapons. Turn this off if you are playing a mod, like Hideous Destructor, that overrides normal ammo handling mechanics, or one that has powerful ammoless weapons.";
+
+// XP source options
+TFLV_OPT_NAME_DAMAGE_TO_XP_FACTOR = "XP gain from damage";
+TFLV_OPT_NAME_SCORE_TO_XP_FACTOR = "XP gain from score";
+TFLV_OPT_TT_DAMAGE_TO_XP_FACTOR = "How much XP you earn per point of damage you inflict. This feature is built into Gun Bonsai.";
+TFLV_OPT_TT_SCORE_TO_XP_FACTOR = "How much XP you earn per point of score you accumulate. Works with Doom Points (included) or any other scoring mod.\nWith real-time scoring enabled, DoT effects (fire, poison, acid, lightning) earn score as they tick, which then flows into XP here — so this is the recommended way to get XP from elemental damage.\nSet this to 0 to disable score-based XP entirely.";
+
+// XP balance options
+TFLV_OPT_NAME_BASE_LEVEL_COST = "XP needed to reach level 1";
+TFLV_OPT_TT_BASE_LEVEL_COST = "How much XP you need to earn for a weapon to gain its first level. Roughly, 1 point of damage dealt == 1 XP gained, with a bonus for damaging nastier enemies like Cyberdemons and Archviles.";
+TFLV_OPT_NAME_XP_CURVE = "XP cost scaling";
+TFLV_OPT_TT_XP_CURVE =
+  "How fast the XP cost for leveling increases as a gun levels up.\n"
+  "\c[CYAN]Constant\c- does not increase the cost at all.\n"
+  "\c[CYAN]Linear\c- increases the cost by a fixed amount each level.\n"
+  "\c[CYAN]Quadratic\c- and \c[CYAN]cubic\c- scale with the square or cube of the level.\n"
+  "\c[CYAN]Exponential\c- doubles the cost every level. Fast early, but high levels become almost unreachable.\n"
+  "\c[CYAN]Gentle Exponential\c- uses base 1.5 instead of 2. Early levels are fast like exponential, but high levels remain achievable. Recommended for longer runs.\n"
+  "\n\c[RED]Warning:\c- changing this setting mid-run may grant free levels (switching to a cheaper curve) or lock progress (switching to a more expensive one).";
+TFLV_OPT_XP_CURVE_0 = "constant (always base_cost)";
+TFLV_OPT_XP_CURVE_1 = "linear (base_cost × level)";
+TFLV_OPT_XP_CURVE_2 = "quadratic (base_cost × level²)";
+TFLV_OPT_XP_CURVE_3 = "cubic (base_cost × level³)";
+TFLV_OPT_XP_CURVE_4 = "exponential (base_cost × 2^level)";
+TFLV_OPT_XP_CURVE_5 = "gentle exponential (base_cost × 1.5^level)";
+TFLV_OPT_NAME_UPGRADE_CHOICES_PER_GUN_LEVEL = "Upgrade choices on gun level up";
+TFLV_OPT_NAME_UPGRADE_CHOICES_PER_PLAYER_LEVEL = "Upgrade choices on player level up";
+TFLV_OPT_TT_UPGRADE_CHOICES_PER_LEVEL = "How many different upgrades it offers you on level up. Setting it to 0 will let you pick from the full list of available upgrades. Setting it to 1 will randomly pick an upgrade for you without opening the menu.";
+TFLV_OPT_NAME_GUN_LEVELS_PER_PLAYER_LEVEL = "Gun levels per player level";
+TFLV_OPT_TT_GUN_LEVELS_PER_PLAYER_LEVEL = "How many times you need to level up a weapon to gain a player bonus.";
+TFLV_OPT_NAME_LEVEL_COST_MUL_FOR_MELEE = "XP cost multiplier for melee weapons";
+TFLV_OPT_NAME_LEVEL_COST_MUL_FOR_WIMPY = "XP cost multiplier for wimpy weapons";
+TFLV_OPT_TT_LEVEL_COST_MUL =
+  "XP cost multipliers for various classes of weapons. These can stack (e.g. fists are both 'melee' and 'wimpy' in vanilla Doom 2). The default settings make both weak and melee weapons easier to level up.\n"
+  "Note that not all mods use these flags, or use them correctly -- in that case overrides can be applied in the BONSAIRC lump.";
+
+// Alternate leveling modes
+TFLV_OPT_NAME_RESPEC_INTERVAL = "Respec interval";
+TFLV_OPT_TT_RESPEC_INTERVAL = "Gaining this many levels will cause your weapon to automatically respec. You will be asked to re-choose all of its upgrades from scratch, and its previous set of upgrades will be discarded. Setting 'upgrade choices per gun level' to 1 as well will cause the weapon to automatically reroll its upgrades as soon as it respecs; otherwise it will not respec until you open the level-up menu.";
+
+TFLV_OPT_NAME_FORCED_UPGRADES = "Forced upgrades";
+TFLV_OPT_TT_FORCED_UPGRADES = "Space-separated list of upgrades to always include in the list offered to you on level up (if eligible). These need to be the internal actor names, e.g. 'TFLV_Upgrade_WeaponDamage'; check the BONSAIRC for a full list. If there are fewer eligible forced upgrades than your 'upgrade choices on level up' setting, random upgrades are used to fill the remaining slots as normal.";
+
+
+// Strings for the various option enums
+
+// HUD orientation settings
+TFLV_OPT_MIRRORMODE_0 = "no mirroring";
+TFLV_OPT_MIRRORMODE_1 = "mirror horizontally (box on left)";
+TFLV_OPT_MIRRORMODE_2 = "mirror vertically (XP bars on top)";
+TFLV_OPT_MIRRORMODE_3 = "mirror both (box on left & bars on top)";
+// HUD skin selection
+TFLV_OPT_HUDSKIN_0 = "no HUD";
+TFLV_OPT_HUDSKIN_1 = "scifi";
+TFLV_OPT_HUDSKIN_2 = "ORB_";
+TFLV_OPT_HUDSKIN_3 = "pentagram";
+// VFX mode
+TFLV_OPT_VFX_MODE_0 = "Minimal";
+TFLV_OPT_VFX_MODE_1 = "Reduced";
+TFLV_OPT_VFX_MODE_2 = "Full";
+// level-up fanfare
+TFLV_OPT_FANFARE_N = "custom (bonsai_levelup_sound cvar)";
+TFLV_OPT_FANFARE_0 = "nothing";
+TFLV_OPT_FANFARE_1 = "Gun Bonsai levelup sound";
+TFLV_OPT_FANFARE_2 = "secret discovery sound";
+TFLV_OPT_FANFARE_3 = "teleport effect";
+// whether upgrades stick to the specific weapon, the specific weapon but if you
+// lose it and find another the new one will inherit the upgrades, or if all weapons
+// of a given type share upgrades
+TFLV_OPT_BINDMODE_0 = "individual weapon";
+TFLV_OPT_BINDMODE_1 = "individual weapon with inheritance";
+TFLV_OPT_BINDMODE_2 = "weapon class";
+// non-numeric slider values
+TFLV_OPT_SLIDER_DISABLED = "Disabled";
+TFLV_OPT_SLIDER_ALLUPGRADES = "All available upgrades";
+TFLV_OPT_SLIDER_NOUPGRADES = "Upgrades disabled";
+// XP curve
+TFLV_OPT_XP_CURVE_0 = "constant (always base_cost)";
+TFLV_OPT_XP_CURVE_1 = "linear (base_cost × level)";
+TFLV_OPT_XP_CURVE_2 = "quadratic (base_cost × level²)";
+TFLV_OPT_XP_CURVE_3 = "cubic (base_cost × level³)";
+TFLV_OPT_XP_CURVE_4 = "exponential (base_cost × 2^level)";
+
+// LegenDoom Integration
+TFLV_OPT_TT_GUN_LEVELS_PER_LD_EFFECT = "How many times a gun needs to level up to gain a new Legendoom effect. Set to 0 to disable. Only has any effect if Legendoom is installed.";
+TFLV_OPT_TT_WHICH_GUNS_CAN_LEARN = "Which weapons can learn new Legendoom effects when they level up.";
+TFLV_OPT_TT_WHICH_GUNS_CAN_REPLACE = "Which weapons can replace one of their existing Legendoom effects with a new one once all slots are filled.";
+TFLV_OPT_TT_BASE_LD_EFFECT_SLOTS = "How many Legendoom effect slots non-legendary guns start with.";
+TFLV_OPT_TT_BONUS_LD_EFFECT_SLOTS = "How many extra effect slots legendary guns get per rarity level (Common=1, Uncommon=2, Rare=3, Epic=4).";
+TFLV_OPT_TT_IGNORE_GUN_RARITY = "If on, weapons can learn Legendoom effects of any rarity regardless of their own spawn rarity.";
+TFLV_OPT_LDMODE_0 = "none";
+TFLV_OPT_LDMODE_1 = "basic weapons only";
+TFLV_OPT_LDMODE_2 = "legendary weapons only";
+TFLV_OPT_LDMODE_3 = "all weapons";

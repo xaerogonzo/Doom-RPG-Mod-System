@@ -1,0 +1,265 @@
+
+/*
+*
+* Hyper-V Unified HUD
+* Draws all ability indicators in one place:
+*   - Stamina (shared melee/dash pool)
+*   - Slomo points
+*   - Dash cooldown
+*   - Hook cooldown
+*   - Parry indicator
+*
+*/
+
+class UnifiedHudHandler : EventHandler
+{
+	// CVars cached as ui fields on first use — FindCVar is a hash lookup
+	ui CVar cHud;
+	ui CVar cHudX, cHudY, cBarW, cLabelW, cGap, cBarH;
+	ui CVar cShowStam, cShowSlomo, cShowDash, cShowHook, cShowParry, cShowRegen;
+	ui int sloMaxCooldown;  // tracks peak cooldown for bar normalization
+
+	override void RenderOverlay(RenderEvent e)
+	{
+		// Cache on first call
+		if(!cHud)
+		{
+			cHud       = CVar.FindCVar("vmm_hud");
+			cHudX      = CVar.FindCVar("vmm_hud_x");
+			cHudY      = CVar.FindCVar("vmm_hud_y");
+			cBarW      = CVar.FindCVar("vmm_hud_bar_width");
+			cLabelW    = CVar.FindCVar("vmm_hud_label_width");
+			cGap       = CVar.FindCVar("vmm_hud_bar_gap");
+			cBarH      = CVar.FindCVar("vmm_hud_bar_height");
+			cShowStam  = CVar.FindCVar("vmm_hud_stamina");
+			cShowSlomo = CVar.FindCVar("vmm_hud_slomo");
+			cShowDash  = CVar.FindCVar("vmm_hud_dash");
+			cShowHook  = CVar.FindCVar("vmm_hud_hook");
+			cShowParry = CVar.FindCVar("vmm_hud_parry");
+			cShowRegen = CVar.FindCVar("vmm_hud_regen");
+		}
+
+		if(!cHud || !cHud.GetBool()) return;
+
+		PlayerInfo p = players[consolePlayer];
+		if(!p || !p.mo) return;
+
+		Actor pmo = p.mo;
+
+		let vm = V_Moves(pmo.FindInventory("V_Moves"));
+		if(!vm) return;
+
+		int baseX  = cHudX    ? cHudX.GetInt()   : 8;
+		int baseY  = cHudY    ? cHudY.GetInt()   : 462;
+		int barW   = cBarW    ? cBarW.GetInt()    : 100;
+		int labelW = cLabelW  ? cLabelW.GetInt()  : 36;
+		int gap    = cGap     ? cGap.GetInt()     : 10;
+		int barH   = cBarH    ? cBarH.GetInt()    : 5;
+
+		bool hasBerserk = pmo.CountInv("PowerStrength") > 0;
+		int curY = baseY;
+
+		// --- Stamina bar ---
+		if(cShowStam && cShowStam.GetBool() && vm.melee_stamina)
+		{
+			color stamCol;
+			int sv = vm.melee_stamina_val;
+			if(hasBerserk)
+				stamCol = sv > 66 ? 0xFFFFAA00 : sv > 33 ? 0xFFCC6600 : 0xFF882200;
+			else
+				stamCol = sv > 66 ? 0xFF00CC44 : sv > 33 ? 0xFFCCCC00 : 0xFFCC2200;
+			DrawBarLabeled(baseX, curY, barW, barH, labelW, sv, 100, stamCol, "STM");
+
+			// Regen indicator — green '+' pulses next to STM label when regen is active
+			if(cShowRegen && cShowRegen.GetBool() && vm.regen_active && (level.time % 20) < 10)
+			{
+				Screen.DrawText(SmallFont, Font.CR_GREEN, baseX + labelW - 8, curY - barH - 1, "+",
+					DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+			}
+
+			curY -= (barH + gap);
+		}
+
+		// --- Slomo bar ---
+		if(cShowSlomo && cShowSlomo.GetBool())
+		{
+			let sh = SlomoHandler(EventHandler.Find("SlomoHandler"));
+			if(sh && sh.allowSlomoHud && sh.totalSlomoPoints > 0)
+			{
+				int sp = sh.currentSlomoPoints;
+				int st = sh.totalSlomoPoints;
+				int cd = sh.waitSlomoCooldown;
+				bool onCD = !sh.slomoCooldownOk && cd > 0;
+
+				if(onCD)
+				{
+					if(cd > sloMaxCooldown) sloMaxCooldown = cd;
+				}
+				else if(sh.slomoCooldownOk)
+				{
+					sloMaxCooldown = 0;
+				}
+
+				// Single bar: always shows points remaining
+				color sloCol;
+				if(hasBerserk)
+					sloCol = sp > st*2/3 ? 0xFFFFDD00 : sp > st/3 ? 0xFFFF8800 : 0xFFCC2200;
+				else
+					sloCol = sp > st*2/3 ? 0xFF4488FF : sp > st/3 ? 0xFF884499 : 0xFFCC2200;
+				DrawBarLabeled(baseX, curY, barW, barH, labelW, sp, max(1, st), sloCol, "SLO");
+
+				// Cooldown pip — small "CD" drawn above the bar while recharging,
+				// same style as the ">>" double-dash indicator on the dash bar.
+				if(onCD)
+				{
+					CVar cBlink = CVar.FindCVar("vmm_hud_slomo_cd_blink");
+					bool doDraw = !(cBlink && cBlink.GetBool()) || (level.time % 20) < 10;
+					if(doDraw)
+					{
+						int barX = baseX + labelW;
+						Screen.DrawText(SmallFont, Font.CR_GRAY, barX + 2, curY - barH - 6, "CD",
+							DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+					}
+				}
+
+				curY -= (barH + gap);
+			}
+		}
+
+		// --- Dash cooldown bar ---
+		// dc counts DOWN from dm to 0. 0=ready (full bar). >0=cooling (partial).
+		if(cShowDash && cShowDash.GetBool() && vm.dash_enabled)
+		{
+			int dc = vm.dash_cooldown;
+			int dm = max(1, vm.dash_move_cooldown);
+			color dashCol = dc <= 0 ? 0xFFEEEEEE : 0xFF666666;
+			int dashVal   = dc <= 0 ? dm : max(0, dm - dc);
+			// Double dash pip — bright notch when second dash is available
+			DrawBarLabeled(baseX, curY, barW, barH, labelW, dashVal, dm, dashCol, "DSH");
+			if(vm.double_dash && vm.double_dash_available)
+			{
+				// Small bright tick above the bar to show second dash ready
+				int barX = baseX + labelW;
+				Screen.DrawText(SmallFont, Font.CR_WHITE, barX + 2, curY - barH - 6, ">>",
+					DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+			}
+			curY -= (barH + gap);
+		}
+
+		// --- Hook cooldown bar ---
+		// hc counts DOWN from hm to 0. 0=ready (full bar). >0=cooling (partial).
+		if(cShowHook && cShowHook.GetBool() && vm.hook_enabled)
+		{
+			int hm = max(1, int(vm.hook_cooldown * 35));
+			int hc = int(vm.hook_busy);
+			color hookCol = hc <= 0 ? 0xFFFF8800 : 0xFF883300;
+			int hookVal   = hc <= 0 ? hm : max(0, hm - hc);
+			DrawBarLabeled(baseX, curY, barW, barH, labelW, hookVal, hm, hookCol, "HKG");
+			curY -= (barH + gap);
+		}
+
+		// --- Teleport indicator ---
+		if(vm.teleport_enabled)
+		{
+			if(vm.tp_state == 2)
+			{
+				// Marker placed — prompt player to press again
+				String tTxt = "[ TELEPORT READY ]";
+				Screen.DrawText(SmallFont, Font.CR_CYAN,
+					320 - SmallFont.StringWidth(tTxt) / 2, 215, tTxt,
+					DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+			}
+			else if(vm.tp_state == 3)
+			{
+				// Cooldown — show draining bar
+				int pDur = vm.teleport_cooldown_max > 0 ? vm.teleport_cooldown_max : 1;
+				DrawBar(320 - 40, 215, 80, 3, vm.tp_cooldown_timer, pDur, 0xFF886600);
+			}
+		}
+
+		// --- Parry indicator ---
+		if(cShowParry && cShowParry.GetBool() && vm.parry_enabled)
+		{
+			if(vm.parry_immune_timer > 0)
+			{
+				// Use parry_hud_is_crit — stable for full immunity duration
+				bool isCrit = vm.parry_hud_is_crit;
+				String pTxt = isCrit ? "!! CRIT PARRY !!" : "PARRY";
+				int cr = isCrit ? Font.CR_GOLD : Font.CR_GREEN;
+				int pX = 320 - SmallFont.StringWidth(pTxt) / 2;
+				Screen.DrawText(SmallFont, cr, pX, 200, pTxt,
+					DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+
+				// Immunity bar — maxVal from parry_duration, not hardcoded 20
+				int pDur = vm.parry_duration > 0 ? vm.parry_duration : 20;
+				color barCol = isCrit ? 0xFFFFCC00 : 0xFF00FFAA;
+				DrawBar(320 - 60, 210, 120, 4, vm.parry_immune_timer, pDur, barCol);
+			}
+			else if(vm.parry_shield_timer > 0)
+			{
+				// Shield is active — incoming hit will be reduced
+				// Show dim indicator so player knows they're protected
+				String pTxt = "[ SHIELD ]";
+				int pX = 320 - SmallFont.StringWidth(pTxt) / 2;
+				Screen.DrawText(SmallFont, Font.CR_DARKGRAY, pX, 200, pTxt,
+					DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+			}
+			else if(vm.parry_window > 0 && vm.melee_key)
+			{
+				// Parry window open in key mode
+				Screen.DrawText(SmallFont, Font.CR_CYAN,
+					320 - SmallFont.StringWidth("PARRY?") / 2, 200, "PARRY?",
+					DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+			}
+		}
+	}
+
+	// ----------------------------------------------------------------
+	// DrawBarLabeled — draws a filled bar with label text
+	// ----------------------------------------------------------------
+	private ui static void DrawBarLabeled(int vx, int vy, int vw, int vh,
+	                                      int labelW, int val, int maxVal,
+	                                      color fillCol, String label)
+	{
+		int sw = Screen.GetWidth();
+		int sh = Screen.GetHeight();
+		int lx = sw * vx / 640;
+		int ly = sh * vy / 480;
+		int bx = sw * (vx + labelW) / 640;
+		int by = ly;
+		int bw = sw * (vw - labelW) / 640;
+		int bh = sh * vh / 480;
+		if(bh < 2) bh = 2;
+
+		Screen.DrawText(SmallFont, Font.CR_WHITE, lx, ly - bh, label,
+			DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+		DrawBar(vx + labelW, vy, vw - labelW, vh, val, maxVal, fillCol);
+	}
+
+	// ----------------------------------------------------------------
+	// DrawBar — draws a filled bar with dark background
+	// ----------------------------------------------------------------
+	private ui static void DrawBar(int vx, int vy, int vw, int vh,
+	                               int val, int maxVal, color fillCol)
+	{
+		int sw = Screen.GetWidth();
+		int sh = Screen.GetHeight();
+		int x = sw * vx / 640;
+		int y = sh * vy / 480;
+		int w = sw * vw / 640;
+		int h = sh * vh / 480;
+		if(h < 2) h = 2;
+
+		color bgCol = 0x55222222;
+		int filled = (maxVal > 0) ? (w * val / maxVal) : 0;
+		filled = clamp(filled, 0, w);
+
+		for(int row = 0; row < h; row++)
+			Screen.DrawLine(x, y + row, x + w, y + row, bgCol);
+		if(filled > 0)
+		{
+			for(int row = 0; row < h; row++)
+				Screen.DrawLine(x, y + row, x + filled, y + row, fillCol);
+		}
+	}
+}

@@ -1,0 +1,52 @@
+// ============================================================================
+// VUAS - Vortex's Universal Achievement System - CVar Definitions
+// ============================================================================
+// Naming convention:
+//   ach_*  = User-facing settings (appearance, behavior)
+//   vuas_* = System settings (persistence, debug)
+// ============================================================================
+
+// --- Toast Notification Settings ---
+user bool ach_toast_enabled = true;       // Show toast popup on achievement unlock
+user int ach_toast_position = 2;          // 0=top-right, 1=top-left, 2=bottom-right, 3=bottom-left, 4=top-center, 5=bottom-center
+user int ach_toast_style = 0;             // 0=procedural, 1=textured
+user float ach_toast_scale = 1.0;         // Toast size multiplier (0.5-2.0)
+user float ach_toast_opacity = 0.9;       // Toast background opacity (0.1-1.0)
+user int ach_toast_duration = 140;        // Toast display duration in tics (35-350, 140 = 4 seconds)
+user int ach_toast_animation = 1;         // 0=none, 1=slide, 2=fade
+user int ach_toast_slide_edge = 0;        // 0=vertical (top/bottom edge), 1=horizontal (left/right edge)
+user int ach_toast_offset_x = 0;         // Toast X offset (positive = right, negative = left)
+user int ach_toast_offset_y = 0;         // Toast Y offset (positive = down, negative = up)
+user bool ach_sound_enabled = true;       // Play sound on achievement unlock
+user int ach_sound_choice = 0;            // 0=Sound 1, 1=Sound 2, 2=Sound 3, 3=Sound 4
+
+// --- Color Settings (Font.CR_ indices: 0=Brick,3=Green,5=Gold,9=White,10=Yellow,20=DarkGray) ---
+user int ach_color_unlocked = 3;          // [UNLOCKED] tag + toast header (default: Green)
+user int ach_color_locked = 20;           // [LOCKED] tag (default: Dark Gray)
+user int ach_color_title = 10;            // Achievement title (default: Yellow)
+user int ach_color_description = 2;       // Description text (default: Gray)
+user int ach_color_border = 5;            // Toast outer border accent (default: Gold)
+user int ach_color_border_inner = 20;    // Toast inner border (default: Dark Gray)
+user int ach_color_progress = 10;         // Progress counter text (default: Yellow)
+
+// --- Menu Settings ---
+user bool ach_show_hidden = false;        // Show hidden achievements in menu (as ???)
+user int ach_menu_filter = 0;            // 0=All, 1=Unlocked Only, 2=Locked Only
+
+// --- Persistence CVars (nosave = survives across sessions via INI, not in savegames) ---
+// 4 CVars x 15 achievements each = 60 capacity
+// vuas_record*: unlock timestamps, encoded with Base64+ROT by default (vuas_encode_data)
+// vuas_maps*: map names where achievements were unlocked, stored plain (pipe-delimited)
+nosave string vuas_record0 = "";          // Achievement data CVar 0 (achievements 0-14)
+nosave string vuas_record1 = "";          // Achievement data CVar 1 (achievements 15-29)
+nosave string vuas_record2 = "";          // Achievement data CVar 2 (achievements 30-44)
+nosave string vuas_record3 = "";          // Achievement data CVar 3 (achievements 45-59)
+nosave string vuas_maps0 = "";            // Unlock map names CVar 0 (achievements 0-14)
+nosave string vuas_maps1 = "";            // Unlock map names CVar 1 (achievements 15-29)
+nosave string vuas_maps2 = "";            // Unlock map names CVar 2 (achievements 30-44)
+nosave string vuas_maps3 = "";            // Unlock map names CVar 3 (achievements 45-59)
+
+// --- System Settings ---
+server bool vuas_encode_data = true;      // Encode achievement data in CVars (Base64+ROT)
+server bool vuas_cheat_detection = true;  // Enable cheat detection for protected achievements
+server bool vuas_debug = false;           // Enable debug output to console (prefixed with "VUAS:")

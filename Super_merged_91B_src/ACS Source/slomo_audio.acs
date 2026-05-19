@@ -1,0 +1,32 @@
+#library "SlomoAudio"
+#include "zcommon.acs"
+
+// SetSoundPitch is not available in this ACC version.
+// Only SetMusicVolume is handled here.
+// Loop sound pitch is set via A_StartSound pitch parameter in ZScript.
+
+script "SlomoAudio" OPEN
+{
+	int prevActive = 0;
+
+	while (TRUE)
+	{
+		int isActive   = GetCVar("sm_audio_active");
+		int pauseMusic = GetCVar("sm_pausemusic");
+
+		if (isActive && !prevActive)
+		{
+			if (pauseMusic == FALSE)
+				SetMusicVolume(0.0);
+		}
+
+		if (!isActive && prevActive)
+		{
+			if (pauseMusic == FALSE)
+				SetMusicVolume(1.0);
+		}
+
+		prevActive = isActive;
+		Delay(1);
+	}
+}

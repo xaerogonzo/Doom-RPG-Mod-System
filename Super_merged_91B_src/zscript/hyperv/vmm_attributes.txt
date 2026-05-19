@@ -1,0 +1,513 @@
+
+/*
+*
+* Script credits to Custom Doom and Ultimate Custom Doom mods
+* https://forum.zdoom.org/viewtopic.php?f=43&t=51446
+* https://github.com/mmaulwurff/ultimate-custom-doom
+*
+* Everything is modified and extended by Ermac
+* https://github.com/iAmErmac
+*
+*
+* You may use this in your project. Just leave this comment
+* at the top of this script and give credit please
+*
+*/
+
+class CustomPlayerProperties play
+{
+
+// public: /////////////////////////////////////////////////////////////////////////////////////////
+
+	CustomPlayerProperties init(PlayerInfo player)
+	{
+		_jumpZ = player.mo.jumpZ;
+		return self;
+	}
+
+	void update(PlayerInfo player)
+	{
+		PlayerPawn           pawn    = player.mo;
+		class<PlayerPawn>    type    = pawn.GetClassName();
+		readonly<PlayerPawn> default = GetDefaultByType(type);
+		_settings = vmm_Settings.of();
+
+		updateDamageMultiply(pawn, _settings, default);
+		updateSpeed         (pawn, _settings, default);
+		updateJumpZ         (pawn, _settings, default);
+		updateSelfDamage    (pawn, _settings, default);
+		updateTakenDamage   (pawn, _settings, default);
+		updateMaxHealth     (pawn, _settings, default);
+	}
+
+// private: ////////////////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////
+	// Player Damage Modifier			//
+	//////////////////////////////////////
+
+	private static void updateDamageMultiply(PlayerPawn pawn, vmm_Settings loadCVar, readonly<PlayerPawn> default)
+	{
+		double originalDamageMultiplier = default.DamageMultiply;
+		double _damage_mult = loadCVar.damageMultiplier();
+		pawn.DamageMultiply = _damage_mult ? originalDamageMultiplier * _damage_mult : originalDamageMultiplier;
+	}
+	
+	//////////////////////////////////////
+	// Player Speed Modifier			//
+	//////////////////////////////////////
+
+	private static void updateSpeed(PlayerPawn pawn, vmm_Settings loadCVar, readonly<PlayerPawn> default)
+	{
+		double originalSpeed = default.Speed;
+		double _speed_mult = loadCVar.speedMultiplier();
+		pawn.Speed = _speed_mult ? originalSpeed * _speed_mult : originalSpeed;
+	}
+	
+	//////////////////////////////////////
+	// Player Jump Modifier				//
+	//////////////////////////////////////
+
+	private void updateJumpZ(PlayerPawn pawn, vmm_Settings loadCVar, readonly<PlayerPawn> default)
+	{
+		double originalJumpZ = default.JumpZ;
+		double _jump_mult = loadCVar.jumpMultiplier();
+
+		if (pawn.JumpZ != _jumpZ) // something changed the jump height
+		{
+			originalJumpZ = pawn.JumpZ;
+		}
+
+		pawn.JumpZ = _jump_mult ? originalJumpZ * _jump_mult : originalJumpZ;
+		_jumpZ = pawn.JumpZ;
+	}
+
+	private static void updateSelfDamage(PlayerPawn pawn, vmm_Settings s, readonly<PlayerPawn> default)
+	{
+		double mult = s.selfDamageMult();
+		if(mult ~== 0.0 || mult ~== 1.0) { pawn.selfDamageFactor = default.selfDamageFactor; return; }
+		// Default selfDamageFactor is 0 (unset = use 1.0 internally). Use 1.0 as baseline.
+		double base = default.selfDamageFactor > 0 ? default.selfDamageFactor : 1.0;
+		pawn.selfDamageFactor = base * mult;
+	}
+
+	private static void updateTakenDamage(PlayerPawn pawn, vmm_Settings s, readonly<PlayerPawn> default)
+	{
+		double mult = s.takenDamageMult();
+		if(mult ~== 0.0 || mult ~== 1.0) { pawn.damageFactor = default.damageFactor; return; }
+		// Default damageFactor is 0 (unset = use 1.0 internally). Use 1.0 as baseline.
+		double base = default.damageFactor > 0 ? default.damageFactor : 1.0;
+		pawn.damageFactor = base * mult;
+	}
+
+	private static void updateMaxHealth(PlayerPawn pawn, vmm_Settings s, readonly<PlayerPawn> default)
+	{
+		int newMax = s.maxHealth();
+		if(newMax <= 0) newMax = default.maxHealth > 0 ? default.maxHealth : 100;
+		// Only update if value changed — avoids scaling health every second
+		if(pawn.maxHealth == newMax) return;
+
+		// Scale current health proportionally only on the first application
+		// (i.e. when maxHealth transitions from default to a new value).
+		// Don't rescale if health was changed by damage/pickups since last check.
+		int safeOld = pawn.maxHealth > 0 ? pawn.maxHealth : 100;
+		pawn.maxHealth = newMax;
+		// Clamp health to new max without rescaling — let the player keep their HP
+		if(pawn.health > newMax) pawn.A_SetHealth(newMax);
+	}
+
+	private double _jumpZ;
+	private vmm_Settings _settings;
+}
+
+class VPlayerPropModifier : EventHandler
+{
+	override void OnRegister()
+	{
+		_isInitialized = false;
+	}
+
+	override void WorldLoaded(WorldEvent event)
+	{
+		_isTitlemap = CheckTitlemap();
+	}
+	
+	override void WorldTick()
+	{
+		PlayerInfo player = players[consolePlayer];
+		if (player == null) { return; }
+		
+		if (_isTitlemap) { return; }
+
+		if (!_isInitialized) { initEvent(player); }
+
+		// Throttle property updates to once per second — speed/jump/damage
+		// multipliers almost never change mid-game, no need to update every tic
+		_propTimer++;
+		if(_propTimer >= 35)
+		{
+			updateProperties(player);
+			_propTimer = 0;
+		}
+		
+		// Permanent powerups — top up once per second
+		_powerupTimer++;
+		if(_powerupTimer >= 35)
+		{
+			ProlongPowerups(player);
+			_powerupTimer = 0;
+		}
+
+		// Track player damage — parry knockback and retaliation window
+		int current_health = player.mo.Health;
+		if(current_health < _last_health && current_health > 0)
+		{
+			Inventory hyperv = player.mo.FindInventory("V_Moves");
+			if(hyperv)
+			{
+				let vm = V_Moves(hyperv);
+
+				// Retaliation window for auto melee boost
+				vm.player_hurt_tics = 70;
+
+				// --- Reactive Parry (knockback/stagger only) ---
+				// Sound and HUD are triggered in ModifyDamage on ParryShieldCrit.
+				// This block only handles attacker knockback/stagger.
+				bool parryAllowed = vm.parry_enabled &&
+				                    (!vm.slot1_active || vm.slot1_parry);
+
+				if(parryAllowed && vm.parry_last_was_crit)
+				{
+					Actor attacker = null;
+					BlockThingsIterator it = BlockThingsIterator.Create(player.mo, int(vm.melee_range));
+					while(it.Next())
+					{
+						let mo = it.thing;
+						if(mo == player.mo) continue;
+						if(!mo.bISMONSTER || !mo.bSHOOTABLE) continue;
+						if(player.mo.Distance3D(mo) > vm.melee_range) continue;
+						if(mo.target != player.mo) continue;
+						attacker = mo;
+						break;
+					}
+					if(attacker)
+					{
+						attacker.GiveInventory("vrMeleeComboStunner", 1);
+						let st = vrMeleeComboStunner(attacker.FindInventory("vrMeleeComboStunner"));
+						if(st)
+						{
+							st.stunMin = vm.parry_stun_min;
+							st.stunMax = vm.parry_stun_max;
+						}
+						attacker.A_PlaySound("vrfist/rip", CHAN_AUTO);
+					}
+					vm.parry_last_was_crit = false;
+				}
+			}
+		}
+		_last_health = current_health;
+		
+		// --- Health regeneration ---
+		if(healticks > 0) { healticks--; }
+		else
+		{
+			healticks = max(1, int(_settings.healthRegenTime() * 35));
+			healUp(player);
+		}
+
+		// --- Armor regeneration ---
+		if(armorticks > 0) { armorticks--; }
+		else
+		{
+			armorticks = max(1, int(_settings.armorRegenTime() * 35));
+			armorUp(player);
+		}
+
+		// --- Ammo regeneration ---
+		if(ammoticks > 0) { ammoticks--; }
+		else
+		{
+			ammoticks = max(1, int(_settings.ammoRegenTime() * 35));
+			ammoUp(player);
+		}
+
+		// Update regen_active flag for HUD
+		Inventory hyperv = player.mo.FindInventory("V_Moves");
+		if(hyperv)
+		{
+			let vm = V_Moves(hyperv);
+			// Show regen indicator whenever regen is active and player is below the cap,
+		// not just the single tic when a tick fires.
+		int curHP    = player.mo.Health;
+		int maxHP    = player.mo.MaxHealth > 0 ? player.mo.MaxHealth : 100;
+		int regenCap = _settings.healthRegenMax() > 0 ? _settings.healthRegenMax() : maxHP;
+		vm.regen_active = _settings.healthRegenEnabled() &&
+		                  curHP > 0 && curHP < regenCap;
+		}
+	}
+	
+	private void initEvent(PlayerInfo player)
+	{
+		_settings = vmm_Settings.of();
+		healticks  = max(1, int(_settings.healthRegenTime()  * 35));
+		armorticks = max(1, int(_settings.armorRegenTime()  * 35));
+		ammoticks  = max(1, int(_settings.ammoRegenTime()   * 35));
+		init(player);
+		_isInitialized = true;
+	}
+	
+	private void init(PlayerInfo player)
+	{
+		_playerProperties = new("CustomPlayerProperties").init(player);
+		updateProperties(player);
+	}
+	
+	private void updateProperties(PlayerInfo player)
+	{
+		_settings = vmm_Settings.of();
+		_playerProperties.update(player);
+	}
+
+	private static bool CheckTitlemap()
+	{
+		bool isTitlemap = (level.mapname == "TITLEMAP");
+		return isTitlemap;
+	}
+	
+	//////////////////////////////////////
+	// Regeneration / Degeneration		//
+	//////////////////////////////////////
+
+	// Shared flash helper
+	private static void regenFlash(PlayerInfo player, double intensity, int col, int duration)
+	{
+		if(intensity > 0 && player && player.mo)
+			player.mo.A_SetBlend(col, intensity, duration);
+	}
+
+	// Health
+	private void healUp(PlayerInfo player)
+	{
+		if(!player || player.mo.Health <= 0 || !_settings.healthRegenEnabled()) return;
+
+		int amount  = max(1, _settings.healthRegenAmount());
+		int type    = _settings.healthRegenType();   // 0=regen, 1=degen
+		int curHP   = player.mo.Health;
+		int maxHP   = player.mo.MaxHealth > 0 ? player.mo.MaxHealth : 100;
+		int minHP   = _settings.healthRegenMin();
+		int maxRegen = _settings.healthRegenMax() > 0 ? _settings.healthRegenMax() : maxHP;
+
+		// Range gate — only act if health is within [min, maxRegen]
+		if(minHP > 0 && curHP < minHP) return;
+		if(curHP >= maxRegen && type == 0) return;
+		if(curHP <= minHP    && type == 1) return;
+
+		int newHP = type == 0 ? min(curHP + amount, maxRegen)
+		                      : max(curHP - amount, max(1, minHP));
+		if(newHP == curHP) return;
+
+		player.mo.A_SetHealth(newHP);
+
+		double vol = _settings.healthRegenSoundVol();
+		if(vol > 0) player.mo.A_StartSound("misc/health", CHAN_AUTO, CHANF_NOPAUSE, vol);
+		regenFlash(player, _settings.healthRegenVisual(), _settings.healthRegenColor(), 17);
+	}
+
+	// Armor
+	private void armorUp(PlayerInfo player)
+	{
+		if(!player || player.mo.Health <= 0 || !_settings.armorRegenEnabled()) return;
+
+		int amount   = max(1, _settings.armorRegenAmount());
+		int type     = _settings.armorRegenType();
+		int curArmor = player.mo.CountInv("BasicArmor");
+		int minArmor = _settings.armorRegenMin();
+		int maxArmor = _settings.armorRegenMax() > 0 ? _settings.armorRegenMax() : 200;
+
+		if(curArmor >= maxArmor && type == 0) return;
+		if(curArmor <= minArmor && type == 1) return;
+
+		if(type == 0)
+		{
+			// Give armor via BasicArmorBonus to respect save percent
+			player.mo.GiveInventory("vmm_ArmorBonus", min(amount, maxArmor - curArmor));
+		}
+		else
+		{
+			player.mo.TakeInventory("BasicArmor", min(amount, curArmor - minArmor));
+		}
+
+		double vol = _settings.armorRegenSoundVol();
+		if(vol > 0) player.mo.A_StartSound("misc/armor", CHAN_AUTO, CHANF_NOPAUSE, vol);
+		regenFlash(player, _settings.armorRegenVisual(), _settings.armorRegenColor(), 17);
+	}
+
+	// Ammo
+	private void ammoUp(PlayerInfo player)
+	{
+		if(!player || player.mo.Health <= 0 || !_settings.ammoRegenEnabled()) return;
+
+		if(_settings.ammoRegenBackpack() && player.mo.CountInv("Backpack") == 0) return;
+
+		// Give 1 unit of each ammo type the player currently carries.
+		// Respects maxamount caps since GiveInventory won't exceed them.
+		Inventory item = player.mo.Inv;
+		while(item)
+		{
+			if(item is "Ammo")
+			{
+				let ammo = Ammo(item);
+				if(ammo && ammo.Amount < ammo.MaxAmount)
+					player.mo.GiveInventory(ammo.GetClassName(), 1);
+			}
+			item = item.Inv;
+		}
+
+		double vol = _settings.ammoRegenSoundVol();
+		if(vol > 0) player.mo.A_StartSound("misc/ammo", CHAN_AUTO, CHANF_NOPAUSE, vol);
+		regenFlash(player, _settings.ammoRegenVisual(), _settings.ammoRegenColor(), 17);
+	}
+	
+	//////////////////////////////////////
+	// Player Entered (start stats)		//
+	//////////////////////////////////////
+
+	override void PlayerEntered(PlayerEvent event)
+	{
+		PlayerInfo player = players[event.playerNumber];
+		if(!player || !player.mo) return;
+
+		_settings = vmm_Settings.of();
+
+		int sh = _settings.startHealth();
+		if(sh > 0) player.mo.A_SetHealth(sh);
+
+		int sa = _settings.startArmor();
+		if(sa > 0) player.mo.GiveInventory("vmm_ArmorBonus", sa);
+	}
+
+	//////////////////////////////////////
+	// World Thing Spawned (enemy/friend)//
+	//////////////////////////////////////
+
+	override void WorldThingSpawned(WorldEvent event)
+	{
+		if(_isTitlemap) return;
+		if(!event.thing) return;
+		Actor mo = event.thing;
+		if(!mo.bISMONSTER || !mo.bSHOOTABLE) return;
+
+		// Use cached _settings — updateProperties refreshes it every second.
+		// Only create a new instance if somehow not yet initialized.
+		if(!_settings) _settings = vmm_Settings.of();
+
+		if(!mo.bFRIENDLY)
+		{
+			double hm  = _settings.enemyHealthMult();
+			int    hmax = _settings.enemyHealthMax();
+			double sm  = _settings.enemySpeedMult();
+			if(hm > 0 && hm != 1.0) ScaleActorHealth(mo, hm, hmax);
+			if(sm > 0 && sm != 1.0) mo.speed = mo.default.speed * sm;
+		}
+		else
+		{
+			double hm  = _settings.friendHealthMult();
+			int    hmax = _settings.friendHealthMax();
+			double sm  = _settings.friendSpeedMult();
+			if(hm > 0 && hm != 1.0) ScaleActorHealth(mo, hm, hmax);
+			if(sm > 0 && sm != 1.0) mo.speed = mo.default.speed * sm;
+		}
+	}
+
+	private static void ScaleActorHealth(Actor mo, double mult, int maxHP)
+	{
+		int defaultHP = mo.default.SpawnHealth();
+		if(defaultHP <= 0) defaultHP = mo.health;
+		if(defaultHP <= 0) return;
+
+		double rel   = double(mo.health) / defaultHP;
+		int newStart = int(round(defaultHP * mult));
+		if(maxHP > 0 && newStart > maxHP) newStart = maxHP;
+
+		mo.StartHealth = newStart;
+		mo.A_SetHealth(int(round(newStart * rel)));
+	}
+
+	//////////////////////////////////////
+	// Permanent Powerups (prolong)		//
+	//////////////////////////////////////
+
+	private void ProlongPowerups(PlayerInfo player)
+	{
+		// Called once per second from WorldTick.
+		// If powerup is enabled and player has it, top up its effectTics.
+		// If player doesn't have it yet, give it.
+		if(!player || !player.mo) return;
+		_settings = vmm_Settings.of();
+
+		ProlongOne(player, "PowerBuddha",            _settings.permBuddha());
+		ProlongOne(player, "PowerDamage",            _settings.permDamage());
+		ProlongOne(player, "PowerDoubleFiringSpeed", _settings.permDoubleFiring());
+		ProlongOne(player, "PowerDrain",             _settings.permDrain());
+		ProlongOne(player, "PowerFlight",            _settings.permFlight());
+		ProlongOne(player, "PowerFrightener",        _settings.permFrightener());
+		ProlongOne(player, "PowerGhost",             _settings.permGhost());
+		ProlongOne(player, "PowerHighJump",          _settings.permHighJump());
+		ProlongOne(player, "PowerInfiniteAmmo",      _settings.permInfiniteAmmo());
+		ProlongOne(player, "PowerInvisibility",      _settings.permInvisibility());
+		ProlongOne(player, "PowerInvulnerable",      _settings.permInvulnerability());
+		ProlongOne(player, "PowerIronFeet",          _settings.permIronFeet());
+		ProlongOne(player, "PowerLightAmp",          _settings.permLightAmp());
+		ProlongOne(player, "PowerMask",              _settings.permMask());
+		ProlongOne(player, "PowerProtection",        _settings.permProtection());
+		ProlongOne(player, "PowerRegeneration",      _settings.permRegeneration());
+		ProlongOne(player, "PowerScanner",           _settings.permScanner());
+		ProlongOne(player, "PowerShadow",            _settings.permShadow());
+		ProlongOne(player, "PowerSpeed",             _settings.permSpeed());
+		ProlongOne(player, "PowerStrength",          _settings.permStrength());
+		ProlongOne(player, "PowerTargeter",          _settings.permTargeter());
+		ProlongOne(player, "PowerTimeFreezer",       _settings.permTimeFreezer());
+		ProlongOne(player, "PowerTorch",             _settings.permTorch());
+		ProlongOne(player, "PowerWeaponLevel2",      _settings.permWeaponLevel2());
+	}
+
+	private static void ProlongOne(PlayerInfo player, string powerClass, bool enabled)
+	{
+		int threshold = 35 * 2; // top up when under 2 seconds remain
+		let pawn = player.mo;
+
+		if(enabled)
+		{
+			let pw = Powerup(pawn.FindInventory(powerClass));
+			if(pw == null)
+			{
+				// Give it fresh — use GiveInventory with class lookup (UZDoom compatible)
+				class<Inventory> pwClass = powerClass;
+				if(pwClass) pawn.GiveInventory(powerClass, 1);
+			}
+			else if(pw.effectTics <= threshold)
+			{
+				// Top up by one second
+				pw.effectTics += 35;
+			}
+		}
+		else
+		{
+			// If disabled mid-game, remove it
+			let pw = Powerup(pawn.FindInventory(powerClass));
+			if(pw != null) pawn.TakeInventory(powerClass, 1);
+		}
+	}
+
+	private bool _isInitialized;
+	private bool _isTitlemap;
+	private vmm_Settings _settings;
+	private int _propTimer;
+	private int _powerupTimer;
+
+	private CustomPlayerProperties	_playerProperties;
+	private int healticks;
+	private int armorticks;
+	private int ammoticks;
+	private int _last_health;
+}

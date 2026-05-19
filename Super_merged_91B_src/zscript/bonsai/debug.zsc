@@ -1,0 +1,114 @@
+// #namespace TFLV;
+
+class TFLV_Debug : Object play {
+  static void DebugCommand(TFLV_GunBonsaiService service, int player, string cmd, uint arg) {
+    Array<string> argv;
+    cmd.split(argv, ",");
+    if (argv.Size() <= 1) {
+      console.printf("Insufficient args.");
+    }
+    // 0: bonsai-debug, 1: <command>, 2: args...
+    if (argv[1] == "info") {
+      ShowInfoConsole(players[player].mo);
+    } else if (argv[1] == "xpcheck") {
+      XPCheck(player);
+    } else if (argv[1] == "w-up" && argv.size() >= 3) {
+      let upgrade = argv[2];
+      if (upgrade.IndexOf(":"..":") == 0) upgrade = "TFLV_Upgrade_" .. upgrade.Mid(2);
+      service.GetInt("add-w-upgrade", upgrade, player, arg, null);
+    } else if (argv[1] == "p-up" && argv.size() >= 3) {
+      let upgrade = argv[2];
+      if (upgrade.IndexOf(":"..":") == 0) upgrade = "TFLV_Upgrade_" .. upgrade.Mid(2);
+      service.GetInt("add-p-upgrade", upgrade, player, arg);
+    } else if (argv[1] == "w-xp") {
+      service.GetDouble("add-w-xp", "", player, arg, null);
+    } else if (argv[1] == "p-xp") {
+      service.GetDouble("add-p-xp", "", player, arg);
+    } else if (argv[1] == "allupgrades") {
+      AddAllUpgrades(service, player);
+    } else if (argv[1] == "reset") {
+      console.printf("Fully resetting all weapon info.");
+      let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+      stats.weapons.clear();
+      stats.weaponinfo_dirty = true;
+      stats.XP = 0;
+      stats.level = 0;
+      stats.upgrades = null;
+      stats.Initialize(stats.proxy);
+    } else {
+      console.printf("Unknown or malformed debug command: %s", argv[1]);
+    }
+  }
+
+  static void ShowInfoConsole(Actor pawn) {
+    TFLV_CurrentStats stats;
+    if (!TFLV_PerPlayerStats.GetStatsFor(pawn).GetCurrentStats(stats)) {
+      console.printf("Error getting current stats for player.");
+      return;
+    }
+    console.printf("Player:\n    Level %d (%d/%d XP)",
+      stats.plvl, stats.pxp, stats.pmax);
+    stats.pupgrades.DumpToConsole("    ");
+    console.printf("%s (%s):\n    Level %d (%d/%d XP)",
+      stats.winfo.wpnClass, stats.wname, stats.wlvl, stats.wxp, stats.wmax);
+    stats.wupgrades.DumpToConsole("    ");
+    stats.winfo.DumpTypeInfo();
+  }
+
+  // Diagnostic: print all XP-related CVar values and current weapon XP state.
+  // Usage: netevent bonsai-debug,xpcheck
+  static void XPCheck(int player) {
+    let pawn = players[player].mo;
+    if (!pawn) { console.printf("XPCheck: no pawn"); return; }
+
+    console.printf("=== XP Diagnostic ===");
+    if (bonsai_enabled)           console.printf("bonsai_enabled: true");
+    else                          console.printf("bonsai_enabled: false");
+    if (bonsai_freeze_progression) console.printf("bonsai_freeze_progression: true");
+    else                           console.printf("bonsai_freeze_progression: false");
+    console.printf("bonsai_damage_to_xp_factor: %.2f", bonsai_damage_to_xp_factor);
+    console.printf("bonsai_score_to_xp_factor:  %.2f", bonsai_score_to_xp_factor);
+    console.printf("player.score: %d", pawn.score);
+
+    let stats = TFLV_PerPlayerStats.GetStatsFor(pawn);
+    if (!stats) { console.printf("XPCheck: no PerPlayerStats - not initialized"); return; }
+
+    console.printf("prevScore: %d", stats.prevScore);
+
+    if (!stats.proxy) {
+      console.printf("proxy: NULL");
+    } else {
+      console.printf("proxy: ok");
+      bool inPoll = stats.proxy.InStateSequence(
+        stats.proxy.CurState, stats.proxy.FindState("Poll"));
+      if (inPoll) console.printf("proxy in Poll: true");
+      else        console.printf("proxy in Poll: false");
+    }
+
+    let info = stats.GetInfoForCurrentWeapon();
+    if (!info) {
+      console.printf("GetInfoForCurrentWeapon: NULL");
+      if (pawn.player.ReadyWeapon)
+        console.printf("ReadyWeapon: %s", pawn.player.ReadyWeapon.GetClassName());
+      else
+        console.printf("ReadyWeapon: none");
+      if (stats.infoForCurrentWeapon)
+        console.printf("infoForCurrentWeapon.wpnClass: %s", stats.infoForCurrentWeapon.wpnClass);
+      else
+        console.printf("infoForCurrentWeapon: null");
+      console.printf("(fire at an enemy first, then re-run xpcheck)");
+    } else {
+      console.printf("weapon: %s  XP: %.1f / %.1f  level: %d",
+        info.wpnClass, info.XP, info.maxXP, info.level);
+    }
+    console.printf("=== End XP Diagnostic ===");
+  }
+
+  static void AddAllUpgrades(TFLV_GunBonsaiService service, int player) {
+    let registry = TFLV_Upgrade_Registry.GetRegistry();
+    for (uint i = 0; i < registry.upgrades.size(); ++i) {
+      service.GetInt("add-w-upgrade", registry.upgrades[i].GetClassName(), player, 1, null);
+      service.GetInt("add-p-upgrade", registry.upgrades[i].GetClassName(), player, 1);
+    }
+  }
+}

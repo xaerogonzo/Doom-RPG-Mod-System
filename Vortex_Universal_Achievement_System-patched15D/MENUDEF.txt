@@ -1,0 +1,191 @@
+// ============================================================================
+// VUAS - Vortex's Universal Achievement System - Settings Menu
+// ============================================================================
+// Uses AddOptionMenu to non-destructively add to the Options menu
+// so this mod plays nicely alongside other mods.
+
+AddOptionMenu "OptionsMenu"
+{
+	StaticText ""
+	Submenu "Universal Achievements", "UniversalAchievementsMenu"
+}
+
+AddOptionMenu "OptionsMenuSimple"
+{
+	StaticText ""
+	Submenu "Universal Achievements", "UniversalAchievementsMenu"
+}
+
+OptionValue "AchToastPositionValues"
+{
+	0, "Top-Right"
+	1, "Top-Left"
+	2, "Bottom-Right"
+	3, "Bottom-Left"
+	4, "Top-Center"
+	5, "Bottom-Center"
+}
+
+OptionValue "AchToastAnimationValues"
+{
+	0, "None"
+	1, "Slide"
+	2, "Fade"
+}
+
+OptionValue "AchToastSlideEdgeValues"
+{
+	0, "Vertical"
+	1, "Horizontal"
+}
+
+OptionValue "AchToastStyleValues"
+{
+	0, "Procedural"
+	1, "Textured"
+}
+
+OptionValue "AchSoundChoiceValues"
+{
+	0, "Sound 1"
+	1, "Sound 2"
+	2, "Sound 3"
+	3, "Sound 4"
+}
+
+OptionValue "AchMenuFilterValues"
+{
+	0, "All"
+	1, "Unlocked Only"
+	2, "Locked Only"
+}
+
+OptionValue "AchColorValues"
+{
+	0, "Brick"
+	1, "Tan"
+	2, "Gray"
+	3, "Green"
+	4, "Brown"
+	5, "Gold"
+	6, "Red"
+	7, "Blue"
+	8, "Orange"
+	9, "White"
+	10, "Yellow"
+	11, "Untranslated"
+	12, "Black"
+	13, "Light Blue"
+	14, "Cream"
+	15, "Olive"
+	16, "Dark Green"
+	17, "Dark Red"
+	18, "Dark Brown"
+	19, "Purple"
+	20, "Dark Gray"
+	21, "Cyan"
+	22, "Ice"
+	23, "Fire"
+	24, "Sapphire"
+	25, "Teal"
+}
+
+// ============================================================================
+// Achievement Browse Menu (dynamically populated by VUAS_AchievementBrowseMenu)
+// ============================================================================
+OptionMenu "VUASAchievementBrowse"
+{
+	Class "VUAS_AchievementBrowseMenu"
+	Title "Achievements"
+	// Items populated dynamically by VUAS_AchievementBrowseMenu.Init()
+}
+
+OptionMenu "UniversalAchievementsMenu"
+{
+	class TFLV_TooltipOptionMenu
+	TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+	TFLV_TooltipAppearance "", "", "tfttbg"
+	Title "Universal Achievements Settings"
+
+	// ---- Toast Notification Settings ----
+	StaticText "Toast Notifications", 1
+	Option "Show Toast Popups", "ach_toast_enabled", "OnOff"
+	TFLV_Tooltip "Enable or disable the pop-up notification that appears when you unlock an achievement."
+	Option "Toast Position", "ach_toast_position", "AchToastPositionValues"
+	TFLV_Tooltip "Where on screen the achievement toast appears. Top-Right is the default."
+	Option "Animation", "ach_toast_animation", "AchToastAnimationValues"
+	TFLV_Tooltip "How the toast enters and exits the screen. None = instant appear/disappear. Slide = slides in from an edge. Fade = fades in and out."
+	Option "Slide Direction", "ach_toast_slide_edge", "AchToastSlideEdgeValues"
+	TFLV_Tooltip "Which axis the toast slides along when Animation is set to Slide. Vertical = slides up/down. Horizontal = slides left/right."
+	Option "Toast Style", "ach_toast_style", "AchToastStyleValues"
+	TFLV_Tooltip "Procedural: draws the toast using colored rectangles — works everywhere, no textures needed. Textured: uses a background graphic for a more polished look."
+	Slider "Toast Scale", "ach_toast_scale", 0.5, 2.0, 0.05, 2
+	TFLV_Tooltip "Size multiplier for the achievement toast. 1.0 is default. Increase if it's hard to read."
+	Slider "Toast Opacity", "ach_toast_opacity", 0.1, 1.0, 0.05, 2
+	TFLV_Tooltip "Transparency of the achievement toast. 1.0 = fully opaque. Lower values let you see the game through it."
+	Slider "Toast Duration (tics)", "ach_toast_duration", 35, 350, 5, 0
+	TFLV_Tooltip "How long the achievement toast stays on screen, in tics (35 tics = 1 second). Default 105 tics = 3 seconds."
+	Slider "Toast X Adjustment", "ach_toast_offset_x", -200, 200, 5, 0
+	TFLV_Tooltip "Horizontal fine-tuning offset for the toast position in pixels. Useful for avoiding other HUD elements."
+	Slider "Toast Y Adjustment", "ach_toast_offset_y", -200, 200, 5, 0
+	TFLV_Tooltip "Vertical fine-tuning offset for the toast position in pixels."
+
+	StaticText ""
+
+	// ---- Sound ----
+	StaticText "Sound", 1
+	Option "Play Unlock Sound", "ach_sound_enabled", "OnOff"
+	TFLV_Tooltip "Play a sound effect when an achievement is unlocked."
+	Option "Unlock Sound", "ach_sound_choice", "AchSoundChoiceValues"
+	TFLV_Tooltip "Which of the four unlock sound effects to use. Try them all with the test button below."
+
+	StaticText ""
+
+	// ---- Colors ----
+	StaticText "Colors", 1
+	Option "Unlocked Color", "ach_color_unlocked", "AchColorValues"
+	TFLV_Tooltip "Text color for unlocked achievement names in the browse menu."
+	Option "Locked Color", "ach_color_locked", "AchColorValues"
+	TFLV_Tooltip "Text color for locked achievement names in the browse menu."
+	Option "Title Color", "ach_color_title", "AchColorValues"
+	TFLV_Tooltip "Color of the achievement title text in the toast notification."
+	Option "Description Color", "ach_color_description", "AchColorValues"
+	TFLV_Tooltip "Color of the achievement description text in the toast notification."
+	Option "Border Accent Color", "ach_color_border", "AchColorValues"
+	TFLV_Tooltip "Color of the outer border of the toast notification (Procedural style only)."
+	Option "Border Inner Color", "ach_color_border_inner", "AchColorValues"
+	TFLV_Tooltip "Color of the inner border stripe of the toast notification (Procedural style only)."
+	Option "Progress Color", "ach_color_progress", "AchColorValues"
+	TFLV_Tooltip "Color of the progress bar shown for threshold achievements (e.g. Kill 100 enemies [45/100])."
+
+	StaticText ""
+
+	// ---- Menu Settings ----
+	StaticText "Achievement Menu", 1
+	Submenu "Browse Achievements", "VUASAchievementBrowse"
+	TFLV_Tooltip "Open the achievement browser to see all achievements, your progress, and unlock dates."
+	Option "Show Hidden Achievements", "ach_show_hidden", "OnOff"
+	TFLV_Tooltip "Show hidden achievements in the browse menu before they are unlocked. Hidden achievements display as '???' by default — enabling this reveals their names and descriptions as a spoiler."
+	Option "Filter", "ach_menu_filter", "AchMenuFilterValues"
+	TFLV_Tooltip "Filter which achievements are shown in the browse menu. All = show everything. Unlocked Only = show only completed achievements. Locked Only = show only achievements still to earn."
+
+	StaticText ""
+
+	// ---- Test & Clear ----
+	StaticText "Test & Clear", 1
+	Command "Show Test Achievement", "netevent vuas_test_toast"
+	TFLV_Tooltip "Trigger a sample achievement toast so you can preview your current notification settings without actually unlocking anything."
+	SafeCommand "Clear All Achievements", "netevent ach_clear_all"
+	TFLV_Tooltip "Permanently reset all achievement progress and unlocks. You will be asked to confirm. This cannot be undone."
+
+	StaticText ""
+
+	// ---- System ----
+	StaticText "System", 1
+	Option "Encode Save Data", "vuas_encode_data", "OnOff"
+	TFLV_Tooltip "Obfuscate achievement save data stored in CVars. ON = data is encoded so it's not human-readable in your config file. OFF = stored as plain text. Either way the data is not encrypted — this is just cosmetic obfuscation."
+	Option "Cheat Detection", "vuas_cheat_detection", "OnOff"
+	TFLV_Tooltip "When enabled, achievements that are marked cheat-protected will be invalidated for the rest of the session if cheats are detected (god mode, noclip, give all, etc.). Achievements already unlocked before cheating are not revoked."
+	Option "Debug Console Output", "vuas_debug", "OnOff"
+	TFLV_Tooltip "Print verbose achievement system activity to the console. Useful for modders testing new achievements. Leave off during normal play."
+}

@@ -1,0 +1,838 @@
+// =============================================================================
+// TFLV_Profiles — Balance & Upgrade Pool profile system (Dictionary-based)
+//
+// Six profiles (all equal in structure, differ only in hardcoded defaults):
+//   0 = Default       (vanilla Gun Bonsai)
+//   1 = Balanced
+//   2 = Challenging
+//   3 = Punishing
+//   4 = Custom
+//   5 = Brutal Mode
+//
+// Storage: one Dictionary-string CVar per slot (bonsai_profile_0 .. _5).
+//   Format: ZScript Dictionary.toString() — self-describing key=value pairs.
+//   Unknown keys on load are silently skipped (forward-compatible).
+//   Missing keys fall back to the slot's hardcoded defaults (backward-compatible).
+//
+// Each profile stores ALL tunable CVars:
+//   - bonsai_stat_* floats and ints  (balance tuning)
+//   - bonsai_upg_*  ints             (upgrade pool rarity tiers, 0-5)
+//   - bonsai_weight_* ints           (tier weight multipliers)
+//   - pacing CVars                   (base cost, xp curve, xp factors)
+//
+// Triggered by netevents (relayed from ConsoleProcess):
+//   bonsai-profile-apply-N   N = 0-5
+//   bonsai-profile-save-N    N = 0-5
+//   bonsai-profile-reset-N   N = 0-5
+// =============================================================================
+
+class TFLV_Profiles play
+{
+
+// =============================================================================
+// CVar name lists — defines what gets serialized into each profile
+// =============================================================================
+
+  static void GetFloatCVarNames(out Array<String> n)
+  {
+    // Player upgrades (0-4)
+    n.Push("bonsai_stat_player_damage");
+    n.Push("bonsai_stat_weapon_damage");
+    n.Push("bonsai_stat_tough_as_nails");
+    n.Push("bonsai_stat_blast_shaping");
+    n.Push("bonsai_stat_rapid_fire");
+    // Projectile modifiers (5-9)
+    n.Push("bonsai_stat_ricochet_damage");
+    n.Push("bonsai_stat_piercing_damage");
+    n.Push("bonsai_stat_explosive_damage");
+    n.Push("bonsai_stat_frag_damage");
+    n.Push("bonsai_stat_frag_arc");
+    // Explosive / submunitions / homing (10-14)
+    n.Push("bonsai_stat_submunitions_health_scale");
+    n.Push("bonsai_stat_submunitions_lifetime");
+    n.Push("bonsai_stat_explosivedeath_scale");
+    n.Push("bonsai_stat_homing_turn_rate");
+    n.Push("bonsai_stat_flare_decay");
+    // Shield / sweep / cleave (15-20)
+    n.Push("bonsai_stat_shield_melee_base");
+    n.Push("bonsai_stat_shield_ranged_base");
+    n.Push("bonsai_stat_sweep_base");
+    n.Push("bonsai_stat_sweep_decay");
+    n.Push("bonsai_stat_cleave_overkill");
+    n.Push("bonsai_stat_cleave_health_cap");
+    // Swiftness / sustain (21-25)
+    n.Push("bonsai_stat_swiftness_base_tics");
+    n.Push("bonsai_stat_swiftness_level_tics");
+    n.Push("bonsai_stat_swiftness_combo_tics");
+    n.Push("bonsai_stat_darkharvest_cap_per_level");
+    n.Push("bonsai_stat_bandoliers_bonus");
+    // Elemental synthesis (26-27)
+    n.Push("bonsai_stat_elemblast_radius");
+    n.Push("bonsai_stat_elemwave_radius");
+    // Fire (28-34)
+    n.Push("bonsai_stat_fire_mult");
+    n.Push("bonsai_stat_fire_stack_rate");
+    n.Push("bonsai_stat_fire_cutoff");
+    n.Push("bonsai_stat_fire_heat_factor");
+    n.Push("bonsai_stat_fire_damage_per_stack");
+    n.Push("bonsai_stat_fire_terror_base");
+    n.Push("bonsai_stat_fire_terror_damage");
+    // Poison (35-43)
+    n.Push("bonsai_stat_poison_mult");
+    n.Push("bonsai_stat_poison_stacks_per_hit");
+    n.Push("bonsai_stat_poison_softcap_factor");
+    n.Push("bonsai_stat_poison_drain_rate");
+    n.Push("bonsai_stat_poison_weakness_base");
+    n.Push("bonsai_stat_poison_hallu_damage");
+    n.Push("bonsai_stat_poison_hallu_armour");
+    n.Push("bonsai_stat_poison_hallu_drain");
+    n.Push("bonsai_stat_poison_putref_transfer");
+    // Acid (44-52)
+    n.Push("bonsai_stat_acid_mult");
+    n.Push("bonsai_stat_acid_stack_base");
+    n.Push("bonsai_stat_acid_stack_per_level");
+    n.Push("bonsai_stat_acid_base_threshold");
+    n.Push("bonsai_stat_acid_dps_above");
+    n.Push("bonsai_stat_acid_dps_mult");
+    n.Push("bonsai_stat_acid_concentration_threshold");
+    n.Push("bonsai_stat_acid_concentration_drain");
+    n.Push("bonsai_stat_acid_embrit_damage");
+    // Lightning (53-61)
+    n.Push("bonsai_stat_lightning_mult");
+    n.Push("bonsai_stat_lightning_stack_rate");
+    n.Push("bonsai_stat_lightning_softcap");
+    n.Push("bonsai_stat_lightning_tbolt_stun_base");
+    n.Push("bonsai_stat_lightning_tbolt_stun_per_level");
+    n.Push("bonsai_stat_lightning_tbolt_cap_base");
+    n.Push("bonsai_stat_lightning_chain_radius");
+    n.Push("bonsai_stat_lightning_reviv_damage");
+    n.Push("bonsai_stat_lightning_reviv_armour");
+    // Pacing (62-65) — previously only 62-63 were here; 64-65 were missing
+    n.Push("bonsai_damage_to_xp_factor");
+    n.Push("bonsai_score_to_xp_factor");
+    n.Push("bonsai_level_cost_mul_for_melee");
+    n.Push("bonsai_level_cost_mul_for_wimpy");
+    // Custom Power curve parameter (66)
+    n.Push("bonsai_power_curve_exponent");
+    // Custom Exponential curve parameter (67)
+    n.Push("bonsai_exp_curve_base");
+    // Hybrid curve parameters (68-70)
+    // Hybrid XP curve float parameters
+    n.Push("bonsai_hybrid_exp_base_a");
+    n.Push("bonsai_hybrid_exp_base_b");
+    n.Push("bonsai_hybrid_power_a");
+    n.Push("bonsai_hybrid_power_b");
+    n.Push("bonsai_hybrid_bias");
+    n.Push("bonsai_hybrid_smooth");
+    // Overdrive (kill streak damage charge)
+    n.Push("bonsai_stat_overdrive_damage");
+    n.Push("bonsai_stat_overdrive_window");
+    // *** Append new float CVars here — do not reorder above ***
+    // Hyper-V float scaling CVars
+    n.Push("bonsai_hyperv_mobility_cd_per_level");
+    n.Push("bonsai_hyperv_melee_cd_per_level");
+    n.Push("bonsai_hyperv_hregen_tick_per_level");
+    n.Push("bonsai_hyperv_ammoregen_tick_per_level");
+    n.Push("bonsai_hyperv_agility_speed_per_level");
+    n.Push("bonsai_hyperv_agility_jump_per_level");
+    // Hyper-V float base value CVars (appended — do not reorder above)
+    n.Push("bonsai_hyperv_mobility_base_cooldown");
+    n.Push("bonsai_hyperv_mobility_min_cooldown");
+    n.Push("bonsai_hyperv_hregen_tick_lv1");
+    n.Push("bonsai_hyperv_hregen_tick_lv2");
+    n.Push("bonsai_hyperv_hregen_tick_lv3");
+    n.Push("bonsai_hyperv_hregen_min_tick");
+    n.Push("bonsai_hyperv_aregen_tick_lv1");
+    n.Push("bonsai_hyperv_aregen_tick_lv2");
+    n.Push("bonsai_hyperv_ammoregen_tick_lv1");
+    n.Push("bonsai_hyperv_ammoregen_tick_lv2");
+    n.Push("bonsai_hyperv_ammoregen_min_tick");
+    n.Push("bonsai_hyperv_agility_base_speed");
+    n.Push("bonsai_hyperv_agility_base_jump");
+    n.Push("bonsai_hyperv_tp_cd_lv1");
+    n.Push("bonsai_hyperv_tp_cd_lv2");
+    // Hook stun scaling CVars (appended — do not reorder above)
+    n.Push("bonsai_hyperv_hook_stun_min_base");
+    n.Push("bonsai_hyperv_hook_stun_max_base");
+    n.Push("bonsai_hyperv_hook_stun_min_per_level");
+    n.Push("bonsai_hyperv_hook_stun_max_per_level");
+  }
+
+  static void GetIntCVarNames(out Array<String> n)
+  {
+    // Explosives (0-1)
+    n.Push("bonsai_stat_explosive_radius");
+    n.Push("bonsai_stat_explosive_radius_per_level");
+    // Fragmentation (2-3)
+    n.Push("bonsai_stat_frag_base_count");
+    n.Push("bonsai_stat_frag_per_level");
+    // Submunitions (4-5)
+    n.Push("bonsai_stat_submunitions_base");
+    n.Push("bonsai_stat_submunitions_bonus_damage");
+    // Projectile / utility ranges (6-8)
+    n.Push("bonsai_stat_homing_base_range");
+    n.Push("bonsai_stat_ricochet_range");
+    n.Push("bonsai_stat_flare_base_range");
+    // Aggressive defence / ECM (9-14)
+    n.Push("bonsai_stat_agdef_base_radius");
+    n.Push("bonsai_stat_agdef_radius_per_level");
+    n.Push("bonsai_stat_ecm_base_range");
+    n.Push("bonsai_stat_ecm_range_per_level");
+    n.Push("bonsai_stat_ecm_lock_base");
+    n.Push("bonsai_stat_ecm_lock_per_level");
+    // Thorns / leech (15-18)
+    n.Push("bonsai_stat_thorns_min_range");
+    n.Push("bonsai_stat_thorns_max_range");
+    n.Push("bonsai_stat_lifeleech_boss_mul");
+    n.Push("bonsai_stat_armourleech_boss_mul");
+    // Poison / acid / lightning ranges (19-23)
+    n.Push("bonsai_stat_poison_putref_radius");
+    n.Push("bonsai_stat_acid_spray_base_range");
+    n.Push("bonsai_stat_acid_spray_range_per_level");
+    n.Push("bonsai_stat_lightning_tbolt_radius_base");
+    n.Push("bonsai_stat_lightning_tbolt_radius_per_level");
+    // Pacing (24-28) — previously 24-26; upgrade_choices and hybrid were missing
+    n.Push("bonsai_base_level_cost");
+    n.Push("bonsai_xp_curve");
+    n.Push("bonsai_gun_levels_per_player_level");
+    n.Push("bonsai_upgrade_choices_per_gun_level");
+    n.Push("bonsai_upgrade_choices_per_player_level");
+    // Hybrid curve: component selectors
+    n.Push("bonsai_hybrid_component_a");
+    n.Push("bonsai_hybrid_component_b");
+    // Hybrid curve: transition range
+    n.Push("bonsai_hybrid_transition_start");
+    n.Push("bonsai_hybrid_transition_end");
+    // Overdrive (33) — must be here before tier weights to match DefaultInts positional order.
+    // DefaultInts pushes overdrive at position 33, then DefaultPoolInts starts with weights at 34.
+    n.Push("bonsai_stat_overdrive_max_stacks");
+    // Tier weights (34-39) — positional order must match DefaultPoolInts which starts with these.
+    // -----------------------------------------------------------------------
+    n.Push("bonsai_weight_disabled");
+    n.Push("bonsai_weight_veryrare");
+    n.Push("bonsai_weight_rare");
+    n.Push("bonsai_weight_uncommon");
+    n.Push("bonsai_weight_common");
+    n.Push("bonsai_weight_favored");
+    // -----------------------------------------------------------------------
+    // Indestructible GB integration (appended — safe for old profile strings)
+    n.Push("bonsai_indestructible_max_level");
+    n.Push("bonsai_indestructible_base_max_lives");
+    n.Push("bonsai_indestructible_lives_on_clear");
+    n.Push("bonsai_indestructible_base_lives_per_clear");
+    n.Push("bonsai_indestructible_lives_on_boss");
+    n.Push("bonsai_indestructible_boss_kill_level");
+    n.Push("bonsai_indestructible_lives_on_damage");
+    n.Push("bonsai_indestructible_damage_per_life");
+    // Companions GB integration
+    n.Push("bonsai_companions_max_level");
+    n.Push("bonsai_companions_base_allies");
+    n.Push("bonsai_companions_allies_per_level");
+    n.Push("bonsai_companions_max_allies");
+    n.Push("bonsai_companions_boss_min_level");
+    n.Push("bonsai_companions_archvile_min_level");
+    n.Push("bonsai_companions_base_revives");
+    n.Push("bonsai_companions_revives_per_level");
+    // NOTE: bonsai_upg_* (upgrade pool rarity tiers) are intentionally NOT
+    // listed here. They are user preferences that persist independently and
+    // must never be overwritten by profile apply/reset. Adding them here
+    // caused saved profiles to zero them all out (tier 0 = Disabled) because
+    // the fallback path returned out-of-bounds array values.
+    // *** Append new int CVars here — do not reorder above ***
+    // Hyper-V max level CVars
+    n.Push("bonsai_hyperv_mobility_max_level");
+    n.Push("bonsai_hyperv_melee_max_level");
+    n.Push("bonsai_hyperv_slomo_max_level");
+    n.Push("bonsai_hyperv_hregen_max_level");
+    n.Push("bonsai_hyperv_aregen_max_level");
+    n.Push("bonsai_hyperv_ammoregen_max_level");
+    n.Push("bonsai_hyperv_agility_max_level");
+    n.Push("bonsai_hyperv_hook_max_level");
+    n.Push("bonsai_hyperv_tp_max_level");
+    // Hyper-V int scaling CVars
+    n.Push("bonsai_hyperv_melee_dmg_per_level");
+    n.Push("bonsai_hyperv_melee_crit_per_level");
+    n.Push("bonsai_hyperv_melee_parry_per_level");
+    n.Push("bonsai_hyperv_slomo_pts_per_level");
+    n.Push("bonsai_hyperv_slomo_depth_per_level");
+    n.Push("bonsai_hyperv_hregen_cap_per_level");
+    n.Push("bonsai_hyperv_aregen_cap_per_level");
+    // Hyper-V int base value CVars (appended — do not reorder above)
+    n.Push("bonsai_hyperv_melee_base_dmg_min");
+    n.Push("bonsai_hyperv_melee_base_dmg_max");
+    n.Push("bonsai_hyperv_melee_base_tics");
+    n.Push("bonsai_hyperv_melee_base_crit");
+    n.Push("bonsai_hyperv_melee_base_parry");
+    n.Push("bonsai_hyperv_hregen_cap_base");
+    n.Push("bonsai_hyperv_aregen_cap_lv1");
+    n.Push("bonsai_hyperv_aregen_cap_lv2");
+    n.Push("bonsai_hyperv_slomo_pts_lv1");
+    n.Push("bonsai_hyperv_slomo_pts_lv2");
+    n.Push("bonsai_hyperv_slomo_base_depth");
+    n.Push("bonsai_hyperv_tp_range_lv1");
+    n.Push("bonsai_hyperv_tp_range_lv2");
+    // Hyper-V new int/bool CVars (appended — do not reorder above)
+    n.Push("bonsai_hyperv_slomo_any_weapon");  // bool stored as 0/1
+    n.Push("bonsai_hyperv_hregen_amount");
+    n.Push("bonsai_hyperv_aregen_amount");
+    // NOTE: bonsai_upg_hyperv_* rarity CVars are also excluded here,
+    // same reason as the bonsai_upg_* block above.
+  }
+
+// =============================================================================
+// Hardcoded profile data
+// =============================================================================
+
+  // Pool defaults: identical across all profiles. Applied when a slot has
+  // never been saved to (or after Reset). The player customises per slot.
+  private static void DefaultPoolInts(out Array<int> v)
+  {
+    // Tier weights — identical across all profiles.
+    // bonsai_upg_* rarity CVars are intentionally excluded; they are user
+    // preferences and must never be overwritten by profile apply/reset.
+    v.Push(0);  // bonsai_weight_disabled
+    v.Push(1);  // bonsai_weight_veryrare
+    v.Push(3);  // bonsai_weight_rare
+    v.Push(6);  // bonsai_weight_uncommon
+    v.Push(10); // bonsai_weight_common
+    v.Push(20); // bonsai_weight_favored
+    // Indestructible GB integration — shared defaults across all profiles.
+    v.Push(4);   // bonsai_indestructible_max_level
+    v.Push(1);   // bonsai_indestructible_base_max_lives
+    v.Push(1);   // bonsai_indestructible_lives_on_clear  (bool as 0/1)
+    v.Push(1);   // bonsai_indestructible_base_lives_per_clear
+    v.Push(1);   // bonsai_indestructible_lives_on_boss   (bool as 0/1)
+    v.Push(3);   // bonsai_indestructible_boss_kill_level
+    v.Push(1);   // bonsai_indestructible_lives_on_damage (bool as 0/1)
+    v.Push(400); // bonsai_indestructible_damage_per_life
+    // Companions GB integration — shared defaults across all profiles.
+    v.Push(6);   // bonsai_companions_max_level
+    v.Push(1);   // bonsai_companions_base_allies
+    v.Push(1);   // bonsai_companions_allies_per_level
+    v.Push(8);   // bonsai_companions_max_allies
+    v.Push(3);   // bonsai_companions_boss_min_level
+    v.Push(2);   // bonsai_companions_archvile_min_level
+    v.Push(1);   // bonsai_companions_base_revives
+    v.Push(1);   // bonsai_companions_revives_per_level
+    // Hyper-V max level CVars — shared defaults across all profiles.
+    v.Push(3); v.Push(6); v.Push(4); v.Push(5); v.Push(4); v.Push(3); v.Push(4); v.Push(2); v.Push(2);
+    // mobility, melee, slomo, hregen, aregen, ammoregen, agility, hook, tp max_level
+    // Hyper-V int scaling CVars
+    v.Push(2); v.Push(1); v.Push(5); v.Push(40); v.Push(10); v.Push(15); v.Push(25);
+    // melee_dmg, melee_crit, melee_parry, slomo_pts, slomo_depth, hregen_cap, aregen_cap _per_level
+    // Hyper-V int base value CVars
+    v.Push(1); v.Push(6); v.Push(35); v.Push(4); v.Push(10); // melee: base_dmg_min/max, base_tics, base_crit, base_parry
+    v.Push(25);                                               // hregen_cap_base
+    v.Push(50); v.Push(100);                                  // aregen_cap_lv1, aregen_cap_lv2
+    v.Push(120); v.Push(200); v.Push(100);                    // slomo_pts_lv1/2, slomo_base_depth
+    v.Push(1024); v.Push(2048);                               // tp_range_lv1, tp_range_lv2
+    // Hyper-V new int/bool CVars
+    v.Push(0); v.Push(1); v.Push(1);
+    // slomo_any_weapon (false=0), hregen_amount, aregen_amount
+  }
+
+  static void DefaultFloats(out Array<double> v)
+  {
+    v.Push(0.10); v.Push(0.20); v.Push(0.90); v.Push(0.50); v.Push(1.00);
+    v.Push(0.50); v.Push(0.60); v.Push(0.10); v.Push(0.20); v.Push(1.00);
+    v.Push(0.80); v.Push(1.00); v.Push(0.80); v.Push(1.00); v.Push(0.875);
+    v.Push(0.70); v.Push(0.90); v.Push(0.80); v.Push(0.60); v.Push(0.25); v.Push(0.50);
+    v.Push(28.0); v.Push(7.00); v.Push(5.00); v.Push(0.20); v.Push(0.50);
+    v.Push(7.00); v.Push(10.0);
+    v.Push(1.00); v.Push(0.20); v.Push(0.50); v.Push(0.90); v.Push(4.00); v.Push(0.70); v.Push(1.00);
+    v.Push(1.00); v.Push(1.00); v.Push(10.0); v.Push(0.20); v.Push(0.990);
+    v.Push(0.010); v.Push(0.95); v.Push(0.50); v.Push(0.50);
+    v.Push(1.00); v.Push(0.50); v.Push(0.10); v.Push(0.50); v.Push(1.00);
+    v.Push(6.00); v.Push(0.80); v.Push(0.90); v.Push(0.010);
+    v.Push(1.00); v.Push(0.20); v.Push(5.00); v.Push(5.00); v.Push(5.00);
+    v.Push(0.90); v.Push(3.00); v.Push(0.20); v.Push(0.80);
+    v.Push(1.00); v.Push(1.00); // damage_to_xp, score_to_xp
+    v.Push(0.50); v.Push(0.50); // level_cost_mul_for_melee, _wimpy
+    v.Push(2.00); v.Push(1.50); // power_curve_exponent, exp_curve_base
+    v.Push(1.50); v.Push(2.00); v.Push(1.50); v.Push(2.00); v.Push(0.00); v.Push(0.00); // hybrid: exp_base_a, exp_base_b, power_a, power_b, bias, smooth
+    v.Push(0.08); v.Push(3.0); // overdrive: damage_per_stack, window_secs
+    // Hyper-V float scaling CVars
+    v.Push(0.10); v.Push(0.10); v.Push(0.5); v.Push(1.0); v.Push(0.05); v.Push(0.05);
+    // mobility_cd_per_level, melee_cd_per_level, hregen_tick_per_level, ammoregen_tick_per_level, agility_speed_per_level, agility_jump_per_level
+    // Hyper-V float base value CVars
+    v.Push(1.0);  v.Push(0.2);  // mobility_base_cooldown, mobility_min_cooldown
+    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0); // hregen_tick_lv1/2/3, hregen_min_tick
+    v.Push(6.0);  v.Push(4.0);  // aregen_tick_lv1, aregen_tick_lv2
+    v.Push(10.0); v.Push(6.0);  v.Push(2.0); // ammoregen_tick_lv1/2, ammoregen_min_tick
+    v.Push(1.25); v.Push(1.35); // agility_base_speed, agility_base_jump
+    v.Push(1.5);  v.Push(0.75); // tp_cd_lv1, tp_cd_lv2
+    // Hook stun scaling CVars
+    v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
+    // hook_stun_min_base, hook_stun_max_base, hook_stun_min_per_level, hook_stun_max_per_level
+  }
+
+  static void BalancedFloats(out Array<double> v)
+  {
+    v.Push(0.07); v.Push(0.12); v.Push(0.92); v.Push(0.50); v.Push(0.50);
+    v.Push(0.40); v.Push(0.48); v.Push(0.07); v.Push(0.14); v.Push(1.00);
+    v.Push(0.85); v.Push(1.00); v.Push(0.85); v.Push(0.80); v.Push(0.875);
+    v.Push(0.75); v.Push(0.92); v.Push(0.85); v.Push(0.60); v.Push(0.18); v.Push(0.40);
+    v.Push(21.0); v.Push(5.00); v.Push(3.50); v.Push(0.12); v.Push(0.40);
+    v.Push(5.50); v.Push(8.00);
+    v.Push(0.75); v.Push(0.15); v.Push(0.50); v.Push(0.90); v.Push(2.80); v.Push(0.78); v.Push(0.70);
+    v.Push(0.75); v.Push(0.80); v.Push(10.0); v.Push(0.25); v.Push(0.993);
+    v.Push(0.007); v.Push(0.96); v.Push(0.50); v.Push(0.40);
+    v.Push(0.75); v.Push(0.40); v.Push(0.08); v.Push(0.50); v.Push(0.75);
+    v.Push(3.50); v.Push(0.85); v.Push(0.90); v.Push(0.007);
+    v.Push(0.75); v.Push(0.16); v.Push(5.00); v.Push(4.00); v.Push(4.00);
+    v.Push(0.90); v.Push(2.40); v.Push(0.15); v.Push(0.84);
+    v.Push(1.00); v.Push(1.00); // damage_to_xp, score_to_xp
+    v.Push(0.50); v.Push(0.50); // melee_mul, wimpy_mul
+    v.Push(2.00); v.Push(1.50); // power_curve_exponent, exp_curve_base
+    v.Push(1.50); v.Push(2.00); v.Push(1.50); v.Push(2.00); v.Push(0.00); v.Push(0.00); // hybrid: exp_base_a, exp_base_b, power_a, power_b, bias, smooth
+    v.Push(0.07); v.Push(3.0); // overdrive: damage_per_stack, window_secs
+    // Hyper-V float scaling CVars
+    v.Push(0.10); v.Push(0.10); v.Push(0.5); v.Push(1.0); v.Push(0.05); v.Push(0.05);
+    // Hyper-V float base value CVars
+    v.Push(1.0);  v.Push(0.2);
+    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0);
+    v.Push(6.0);  v.Push(4.0);
+    v.Push(10.0); v.Push(6.0);  v.Push(2.0);
+    v.Push(1.25); v.Push(1.35);
+    v.Push(1.5);  v.Push(0.75);
+    // Hook stun scaling CVars
+    v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
+  }
+
+  static void ChallengingFloats(out Array<double> v)
+  {
+    v.Push(0.04); v.Push(0.07); v.Push(0.94); v.Push(0.50); v.Push(0.50);
+    v.Push(0.30); v.Push(0.36); v.Push(0.05); v.Push(0.09); v.Push(1.00);
+    v.Push(0.88); v.Push(1.00); v.Push(0.88); v.Push(0.65); v.Push(0.875);
+    v.Push(0.82); v.Push(0.94); v.Push(0.88); v.Push(0.60); v.Push(0.12); v.Push(0.30);
+    v.Push(14.0); v.Push(3.50); v.Push(2.50); v.Push(0.07); v.Push(0.30);
+    v.Push(4.00); v.Push(6.00);
+    v.Push(0.50); v.Push(0.12); v.Push(0.50); v.Push(0.90); v.Push(1.80); v.Push(0.84); v.Push(0.50);
+    v.Push(0.50); v.Push(0.60); v.Push(10.0); v.Push(0.30); v.Push(0.996);
+    v.Push(0.004); v.Push(0.97); v.Push(0.50); v.Push(0.30);
+    v.Push(0.50); v.Push(0.30); v.Push(0.06); v.Push(0.50); v.Push(0.50);
+    v.Push(2.00); v.Push(0.88); v.Push(0.90); v.Push(0.004);
+    v.Push(0.50); v.Push(0.12); v.Push(5.00); v.Push(3.00); v.Push(3.00);
+    v.Push(0.90); v.Push(1.80); v.Push(0.10); v.Push(0.88);
+    v.Push(1.00); v.Push(1.00); // damage_to_xp, score_to_xp
+    v.Push(0.50); v.Push(0.50); // melee_mul, wimpy_mul
+    v.Push(2.00); v.Push(1.50); // power_curve_exponent, exp_curve_base
+    v.Push(1.50); v.Push(2.00); v.Push(1.50); v.Push(2.00); v.Push(0.00); v.Push(0.00); // hybrid: exp_base_a, exp_base_b, power_a, power_b, bias, smooth
+    v.Push(0.06); v.Push(2.5); // overdrive: damage_per_stack, window_secs
+    // Hyper-V float scaling CVars
+    v.Push(0.10); v.Push(0.10); v.Push(0.5); v.Push(1.0); v.Push(0.05); v.Push(0.05);
+    // Hyper-V float base value CVars
+    v.Push(1.0);  v.Push(0.2);
+    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0);
+    v.Push(6.0);  v.Push(4.0);
+    v.Push(10.0); v.Push(6.0);  v.Push(2.0);
+    v.Push(1.25); v.Push(1.35);
+    v.Push(1.5);  v.Push(0.75);
+    // Hook stun scaling CVars
+    v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
+  }
+
+  static void PunishingFloats(out Array<double> v)
+  {
+    v.Push(0.02); v.Push(0.04); v.Push(0.96); v.Push(0.50); v.Push(0.00);
+    v.Push(0.20); v.Push(0.24); v.Push(0.03); v.Push(0.05); v.Push(1.00);
+    v.Push(0.92); v.Push(1.00); v.Push(0.92); v.Push(0.50); v.Push(0.875);
+    v.Push(0.88); v.Push(0.96); v.Push(0.92); v.Push(0.60); v.Push(0.07); v.Push(0.20);
+    v.Push(9.00); v.Push(2.50); v.Push(1.50); v.Push(0.04); v.Push(0.20);
+    v.Push(3.00); v.Push(4.00);
+    v.Push(0.30); v.Push(0.08); v.Push(0.50); v.Push(0.90); v.Push(1.00); v.Push(0.90); v.Push(0.30);
+    v.Push(0.30); v.Push(0.40); v.Push(10.0); v.Push(0.35); v.Push(0.998);
+    v.Push(0.002); v.Push(0.98); v.Push(0.50); v.Push(0.20);
+    v.Push(0.30); v.Push(0.20); v.Push(0.04); v.Push(0.50); v.Push(0.30);
+    v.Push(1.20); v.Push(0.92); v.Push(0.90); v.Push(0.002);
+    v.Push(0.30); v.Push(0.08); v.Push(5.00); v.Push(2.00); v.Push(2.00);
+    v.Push(0.90); v.Push(1.20); v.Push(0.06); v.Push(0.92);
+    v.Push(1.00); v.Push(1.00); // damage_to_xp, score_to_xp
+    v.Push(0.50); v.Push(0.50); // melee_mul, wimpy_mul
+    v.Push(2.00); v.Push(1.50); // power_curve_exponent, exp_curve_base
+    v.Push(1.50); v.Push(2.00); v.Push(1.50); v.Push(2.00); v.Push(0.00); v.Push(0.00); // hybrid: exp_base_a, exp_base_b, power_a, power_b, bias, smooth
+    v.Push(0.05); v.Push(2.0); // overdrive: damage_per_stack, window_secs
+    // Hyper-V float scaling CVars
+    v.Push(0.10); v.Push(0.10); v.Push(0.5); v.Push(1.0); v.Push(0.05); v.Push(0.05);
+    // Hyper-V float base value CVars
+    v.Push(1.0);  v.Push(0.2);
+    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0);
+    v.Push(6.0);  v.Push(4.0);
+    v.Push(10.0); v.Push(6.0);  v.Push(2.0);
+    v.Push(1.25); v.Push(1.35);
+    v.Push(1.5);  v.Push(0.75);
+    // Hook stun scaling CVars
+    v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
+  }
+
+  static void BrutalFloats(out Array<double> v)
+  {
+    // Upgrade power: identical to Default; pacing differs
+    v.Push(0.10); v.Push(0.20); v.Push(0.90); v.Push(0.50); v.Push(1.00);
+    v.Push(0.50); v.Push(0.60); v.Push(0.10); v.Push(0.20); v.Push(1.00);
+    v.Push(0.80); v.Push(1.00); v.Push(0.80); v.Push(1.00); v.Push(0.875);
+    v.Push(0.70); v.Push(0.90); v.Push(0.80); v.Push(0.60); v.Push(0.25); v.Push(0.50);
+    v.Push(28.0); v.Push(7.00); v.Push(5.00); v.Push(0.20); v.Push(0.50);
+    v.Push(7.00); v.Push(10.0);
+    v.Push(1.00); v.Push(0.20); v.Push(0.50); v.Push(0.90); v.Push(4.00); v.Push(0.70); v.Push(1.00);
+    v.Push(1.00); v.Push(1.00); v.Push(10.0); v.Push(0.20); v.Push(0.990);
+    v.Push(0.010); v.Push(0.95); v.Push(0.50); v.Push(0.50);
+    v.Push(1.00); v.Push(0.50); v.Push(0.10); v.Push(0.50); v.Push(1.00);
+    v.Push(6.00); v.Push(0.80); v.Push(0.90); v.Push(0.010);
+    v.Push(1.00); v.Push(0.20); v.Push(5.00); v.Push(5.00); v.Push(5.00);
+    v.Push(0.90); v.Push(3.00); v.Push(0.20); v.Push(0.80);
+    v.Push(0.00); v.Push(1.00); // damage_to_xp=0, score_to_xp=1
+    v.Push(0.50); v.Push(0.50); // melee_mul, wimpy_mul
+    v.Push(2.00); v.Push(1.50); // power_curve_exponent, exp_curve_base
+    v.Push(1.50); v.Push(2.00); v.Push(1.50); v.Push(2.00); v.Push(0.00); v.Push(0.00); // hybrid: exp_base_a, exp_base_b, power_a, power_b, bias, smooth
+    v.Push(0.08); v.Push(3.0); // overdrive: damage_per_stack, window_secs
+    // Hyper-V float scaling CVars
+    v.Push(0.10); v.Push(0.10); v.Push(0.5); v.Push(1.0); v.Push(0.05); v.Push(0.05);
+    // Hyper-V float base value CVars
+    v.Push(1.0);  v.Push(0.2);
+    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0);
+    v.Push(6.0);  v.Push(4.0);
+    v.Push(10.0); v.Push(6.0);  v.Push(2.0);
+    v.Push(1.25); v.Push(1.35);
+    v.Push(1.5);  v.Push(0.75);
+    // Hook stun scaling CVars
+    v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
+  }
+
+  static void DefaultInts(out Array<int> v)
+  {
+    v.Push(64);  v.Push(16);
+    v.Push(6);   v.Push(2);
+    v.Push(3);   v.Push(4);
+    v.Push(64);  v.Push(512); v.Push(768);
+    v.Push(64);  v.Push(32);  v.Push(192); v.Push(64);  v.Push(128); v.Push(32);
+    v.Push(192); v.Push(1024); v.Push(10); v.Push(10);
+    v.Push(100); v.Push(64);  v.Push(32);  v.Push(64);  v.Push(64);
+    v.Push(1200); v.Push(0); v.Push(7); // base_level_cost, xp_curve=Custom Power, gun_levels_per_player
+    v.Push(4); v.Push(4);               // upgrade_choices_per_gun_level, _per_player_level
+    v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
+    v.Push(5); // bonsai_stat_overdrive_max_stacks
+    DefaultPoolInts(v);
+  }
+
+  static void BalancedInts(out Array<int> v)
+  {
+    v.Push(56);  v.Push(12);
+    v.Push(5);   v.Push(2);
+    v.Push(3);   v.Push(3);
+    v.Push(64);  v.Push(512); v.Push(768);
+    v.Push(64);  v.Push(28);  v.Push(192); v.Push(56);  v.Push(128); v.Push(28);
+    v.Push(160); v.Push(768); v.Push(8);   v.Push(8);
+    v.Push(80);  v.Push(56);  v.Push(24);  v.Push(56);  v.Push(56);
+    v.Push(1200); v.Push(0); v.Push(7); // base_level_cost, xp_curve=Custom Power, gun_levels_per_player
+    v.Push(4); v.Push(4);               // upgrade_choices_per_gun_level, _per_player_level
+    v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
+    v.Push(5); // bonsai_stat_overdrive_max_stacks
+    DefaultPoolInts(v);
+  }
+
+  static void ChallengingInts(out Array<int> v)
+  {
+    v.Push(48);  v.Push(8);
+    v.Push(4);   v.Push(1);
+    v.Push(2);   v.Push(2);
+    v.Push(64);  v.Push(512); v.Push(768);
+    v.Push(64);  v.Push(24);  v.Push(192); v.Push(48);  v.Push(128); v.Push(24);
+    v.Push(128); v.Push(512); v.Push(6);   v.Push(6);
+    v.Push(60);  v.Push(48);  v.Push(18);  v.Push(48);  v.Push(48);
+    v.Push(1200); v.Push(0); v.Push(7); // base_level_cost, xp_curve=Custom Power, gun_levels_per_player
+    v.Push(4); v.Push(4);               // upgrade_choices_per_gun_level, _per_player_level
+    v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
+    v.Push(4); // bonsai_stat_overdrive_max_stacks
+    DefaultPoolInts(v);
+  }
+
+  static void PunishingInts(out Array<int> v)
+  {
+    v.Push(40);  v.Push(6);
+    v.Push(3);   v.Push(1);
+    v.Push(2);   v.Push(1);
+    v.Push(64);  v.Push(512); v.Push(768);
+    v.Push(64);  v.Push(20);  v.Push(192); v.Push(40);  v.Push(128); v.Push(20);
+    v.Push(96);  v.Push(384); v.Push(4);   v.Push(4);
+    v.Push(40);  v.Push(40);  v.Push(12);  v.Push(40);  v.Push(40);
+    v.Push(1200); v.Push(0); v.Push(7); // base_level_cost, xp_curve=Custom Power, gun_levels_per_player
+    v.Push(4); v.Push(4);               // upgrade_choices_per_gun_level, _per_player_level
+    v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
+    v.Push(3); // bonsai_stat_overdrive_max_stacks
+    DefaultPoolInts(v);
+  }
+
+  static void BrutalInts(out Array<int> v)
+  {
+    v.Push(64);  v.Push(16);
+    v.Push(6);   v.Push(2);
+    v.Push(3);   v.Push(4);
+    v.Push(64);  v.Push(512); v.Push(768);
+    v.Push(64);  v.Push(32);  v.Push(192); v.Push(64);  v.Push(128); v.Push(32);
+    v.Push(192); v.Push(1024); v.Push(10);  v.Push(10);
+    v.Push(100); v.Push(64);  v.Push(32);  v.Push(64);  v.Push(64);
+    v.Push(4000); v.Push(1); v.Push(7); // base_level_cost=4000, xp_curve=Custom Exp (base 1.5)
+    v.Push(4); v.Push(4);               // upgrade_choices_per_gun_level, _per_player_level
+    v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
+    v.Push(5); // bonsai_stat_overdrive_max_stacks
+    DefaultPoolInts(v);
+  }
+
+// =============================================================================
+// Public API
+// =============================================================================
+
+  static void Apply(int profile)
+  {
+    Array<String> floatNames, intNames;
+    Array<double> floatVals;
+    Array<int>    intVals;
+    GetFloatCVarNames(floatNames);
+    GetIntCVarNames(intNames);
+
+    String stored = GetStoredString(profile);
+    // Sanity-check the stored string: valid saves contain "=" separators.
+    // The old buggy format used Dictionary.ToString() which produces JSON-like
+    // output incompatible with our parser — detect and discard it gracefully.
+    bool validStored = stored.Length() > 0 && stored.IndexOf("=") >= 0
+                       && stored.IndexOf("{") < 0;
+    if (validStored)
+      Deserialize(stored, profile, floatNames, intNames, floatVals, intVals);
+    else
+    {
+      if (stored.Length() > 0)
+        Console.PrintF("\c[ORANGE]Gun Bonsai:\c- Saved profile data was in an old format and has been discarded. Applying hardcoded defaults.");
+      GetHardcodedFloats(profile, floatVals);
+      GetHardcodedInts(profile, intVals);
+    }
+
+    ApplyAllCVars(floatNames, floatVals, intNames, intVals);
+
+    static const String NAMES[] = {
+      "Default", "Balanced", "Challenging", "Punishing", "Custom", "Brutal Mode"
+    };
+    String pname = (profile >= 0 && profile <= 5) ? NAMES[profile] : "Unknown";
+    bool wasSaved = (stored.Length() > 0);
+    Console.PrintF("\c[CYAN]Gun Bonsai:\c- Applied \c[GOLD]%s\c- profile (%s).",
+      pname, wasSaved ? "from saved data" : "hardcoded defaults");
+  }
+
+  static void Save(int profile)
+  {
+    if (profile < 0 || profile > 5)
+    {
+      Console.PrintF("\c[CYAN]Gun Bonsai:\c- Invalid profile index.");
+      return;
+    }
+
+    static const String STORECVARS[] = {
+      "bonsai_profile_0", "bonsai_profile_1", "bonsai_profile_2",
+      "bonsai_profile_3", "bonsai_profile_4", "bonsai_profile_5"
+    };
+    CVar storeCv = CVar.FindCVar(STORECVARS[profile]);
+    if (!storeCv)
+    {
+      Console.PrintF("\c[RED]Gun Bonsai:\c- ERROR: storage CVar not found. Profile not saved.");
+      return;
+    }
+
+    Array<String> floatNames, intNames;
+    GetFloatCVarNames(floatNames);
+    GetIntCVarNames(intNames);
+
+    // Serialize as "key=value,key=value,..." — no JSON dependency, safe to parse
+    // back with simple split. Comma separator; values never contain commas.
+    String serial = "";
+    for (int i = 0; i < floatNames.Size(); ++i)
+    {
+      CVar cv = CVar.FindCVar(floatNames[i]);
+      if (!cv) continue;
+      if (serial.Length() > 0) serial = serial .. ",";
+      serial = serial .. floatNames[i] .. "=" .. String.Format("%.6f", cv.GetFloat());
+    }
+    for (int i = 0; i < intNames.Size(); ++i)
+    {
+      CVar cv = CVar.FindCVar(intNames[i]);
+      if (!cv) continue;
+      if (serial.Length() > 0) serial = serial .. ",";
+      serial = serial .. intNames[i] .. "=" .. String.Format("%d", cv.GetInt());
+    }
+
+    storeCv.SetString(serial);
+
+    static const String NAMES[] = {
+      "Default", "Balanced", "Challenging", "Punishing", "Custom", "Brutal Mode"
+    };
+    Console.PrintF("\c[CYAN]Gun Bonsai:\c- Saved to \c[GOLD]%s\c- profile.", NAMES[profile]);
+  }
+
+  static void Reset(int profile)
+  {
+    if (profile >= 0 && profile <= 5)
+      SetStoredString(profile, "");
+
+    Array<String> floatNames, intNames;
+    Array<double> floatVals;
+    Array<int>    intVals;
+    GetFloatCVarNames(floatNames);
+    GetIntCVarNames(intNames);
+    GetHardcodedFloats(profile, floatVals);
+    GetHardcodedInts(profile, intVals);
+    ApplyAllCVars(floatNames, floatVals, intNames, intVals);
+
+    static const String NAMES[] = {
+      "Default", "Balanced", "Challenging", "Punishing", "Custom", "Brutal Mode"
+    };
+    Console.PrintF("\c[CYAN]Gun Bonsai:\c- \c[GOLD]%s\c- profile reset to built-in defaults.",
+      (profile >= 0 && profile <= 5) ? NAMES[profile] : "Unknown");
+  }
+
+// =============================================================================
+// Internal helpers
+// =============================================================================
+
+  private static String GetStoredString(int profile)
+  {
+    static const String CVARS[] = {
+      "bonsai_profile_0", "bonsai_profile_1", "bonsai_profile_2",
+      "bonsai_profile_3", "bonsai_profile_4", "bonsai_profile_5"
+    };
+    if (profile < 0 || profile > 5) return "";
+    CVar cv = CVar.FindCVar(CVARS[profile]);
+    return cv ? cv.GetString() : "";
+  }
+
+  private static void SetStoredString(int profile, String value)
+  {
+    static const String CVARS[] = {
+      "bonsai_profile_0", "bonsai_profile_1", "bonsai_profile_2",
+      "bonsai_profile_3", "bonsai_profile_4", "bonsai_profile_5"
+    };
+    if (profile < 0 || profile > 5) return;
+    CVar cv = CVar.FindCVar(CVARS[profile]);
+    if (cv) cv.SetString(value);
+  }
+
+  private static void GetHardcodedFloats(int profile, out Array<double> v)
+  {
+    switch (profile)
+    {
+      case 1:  BalancedFloats(v);    return;
+      case 2:  ChallengingFloats(v); return;
+      case 3:  PunishingFloats(v);   return;
+      case 5:  BrutalFloats(v);      return;
+      default: DefaultFloats(v);     return;
+    }
+  }
+
+  private static void GetHardcodedInts(int profile, out Array<int> v)
+  {
+    switch (profile)
+    {
+      case 1:  BalancedInts(v);    return;
+      case 2:  ChallengingInts(v); return;
+      case 3:  PunishingInts(v);   return;
+      case 5:  BrutalInts(v);      return;
+      default: DefaultInts(v);     return;
+    }
+  }
+
+  private static void ApplyAllCVars(
+    Array<String> fNames, Array<double> fVals,
+    Array<String> iNames, Array<int>    iVals)
+  {
+    for (int i = 0; i < fNames.Size() && i < fVals.Size(); ++i)
+    {
+      CVar cv = CVar.FindCVar(fNames[i]);
+      if (cv) cv.SetFloat(fVals[i]);
+      else Console.PrintF("\c[RED]Gun Bonsai Profile:\c- float CVar not found: %s", fNames[i]);
+    }
+    for (int i = 0; i < iNames.Size() && i < iVals.Size(); ++i)
+    {
+      CVar cv = CVar.FindCVar(iNames[i]);
+      if (cv) cv.SetInt(iVals[i]);
+      else Console.PrintF("\c[RED]Gun Bonsai Profile:\c- int CVar not found: %s", iNames[i]);
+    }
+  }
+
+  // Deserialize a Dictionary-format profile string.
+  // Keys missing from the stored Dictionary fall back to the slot's hardcoded
+  // defaults — handles profiles saved before new CVars were added.
+  private static void Deserialize(
+    String stored, int profile,
+    Array<String> floatNames, Array<String> intNames,
+    out Array<double> fVals, out Array<int> iVals)
+  {
+    // Parse "key=value,key=value,..." into a lookup Dictionary manually.
+    // This avoids Dictionary.fromString() which requires strict JSON format.
+    Dictionary lookup = Dictionary.Create();
+    Array<String> pairs;
+    stored.Split(pairs, ",");
+    for (int p = 0; p < pairs.Size(); ++p)
+    {
+      int eq = pairs[p].IndexOf("=");
+      if (eq < 1) continue;
+      String k = pairs[p].Left(eq);
+      String v = pairs[p].Mid(eq + 1);
+      lookup.Insert(k, v);
+    }
+
+    Array<double> fallbackF;
+    Array<int>    fallbackI;
+    GetHardcodedFloats(profile, fallbackF);
+    GetHardcodedInts(profile, fallbackI);
+
+    for (int i = 0; i < floatNames.Size(); ++i)
+    {
+      String val = lookup.at(floatNames[i]);
+      fVals.Push(val.Length() > 0 ? val.ToDouble() : fallbackF[i]);
+    }
+    for (int i = 0; i < intNames.Size(); ++i)
+    {
+      String val = lookup.at(intNames[i]);
+      iVals.Push(val.Length() > 0 ? val.ToInt() : fallbackI[i]);
+    }
+  }
+
+
+  // =========================================================================
+  // Export — prints all saved profile strings to the console.
+  // Each non-empty slot is printed as a console command the recipient can
+  // paste directly: bonsai_profile_N "dictionary-string"
+  // Empty slots (never saved to) print a note so the user knows.
+  // =========================================================================
+  static void ExportSlot(int slot)
+  {
+    if (slot < 0 || slot > 5) return;
+
+    static const String NAMES[] = {
+      "Default", "Balanced", "Challenging", "Punishing", "Custom", "Brutal Mode"
+    };
+    static const String CVARS[] = {
+      "bonsai_profile_0", "bonsai_profile_1", "bonsai_profile_2",
+      "bonsai_profile_3", "bonsai_profile_4", "bonsai_profile_5"
+    };
+
+    CVar cv = CVar.FindCVar(CVARS[slot]);
+    if (!cv) return;
+    String stored = cv.GetString();
+
+    Console.PrintF("\c[CYAN]=== Gun Bonsai Export: %s (Slot %d) ===\c-", NAMES[slot], slot);
+
+    if (stored.Length() == 0)
+    {
+      Console.PrintF("\c[ORANGE]This slot has no saved data.\c-");
+      Console.PrintF("\c[GRAY]Use Save to %s first, then export.\c-", NAMES[slot]);
+    }
+    else
+    {
+      Console.PrintF("\c[GRAY]Paste this into your console to import:\c-");
+      Console.PrintF("\c[WHITE]%s \"%s\"\c-", CVARS[slot], stored);
+      Console.PrintF("\c[GRAY]Then Apply the %s profile from the Profiles menu.\c-", NAMES[slot]);
+    }
+
+    Console.PrintF("\c[CYAN]========================================\c-");
+  }
+
+} // class TFLV_Profiles

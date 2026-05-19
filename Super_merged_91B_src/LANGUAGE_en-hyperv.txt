@@ -1,0 +1,322 @@
+// =============================================================================
+// Super Merged — Hyper-V Language Strings
+// =============================================================================
+
+[enu default]
+
+// ─── Top Level ────────────────────────────────────────────────────────────────
+VMM_TT_RESET_ALL = "Resets every Hyper-V setting across all categories back to its factory default.";
+
+// ─── Movement ─────────────────────────────────────────────────────────────────
+VMM_TT_MOVEMENT = "Configure dash/roll abilities, double jump, and ledge climbing.";
+VMM_TT_DOUBLE_JUMP = "Press the jump key a second time while airborne to perform an extra jump.";
+VMM_TT_LEDGE_CLIMB = "When walking into a ledge within reach, the player automatically grabs and climbs over it. Max climb height: 48 map units.";
+
+// ─── Dash ─────────────────────────────────────────────────────────────────────
+VMM_TT_DASH = "Configure dash distances, directions, cooldown, and stamina costs.";
+VMM_TT_DASH_PRESET = "Sets forward, side, and back distances to a named preset. Choose Custom to use the individual distance sliders freely. Note: sliders have no effect when a preset is selected.";
+VMM_TT_DASH_ENABLED = "Master switch for all dash and roll abilities.";
+VMM_TT_DASH_MOD_KEY = "Hold this key, then press a movement direction to dash in that direction. Diagonal dashes are supported — hold two directions at once.";
+VMM_TT_DOUBLE_DASH = "Press modifier + direction a second time immediately after the first dash to chain a second dash. Release and re-press the direction key to trigger it.";
+VMM_TT_DASH_COOLDOWN = "Seconds before a new dash can be started after the previous one. 0 = no cooldown.";
+VMM_TT_DASH_FWD_LEAP = "When enabled, the forward dash launches you diagonally upward as well as forward. Disable for a flat horizontal dash.";
+VMM_TT_DASH_FWD_DIST = "Distance multiplier for the forward dash. Balanced preset default: 1.6.";
+VMM_TT_DASH_SIDE_ENABLED = "Enables left and right side rolls. Side rolls stay on the ground.";
+VMM_TT_DASH_SIDE_DIST = "Distance multiplier for side rolls. Balanced preset default: 1.2.";
+VMM_TT_DASH_BACK_ENABLED = "Enables the backward roll. Back roll stays on the ground.";
+VMM_TT_DASH_BACK_DIST = "Distance multiplier for the back roll. Balanced preset default: 1.0.";
+VMM_TT_DASH_STAMINA = "When enabled, each dash drains from the shared stamina pool. At 0 stamina, dashes are blocked entirely.";
+VMM_TT_DASH_FWD_COST = "Stamina drained by a forward dash. Default: 10.";
+VMM_TT_DASH_SIDE_COST = "Stamina drained by a side roll. Default: 15.";
+VMM_TT_DASH_BACK_COST = "Stamina drained by a back roll. Default: 20.";
+VMM_TT_RESET_DASH = "Resets all dash settings to their defaults, including preset, distances, cooldown, and stamina costs.";
+
+// ─── Stamina ──────────────────────────────────────────────────────────────────
+VMM_TT_STAMINA = "Melee and dash share a 0-100 stamina pool. Recharges automatically. Below 50: melee cooldown doubles. At 0: dashes blocked. Berserk bypasses stamina cost for melee.";
+
+// ─── Melee ────────────────────────────────────────────────────────────────────
+VMM_TT_MELEE = "Configure auto-melee, combo and crits, parry, and weapon slot 1 mode.";
+VMM_TT_MELEE_ENABLED = "Master switch for the auto-melee system.";
+VMM_TT_MELEE_TOGGLE_KEY = "Keybind to toggle melee on or off during play without opening the menu.";
+VMM_TT_MELEE_VR_MODE = "Always-passive melee designed for VR. Fixed cooldown, no stamina cost, and berserk multiplies damage by 10x instead of the normal bonus.";
+VMM_TT_MELEE_KEY_MODE = "Off: melee fires automatically when an enemy is in range on cooldown. On: melee only fires when you press the Melee Attack Key.";
+VMM_TT_MELEE_ATTACK_KEY = "Key that triggers a melee strike in key-activated mode, and also arms the parry shield in key parry mode.";
+VMM_TT_MELEE_SOUND = "Plays the punch sound on each melee hit.";
+VMM_TT_MELEE_PUFF = "Shows a sweat-burst particle effect on the target when a hit lands.";
+VMM_TT_SUBMENU_STRIKE = "Set attack range, damage preset, and damage multiplier.";
+VMM_TT_SUBMENU_STAMINA_BERSERK = "Configure stamina consumption and berserk pack bonuses for melee.";
+VMM_TT_SUBMENU_COMBO = "Configure combo hit requirements, crit chance, knockback, and stun.";
+VMM_TT_SUBMENU_PARRY = "Configure the proactive damage shield and attacker stun system.";
+VMM_TT_SUBMENU_SLOT1 = "Special melee behaviour for slot 1 weapons such as fists and chainsaw.";
+VMM_TT_SUBMENU_INDICATOR = "Visual indicator that shows when an enemy is within melee range.";
+
+// ─── Strike ───────────────────────────────────────────────────────────────────
+VMM_TT_MELEE_RANGE = "Maximum attack reach in map units. 64 = roughly arm's length.";
+VMM_TT_MELEE_PRESET = "Selects a balanced min/max damage pair. Set to Custom to use the individual min/max sliders below.";
+VMM_TT_MELEE_DMG_MIN = "Minimum damage per hit when Preset is set to Custom.";
+VMM_TT_MELEE_DMG_MAX = "Maximum damage per hit when Preset is set to Custom.";
+VMM_TT_MELEE_MULT = "Final damage multiplier applied after rolling the min/max. Crit bonuses stack on top of this.";
+VMM_TT_RESET_STRIKE = "Resets attack range, damage preset, and multiplier to defaults.";
+
+// ─── Stamina & Berserk ────────────────────────────────────────────────────────
+VMM_TT_MELEE_STAMINA_TOGGLE = "Each melee hit drains 20 stamina. Below 50 stamina, cooldown doubles. VR Mode ignores this.";
+VMM_TT_MELEE_BERSERK = "Activates bonus melee stats when a berserk pack is picked up.";
+VMM_TT_MELEE_BERSERK_DMG = "Multiplies hit damage while berserk is active. Default: 3.0 (triple damage).";
+VMM_TT_MELEE_BERSERK_COOLDOWN = "Divides melee cooldown while berserk is active. Default: 2.0 (half cooldown).";
+VMM_TT_MELEE_BERSERK_STAMINA = "Percentage reduction to stamina cost per hit while berserk. 0 = no reduction, 100 = free hits. Default: 50.";
+VMM_TT_RESET_STAMINA = "Resets stamina system and berserk bonus settings to defaults.";
+
+// ─── Combo & Crits ────────────────────────────────────────────────────────────
+VMM_TT_MELEE_COMBO = "Off: crits can roll on any hit. On: crits only unlock after landing several consecutive hits on the same target.";
+VMM_TT_MELEE_COMBOHIT = "Number of consecutive hits required on the same target before crits become possible. Default: 3.";
+VMM_TT_MELEE_COMBOCRIT = "Base probability of landing a critical hit. A crit triggers: strong punch sound, 1.5-3x damage, knockback, and stun chance. Also drives parry trigger probability. Default: 40%.";
+VMM_TT_MELEE_BERSERK_CRIT = "Additional crit chance added on top of the base when berserk is active. Default: 30%.";
+VMM_TT_MELEE_KNOCKBACK = "Force applied to push the enemy away on a crit hit. 0 disables knockback entirely. Default: 1.0.";
+VMM_TT_MELEE_KB_MASS = "Enemies with a mass value above this threshold cannot be knocked back. Default: 600.";
+VMM_TT_MELEE_STUN = "Probability of freezing the target in place on a crit hit. Default: 20%.";
+VMM_TT_MELEE_BERSERK_STUN = "Additional stun chance added on top of base when berserk is active. Default: 20%.";
+VMM_TT_RESET_COMBO = "Resets combo requirements, crit chance, knockback, and stun settings to defaults.";
+
+// ─── Parry ────────────────────────────────────────────────────────────────────
+VMM_TT_PARRY_ENABLED = "Enables the proactive parry system. When an enemy winds up an attack within melee range, a chance roll is made. On success, a damage shield activates before the hit lands.";
+VMM_TT_PARRY_KEY_MODE = "Off (Passive): parry shield is always ready when an enemy is in range. On (Key): you must press the Melee Attack Key within 8 tics of a detected threat to arm the shield.";
+VMM_TT_PARRY_HUD = "Shows [ SHIELD ] on-screen when the shield is armed, and flashes !! CRIT PARRY !! with an immunity bar when the shield absorbs a hit.";
+VMM_TT_PARRY_PROB = "Scales the parry trigger chance relative to your base crit chance. Formula: (Crit x Prob) / 10. Example: Crit=8, Prob=5 -> 40% chance. Default: 100%.";
+VMM_TT_PARRY_RESIST = "Percentage of incoming damage absorbed by the shield when it fires. Fires before damage is applied at the engine level. Default: 50%.";
+VMM_TT_PARRY_DURATION = "How long the shield stays active after the first hit is absorbed, in game tics. 35 tics = 1 second. Used for follow-up hit immunity. Default: 20 tics.";
+VMM_TT_PARRY_STUN_MIN = "Minimum duration in seconds that the attacker is frozen after landing a parried hit. 0.1 seconds = approximately 3 tics. Default: 3.0.";
+VMM_TT_PARRY_STUN_MAX = "Maximum duration in seconds that the attacker is frozen after a parried hit. A random value between min and max is chosen each time. Default: 5.0.";
+VMM_TT_RESET_PARRY = "Resets all parry settings including probability, damage reduction, immunity window, and stun durations to defaults.";
+
+// ─── Slot 1 Mode ──────────────────────────────────────────────────────────────
+VMM_TT_SLOT1_MODE = "When active, fists, chainsaw, and any mod weapon in slot 1 use modified melee logic. The mod suppresses its own hit detection so your weapon handles base damage, then adds a crit bonus on top.";
+VMM_TT_SLOT1_CRIT_MIN = "Minimum additive damage bonus applied on top of your weapon's damage when a crit fires. Default: 10.";
+VMM_TT_SLOT1_CRIT_MAX = "Maximum additive damage bonus on a crit. A value between min and max is rolled each time. Default: 30.";
+VMM_TT_SLOT1_SND = "On: weapon uses its own fire sounds normally. The mod's punch sounds are suppressed. Default: On.";
+VMM_TT_SLOT1_COMBO = "Tracks hit count on the current target for combo crit logic. In rapid-fire mode, tracking is throttled to prevent instant crit spam.";
+VMM_TT_SLOT1_COMBO_RATE = "Minimum game tics between combo count increments in rapid-fire mode. Higher values slow combo buildup on chainsaws. Default: 8.";
+VMM_TT_SLOT1_RAPID_THRESHOLD = "Number of hits within the detection window that classify firing as rapid-fire mode. Default: 3.";
+VMM_TT_SLOT1_RAPID_WINDOW = "Game tic window for counting rapid hits. Wider windows are more likely to trigger rapid mode. Default: 10 tics.";
+VMM_TT_SLOT1_RAPID_CRIT = "Crit chance override used specifically during rapid-fire mode. 0 = disabled (crits use normal chance). Default: 0%.";
+VMM_TT_SLOT1_PARRY = "When On, the parry system remains active while a slot 1 weapon is equipped. Default: On.";
+VMM_TT_SLOT1_INDICATOR = "When Off, the melee range indicator is hidden while a slot 1 weapon is equipped. Default: Off.";
+
+// ─── Range Indicator ──────────────────────────────────────────────────────────
+VMM_TT_INDICATOR_STYLE = "Visual effect shown when an enemy enters your melee range. Options: Off, Glow on Target, Ray, Reticle Ring, Column Effect.";
+VMM_TT_INDICATOR_ACTIVE = "Toggles the indicator on and off. Can also be toggled mid-game with the keybind.";
+VMM_TT_INDICATOR_TOGGLE = "Keybind to toggle the melee range indicator on or off during play.";
+VMM_TT_INDICATOR_RANGE = "Distance in map units at which a nearby enemy activates the indicator. Default: 256.";
+
+// ─── Teleporter ───────────────────────────────────────────────────────────────
+VMM_TT_TELEPORT = "Configure the teleporter. Tap to fire a beam, tap again to teleport to the marker.";
+VMM_TT_TELEPORT_ENABLED = "Master switch for the teleporter. Tap key: fires beam. Tap again while beam is flying: cancel. Tap again when marker is placed: teleport.";
+VMM_TT_TELEPORT_KEY = "Fires the teleporter beam on press. Also confirms teleport when a marker is placed. One key handles all states.";
+VMM_TT_TELEPORT_CANCEL = "Clears the flying beam or placed marker without teleporting. Cancelling a beam is free. Cancelling a placed marker applies a half-cooldown penalty.";
+VMM_TT_TP_BEAM_SPEED = "How fast the beam projectile travels. Higher speed = flatter, longer arc. Lower speed = steeper drop. Default: 40.";
+VMM_TT_TP_MAX_RANGE = "Maximum distance the beam can travel before it self-destructs. Default: 1024 map units.";
+VMM_TT_TP_COOLDOWN = "Delay before the teleporter can be used again after teleporting. Default: 1.5 seconds.";
+VMM_TT_TP_RESTRICT = "When On, prevents the beam from marking slopes, stairs, or locations without line of sight to the player. Default: On.";
+VMM_TT_RESET_TELEPORT = "Resets beam speed, max range, cooldown, and restricted mode to defaults.";
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+VMM_TT_HOOK = "Configure the grappling hook. Hit walls to pull yourself, hit monsters to drag them.";
+VMM_TT_HOOK_ENABLED = "Master switch for the grappling hook.";
+VMM_TT_HOOK_THROW_KEY = "Keybind to throw the hook. Hooks latch onto the first solid surface or monster hit.";
+VMM_TT_HOOK_PULL = "When On, hitting a monster drags it toward you instead of pulling you toward it. The monster is frozen while being dragged.";
+VMM_TT_HOOK_MAXDIST = "Maximum distance the hook can reach. Default: 720 map units.";
+VMM_TT_HOOK_COOLDOWN = "Delay before the hook can be thrown again. Default: 1.0 seconds.";
+VMM_TT_HOOK_STUN = "When On, monsters are frozen in place while hooked and briefly stunned after the hook releases.";
+VMM_TT_HOOK_STUN_MIN = "Minimum stun duration in seconds applied to the monster after the hook releases. 0.1 sec = approximately 3 game tics. Default: 2.0.";
+VMM_TT_HOOK_STUN_MAX = "Maximum stun duration in seconds. A random value between min and max is chosen each release. Default: 4.0.";
+VMM_TT_RESET_HOOK = "Resets hook range, cooldown, meat hook toggle, and stun settings to defaults.";
+
+// ─── Slomo ────────────────────────────────────────────────────────────────────
+VMM_TT_SLOMO = "Configure bullet time. Slows enemies and projectiles while the player moves freely.";
+VMM_TT_SLOMO_ENABLED = "Master switch for slomo bullet time.";
+VMM_TT_SLOMO_KEY = "Keybind to toggle slomo on and off.";
+VMM_TT_SUBMENU_SLOMO_POOL = "Set total point capacity, drain rate, and recharge rate.";
+VMM_TT_SUBMENU_SLOMO_TIMING = "Set slowdown depth, cooldown, and momentum freeze behaviour.";
+VMM_TT_SUBMENU_SLOMO_BERSERK = "Berserk pack bonuses: deeper freeze, slower drain, bigger pool, faster cooldown recovery.";
+VMM_TT_SUBMENU_SLOMO_INVULN = "Invulnerability sphere bonuses: override depth, infinite slomo, instant cooldown clear.";
+VMM_TT_SUBMENU_SLOMO_AUDIO = "Control music and sound pausing during slomo.";
+VMM_TT_SUBMENU_SLOMO_HUD = "Configure the slomo bar and on-screen status messages.";
+
+VMM_TT_SLOMO_TOTAL_PTS = "Maximum slomo point capacity. 35 points = approximately 1 second of slomo. Default: 200.";
+VMM_TT_SLOMO_MIN_PTS = "Minimum points required before slomo can be activated. Default: 1.";
+VMM_TT_SLOMO_INFINITE = "When On, slomo points never drain while active — infinite bullet time.";
+VMM_TT_SLOMO_DRAIN_DELAY = "Extra game tics to wait between each point drain step. 0 = drain every tic. Default: 0.";
+VMM_TT_SLOMO_REFILL = "Points refilled per game tic while slomo is inactive. Default: 2.";
+VMM_TT_SLOMO_RECHARGE_DELAY = "Extra tics between each recharge step. Default: 0.";
+
+VMM_TT_SLOMO_DEPTH = "How strongly enemies and projectiles are slowed. 100 = full freeze. 50 = half speed. 10 = nearly unaffected. Default: 100.";
+VMM_TT_SLOMO_COOLDOWN = "Game tics to wait before slomo can be activated again after depleting. Default: 0.";
+VMM_TT_SLOMO_COOLDOWN_READY = "When Off, the cooldown must complete before the first use of slomo in a new map.";
+VMM_TT_SLOMO_FREEZE_MOM = "Saves the player's velocity when entering slomo and restores it when exiting.";
+
+VMM_TT_SLOMO_BERSERK = "Activates enhanced slomo stats while a berserk pack is active. Invulnerability overrides these.";
+VMM_TT_SLOMO_BERSERK_DEPTH = "Extra slowdown depth percentage added on top of the base while berserk. Default: +30%.";
+VMM_TT_SLOMO_BERSERK_DRAIN = "Percentage chance to skip each drain tic while berserk. 100 = no drain at all. Default: 50%.";
+VMM_TT_SLOMO_BERSERK_PTS = "Extra points added to the pool capacity while berserk is active. Default: 100.";
+VMM_TT_SLOMO_BERSERK_CD = "Percentage of remaining cooldown removed per tic while berserk is active. Default: 50%.";
+
+VMM_TT_SLOMO_INVULN = "Activates maximum slomo enhancement while an invulnerability sphere is active.";
+VMM_TT_SLOMO_INVULN_DEPTH = "Overrides base slowdown depth while invulnerable. Default: 100 (full freeze).";
+VMM_TT_SLOMO_INVULN_INF = "Points never drain while invulnerable. Default: On.";
+VMM_TT_SLOMO_INVULN_CD = "Instantly clears any remaining cooldown when invulnerability activates. Default: On.";
+
+VMM_TT_SLOMO_MUSIC = "Off: background music is muted while slomo is running. On: music continues.";
+VMM_TT_SLOMO_SOUNDS = "Off: game sounds pause during slomo. On: sounds play normally.";
+
+VMM_TT_SLOMO_HUD_BAR = "Shows the slomo point bar in the ability HUD.";
+VMM_TT_SLOMO_HUD_HIDE_FULL = "Hides the slomo bar when the pool is completely full.";
+VMM_TT_SLOMO_HUD_CD_BLINK = "When enabled, the 'CD' cooldown indicator above the slomo bar blinks on and off while recharging. When disabled, it is always visible during cooldown.";
+VMM_TT_SLOMO_MSG_ACTIVE = "Shows =Slomo Active= text and corner markers while slomo is running.";
+VMM_TT_SLOMO_MSG_STATUS = "Shows cooldown and not-enough-points messages when the toggle key is pressed.";
+VMM_TT_SLOMO_MSG_READY = "Shows a Slomo Ready! message when the minimum point threshold is reached.";
+VMM_TT_SLOMO_HUD_DIVFACTOR = "Divides the cooldown number displayed in the HUD. Useful to show seconds instead of raw tics. Never set to 0. Default: 1.";
+
+// ─── Player Rules ─────────────────────────────────────────────────────────────
+VMM_TT_PLAYER_RULES = "Per-player stat overrides: damage, speed, jump, health cap, and starting conditions.";
+VMM_TT_DAMAGE_MULT = "Multiplies all outgoing weapon damage. 1.0 = unchanged. 2.0 = double damage. Default: 1.0.";
+VMM_TT_TAKEN_DAMAGE = "Multiplies all incoming damage before it is applied. Below 1.0 = tankier. Above 1.0 = more fragile. Default: 1.0.";
+VMM_TT_SELF_DAMAGE = "Multiplies splash damage and other self-inflicted damage. 0 = no self damage. Default: 1.0.";
+VMM_TT_JUMP_MULT = "Scales jump height. Default: 1.0.";
+VMM_TT_SPEED_MULT = "Scales base movement speed. Default: 1.0.";
+VMM_TT_MAX_HEALTH = "Overrides the player's maximum health cap. Health is clamped to this value if it exceeds it. 0 = use the game's default.";
+VMM_TT_START_HEALTH = "Health the player starts with on each level entry. 0 = use the game's default starting health.";
+VMM_TT_START_ARMOR = "Armor the player starts with on each level entry. 0 = none.";
+VMM_TT_RESET_PLAYER_RULES = "Resets all player rule multipliers and start conditions to defaults.";
+
+// ─── World Rules ──────────────────────────────────────────────────────────────
+VMM_TT_WORLD_RULES = "Scale enemy and friendly monster health and speed. Applied when each monster spawns.";
+VMM_TT_ENEMY_HP_MULT = "Multiplies enemy spawn health. Applied once when the enemy spawns — does not affect existing enemies. Default: 1.0.";
+VMM_TT_ENEMY_HP_CAP = "Maximum health any enemy can have after scaling. 0 = no cap.";
+VMM_TT_ENEMY_SPD_MULT = "Multiplies enemy movement speed on spawn. Default: 1.0.";
+VMM_TT_FRIEND_HP_MULT = "Multiplies friendly monster spawn health. Default: 1.0.";
+VMM_TT_FRIEND_HP_CAP = "Maximum health any friendly monster can have after scaling. 0 = no cap.";
+VMM_TT_FRIEND_SPD_MULT = "Multiplies friendly monster movement speed on spawn. Default: 1.0.";
+VMM_TT_RESET_WORLD_RULES = "Resets all enemy and friendly monster scaling to 1.0 with no caps.";
+
+// ─── Permanent Powerups ───────────────────────────────────────────────────────
+VMM_TT_POWERUPS = "Keep GZDoom powerups active indefinitely. Each is topped up every second.";
+VMM_TT_PERM_BUDDHA = "Survive at 1 HP — cannot be killed by damage. Powerup: PowerBuddha.";
+VMM_TT_PERM_DAMAGE = "Doubles all weapon damage output. Powerup: PowerDamage.";
+VMM_TT_PERM_DOUBLEFIRING = "Doubles weapon firing speed. Powerup: PowerDoubleFiringSpeed.";
+VMM_TT_PERM_DRAIN = "Regenerates health on each hit dealt. Powerup: PowerDrain.";
+VMM_TT_PERM_FLIGHT = "Grants free flight. Warning: may allow bypassing map progression barriers. Powerup: PowerFlight.";
+VMM_TT_PERM_FRIGHTENER = "Causes monsters that can see you to flee. Note: only works on monsters with a Fear state — vanilla Doom enemies are unaffected. Powerup: PowerFrightener.";
+VMM_TT_PERM_GHOST = "Player passes through most solid objects. Powerup: PowerGhost.";
+VMM_TT_PERM_HIGHJUMP = "Greatly increases jump height. Powerup: PowerHighJump.";
+VMM_TT_PERM_INFINITEAMMO = "All weapons have unlimited ammunition. Powerup: PowerInfiniteAmmo.";
+VMM_TT_PERM_INVISIBILITY = "Full invisibility — enemies cannot see you. Powerup: PowerInvisibility.";
+VMM_TT_PERM_INVULN = "Grants invulnerability. Warning: may affect map progression. Powerup: PowerInvulnerable.";
+VMM_TT_PERM_IRONFEET = "Radiation suit — immunity to floor damage. Powerup: PowerIronFeet.";
+VMM_TT_PERM_LIGHTAMP = "Full map brightness regardless of sector lighting. Powerup: PowerLightAmp.";
+VMM_TT_PERM_MASK = "Gas mask — protection from airborne damage sources. Powerup: PowerMask.";
+VMM_TT_PERM_PROTECTION = "General damage resistance. Powerup: PowerProtection.";
+VMM_TT_PERM_REGENERATION = "Passive health regeneration over time (engine-level). Powerup: PowerRegeneration.";
+VMM_TT_PERM_SCANNER = "Reveals all enemies on the automap. Powerup: PowerScanner.";
+VMM_TT_PERM_SHADOW = "Partial invisibility — enemies have reduced targeting accuracy. Powerup: PowerShadow.";
+VMM_TT_PERM_SPEED = "Doubles movement speed. Powerup: PowerSpeed.";
+VMM_TT_PERM_STRENGTH = "Berserk fist — melee kills most enemies in one hit. Powerup: PowerStrength.";
+VMM_TT_PERM_TARGETER = "Enables the targeter crosshair HUD element. Powerup: PowerTargeter.";
+VMM_TT_PERM_TIMEFREEZER = "Freezes all actors in the map. Powerup: PowerTimeFreezer.";
+VMM_TT_PERM_TORCH = "Light amplification variant. Powerup: PowerTorch.";
+VMM_TT_PERM_WEAPONLEVEL2 = "Heretic/Hexen weapon power-up. Has no effect in Doom IWADs. Powerup: PowerWeaponLevel2.";
+VMM_TT_RESET_POWERUPS = "Disables all permanent powerups at once.";
+
+// ─── Regeneration ─────────────────────────────────────────────────────────────
+VMM_TT_REGEN = "Configure health, armor, and ammo regeneration. Each can regen or degen over time.";
+VMM_TT_SUBMENU_HEALTH_REGEN = "Periodically restore or drain health within a configurable HP range.";
+VMM_TT_SUBMENU_ARMOR_REGEN = "Periodically restore or drain armor within a configurable armor range.";
+VMM_TT_SUBMENU_AMMO_REGEN = "Periodically top up all carried ammo types within their natural caps.";
+
+VMM_TT_HEALTH_REGEN = "Master switch for periodic health restoration or drain.";
+VMM_TT_REGEN_TYPE = "Regeneration: restores health each interval. Degeneration: drains health each interval.";
+VMM_TT_REGEN_AMOUNT = "HP restored (or drained) per interval. Default: 1.";
+VMM_TT_REGEN_TIME = "Seconds between each regen tick. Default: 5.0.";
+VMM_TT_REGEN_MIN = "Regen will not fire if health is below this floor. Set to 0 to disable the floor. Useful to ensure regen only operates above a critical threshold.";
+VMM_TT_REGEN_MAX = "Regen will not fire if health is above this ceiling. Set to 0 for no ceiling — regen fires until full health.";
+VMM_TT_REGEN_SND = "Volume of the sound played when regen fires. 0 = silent.";
+VMM_TT_REGEN_VISUAL = "Intensity of the screen color flash when regen fires. 0 = no flash.";
+VMM_TT_REGEN_COLOR = "Color of the screen flash when health regen fires.";
+VMM_TT_RESET_HEALTH_REGEN = "Resets health regen type, amount, interval, range, and feedback to defaults.";
+
+VMM_TT_ARMOR_REGEN = "Master switch for periodic armor restoration or drain.";
+VMM_TT_ARMOR_REGEN_TYPE = "Regeneration: restores armor each interval. Degeneration: drains armor.";
+VMM_TT_ARMOR_REGEN_AMOUNT = "Armor restored (or drained) per interval. Default: 1.";
+VMM_TT_ARMOR_REGEN_TIME = "Seconds between each armor regen tick. Default: 5.0.";
+VMM_TT_ARMOR_REGEN_MIN = "Armor regen will not fire if armor is below this floor. 0 = no floor.";
+VMM_TT_ARMOR_REGEN_MAX = "Armor regen will not fire if armor is above this ceiling. 0 = no ceiling. Default cap: 100.";
+VMM_TT_ARMOR_REGEN_SND = "Volume of the sound played when armor regen fires. 0 = silent.";
+VMM_TT_ARMOR_REGEN_VISUAL = "Intensity of the screen flash when armor regen fires. 0 = no flash.";
+VMM_TT_ARMOR_REGEN_COLOR = "Color of the screen flash when armor regen fires.";
+VMM_TT_RESET_ARMOR_REGEN = "Resets armor regen type, amount, interval, range, and feedback to defaults.";
+
+VMM_TT_AMMO_REGEN = "Master switch for periodic ammo replenishment.";
+VMM_TT_AMMO_REGEN_TIME = "Seconds between each ammo regen tick. Ammo is given to all carried weapon types. Default: 10.0.";
+VMM_TT_AMMO_REGEN_BACKPACK = "When On, ammo only regenerates if the player is carrying a backpack.";
+VMM_TT_AMMO_REGEN_SND = "Volume of the sound played when ammo regen fires. 0 = silent.";
+VMM_TT_AMMO_REGEN_VISUAL = "Intensity of the screen flash when ammo regen fires. 0 = no flash.";
+VMM_TT_AMMO_REGEN_COLOR = "Color of the screen flash when ammo regen fires.";
+VMM_TT_RESET_AMMO_REGEN = "Resets ammo regen interval, backpack requirement, and feedback to defaults.";
+
+// ─── HUD ──────────────────────────────────────────────────────────────────────
+VMM_TT_HUD = "Configure the stacked ability bars and on-screen indicators.";
+VMM_TT_HUD_ENABLED = "Master switch for the ability HUD. When off, all bars and indicators are hidden.";
+VMM_TT_HUD_STAMINA = "Shows the STM bar — the shared melee/dash stamina pool. Green/yellow/red based on level.";
+VMM_TT_HUD_SLOMO = "Shows the SLO bar — the slomo bullet time point pool. Blue/purple/red based on level.";
+VMM_TT_HUD_DASH = "Shows the DSH bar — fills white as the dash cooldown recovers. Full = ready.";
+VMM_TT_HUD_HOOK = "Shows the HKG bar — fills orange as the hook cooldown recovers. Off by default.";
+VMM_TT_HUD_PARRY = "Shows [ SHIELD ] when the parry shield is armed, and !! CRIT PARRY !! with an immunity drain bar when the shield absorbs a hit.";
+VMM_TT_HUD_REGEN = "Shows a pulsing + symbol next to the STM label when health regen is actively ticking.";
+VMM_TT_HUD_X = "Horizontal position of the HUD anchor in virtual 640x480 screen space. Default: 8 (near left edge).";
+VMM_TT_HUD_Y = "Vertical position of the bottom bar in virtual 640x480 screen space. Bars stack upward from here. Default: 462 (near bottom).";
+VMM_TT_HUD_HEIGHT = "Pixel height of each bar in virtual screen space. Default: 5.";
+VMM_TT_HUD_WIDTH = "Pixel width of each bar. Default: 100.";
+VMM_TT_HUD_LABEL_WIDTH = "Width of the label column to the left of each bar. Default: 36.";
+VMM_TT_HUD_GAP = "Vertical pixel gap between stacked bars. Default: 10.";
+VMM_TT_RESET_HUD = "Resets all HUD position, size, and visibility settings to defaults.";
+
+// =============================================================================
+// Hyper-V x Gun Bonsai Upgrade Strings
+// =============================================================================
+[enu default]
+
+TFLV_Upgrade_HyperV_Mobility_Name      = "Mobility";
+TFLV_Upgrade_HyperV_Mobility_Desc      = "Unlocks movement abilities. Level 1: crouch, jump, and dash. Level 2: double dash and ledge climb. Level 3: double jump.";
+TFLV_Upgrade_HyperV_Mobility_TT        = "Mobility (@next)";
+
+TFLV_Upgrade_HyperV_Melee_Name         = "Combat Training";
+TFLV_Upgrade_HyperV_Melee_Desc         = "Unlocks close-quarters combat. Level 1: auto-melee. Level 2: combo system and knockback. Level 3: parry.";
+TFLV_Upgrade_HyperV_Melee_TT           = "Combat Training (@next)";
+
+TFLV_Upgrade_HyperV_BulletTime_Name    = "Bullet Time";
+TFLV_Upgrade_HyperV_BulletTime_Desc    = "Unlocks slow-motion bullet time on this weapon. Melee and wimpy weapons only. Level 1: 60% capacity. Level 2: full capacity with Berserk and Invulnerability bonuses.";
+TFLV_Upgrade_HyperV_BulletTime_TT      = "Bullet Time (@next)";
+
+TFLV_Upgrade_HyperV_HealthRegen_Name   = "Regeneration";
+TFLV_Upgrade_HyperV_HealthRegen_Desc   = "Unlocks passive health regeneration. Health recovers up to @cap every @tick.";
+TFLV_Upgrade_HyperV_HealthRegen_TT     = "Regeneration (cap: @cap, tick: @tick)";
+
+TFLV_Upgrade_HyperV_ArmorRegen_Name    = "Armor Recovery";
+TFLV_Upgrade_HyperV_ArmorRegen_Desc    = "Unlocks passive armor regeneration. Armor recovers up to @cap every @tick.";
+TFLV_Upgrade_HyperV_ArmorRegen_TT      = "Armor Recovery (cap: @cap, tick: @tick)";
+
+TFLV_Upgrade_HyperV_AmmoRegen_Name     = "Resupply";
+TFLV_Upgrade_HyperV_AmmoRegen_Desc     = "Unlocks passive ammo regeneration. All carried ammo types slowly replenish. Level 2 enables backpack scaling.";
+TFLV_Upgrade_HyperV_AmmoRegen_TT       = "Resupply (tick: @tick, backpack: @backpack)";
+
+TFLV_Upgrade_HyperV_Agility_Name       = "Agility";
+TFLV_Upgrade_HyperV_Agility_Desc       = "Increases movement speed and jump height. Level 1: +25% speed. Level 2: +35% jump height.";
+TFLV_Upgrade_HyperV_Agility_TT         = "Agility: @speed / @jump";
+
+TFLV_Upgrade_HyperV_Hook_Name          = "Grappling Hook";
+TFLV_Upgrade_HyperV_Hook_Desc          = "Unlocks the grappling hook on this weapon. Level 1: pull to surfaces. Level 2: pull enemies and stun them on impact.";
+TFLV_Upgrade_HyperV_Hook_TT            = "Grappling Hook (@next)";
+
+TFLV_Upgrade_HyperV_Teleporter_Name    = "Teleporter";
+TFLV_Upgrade_HyperV_Teleporter_Desc    = "Unlocks the teleport beam on this weapon. Level 1: standard range and cooldown. Level 2: doubled range, halved cooldown.";
+TFLV_Upgrade_HyperV_Teleporter_TT      = "Teleporter (@next)";
+
+VMM_MELEE_BASE_CD = "Base Hit Cooldown (tics)";

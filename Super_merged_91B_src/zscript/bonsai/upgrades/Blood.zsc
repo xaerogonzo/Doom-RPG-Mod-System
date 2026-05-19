@@ -1,0 +1,155 @@
+// The blood (sanguine) upgrade tree.
+//
+// APPRENTICE: SANGUINE INSCRIPTION
+// Applies a blood DoT whose damage per tick is proportional to the enemy's
+// CURRENT health. Strongest on fresh, tanky targets — fades naturally as HP
+// drops. Each tick heals the player for a fraction of damage dealt.
+// Strategic role: anti-tank opener with lifesteal sustain.
+//
+// JOURNEYMAN: VITAL DRAIN
+// Improves the lifesteal ratio. While the target is below 50% HP, each
+// tick also restores a small amount of armour.
+//
+// MASTER: EXSANGUINATE
+// When a blood-cursed enemy dies, a blood burst heals the player based on
+// the enemy's spawn health — the deathblow reward the DoT can't earn alone.
+//
+// Unlike other elements (2 mutually exclusive masters), blood uses a single
+// linear chain: Apprentice → Journeyman → Master.
+// #namespace TFLV::Upgrade;
+// #debug off
+
+class TFLV_Upgrade_SanguineShots : TFLV_Upgrade_ElementalUpgrade {
+  override TFLV_Upgrade_UpgradeElement Element() { return TFLV_Upgrade_ELEM_BLOOD; }
+
+  override void OnDamageDealt(Actor player, Actor shot, Actor target, int damage) {
+    let bd = TFLV_Upgrade_BloodDot(
+      TFLV_Upgrade_Dot.GiveStacks(player, target, "TFLV_Upgrade_BloodDot",
+        damage * bonsai_stat_blood_stacks_per_damage,
+        level * bonsai_stat_blood_softcap));
+    if (bd) bd.level = max(bd.level, level);
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("drain",  string.format("%.1f%%", bonsai_stat_blood_drain_pct * level * 100.0));
+    fields.insert("heal",   string.format("%.0f%%", bonsai_stat_blood_heal_ratio * 100.0));
+    fields.insert("stacks", string.format("%.1f", bonsai_stat_blood_stacks_per_damage));
+    fields.insert("cap",    string.format("%.0f", level * bonsai_stat_blood_softcap));
+  }
+}
+
+class TFLV_Upgrade_VitalDrain : TFLV_Upgrade_DotModifier {
+  override TFLV_Upgrade_UpgradeElement Element() { return TFLV_Upgrade_ELEM_BLOOD; }
+  override string DotType() { return "TFLV_Upgrade_BloodDot"; }
+
+  override void ModifyDot(Actor player, Actor shot, Actor target, int damage, TFLV_Upgrade_Dot dot_item) {
+    TFLV_Upgrade_BloodDot(dot_item).vitalDrain = level;
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return HasIntermediatePrereq(info, "TFLV_Upgrade_SanguineShots");
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("heal-bonus", string.format("+%.0f%%", bonsai_stat_blood_vitaldrain_bonus * level * 100.0));
+  }
+}
+
+class TFLV_Upgrade_Exsanguinate : TFLV_Upgrade_ElementalUpgrade {
+  override TFLV_Upgrade_UpgradeElement Element() { return TFLV_Upgrade_ELEM_BLOOD; }
+
+  override void OnKill(PlayerPawn player, Actor shot, Actor target) {
+    double stacks = TFLV_Upgrade_Dot.CountStacks(target, "TFLV_Upgrade_BloodDot");
+    if (stacks <= 0) return;
+
+    // Heal based on enemy's spawn health — rewarding the kill the DoT couldn't finish.
+    int burstHeal = int(target.SpawnHealth() * bonsai_stat_blood_burst_ratio * level);
+    if (burstHeal <= 0) return;
+    player.GiveBody(burstHeal);
+  }
+
+  override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
+    return HasIntermediatePrereq(info, "TFLV_Upgrade_VitalDrain");
+  }
+
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    fields.insert("burst", string.format("%.0f%%", bonsai_stat_blood_burst_ratio * level * 100.0));
+  }
+}
+
+// =============================================================================
+// BloodDot — the inventory item that lives on the afflicted enemy.
+// =============================================================================
+class TFLV_Upgrade_BloodDot : TFLV_Upgrade_Dot {
+  uint level;
+  uint vitalDrain; // level of VitalDrain modifier on this dot (0 = not active)
+
+  Default {
+    DamageType "Blood";
+  }
+
+  override double GetElementMultiplier() { return bonsai_stat_blood_mult; }
+
+  override string GetParticleColour() {
+    static const string colours[] = { "crimson", "darkred", "firebrick", "darkred" };
+    return colours[random[TFLV_Upgrade_RNG_BloodColour](0, 3)];
+  }
+
+  // Slight downward drift — distinct from fire (+0.1 rise) while sharing the
+  // downward feel of poison/acid, but slower for a heavy "blood drip" look.
+  override double GetParticleZV() { return -0.05; }
+
+  // Damage = % of enemy's CURRENT health per tick, scaled by upgrade level.
+  // Anti-tank behaviour: strong when the target is fresh, fades as HP drops.
+  // Stacks are consumed as a pure duration timer independent of damage dealt.
+  override double GetDamage() {
+    if (!owner || stacks <= 0) return 0;
+    double dmg = double(owner.health) * bonsai_stat_blood_drain_pct * level;
+    stacks -= bonsai_stat_blood_stack_drain_rate;
+    return max(0.5, dmg); // floor keeps it from truly zeroing on low-HP targets
+  }
+
+  override void TickDot() {
+    if (!owner || owner.bKILLED || stacks <= 0) {
+      if (owner) owner.RestoreRenderStyle();
+      Destroy();
+      return;
+    }
+
+    buffer += GetDamage() * GetElementMultiplier();
+    if (buffer > 1) {
+      int dealt = int(floor(buffer));
+      owner.DamageMobj(self, self.target, dealt, self.DamageType,
+        DMG_NO_ARMOR | DMG_NO_PAIN | DMG_THRUSTLESS | DMG_NO_ENHANCE);
+      buffer -= dealt;
+
+      // Heal the player proportional to damage dealt this tick.
+      let plr = PlayerPawn(self.target);
+      if (plr && dealt > 0) {
+        double healRatio = bonsai_stat_blood_heal_ratio;
+        if (vitalDrain > 0)
+          healRatio += bonsai_stat_blood_vitaldrain_bonus * vitalDrain;
+
+        int healAmt = max(1, int(dealt * healRatio));
+        plr.GiveBody(healAmt);
+
+        // VitalDrain: while target is below 50% HP, also trickle-restore armour.
+        if (vitalDrain > 0) {
+          double hpFrac = double(owner.health) / max(1, owner.SpawnHealth());
+          if (hpFrac <= 0.5) {
+            let ab = BasicArmorBonus(Actor.Spawn("BasicArmorBonus", plr.pos, NO_REPLACE));
+            if (ab && !ab.CallTryPickup(plr)) ab.Destroy();
+          }
+        }
+      }
+    }
+  }
+
+  override void CopyFrom(TFLV_Upgrade_Dot _src) {
+    super.CopyFrom(_src);
+    let src = TFLV_Upgrade_BloodDot(_src);
+    if (!src) return;
+    self.level      = max(self.level,      src.level);
+    self.vitalDrain = max(self.vitalDrain, src.vitalDrain);
+  }
+}

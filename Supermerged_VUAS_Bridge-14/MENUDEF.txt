@@ -1,0 +1,125 @@
+// =============================================================================
+// Supermerged VUAS Bridge — MENUDEF
+// Injects an "Achievement Integration" submenu into the Gun Bonsai Suite.
+// This MENUDEF only loads when the bridge pk3 is present.
+// =============================================================================
+
+// Hook into the top-level Gun Bonsai Suite menu
+AddOptionMenu "GunBonsaiSuiteMenu"
+{
+  StaticText ""
+  TFLV_AnimatedSubmenu "Achievement Integration",  "SM_AchievementBonusMenu"
+  TFLV_Tooltip "Configure VUAS achievement bonus points and Doom Points integration. Only relevant when VUAS and this bridge are loaded."
+}
+
+// =============================================================================
+// Achievement Integration submenu
+// =============================================================================
+OptionMenu "SM_AchievementBonusMenu"
+{
+  class TFLV_TooltipOptionMenu
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+  Title "Achievement Integration"
+
+  StaticText "Integration Settings", GOLD
+  Option "Achievement Bonus Points",      "dp_ach_enabled",       "OnOff"
+  TFLV_Tooltip "Master switch for achievement bonus points. When ON, unlocking a VUAS achievement awards Doom Points score. Default ON."
+  Option "Show Toast on Bonus Award",     "dp_ach_repeat_toast",  "OnOff"
+  TFLV_Tooltip "Show the achievement toast again each time a bonus fires, including repeat runs. First-unlock toasts always show regardless of this setting. Default ON."
+  Slider "Weapon XP per 100 Bonus Points","dp_ach_xp_per_100pts", 0, 200, 10, 0
+  TFLV_Tooltip "How much Gun Bonsai weapon XP to award per 100 Doom Points earned from an achievement bonus. Example: achievement worth 500pts at 50 gives 250 weapon XP. Set to 0 to disable XP rewards entirely. Default 50."
+
+  StaticText ""
+  StaticText "VUAS Default Achievements", GOLD
+  StaticText "Points awarded when each achievement unlocks. Set to 0 to disable.", DARKGRAY
+  Slider "First Blood (first kill)",           "dp_ach_first_blood",        0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing your first enemy. Default 100."
+  Slider "Warrior (kill 50)",                  "dp_ach_kill_50",            0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing 50 enemies. Default 250."
+  Slider "Imp Slayer (kill 100 Imps)",         "dp_ach_kill_100_imps",      0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing 100 Imps. Default 300."
+  Slider "Zombie Slayer (kill 100 Zombiemen)", "dp_ach_kill_100_zombiemen", 0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing 100 Zombiemen. Default 300."
+  Slider "Secret Hunter (find 10 secrets)",    "dp_ach_secret_hunter",      0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for finding 10 secret areas. Default 400."
+  Slider "Ultraviolent (25 kills on UV+)",     "dp_ach_uv_warrior",         0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing 25 enemies on UV or Nightmare. Default 500."
+  Slider "Hidden Gem (hidden achievement)",    "dp_ach_hidden_gem",         0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for the hidden VUAS discovery achievement. Default 1000."
+
+  StaticText ""
+  StaticText "Supermerged Achievements — Leveling", GOLD
+  Slider "Baptism of Fire (first weapon level)", "dp_ach_wpn_first_level",    0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for leveling up any weapon for the first time. Default 250."
+  Slider "Sharpshooter (weapon level 5)",        "dp_ach_wpn_level_5",        0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points when any weapon reaches level 5. Default 500."
+  Slider "Master Armourer (weapon level 10)",    "dp_ach_wpn_level_10",       0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points when any weapon reaches level 10. Default 1000."
+  Slider "Growing Pains (first player level)",   "dp_ach_player_first_level", 0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for earning your first player level. Default 250."
+  Slider "Seasoned Veteran (player level 5)",    "dp_ach_player_level_5",     0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points when you reach player level 5. Default 500."
+  Slider "Legendary (player level 10)",          "dp_ach_player_level_10",    0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points when you reach player level 10. Default 1000."
+
+  StaticText ""
+  StaticText "Supermerged Achievements — Upgrades", GOLD
+  Slider "Enhancement Protocol (first upgrade)", "dp_ach_first_upgrade",       0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for selecting your first weapon upgrade. Default 100."
+  Slider "Perfection (upgrade level 3)",         "dp_ach_upgrade_level_3",     0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points when any upgrade reaches level 3. Default 500."
+  Slider "Grand Synthesis (elemental synthesis)","dp_ach_elemental_synthesis", 0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for unlocking any elemental synthesis upgrade. Default 300."
+  Slider "Elemental Master (all 4 elements)",    "dp_ach_all_elements",        0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for having all four elemental types active on one weapon. Default 500."
+  Slider "Overdrive (max charge stacks)",        "dp_ach_overdrive_maxed",     0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for reaching maximum Overdrive charge stacks. Default 300."
+  Slider "Arsenal (5+ upgrades, hidden)",        "dp_ach_all_upgrades",        0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for having 5 or more different upgrades on one weapon. Hidden achievement. Default 500."
+
+  StaticText ""
+  StaticText "Supermerged Achievements — Combat", GOLD
+  Slider "Century (100 kills)",                  "dp_ach_kills_100",      0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing 100 enemies total. Default 250."
+  Slider "Exterminatus (1000 kills)",            "dp_ach_kills_1000",     0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing 1000 enemies total. Default 1000."
+  Slider "Billiards (ricochet chain 3+)",        "dp_ach_ricochet_chain", 0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for a Ricochet shot that bounces to 3 or more enemies. Default 300."
+  Slider "On a Roll (streak 5 kills)",           "dp_ach_kill_streak_5",  0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing 5 enemies in quick succession. Default 200."
+  Slider "Unstoppable (streak 10 kills)",        "dp_ach_kill_streak_10", 0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing 10 enemies in quick succession. Default 500."
+  Slider "Untouchable (streak 25, hidden)",      "dp_ach_kill_streak_25", 0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for killing 25 enemies in quick succession. Hidden achievement. Default 2000."
+
+  StaticText ""
+  StaticText "Supermerged Achievements — Companions", GOLD
+  Slider "Faithful Companion (map clear alive)", "dp_ach_companion_survives",  0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for completing a map with your companion still alive. Default 300."
+  Slider "Back from the Dead (resurrect)",       "dp_ach_companion_resurrect", 0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for watching your companion resurrect after dying. Default 300."
+
+  StaticText ""
+  StaticText "Supermerged Achievements — Survival & Exploration", GOLD
+  Slider "Deathless (no deaths on map)",          "dp_ach_no_death_map",        0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for completing a map without dying. Per-map achievement — fires every run. Default 750."
+  Slider "Safety Net (Indestructible life used)", "dp_ach_indestructible_used", 0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for spending an Indestructible extra life. Default 100."
+  Slider "Baptism by Fire (XP comeback, hidden)", "dp_ach_xp_comeback",         0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for losing XP from dying and earning it back to the same weapon level. Hidden achievement. Default 500."
+  Slider "Secret Finder (first secret)",          "dp_ach_secret_finder",       0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for finding your first secret area. Default 150."
+  Slider "No Stone Unturned (100% map)",          "dp_ach_perfect_map",         0, 5000, 50, 0
+  TFLV_Tooltip "Bonus points for completing a map with 100% kills, items, and secrets. Per-map achievement — fires every run. Default 750."
+
+  StaticText ""
+  StaticText "Run Progress", GOLD
+  StaticText "Track which bonuses have fired this run.", DARKGRAY
+  Command ">> Reset Run Achievement Progress", "netevent sm_reset_run_progress"
+  TFLV_Tooltip "Clears the per-run record of which achievement bonuses have already been awarded. After resetting, earning any achievement again this run will award its Doom Points bonus again. Does not affect historical VUAS records."
+
+  StaticText ""
+  Command ">> Reset All Bonus Values to Defaults", "resetcvar dp_ach_first_blood; resetcvar dp_ach_kill_50; resetcvar dp_ach_kill_100_imps; resetcvar dp_ach_kill_100_zombiemen; resetcvar dp_ach_secret_hunter; resetcvar dp_ach_uv_warrior; resetcvar dp_ach_hidden_gem; resetcvar dp_ach_wpn_first_level; resetcvar dp_ach_wpn_level_5; resetcvar dp_ach_wpn_level_10; resetcvar dp_ach_player_first_level; resetcvar dp_ach_player_level_5; resetcvar dp_ach_player_level_10; resetcvar dp_ach_first_upgrade; resetcvar dp_ach_upgrade_level_3; resetcvar dp_ach_elemental_synthesis; resetcvar dp_ach_all_elements; resetcvar dp_ach_overdrive_maxed; resetcvar dp_ach_all_upgrades; resetcvar dp_ach_kills_100; resetcvar dp_ach_kills_1000; resetcvar dp_ach_ricochet_chain; resetcvar dp_ach_kill_streak_5; resetcvar dp_ach_kill_streak_10; resetcvar dp_ach_kill_streak_25; resetcvar dp_ach_companion_survives; resetcvar dp_ach_companion_resurrect; resetcvar dp_ach_no_death_map; resetcvar dp_ach_indestructible_used; resetcvar dp_ach_xp_comeback; resetcvar dp_ach_secret_finder; resetcvar dp_ach_perfect_map"
+  TFLV_Tooltip "Reset all achievement bonus point values back to their defaults."
+}

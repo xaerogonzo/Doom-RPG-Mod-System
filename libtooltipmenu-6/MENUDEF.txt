@@ -1,0 +1,22 @@
+// libtooltipmenu — global tooltip override configuration.
+
+OptionValue "TFLV_TTPresets"
+{
+    0, "Custom"
+    1, "Left Panel"
+    2, "Right Panel"
+    3, "Bottom Bar"
+    4, "Top Bar"
+    5, "Centre Box"
+}
+
+AddOptionMenu "OptionsMenu"
+{
+    Submenu "Tooltip Appearance", "TFLV_TooltipConfigMenu"
+}
+
+OptionMenu "TFLV_TooltipConfigMenu"
+{
+    class TFLV_TooltipConfigMenu
+    Title "Tooltip Appearance"
+}

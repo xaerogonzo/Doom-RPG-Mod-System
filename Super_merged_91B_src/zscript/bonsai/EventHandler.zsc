@@ -1,0 +1,770 @@
+// =============================================================================
+// Unified Event Handler for Gun Bonsai
+// Integrates: Gun Bonsai, Indestructible, and Doom Points
+// Master switches gate all subsystem calls for zero performance impact when off.
+// =============================================================================
+// #namespace TFLV;
+// #debug off;
+
+class TFLV_EventHandler : StaticEventHandler {
+  // --- Gun Bonsai state ---
+  TFLV_PerPlayerStats playerstats[MAXPLAYERS];
+  TFLV_Upgrade_Registry UPGRADE_REGISTRY;
+  TFLV_RC rc;
+  TFLV_GunBonsaiService service;
+  ui TFLV_HUD hud;
+  // Tracks whether each player died this session without a map transition
+  // in between. Used to distinguish a same-map death respawn (totaltime resets
+  // to 0 but we should keep upgrades) from a true new game start.
+  bool player_died_this_map[MAXPLAYERS];
+
+  // --- Indestructible subsystem ---
+  TFIS_IndestructibleSystem indestructible;
+
+  // --- Doom Points subsystem ---
+  dp_ScoringSystem scoring;
+
+  // --- Companions subsystem ---
+  TFCO_CompanionsSystem companions;
+
+  // =========================================================================
+  // Master switch helpers - cached per-tic for performance
+  // =========================================================================
+
+  private bool cached_bonsai_on;
+  private bool cached_indestructible_on;
+  private bool cached_dp_on;
+  private bool cached_companions_on;
+  private transient int last_cache_tic;
+
+  void RefreshMasterSwitches() {
+    if (last_cache_tic == gametic) return;
+    last_cache_tic = gametic;
+    let cv_b = CVar.FindCVar("bonsai_enabled");
+    cached_bonsai_on = cv_b ? cv_b.GetBool() : true;
+    let cv_i = CVar.FindCVar("indestructible_enabled");
+    cached_indestructible_on = cv_i ? cv_i.GetBool() : true;
+    let cv_d = CVar.FindCVar("dp_enabled");
+    cached_dp_on = cv_d ? cv_d.GetBool() : true;
+    let cv_c = CVar.FindCVar("companions_enabled");
+    cached_companions_on = cv_c ? cv_c.GetBool() : true;
+  }
+
+  bool BonsaiEnabled()        { RefreshMasterSwitches(); return cached_bonsai_on; }
+  bool IndestructibleEnabled(){ RefreshMasterSwitches(); return cached_indestructible_on; }
+  bool DoomPointsEnabled()    { RefreshMasterSwitches(); return cached_dp_on; }
+  bool CompanionsEnabled()    { RefreshMasterSwitches(); return cached_companions_on; }
+
+  ui static bool IsBonsaiEnabledUI() {
+    let cv = CVar.FindCVar("bonsai_enabled");
+    return cv ? cv.GetBool() : true;
+  }
+  ui static bool IsDoomPointsEnabledUI() {
+    let cv = CVar.FindCVar("dp_enabled");
+    return cv ? cv.GetBool() : true;
+  }
+
+  // =========================================================================
+  // Initialization
+  // =========================================================================
+
+  override void OnRegister() {
+    console.printf("Initializing Gun Bonsai (unified) v%s...", "gun-bonsai-0.10.6-unified-r2");
+
+    UPGRADE_REGISTRY = new("TFLV_Upgrade_Registry");
+    rc = TFLV_RC.LoadAll("BONSAIRC");
+    rc.Finalize(self);
+
+    let bonsaiService = TFLV_GunBonsaiService(ServiceIterator.Find("TFLV_GunBonsaiService").Next());
+    bonsaiService.Init(self);
+    self.service = bonsaiService;
+
+    indestructible = new("TFIS_IndestructibleSystem");
+    let isService = TFIS_IndestructibleService(ServiceIterator.Find("TFIS_IndestructibleService").Next());
+    if (isService) isService.Init(indestructible);
+
+    scoring = new("dp_ScoringSystem").init();
+    companions = new("TFCO_CompanionsSystem");
+
+    // Report Legendoom status at startup so it's visible in the log.
+    if (TFLV_Settings.have_legendoom()) {
+      console.printf("%s", StringTable.Localize("$TFLV_MSG_LD_YES"));
+    } else {
+      console.printf("%s", StringTable.Localize("$TFLV_MSG_LD_NO"));
+    }
+  }
+
+  // =========================================================================
+  // Player lifecycle
+  // =========================================================================
+
+  override void PlayerEntered(PlayerEvent evt) {
+    if (DoomPointsEnabled())
+      scoring.PlayerEntered(evt.playerNumber);
+    if (IndestructibleEnabled())
+      indestructible.PlayerEntered(evt.playerNumber);
+    if (CompanionsEnabled())
+      companions.PlayerEntered(evt.playerNumber);
+  }
+
+  override void PlayerRespawned(PlayerEvent evt) {
+    // Fires whenever a player respawns after death, both mid-map and at death exits.
+    // We call InitPlayer immediately so the proxy is recreated and stats are
+    // reattached before the first tic — don't wait for lazy GetStatsFor.
+    // new_map=false: the wipe logic is already handled by WorldLoaded for map
+    // transitions; here we only care about restoring an existing proxy.
+    if (BonsaiEnabled()) InitPlayer(evt.playerNumber, false);
+  }
+
+  override void PlayerDisconnected(PlayerEvent evt) {
+    if (DoomPointsEnabled())
+      scoring.PlayerDisconnected(evt.playerNumber);
+  }
+
+  // =========================================================================
+  // World loading
+  // =========================================================================
+
+  int mapnum;
+  bool playerDiedThisMap;       // reset each map load, used for deathless achievement
+  bool mapWasPlayed;            // true once the player has actually taken any action this map
+  bool pendingDeathlessCheck;   // set in WorldUnloaded, consumed in WorldLoaded (skipped on save loads)
+
+  override void WorldLoaded(WorldEvent evt) {
+    playerDiedThisMap = false; // reset on each new map
+    mapWasPlayed      = false; // reset on each new map
+
+    // Consume the pending deathless check set by the previous WorldUnloaded.
+    // Only fire the event if this is a real map transition, not a save load.
+    // On save load, WorldUnloaded fired for the session we were just in,
+    // but we didn't actually exit the map — skip to avoid a false deathless.
+    if (pendingDeathlessCheck && !evt.IsSaveGame) {
+      EventHandler.SendNetworkEvent("vuas_event:no_death_map");
+    }
+    pendingDeathlessCheck = false;
+    // Rebuild Doom Points playerScores first — must happen before InitPlayer
+    // so that score tracking is live from the first tic on any map load,
+    // including save loads from a cold start.
+    if (DoomPointsEnabled()) scoring.WorldLoaded();
+
+    if (BonsaiEnabled()) {
+      // Wipe stats on a completely fresh game start (totaltime==0, not a save
+      // load, not a reopen). The tricky case: dying and respawning on the same
+      // map also lands here with totaltime==0. We use player_died_this_map to
+      // tell them apart — if the player died this map session, this is a respawn,
+      // not a new game. bonsai_keep_upgrades_on_death preserves stats on respawn.
+      bool is_fresh_game = (level.totaltime == 0 && !evt.IsSaveGame && !evt.IsReopen);
+      for (uint i = 0; i < MAXPLAYERS; ++i) {
+        bool is_respawn = player_died_this_map[i];
+        // Clear the flag — it only covers the immediately following WorldLoaded.
+        player_died_this_map[i] = false;
+        if (is_fresh_game && !(is_respawn && bonsai_keep_upgrades_on_death)) {
+          playerstats[i] = null;
+          // Also strip the proxy from the player's inventory. If we only null
+          // playerstats[], InitPlayer will find the old proxy still attached to
+          // the pawn (GZDoom doesn't wipe inventory before the first WorldLoaded)
+          // and restore all the old stats from it, defeating the wipe entirely.
+          if (players[i].mo) {
+            let oldProxy = players[i].mo.FindInventory("TFLV_PerPlayerStatsProxy");
+            if (oldProxy) oldProxy.Destroy();
+          }
+        }
+      }
+      for (uint i = 0; i < MAXPLAYERS; ++i) {
+        if (playeringame[i]) InitPlayer(i, true);
+      }
+      if (!evt.IsSaveGame && !evt.IsReopen) {
+        for (uint i = 0; i < 8; ++i) {
+          if (playeringame[i] && playerstats[i])
+            playerstats[i].OnMapEntry(level.mapname, mapnum);
+        }
+        ++mapnum;
+      }
+    }
+    if (IndestructibleEnabled())
+      indestructible.WorldLoaded(evt.IsSaveGame, evt.IsReopen);
+  }
+
+  override void WorldUnloaded(WorldEvent evt) {
+    // Guard: level.totaltime == 0 means the map was never meaningfully played
+    // (e.g. the engine unloads a map that was barely entered). Skip all
+    // end-of-map achievement checks in this case to prevent false positives.
+    bool mapWasMeaningfullyPlayed = (level.totaltime > 0);
+
+    // Deathless: defer to WorldLoaded so we can skip false positives from save loads.
+    // WorldUnloaded also fires when loading a save, so we can't fire here safely.
+    pendingDeathlessCheck = (mapWasMeaningfullyPlayed && !playerDiedThisMap && mapWasPlayed);
+    // Check companion survival achievement
+    if (mapWasMeaningfullyPlayed && CompanionsEnabled() && companions != null) {
+      if (companions.HasLivingCompanion()) {
+        EventHandler.SendNetworkEvent("vuas_event:companion_survives");
+      }
+    }
+    // Check perfect map achievement (100% kills, items, secrets)
+    if (mapWasMeaningfullyPlayed && Level.total_monsters > 0 && Level.total_secrets >= 0 && Level.total_items >= 0) {
+      bool perfectKills   = Level.killed_monsters >= Level.total_monsters;
+      bool perfectSecrets = Level.total_secrets == 0 || Level.found_secrets >= Level.total_secrets;
+      bool perfectItems   = Level.total_items   == 0 || Level.found_items   >= Level.total_items;
+      if (perfectKills && perfectSecrets && perfectItems) {
+        EventHandler.SendNetworkEvent("vuas_event:perfect_map");
+      }
+    }
+    if (DoomPointsEnabled())
+      scoring.WorldUnloaded();
+  }
+
+  // =========================================================================
+  // Per-tick updates
+  // =========================================================================
+
+  override void WorldTick() {
+    if (DoomPointsEnabled())
+      scoring.WorldTick();
+  }
+
+  // =========================================================================
+  // Thing spawned
+  // =========================================================================
+
+  override void WorldThingSpawned(WorldEvent evt) {
+    Actor thing = evt.thing;
+    if (!thing) return;
+    if (BonsaiEnabled() && thing.bMISSILE && PlayerPawn(thing.target))
+      TFLV_PerPlayerStats.GetStatsFor(thing.target).OnProjectileCreated(thing);
+    if (DoomPointsEnabled())
+      scoring.WorldThingSpawned(thing);
+    if (CompanionsEnabled()) {
+      companions.WorldThingSpawned(thing);
+    }
+  }
+
+  // =========================================================================
+  // Thing revived (by Archvile etc.)
+  // =========================================================================
+
+  override void WorldThingRevived(WorldEvent evt) {
+    if (CompanionsEnabled())
+      companions.WorldThingRevived(evt.thing);
+  }
+
+  // =========================================================================
+  // Thing died
+  // =========================================================================
+
+  override void WorldThingDied(WorldEvent evt) {
+    Actor died = evt.thing;
+    if (!died) return;
+
+    // Track player deaths so WorldLoaded can distinguish a same-map respawn
+    // (where totaltime resets to 0) from a true new game start.
+    if (BonsaiEnabled()) {
+      let deadPlayer = PlayerPawn(died);
+      if (deadPlayer) {
+        int pn = deadPlayer.PlayerNumber();
+        player_died_this_map[pn] = true;
+        playerDiedThisMap = true; // always track for deathless achievement
+
+        // XP death penalty — reduce within-level XP progress for ALL weapons
+        // by the configured fraction. Only progress above each weapon's current
+        // level floor is penalized, so you can never lose a level.
+        // We iterate all weapons[] directly because by the time WorldThingDied
+        // fires, GZDoom has already cleared ReadyWeapon to null and TickStats
+        // has set infoForCurrentWeapon to null as a result — so we can't rely
+        // on either of those fields here.
+        if (bonsai_death_xp_penalty > 0 && playerstats[pn]) {
+          let stats = playerstats[pn];
+          bool anyPenalty = false;
+          for (int wi = 0; wi < stats.weapons.Size(); ++wi) {
+            let info = stats.weapons[wi];
+            if (!info || info.XP <= 0) continue;
+            double floor    = info.TotalXPForLevel(info.level);
+            double progress = info.XP - floor;
+            if (progress > 0) {
+              info.XP = floor + max(0, progress * (1.0 - bonsai_death_xp_penalty));
+              anyPenalty = true;
+            }
+          }
+          if (anyPenalty)
+            stats.xpPenaltyAppliedThisSession = true;
+        }
+
+        // Score death penalty — deduct flat points from player score.
+        if (DoomPointsEnabled()) {
+          let cv = CVar.GetCVar("dp_death_score_penalty", players[pn]);
+          if (cv) {
+            int penalty = cv.GetInt();
+            if (penalty > 0 && deadPlayer.score > 0)
+              deadPlayer.score = max(0, deadPlayer.score - penalty);
+          }
+        }
+      }
+    }
+
+    // Before handing off to DoomPoints, ensure died.target points to the
+    // actual player killer so dp_Counter.countDeath attribution works.
+    // When an elemental DoT (or other upgrade-spawned inflictor) deals the
+    // killing blow, died.target ends up pointing at the Inventory/Actor that
+    // called DamageMobj — not at the PlayerPawn.  We fix this by checking
+    // whether that actor carries a FriendPlayer back-reference to a player,
+    // or whether it is itself a TFLV_Upgrade_Dot whose .target is a player.
+    if (DoomPointsEnabled() && died.target && !PlayerPawn(died.target)) {
+      // Check TFLV_Upgrade_Dot: self.target is set to the owning PlayerPawn.
+      let dotItem = TFLV_Upgrade_Dot(died.target);
+      if (dotItem && PlayerPawn(dotItem.target)) {
+        died.target = dotItem.target;
+      }
+      // Fallback: generic FriendPlayer attribution (covers other upgrade actors).
+      else if (died.target.FriendPlayer && playeringame[died.target.FriendPlayer-1]) {
+        died.target = players[died.target.FriendPlayer-1].mo;
+      }
+    }
+
+    if (DoomPointsEnabled())
+      scoring.WorldThingDied(died);
+    if (IndestructibleEnabled())
+      indestructible.WorldThingDied(died);
+  }
+
+  // =========================================================================
+  // Damage handling (Gun Bonsai)
+  // =========================================================================
+
+  static PlayerPawn GetPlayerDamageSource(WorldEvent evt) {
+    if (evt.damage <= 0 || !evt.thing.bISMONSTER || !evt.damagesource
+        || evt.thing.bFRIENDLY || evt.thing == evt.damagesource)
+      return null;
+    if (evt.damagesource is "PlayerPawn") return PlayerPawn(evt.damagesource);
+    if (evt.damagesource.FriendPlayer && playeringame[evt.damagesource.FriendPlayer-1])
+      return players[evt.damagesource.FriendPlayer-1].mo;
+    return null;
+  }
+
+  override void WorldThingDamaged(WorldEvent evt) {
+    // --- Gun Bonsai ---
+    if (BonsaiEnabled()) {
+      if (PlayerPawn(evt.thing)) {
+        TFLV_PerPlayerStats.GetStatsFor(PlayerPawn(evt.thing)).OnDamageReceived(
+          evt.inflictor, evt.damagesource, evt.damage);
+        return;
+      }
+      PlayerPawn source = GetPlayerDamageSource(evt);
+      if (source) {
+        let stats = TFLV_PerPlayerStats.GetStatsFor(PlayerPawn(source));
+        stats.OnDamageDealt(evt.inflictor, evt.thing, evt.damage);
+        if (evt.thing.health <= 0)
+          stats.OnKill(evt.inflictor, evt.thing);
+      }
+    }
+
+    // Mark map as played on first damage event
+    mapWasPlayed = true;
+    // --- Doom Points damage scoring ---
+    // Award score for every point of damage dealt to a monster by a player,
+    // including DoT effects (fire, poison, acid, lightning).
+    // DoT damage calls DamageMobj(self, self.target, ...) where self.target
+    // is the PlayerPawn, so evt.damagesource is already the player for dots.
+    // We also resolve through TFLV_Upgrade_Dot in case attribution got indirect.
+    if (DoomPointsEnabled() && evt.damage > 0
+        && evt.thing.bISMONSTER && !evt.thing.bFRIENDLY
+        && evt.thing != evt.damagesource) {
+      Actor scoringSource = evt.damagesource;
+      if (scoringSource && !PlayerPawn(scoringSource)) {
+        // Check if it's a Dot item whose .target is the player
+        let dotItem = TFLV_Upgrade_Dot(scoringSource);
+        if (dotItem && PlayerPawn(dotItem.target)) {
+          scoringSource = dotItem.target;
+        } else if (scoringSource.FriendPlayer && playeringame[scoringSource.FriendPlayer-1]) {
+          scoringSource = players[scoringSource.FriendPlayer-1].mo;
+        }
+      }
+      if (scoringSource) {
+        scoring.WorldThingDamaged(evt.thing, evt.damage, evt.damagetype, scoringSource);
+      }
+    }
+  }
+
+  // =========================================================================
+  // Rendering
+  // =========================================================================
+
+  ui bool ShouldDrawBonsaiHUD(uint p) const {
+    return IsBonsaiEnabledUI() && playeringame[p] && playerstats[p]
+      && players[p].ReadyWeapon && screenblocks <= 11 && !automapactive;
+  }
+
+  override void RenderOverlay(RenderEvent evt) {
+    if (ShouldDrawBonsaiHUD(consoleplayer)) {
+      if (!hud) hud = new("TFLV_HUD");
+      TFLV_CurrentStats stats;
+      if (playerstats[consoleplayer].GetCurrentStats(stats))
+        hud.Draw(stats);
+    }
+    if (IsDoomPointsEnabledUI() && !menuActive && !automapActive)
+      scoring.RenderOverlay(evt.fracTic);
+  }
+
+  // =========================================================================
+  // Network events
+  // =========================================================================
+
+  override void NetworkProcess(ConsoleEvent evt) {
+    if (BonsaiEnabled()) {
+      if (evt.name == "bonsai-show-info") { ShowInfo(evt.player); return; }
+      else if (evt.name == "bonsai-choose-level-up-option") { ChooseLevelUpOption(evt.player, evt.args[0]); return; }
+      else if (evt.name == "bonsai-toggle-upgrade") { ToggleUpgrade(evt.player, evt.args[0] != 0, evt.args[1]); return; }
+      else if (evt.name == "bonsai-tune-upgrade") { TuneUpgrade(evt.player, evt.args[0] != 0, evt.args[1], evt.args[2]); return; }
+      else if (evt.name.IndexOf("bonsai-debug") == 0) { TFLV_Debug.DebugCommand(service, evt.player, evt.name, evt.args[0]); return; }
+      else if (evt.name == "bonsai-cycle-ld-effect") {
+        if (TFLV_Settings.have_legendoom()) {
+          CycleLDEffect(evt.player);
+        } else {
+          if (players[evt.player].mo)
+            players[evt.player].mo.A_Log(StringTable.Localize("$TFLV_MSG_LD_REQUIRED"), true);
+        }
+        return;
+      }
+      else if (evt.name == "bonsai-select-ld-effect") {
+        if (TFLV_Settings.have_legendoom()) {
+          SelectLDEffect(evt.player, evt.args[0]);
+        }
+        return;
+      }
+      else if (evt.name == "dp_streak")
+      {
+        // Relay DoomPoints kill streak milestone to VUAS custom event
+        EventHandler.SendNetworkEvent(
+          string.format("vuas_event:kill_streak_%d", evt.args[0]));
+        return;
+      }
+      else if (evt.name.Left(20) == "dp_achievement_bonus" || evt.name.Left(24) == "dp_achievement_bonus_map")
+      {
+        // VUAS bridge fires "dp_achievement_bonus:achievement_id" when an achievement unlocks.
+        // args[0] = point value. Achievement ID is in the netevent name after the colon.
+        // We check SM_RunProgress here (proper play context) before awarding.
+        CVar masterSwitch = CVar.FindCVar("dp_ach_enabled");
+        if (!DoomPointsEnabled() || !scoring || evt.args[0] <= 0) return;
+        if (masterSwitch && !masterSwitch.GetBool()) return;
+
+        // Extract achievement ID from event name
+        String achID = "";
+        int colonPos = evt.name.IndexOf(":");
+        if (colonPos >= 0) achID = evt.name.Mid(colonPos + 1);
+
+        // Check per-run progress item on the player actor
+        let plr = players[evt.player >= 0 ? evt.player : consoleplayer].mo;
+        bool shouldAward = true;
+
+        if (plr && achID.Length() > 0)
+        {
+          // SM_RunProgress is defined in the bridge (loads after Supermerged) so we
+          // can't reference it by class name here. Use string-based inventory access
+          // and call methods via netevent relay to SM_RunProgressHandler instead.
+          //
+          // The sm_run_paid_ids CVar mirrors the item's paidIDs field (written by
+          // SM_RunProgressHandler.MarkPaid on the handler side).
+          // We read it here to check, and fire a relay netevent to update it.
+          bool isPerMap = evt.name.Left(24) == "dp_achievement_bonus_map";
+          if (!isPerMap)
+          {
+            // Check if already paid via the mirror CVar
+            CVar paidCvar = CVar.FindCVar("sm_run_paid_ids");
+            String paid = paidCvar ? paidCvar.GetString() : "";
+            String search = "," .. achID .. ",";
+            String wrapped = "," .. paid .. ",";
+            if (wrapped.IndexOf(search) >= 0)
+              shouldAward = false;
+            else
+            {
+              // Update the CVar immediately so same-tic duplicate events see it
+              // as paid before sm_mark_paid is dequeued and processed.
+              String paid2 = paidCvar ? paidCvar.GetString() : "";
+              if (paidCvar) paidCvar.SetString(paid2.Length() == 0 ? achID : paid2 .. "," .. achID);
+              // Also relay to SM_RunProgressHandler to keep the inventory item in sync.
+              EventHandler.SendNetworkEvent("sm_mark_paid:" .. achID);
+            }
+          }
+        }
+
+        if (shouldAward)
+        {
+          int targetPl = evt.player >= 0 ? evt.player : consoleplayer;
+
+          // Award Doom Points score bonus
+          scoring.AwardBonusPoints(targetPl, evt.args[0]);
+
+          // Award Gun Bonsai weapon XP bonus (if enabled and player is valid).
+          // We add XP directly to the WeaponInfo object to avoid the
+          // GetInfoForCurrentWeapon() null-return timing issue.
+          // Falls back to AddXP if infoForCurrentWeapon is not available.
+          CVar xpCVar = CVar.FindCVar("dp_ach_xp_per_100pts");
+          int xpPer100 = xpCVar ? xpCVar.GetInt() : 50;
+          if (xpPer100 > 0 && BonsaiEnabled() && playerstats[targetPl])
+          {
+            double xpAward = (evt.args[0] / 100.0) * xpPer100;
+            if (xpAward > 0)
+            {
+              // Try direct info access first, fall back to AddXP
+              let winfo = playerstats[targetPl].infoForCurrentWeapon;
+              if (winfo)
+                winfo.AddXP(xpAward);
+              else
+                playerstats[targetPl].AddXP(xpAward);
+            }
+          }
+        }
+        return;
+      }
+      else if (evt.name == "bonsai-profile-apply-0")      { TFLV_Profiles.Apply(0);  return; }
+      else if (evt.name == "bonsai-profile-apply-1")      { TFLV_Profiles.Apply(1);  return; }
+      else if (evt.name == "bonsai-profile-apply-2")      { TFLV_Profiles.Apply(2);  return; }
+      else if (evt.name == "bonsai-profile-apply-3")      { TFLV_Profiles.Apply(3);  return; }
+      else if (evt.name == "bonsai-profile-apply-4")      { TFLV_Profiles.Apply(4);  return; }
+      else if (evt.name == "bonsai-profile-apply-5")      { TFLV_Profiles.Apply(5);  return; }
+      else if (evt.name == "bonsai-profile-save-0")       { TFLV_Profiles.Save(0);   return; }
+      else if (evt.name == "bonsai-profile-save-1")       { TFLV_Profiles.Save(1);   return; }
+      else if (evt.name == "bonsai-profile-save-2")       { TFLV_Profiles.Save(2);   return; }
+      else if (evt.name == "bonsai-profile-save-3")       { TFLV_Profiles.Save(3);   return; }
+      else if (evt.name == "bonsai-profile-save-4")       { TFLV_Profiles.Save(4);   return; }
+      else if (evt.name == "bonsai-profile-save-5")       { TFLV_Profiles.Save(5);   return; }
+      else if (evt.name == "bonsai-profile-reset-0")      { TFLV_Profiles.Reset(0);  return; }
+      else if (evt.name == "bonsai-profile-reset-1")      { TFLV_Profiles.Reset(1);  return; }
+      else if (evt.name == "bonsai-profile-reset-2")      { TFLV_Profiles.Reset(2);  return; }
+      else if (evt.name == "bonsai-profile-reset-3")      { TFLV_Profiles.Reset(3);  return; }
+      else if (evt.name == "bonsai-profile-reset-4")      { TFLV_Profiles.Reset(4);  return; }
+      else if (evt.name == "bonsai-profile-reset-5")      { TFLV_Profiles.Reset(5);       return; }
+      else if (evt.name == "bonsai-profile-export-0")     { TFLV_Profiles.ExportSlot(0);  return; }
+      else if (evt.name == "bonsai-profile-export-1")     { TFLV_Profiles.ExportSlot(1);  return; }
+      else if (evt.name == "bonsai-profile-export-2")     { TFLV_Profiles.ExportSlot(2);  return; }
+      else if (evt.name == "bonsai-profile-export-3")     { TFLV_Profiles.ExportSlot(3);  return; }
+      else if (evt.name == "bonsai-profile-export-4")     { TFLV_Profiles.ExportSlot(4);  return; }
+      else if (evt.name == "bonsai-profile-export-5")     { TFLV_Profiles.ExportSlot(5);  return; }
+    }
+    if (IndestructibleEnabled()) {
+      if (evt.name == "indestructible-adjust-lives" || evt.name == "indestructible-clamp-lives") {
+        indestructible.HandleNetworkEvent(evt.name, evt.args[0], evt.args[1]);
+        return;
+      }
+    }
+
+    // Manual level setting events
+    if (evt.name == "bonsai-set-level") {
+      SetUpgradeLevel(evt.player, evt.args[0], evt.args[1], evt.args[2], false);
+      return;
+    } else if (evt.name == "bonsai-set-level-abs") {
+      SetUpgradeLevel(evt.player, evt.args[0], evt.args[1], evt.args[2], true);
+      return;
+    } else if (evt.name == "bonsai-reset-all-upgrades") {
+      ResetAllUpgrades(evt.player, evt.args[0]);
+      return;
+    } else if (evt.name == "bonsai-toggle-wimpy") {
+      let stats = playerstats[evt.player];
+      if (!stats) return;
+      let winfo = stats.GetInfoForCurrentWeapon();
+      if (!winfo) return;
+      // Cycle: auto(0) → forced-on(1) → forced-off(-1) → auto(0)
+      if      (winfo.wimpy_override == 0)  winfo.wimpy_override =  1;
+      else if (winfo.wimpy_override == 1)  winfo.wimpy_override = -1;
+      else                                 winfo.wimpy_override =  0;
+      winfo.UpdateCachedTypeFlags();
+      winfo.maxXP = winfo.TotalXPForLevel(winfo.level + 1);
+      let pawn = players[evt.player].mo;
+      if (pawn) {
+        string stateStr;
+        if      (winfo.wimpy_override > 0) stateStr = "\c[GREEN]FORCED ON\c-";
+        else if (winfo.wimpy_override < 0) stateStr = "\c[RED]FORCED OFF\c-";
+        else                               stateStr = "\c[YELLOW]AUTO\c-";
+        pawn.A_Log(string.format(
+          "%s: Wimpy %s (XP cost now %d%% of normal).",
+          winfo.wpn.GetTag(), stateStr,
+          winfo.IsWimpy() ? int(bonsai_level_cost_mul_for_wimpy * 100) : 100), true);
+      }
+      return;
+    }
+  }
+
+  // =========================================================================
+  // Console-side event handler — fires from UI/menu context, works without
+  // an active game session. Used for profile Save/Apply Saved/Reset which
+  // need to run from the menus.
+  // =========================================================================
+
+  override void ConsoleProcess(ConsoleEvent evt) {
+    // Profile save/apply/reset fire as netevents from menu buttons.
+    // ConsoleProcess catches them and relays to NetworkProcess via
+    // SendNetworkEvent, which runs in play context where CVar writes work.
+    if (evt.name.IndexOf("bonsai-profile-") == 0) {
+      EventHandler.SendNetworkEvent(evt.name);
+      return;
+    }
+  }
+
+  // Set or adjust an upgrade level. bag_type: 0=player, 1=weapon.
+  // registry_idx: index into the upgrade registry.
+  // value: if absolute, the target level; if relative, the delta (+1/-1).
+  void SetUpgradeLevel(int player, int bag_type, int registry_idx, int value, bool absolute) {
+    let stats = playerstats[player];
+    if (!stats) return;
+
+    if (registry_idx < 0 || registry_idx >= int(UPGRADE_REGISTRY.upgrade_names.size())) return;
+    string classname = UPGRADE_REGISTRY.upgrade_names[registry_idx];
+
+    TFLV_Upgrade_UpgradeBag bag;
+    TFLV_WeaponInfo winfo;
+    if (bag_type == 0) {
+      bag = stats.upgrades;
+    } else {
+      winfo = stats.GetInfoForCurrentWeapon();
+      if (!winfo) return;
+      bag = winfo.upgrades;
+    }
+
+    // Find current level
+    uint current = bag.Level(classname);
+    uint target;
+    if (absolute) {
+      target = max(0, value);
+    } else {
+      target = max(0, int(current) + value);
+    }
+
+    if (target == current) return;
+
+    if (target == 0 && current > 0) {
+      // Remove the upgrade entirely
+      for (uint i = 0; i < bag.upgrades.size(); ++i) {
+        if (bag.upgrades[i].GetClassName() == classname) {
+          bag.upgrades[i].OnDeactivate(stats, winfo);
+          bag.upgrades.delete(i);
+          break;
+        }
+      }
+      console.printf("Removed %s from %s.", classname, bag_type == 0 ? "player" : "weapon");
+    } else if (current == 0 && target > 0) {
+      // Add new upgrade at target level
+      let upgrade = bag.Add(classname, target);
+      upgrade.OnActivate(stats, winfo);
+      console.printf("Added %s at level %d to %s.", classname, target, bag_type == 0 ? "player" : "weapon");
+    } else {
+      // Adjust existing upgrade level
+      for (uint i = 0; i < bag.upgrades.size(); ++i) {
+        if (bag.upgrades[i].GetClassName() == classname) {
+          bag.upgrades[i].level = target;
+          bag.upgrades[i].max_level = max(bag.upgrades[i].max_level, target);
+          break;
+        }
+      }
+      console.printf("Set %s to level %d on %s.", classname, target, bag_type == 0 ? "player" : "weapon");
+    }
+  }
+
+  // Remove all upgrades from player (bag_type 0) or weapon (bag_type 1).
+  void ResetAllUpgrades(int player, int bag_type) {
+    let stats = playerstats[player];
+    if (!stats) return;
+
+    TFLV_Upgrade_UpgradeBag bag;
+    TFLV_WeaponInfo winfo;
+    if (bag_type == 0) {
+      bag = stats.upgrades;
+    } else {
+      winfo = stats.GetInfoForCurrentWeapon();
+      if (!winfo) return;
+      bag = winfo.upgrades;
+    }
+
+    // Deactivate all upgrades first
+    for (uint i = 0; i < bag.upgrades.size(); ++i) {
+      bag.upgrades[i].OnDeactivate(stats, winfo);
+    }
+    uint count = bag.upgrades.size();
+    bag.upgrades.Clear();
+    console.printf("Removed %d upgrades from %s.", count, bag_type == 0 ? "player" : "weapon");
+  }
+
+  // =========================================================================
+  // Gun Bonsai player/stats management
+  // =========================================================================
+
+  void InitPlayer(uint p, bool new_map=false) {
+    PlayerPawn pawn = players[p].mo;
+    if (!pawn) return;
+    let proxy = TFLV_PerPlayerStatsProxy(pawn.FindInventory("TFLV_PerPlayerStatsProxy"));
+    if (proxy) {
+      playerstats[p] = proxy.stats;
+      playerstats[p].Initialize(proxy);
+    } else {
+      // Determine if we should wipe stats or restore them.
+      //
+      // Wipe only when ALL of these are true:
+      //   - This is a map transition (new_map=true) — mid-map respawns NEVER wipe
+      //   - bonsai_ignore_death_exits is OFF — player chose to respect pistol starts
+      //   - bonsai_keep_upgrades_on_death is OFF — player did NOT ask to always keep
+      //
+      // The two flags are independent:
+      //   bonsai_ignore_death_exits: keep upgrades across death exits / pistol starts
+      //   bonsai_keep_upgrades_on_death: keep upgrades on ALL deaths including death exits
+      //   (either flag being true preserves upgrades at map transitions)
+      bool should_wipe = !playerstats[p]
+        || (new_map && !bonsai_ignore_death_exits && !bonsai_keep_upgrades_on_death);
+      if (should_wipe) {
+        playerstats[p] = new("TFLV_PerPlayerStats");
+      }
+      proxy = TFLV_PerPlayerStatsProxy(pawn.GiveInventoryType("TFLV_PerPlayerStatsProxy"));
+      proxy.Initialize(playerstats[p]);
+    }
+  }
+
+  ui static TFLV_PerPlayerStats GetConsolePlayerStats() {
+    return TFLV_EventHandler(StaticEventHandler.Find("TFLV_EventHandler")).playerstats[consoleplayer];
+  }
+
+  TFLV_PerPlayerStats GetStatsFor(PlayerPawn pawn) {
+    if (!pawn) return null;
+    let stats = playerstats[pawn.PlayerNumber()];
+    if (stats && stats.proxy && stats.proxy.owner == stats.owner && stats.owner == pawn)
+      return stats;
+    InitPlayer(pawn.PlayerNumber());
+    return playerstats[pawn.PlayerNumber()];
+  }
+
+  // Advance to the next learned Legendoom effect on the current weapon.
+  void CycleLDEffect(uint p) {
+    if (!playerstats[p]) return;
+    let info = playerstats[p].GetInfoForCurrentWeapon();
+    if (info && info.ld_info) info.ld_info.CycleEffect();
+  }
+
+  // Activate a specific Legendoom effect by index on the current weapon.
+  void SelectLDEffect(uint p, int index) {
+    if (!playerstats[p]) return;
+    let info = playerstats[p].GetInfoForCurrentWeapon();
+    if (info && info.ld_info) info.ld_info.SelectEffect(index);
+  }
+
+  void ShowInfo(uint p) {
+    let stats = playerstats[p];
+    if (!stats) { console.printf(StringTable.Localize("$TFLV_MSG_PLAYERSTATS_MISSING"), p); return; }
+    if (stats.GetInfoForCurrentWeapon() && stats.GetInfoForCurrentWeapon().StartLevelUp()) return;
+    if (stats.StartLevelUp()) return;
+    if (p == consoleplayer) Menu.SetMenu("GunBonsaiStatusDisplay");
+  }
+
+  void ChooseLevelUpOption(uint p, int index) {
+    if (!playerstats[p]) return;
+    let giver = playerstats[p].currentEffectGiver;
+    if (!giver) return;
+    giver.Choose(index);
+  }
+
+  void ToggleUpgrade(int player, bool on_weapon, int index) {
+    let stats = playerstats[player];
+    if (on_weapon) stats.GetInfoForCurrentWeapon().ToggleUpgrade(index);
+    else stats.ToggleUpgrade(index);
+  }
+
+  void TuneUpgrade(int player, bool on_weapon, int index, int amount) {
+    let stats = playerstats[player];
+    if (on_weapon) stats.GetInfoForCurrentWeapon().TuneUpgrade(index, amount);
+    else stats.TuneUpgrade(index, amount);
+  }
+}

@@ -1,0 +1,124 @@
+// Indestructible - Gun Bonsai player upgrade.
+// Three separate life-earning mechanics, each independently toggleable:
+//   1. Level Clear: lives granted when completing a map
+//   2. Boss Kill: lives granted when killing a boss monster
+//   3. Damage Charging: lives earned by accumulating damage taken
+// All scaling values and toggles are CVar-driven from the Indestructible Options menu.
+// #namespace TFLV::Upgrade;
+
+class TFLV_Upgrade_Indestructible : TFLV_Upgrade_BaseUpgrade {
+  int charge;
+
+  // --- Mechanic 1: Damage Charging ---
+  // Accumulates damage taken; when threshold is reached, grants a life.
+  // Toggle: bonsai_indestructible_lives_on_damage
+  // Scaling: threshold decreases with upgrade level
+  override void OnDamageReceived(Actor pawn, Actor shot, Actor attacker, int damage) {
+    if (pawn == attacker) return;
+    if (!bonsai_indestructible_lives_on_damage) return;
+
+    let damagePerLife = GetDamagePerLife(level);
+    if (damagePerLife <= 0) return;
+
+    charge += damage;
+    if (charge >= damagePerLife) {
+      charge -= damagePerLife;
+      EventHandler.SendNetworkEvent("indestructible-adjust-lives", 1, 0);
+      EventHandler.SendNetworkEvent("vuas_event:indestructible_used");
+      EventHandler.SendNetworkEvent("indestructible-clamp-lives", 0, GetMaxLives(level));
+    }
+  }
+
+  // --- Mechanic 2: Level Clear ---
+  // Grants lives when entering a new map (i.e. clearing the previous one).
+  // Toggle: bonsai_indestructible_lives_on_clear
+  // Scaling: lives granted = base * upgrade_level
+  override void OnMapEntry(string mapname, int mapnum) {
+    if (level <= 0) return;
+    if (!bonsai_indestructible_lives_on_clear) return;
+
+    let livesPerClear = GetLivesPerClear(level);
+    if (livesPerClear > 0) {
+      EventHandler.SendNetworkEvent("indestructible-adjust-lives", livesPerClear, 1);
+      EventHandler.SendNetworkEvent("indestructible-clamp-lives", 0, GetMaxLives(level));
+    }
+  }
+
+  // --- Mechanic 3: Boss Kills ---
+  // Grants a life when killing a boss, if upgrade level is high enough.
+  // Toggle: bonsai_indestructible_lives_on_boss
+  // Gated: only activates at or above bonsai_indestructible_boss_kill_level
+  override void OnKill(PlayerPawn pawn, Actor shot, Actor target) {
+    if (!target || !target.bBOSS) return;
+    if (!bonsai_indestructible_lives_on_boss) return;
+
+    let bossLevel = bonsai_indestructible_boss_kill_level;
+    if (bossLevel > 0 && level >= bossLevel) {
+      EventHandler.SendNetworkEvent("indestructible-adjust-lives", 1, 1);
+      EventHandler.SendNetworkEvent("indestructible-clamp-lives", 0, GetMaxLives(level));
+    }
+  }
+
+  // --- Eligibility ---
+  override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const {
+    let maxLevel = bonsai_indestructible_max_level;
+    return stats.upgrades.Level("TFLV_Upgrade_Indestructible") < maxLevel
+      && CVar.FindCVar("indestructible_gun_bonsai_mode").GetBool() == true;
+  }
+
+  // --- Scaling functions (all CVar-driven) ---
+
+  // Lives granted per level clear. Default: 1 * level.
+  static int GetLivesPerClear(uint lvl) {
+    return bonsai_indestructible_base_lives_per_clear * lvl;
+  }
+
+  // Max lives that can be carried. Default: 1 + level^2.
+  // lv1=2, lv2=5, lv3=10, lv4=17
+  static int GetMaxLives(uint lvl) {
+    return bonsai_indestructible_base_max_lives + (lvl * lvl);
+  }
+
+  // Damage required to earn one life. Decreases with level.
+  // Default 400: lv1=400, lv2=267, lv3=200, lv4=160
+  static int GetDamagePerLife(uint lvl) {
+    if (lvl <= 0) return 0;
+    int base = bonsai_indestructible_damage_per_life;
+    if (base <= 0) return 0;
+    return max(50, base * 2 / (lvl + 1));
+  }
+
+  // --- Tooltip ---
+  override void GetTooltipFields(Dictionary fields, uint level) {
+    // Max lives (always shown)
+    fields.insert("max-lives", ""..GetMaxLives(level));
+
+    // Level clear info
+    if (bonsai_indestructible_lives_on_clear) {
+      fields.insert("clear-info", string.format("+%d lives per level clear.", GetLivesPerClear(level)));
+    } else {
+      fields.insert("clear-info", "Level clear lives: OFF.");
+    }
+
+    // Damage charging info
+    if (bonsai_indestructible_lives_on_damage && GetDamagePerLife(level) > 0) {
+      fields.insert("damage-info", string.format("+1 life per %d damage taken.", GetDamagePerLife(level)));
+    } else {
+      fields.insert("damage-info", "Damage charging: OFF.");
+    }
+
+    // Boss kill info
+    if (bonsai_indestructible_lives_on_boss) {
+      let bossLevel = bonsai_indestructible_boss_kill_level;
+      if (level >= bossLevel && bossLevel > 0) {
+        fields.insert("boss-info", "Boss kills grant +1 life.");
+      } else if (bossLevel > 0) {
+        fields.insert("boss-info", string.format("Boss kills at level %d+.", bossLevel));
+      } else {
+        fields.insert("boss-info", "Boss kill level threshold: disabled.");
+      }
+    } else {
+      fields.insert("boss-info", "Boss kill lives: OFF.");
+    }
+  }
+}

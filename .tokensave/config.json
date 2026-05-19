@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "root_dir": "D:\\Games\\Doom wads\\My Projects\\Doom RPG MOD",
+  "exclude": [
+    "target/**",
+    ".git/**",
+    ".tokensave/**",
+    "node_modules/**",
+    "vendor/**",
+    "**/*.min.*",
+    "bin/**",
+    "build/**",
+    "out/**",
+    ".gradle/**",
+    "**/*.pk3",
+    "**/*.wad",
+    "**/*.o",
+    "**/*.7z"
+  ],
+  "include": [],
+  "max_file_size": 1048576,
+  "extract_docstrings": true,
+  "track_call_sites": true,
+  "git_ignore": false
+}

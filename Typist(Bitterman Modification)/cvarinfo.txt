@@ -1,0 +1,43 @@
+// SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+// SPDX-License-Identifier: BSD-3-Clause
+
+// Buddha
+server bool tt_buddha_enabled = true;
+
+// General settings
+user int  tt_view_scale = 1;
+user bool tt_fast_confirmation = false;
+user int  tt_combat_entry_ticks = 15;
+
+// Enemy and projectile speed scaling (1.0 = normal speed, 0.1 = very slow)
+user float tt_enemy_speed_scale      = 0.5;
+user float tt_projectile_speed_scale = 0.2;
+
+// Command settings
+user string tt_command_pass_through = "/pass";
+
+// Sound settings
+user bool tt_sound_enabled = true;
+user int  tt_sound_theme = 1;
+user bool tt_sound_typing_enabled = true;
+
+// Mixed Lesson configuration
+user bool tt_is_english_enabled = true;
+user bool tt_is_random_enabled  = false;
+user bool tt_is_maths_enabled   = false;
+user bool tt_is_custom_enabled  = false;
+
+// Random Character Lesson configuration
+user int    tt_rc_length = 3;
+user bool   tt_rc_uppercase_letters_enabled = false;
+user bool   tt_rc_lowercase_letters_enabled = true;
+user bool   tt_rc_numbers_enabled           = false;
+user bool   tt_rc_punctuation_enabled       = false;
+user bool   tt_rc_symbols_enabled           = false;
+user bool   tt_rc_custom_enabled            = false;
+user string tt_rc_custom = "";
+
+// Variables for score
+nosave string tt_lp_score = "";
+user   bool   tt_lp_show  = true;
+server string tt_lp_parameters_class = "tt_lp_TypistParameters";

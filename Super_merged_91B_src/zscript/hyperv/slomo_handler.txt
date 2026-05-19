@@ -1,0 +1,625 @@
+
+/*
+*
+* Slomo Bullet Time — ZScript translation of original ACS mod by Spaceman333
+* Translated and integrated into Hyper-V by Ermac
+* Original: https://github.com/Spaceman333/SlomoBulletTime
+*
+* All original functionality preserved:
+*   - Toggle on/off via keybind
+*   - Slomo point pool with drain/recharge
+*   - Cooldown system
+*   - Freeze momentum option
+*   - Music pause option
+*   - Full HUD with point meter, cooldown display, active messages
+*
+*/
+
+class SlomoHandler : EventHandler
+{
+
+	override void OnRegister()
+	{
+		_isInitialized = false;
+	}
+
+	override void WorldLoaded(WorldEvent e)
+	{
+		_isTitlemap = (level.mapname == "TITLEMAP");
+	}
+
+	override void NetworkProcess(ConsoleEvent e)
+	{
+		if(e.Name == "vmm_slomo_toggle")
+		{
+			CVar enabled = CVar.FindCVar("sm_enabled");
+			if(enabled && !enabled.GetBool()) return;
+			CVar ext = CVar.FindCVar("m8f_sm_externaltoggle");
+			if(ext) ext.SetInt(1);
+		}
+	}
+
+	override void WorldTick()
+	{
+		if(_isTitlemap) return;
+		if(!_isInitialized) { Init(); return; }
+
+		PlayerInfo p = players[consolePlayer];
+		if(!p || !p.mo || p.mo.health <= 0) return;
+		Actor owner = p.mo;
+
+		// LoadSettings reads CVars — throttle to once per second (35 tics)
+		// Game logic (toggle, drain, recharge) runs every tic regardless
+		settingsTimer++;
+		if(settingsTimer >= 35)
+		{
+			LoadSettings();
+			settingsTimer = 0;
+		}
+
+		//////////////////////////////////////////////////////////////////////
+		// 1 - CONTROL
+		//////////////////////////////////////////////////////////////////////
+
+		// If slomo is disabled, deactivate if currently active and skip
+		if(!slomoEnabled)
+		{
+			if(slomoActive)
+			{
+				slomoActive = false;
+				players[consolePlayer].mo.TakeInventory("SMPowerTimeFreezerSound", 1);
+				players[consolePlayer].mo.TakeInventory("PowerSlomoUseless", 1);
+				players[consolePlayer].mo.A_StopSound(CHAN_6);
+				CVar.FindCVar("sm_audio_active").SetInt(0);
+				CVar.FindCVar("hyperv_slomo_active").SetInt(0);
+			}
+			return;
+		}
+
+		// Button delay countdown
+		if(waitButton > 0)
+		{
+			waitButton--;
+			playedOnce = false;
+		}
+		else
+		{
+			// Check external toggle CVar (set by network event)
+			bool isToggled = false;
+			CVar ext = CVar.FindCVar("m8f_sm_externaltoggle");
+			if(ext && ext.GetInt() != 0)
+			{
+				isToggled = true;
+				ext.SetInt(0);
+			}
+
+			if(isToggled && !slomoActive &&
+			   currentSlomoPoints >= minimumSlomoPoints && slomoCooldownOk)
+			{
+				// Activate slomo
+				slomoActive       = true;
+				slomoCooldownOk   = false;
+				slowPointFailsafe = false;
+				waitSlomoCooldown = slomoCooldownTime;
+				cooldownReadyOnce = true;
+
+				// Music muted by ACS (slomo_audio) via sm_audio_active CVar
+				// sm_pausemusic option is acknowledged but has no effect.
+
+				if(!playedOnce)
+				{
+					if(!saveSpeedOnce && freezeMomentum)
+					{
+						savedVel   = owner.vel;
+						saveSpeedOnce = true;
+					}
+					owner.GiveInventory("SlomoBulletTimeGiver", 1);
+					owner.GiveInventory("SlomoScreenGiver", 1);
+					owner.A_StartSound("Slomo_on", CHAN_AUTO, CHANF_NOPAUSE);
+					owner.A_StartSound("Slomo_loop", CHAN_6, CHANF_LOOP | CHANF_NOPAUSE);
+					CVar.FindCVar("sm_audio_active").SetInt(1);
+					CVar.FindCVar("hyperv_slomo_active").SetInt(1);
+					playedOnce = true;
+					waitButton = buttonDelayTime;
+				}
+			}
+			else if(isToggled && !slomoActive && showCoolMessage &&
+			        currentSlomoPoints < minimumSlomoPoints && allowSlomoHud)
+			{
+				// Not enough points message — shown via RenderOverlay flag
+				showNotEnoughMsg = true;
+				waitButton = buttonDelayTime;
+			}
+			else if(isToggled && !slomoActive && showCoolMessage &&
+			        !slomoCooldownOk && allowSlomoHud)
+			{
+				// On cooldown message
+				showCooldownMsg = true;
+				waitButton = buttonDelayTime;
+			}
+			else if((isToggled && slomoActive) ||
+			        (currentSlomoPoints < 1 && !slowPointFailsafe))
+			{
+				// Deactivate slomo
+				slomoActive       = false;
+				slowPointFailsafe = true;
+				minimumMsgOnce    = true;
+
+				// Music restored by ACS (slomo_audio)
+
+				if(!playedOnce)
+				{
+					owner.TakeInventory("SMPowerTimeFreezerSound", 1);
+					owner.TakeInventory("PowerSlomoUseless", 1);
+					if(freezeMomentum && saveSpeedOnce)
+					{
+						owner.vel  = savedVel;
+						saveSpeedOnce = false;
+					}
+					owner.A_StopSound(CHAN_6);
+					owner.A_StartSound("Slomo_off", CHAN_AUTO, CHANF_NOPAUSE);
+					CVar.FindCVar("sm_audio_active").SetInt(0);
+					CVar.FindCVar("hyperv_slomo_active").SetInt(0);
+					playedOnce = true;
+					waitButton = buttonDelayTime;
+				}
+			}
+		}
+
+		//////////////////////////////////////////////////////////////////////
+		// 2 - SYSTEM
+		//////////////////////////////////////////////////////////////////////
+
+		// Cooldown countdown
+		if(waitSlomoCooldown < 1)
+			slomoCooldownOk = true;
+		else
+			waitSlomoCooldown--;
+
+		// Compute effective depth and powerup states
+		Actor pmo = players[consolePlayer].mo;
+		bool hasInvuln  = invulnEnabled  && pmo != null && pmo.CountInv("PowerInvulnerable") > 0;
+		bool hasBerserk = berserkSlomoEnabled && pmo != null &&
+		                  pmo.CountInv("PowerStrength") > 0 && !hasInvuln;
+
+		// Invuln takes full precedence, then berserk, then base
+		int effectiveDepth;
+		bool effectiveInfinite = noSlomoPointDrain;
+		bool effectiveZeroCooldown = false;
+
+		if(hasInvuln)
+		{
+			effectiveDepth         = clamp(invulnDepth, 1, 100);
+			effectiveInfinite      = invulnInfinite || noSlomoPointDrain;
+			effectiveZeroCooldown  = invulnZeroCooldown;
+		}
+		else if(hasBerserk)
+		{
+			effectiveDepth = clamp(slowdownDepth + berserkDepthBonus, 1, 100);
+		}
+		else
+		{
+			effectiveDepth = slowdownDepth;
+		}
+
+		// Apply zero cooldown from invuln
+		if(effectiveZeroCooldown && waitSlomoCooldown > 0)
+			waitSlomoCooldown = 0;
+
+		// Apply berserk cooldown reduction (drains cooldown faster)
+		if(hasBerserk && berserkCooldownReduce > 0 && waitSlomoCooldown > 0)
+		{
+			int extra = berserkCooldownReduce * waitSlomoCooldown / 100;
+			waitSlomoCooldown = max(0, waitSlomoCooldown - extra);
+		}
+
+		// Give/take freeze based on effective depth
+		// Cycle length = 10 tics. Freeze for (depth/10) tics per cycle.
+		// Momentum freeze only applies at full depth (100%) to avoid choppiness
+		bool fullFreeze = (effectiveDepth >= 100);
+
+		if(slomoActive)
+		{
+			depthCounter = (depthCounter + 1) % 10;
+			int freezeTics = max(1, effectiveDepth / 10);
+
+			if(depthCounter < freezeTics)
+			{
+				// Freeze tic
+				if(pmo.CountInv("SMPowerTimeFreezerSound") < 1)
+				{
+					if(!saveSpeedOnce && freezeMomentum && fullFreeze)
+					{
+						savedVel      = pmo.vel;
+						saveSpeedOnce = true;
+					}
+					pmo.GiveInventory("SlomoBulletTimeGiver", 1);
+				}
+			}
+			else
+			{
+				// Unfreeze tic
+				if(pmo.CountInv("SMPowerTimeFreezerSound") > 0)
+					pmo.TakeInventory("SMPowerTimeFreezerSound", 1);
+				// Don't restore/zero velocity at partial depths — let player move freely
+			}
+		}
+		else
+		{
+			depthCounter = 0;
+		}
+
+		// Freeze momentum velocity zero — only at full depth to avoid choppiness
+		if(freezeMomentum && fullFreeze && saveSpeedOnce &&
+		   pmo.CountInv("SMPowerTimeFreezerSound") > 0)
+		{
+			pmo.vel = (0, 0, 0);
+		}
+
+		// Drain slomo points while active
+		if(slomoActive && waitSlomoPointDrain < 1 && !effectiveInfinite)
+		{
+			bool skipDrain = hasBerserk && berserkDrainReduction >= 100;
+			if(!skipDrain && hasBerserk && berserkDrainReduction > 0)
+				skipDrain = (random(1, 100) <= berserkDrainReduction);
+
+			if(!skipDrain)
+				currentSlomoPoints--;
+
+			waitSlomoPointDrain = slomoPointDrain;
+		}
+		else if(waitSlomoPointDrain > 0)
+		{
+			waitSlomoPointDrain--;
+		}
+
+		// Audio handled by ACS bridge (slomo_audio.acs) via sm_audio_active CVar
+
+		// Tick down transient HUD message timers
+		if(showNotEnoughMsg || showCooldownMsg || showReadyMsg)
+		{
+			msgTimer++;
+			if(showNotEnoughMsg && msgTimer > 70) { showNotEnoughMsg = false; msgTimer = 0; }
+			if(showCooldownMsg  && msgTimer > 52) { showCooldownMsg  = false; msgTimer = 0; }
+			if(showReadyMsg     && msgTimer > 28) { showReadyMsg     = false; msgTimer = 0; }
+		}
+
+		// Once fully recharged, allow one final draw then hide
+		bool _hasInvuln2 = invulnEnabled && players[consolePlayer].mo != null &&
+		                   players[consolePlayer].mo.CountInv("PowerInvulnerable") > 0;
+		bool _hasBerserk2 = berserkSlomoEnabled && players[consolePlayer].mo != null &&
+		                    players[consolePlayer].mo.CountInv("PowerStrength") > 0 && !_hasInvuln2;
+		int effectiveTotal = totalSlomoPoints + (_hasBerserk2 ? berserkPointsBonus : 0);
+
+		if(!slomoActive && currentSlomoPoints >= effectiveTotal && lastShowBeforeHide)
+		{
+			lastShowBeforeHide = false;
+		}
+		if(!slomoActive)
+		{
+			if(currentSlomoPoints < effectiveTotal)
+			{
+				if(waitSlomoPointRecharge < 1)
+				{
+					currentSlomoPoints += slomoPointRefillAmount;
+					if(currentSlomoPoints > effectiveTotal)
+						currentSlomoPoints = effectiveTotal;
+					lastShowBeforeHide = true;
+					waitSlomoPointRecharge = slomoPointRecharge;
+				}
+				else
+				{
+					waitSlomoPointRecharge--;
+				}
+			}
+			else if(currentSlomoPoints > effectiveTotal)
+			{
+				currentSlomoPoints = effectiveTotal;
+			}
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// HUD — RenderOverlay replaces ACS HudMessage calls
+	//////////////////////////////////////////////////////////////////////
+
+	override void RenderOverlay(RenderEvent e)
+	{
+		if(!allowSlomoHud) return;
+		if(!_isInitialized) return;
+		if(_isTitlemap) return;
+
+		// Slomo point bar moved to UnifiedHudHandler (unified_hud.txt)
+
+		// Active message and corner markers (slomo-specific, kept here)
+		if(slomoActive && showActiveMessage)
+		{
+			Screen.DrawText(SmallFont, Font.CR_CYAN,
+				320 - SmallFont.StringWidth("=Slomo Active=") / 2, 5,
+				"=Slomo Active=",
+				DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+			Screen.DrawText(SmallFont, Font.CR_CYAN, 4,   4,   "<**", DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+			Screen.DrawText(SmallFont, Font.CR_CYAN, 4,   470, "<**", DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+			Screen.DrawText(SmallFont, Font.CR_CYAN, 620, 4,   "**>", DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+			Screen.DrawText(SmallFont, Font.CR_CYAN, 620, 470, "**>", DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+		}
+
+		// --- Transient messages (drawn while flags are set, cleared by WorldTick) ---
+		if(showNotEnoughMsg)
+		{
+			Screen.DrawText(SmallFont, Font.CR_RED,
+				320 - SmallFont.StringWidth(String.Format("Min pts: %d", minimumSlomoPoints)) / 2,
+				290,
+				String.Format("Min pts: %d", minimumSlomoPoints),
+				DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+		}
+		if(showCooldownMsg)
+		{
+			Screen.DrawText(SmallFont, Font.CR_RED,
+				320 - SmallFont.StringWidth("Slomo on cooldown.") / 2,
+				290,
+				"Slomo on cooldown.",
+				DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+		}
+		if(showReadyMsg)
+		{
+			Screen.DrawText(SmallFont, Font.CR_GREEN,
+				320 - SmallFont.StringWidth("Slomo Ready!") / 2,
+				290,
+				"Slomo Ready!",
+				DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+		}
+		if(showMinReadyMsg && minimumMsgOnce)
+		{
+			Screen.DrawText(SmallFont, Font.CR_GREEN,
+				320 - SmallFont.StringWidth("Slomo Ready!") / 2,
+				290,
+				"Slomo Ready!",
+				DTA_VirtualWidth, 640, DTA_VirtualHeight, 480, DTA_KeepRatio, true);
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// Private helpers
+	//////////////////////////////////////////////////////////////////////
+
+	private void Init()
+	{
+		buttonDelayTime      = 8;
+		soundLoopRepeatDelay = 3000;
+		depthCounter         = 0;
+
+		LoadSettings();
+
+		currentSlomoPoints     = totalSlomoPoints;
+		waitSlomoPointRecharge = slomoPointRecharge;
+		waitSlomoPointDrain    = slomoPointDrain;
+		waitSoundLoopRepeat    = soundLoopRepeatDelay;
+		waitButton             = 0;
+
+		if(slomoCooldownReadyAtStart)
+			waitSlomoCooldown = 0;
+		else
+			waitSlomoCooldown = slomoCooldownTime;
+
+		slomoCooldownOk = slomoCooldownReadyAtStart;
+
+		_isInitialized = true;
+	}
+
+	private void LoadSettings()
+	{
+		allowSlomoHud           = GetBool("sm_allowslomohud");
+		slomoEnabled            = GetBool("sm_enabled");
+		hideHudAtFull           = GetBool("sm_hidefullslomohud");
+		showCoolMessage         = GetBool("sm_enablecoolmessage");
+		freezeMomentum          = GetBool("sm_enablefreezemomentum");
+		noSlomoPointDrain       = GetBool("sm_noslomopointdrain");
+		pauseMusic              = GetBool("sm_pausemusic");
+		showActiveMessage       = GetBool("sm_enableactivemessage");
+		useBigFont              = GetBool("sm_usebigfont");
+		showMinReadyMsg         = GetBool("sm_minimumpointreadymsg");
+		slomoCooldownReadyAtStart = GetBool("sm_cooldownreadyatstart");
+
+		totalSlomoPoints        = GetInt("sm_totalslomopoints");
+		minimumSlomoPoints      = GetInt("sm_minimumslomopoints");
+		slomoCooldownTime       = GetInt("sm_slomocooldownticks");
+		slomoPointRecharge      = GetInt("sm_slomorechargedelay");
+		slomoPointDrain         = GetInt("sm_slomodraindelay");
+		slomoPointRefillAmount  = GetInt("sm_slomorefillamount");
+		hudCooldownDivFactor    = GetInt("sm_hudcooldowndivfactor");
+		berserkSlomoEnabled     = GetBool("sm_berserk_enabled");
+		berserkDrainReduction   = GetInt("sm_berserk_drain_reduction");
+		berserkPointsBonus      = GetInt("sm_berserk_points_bonus");
+		berserkDepthBonus       = GetInt("sm_berserk_depth_bonus");
+		berserkCooldownReduce   = GetInt("sm_berserk_cooldown_reduce");
+		invulnEnabled           = GetBool("sm_invuln_enabled");
+		invulnDepth             = GetInt("sm_invuln_depth");
+		invulnInfinite          = GetBool("sm_invuln_infinite");
+		invulnZeroCooldown      = GetBool("sm_invuln_zero_cooldown");
+		slowdownDepth           = clamp(GetInt("sm_slowdown_depth"), 1, 100);
+	}
+
+	private static bool GetBool(String name)
+	{
+		CVar c = CVar.FindCVar(name);
+		return c ? c.GetInt() != 0 : false;
+	}
+
+	private static int GetInt(String name)
+	{
+		CVar c = CVar.FindCVar(name);
+		return c ? c.GetInt() : 0;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// Fields — settings (reloaded each tic)
+	//////////////////////////////////////////////////////////////////////
+
+	bool allowSlomoHud;
+	bool slomoEnabled;
+	private bool hideHudAtFull;
+	private bool showCoolMessage;
+	private bool freezeMomentum;
+	private bool noSlomoPointDrain;
+	private bool pauseMusic;
+	private bool showActiveMessage;
+	private bool useBigFont;
+	private bool showMinReadyMsg;
+	private bool slomoCooldownReadyAtStart;
+
+	int totalSlomoPoints;
+	private int minimumSlomoPoints;
+	private int slomoCooldownTime;
+	private int slomoPointRecharge;
+	private int slomoPointDrain;
+	private int slomoPointRefillAmount;
+	private int hudCooldownDivFactor;
+	private bool berserkSlomoEnabled;
+	private int  berserkDrainReduction;
+	private int  berserkPointsBonus;
+	private int  berserkDepthBonus;
+	private int  berserkCooldownReduce;
+	private bool invulnEnabled;
+	private int  invulnDepth;
+	private bool invulnInfinite;
+	private bool invulnZeroCooldown;
+
+	//////////////////////////////////////////////////////////////////////
+	// Fields — runtime state
+	//////////////////////////////////////////////////////////////////////
+
+	private bool _isInitialized;
+	private bool _isTitlemap;
+
+	bool  slomoActive;
+	bool  slomoCooldownOk;
+	private bool  slowPointFailsafe;
+	private bool  playedOnce;
+	private bool  saveSpeedOnce;
+	private bool  lastShowBeforeHide;
+	private bool  cooldownReadyOnce;
+	private bool  minimumMsgOnce;
+	private bool  cooldownJustCleared;
+
+	int   currentSlomoPoints;
+	private int   waitButton;
+	int   waitSlomoCooldown;
+	private int   waitSlomoPointRecharge;
+	private int   waitSlomoPointDrain;
+	private int   waitSoundLoopRepeat;
+
+	private Vector3 savedVel;
+
+	// Transient HUD message flags
+	private int   msgTimer;
+	private bool  showNotEnoughMsg;
+	private bool  showCooldownMsg;
+	private bool  showReadyMsg;
+	
+	private int   buttonDelayTime;
+	private int   soundLoopRepeatDelay;
+	private int   settingsTimer;
+	private int   depthCounter;    // tic counter for partial freeze cycling
+	private int   slowdownDepth;   // 0-100, loaded from sm_slowdown_depth
+}
+
+//////////////////////////////////////////////////////////////////////
+// Slomo Actors — converted from DECORATE
+// (SMPowerTimeFreezerSound was already ZScript in the original)
+//////////////////////////////////////////////////////////////////////
+
+class SlomoBulletTimeGiver : PowerupGiver
+{
+	Default
+	{
+		-COUNTITEM;
+		Inventory.MaxAmount 0;
+		Powerup.Type "SMPowerTimeFreezerSound";
+		Powerup.Duration 0x7FFFFFFD;
+		+INVENTORY.AUTOACTIVATE;
+		+INVENTORY.ALWAYSPICKUP;
+	}
+}
+
+class PowerSlomoUseless : PowerRegeneration
+{
+	Default
+	{
+		Powerup.Strength 0;
+	}
+}
+
+class SlomoScreenGiver : PowerupGiver
+{
+	Default
+	{
+		-COUNTITEM;
+		Inventory.MaxAmount 0;
+		Powerup.Type "PowerSlomoUseless";
+		Powerup.Duration 0x7FFFFFFD;
+		Powerup.Color "White", 0.08;
+		RenderStyle "Add";
+		+INVENTORY.AUTOACTIVATE;
+		+INVENTORY.ALWAYSPICKUP;
+		+INVENTORY.NOSCREENBLINK;
+	}
+}
+
+// A version of PowerTimeFreezer which does not mute sound while in effect.
+// Credits: Blue Shadow & Kinsie
+class SMPowerTimeFreezerSound : PowerTimeFreezer
+{
+	override void InitEffect()
+	{
+		int freezemask;
+
+		Powerup.InitEffect();
+
+		if(Owner == null || Owner.player == null)
+			return;
+
+		CVar pauseMusicCvar  = CVar.FindCVar("sm_pausemusic");
+		CVar pauseSoundsCvar = CVar.FindCVar("sm_pausesounds");
+
+		S_PauseSound(pauseMusicCvar, pauseSoundsCvar);
+
+		freezemask = 1 << Owner.PlayerNumber();
+		Owner.player.timefreezer |= freezemask;
+		for(int i = 0; i < MAXPLAYERS; i++)
+		{
+			if(playeringame[i] && players[i].mo != null &&
+			   players[i].mo.IsTeammate(Owner))
+			{
+				players[i].timefreezer |= freezemask;
+			}
+		}
+
+		EffectTics += !(EffectTics & 1);
+		if((EffectTics & 1) == 0) EffectTics++;
+
+		if((level.time & 1) == 0)
+			Level.SetFrozen(true);
+		else
+			if(EffectTics < 0x7fffffff) EffectTics++;
+	}
+
+	override void EndEffect()
+	{
+		Powerup.EndEffect();
+
+		if(Owner != null && Owner.player != null)
+		{
+			int freezemask = ~(1 << Owner.PlayerNumber());
+			for(int i = 0; i < MAXPLAYERS; ++i)
+				players[i].timefreezer &= freezemask;
+		}
+
+		for(int i = 0; i < MAXPLAYERS; ++i)
+			if(playeringame[i] && players[i].timefreezer != 0) return;
+
+		Level.SetFrozen(false);
+		S_ResumeSound(true);
+	}
+}
+

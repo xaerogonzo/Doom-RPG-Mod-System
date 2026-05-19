@@ -1,0 +1,15 @@
+// SPDX-FileCopyrightText: © 2019 Alexander Kromm <mmaulwurff@gmail.com>
+// SPDX-License-Identifier: BSD-3-Clause
+
+Alias tt_unlock_mode   "event tt_unlock_mode"
+Alias tt_force_combat  "event tt_force_combat"
+Alias tt_reset_targets "event tt_reset_targets"
+Alias tt_emergency_exit "event tt_emergency_exit"
+
+Alias zc_top "openMenu tt_lp_TopMenu"
+
+AddKeySection "$TT_TITLE" tt_keys
+AddMenuKey "$TT_UNLOCK"    tt_unlock_mode
+AddMenuKey "$TT_COMBAT"    tt_force_combat
+AddMenuKey "$TT_EMERGENCY" tt_emergency_exit
+AddMenuKey "$TT_SCORE"     zc_top

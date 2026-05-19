@@ -1,0 +1,21 @@
+// libtooltipmenu global override CVARs
+// Sentinel: -1.0 for floats (use mod default), "" for strings.
+
+// Master switch — Off restores all mods to their original appearance.
+user bool tflv_tt_override_enabled = true;
+
+// Preset: 0=Custom, 1=Left Panel, 2=Right Panel, 3=Bottom Bar, 4=Top Bar, 5=Centre Box
+user int tflv_tt_preset = 0;
+
+// Geometry sentinels (-1.0 = use mod default)
+user float tflv_tt_x     = -1.0;
+user float tflv_tt_y     = -1.0;
+user float tflv_tt_w     = -1.0;
+user float tflv_tt_xpad  = -1.0;
+user float tflv_tt_ypad  = -1.0;
+user float tflv_tt_scale = -1.0;
+
+// Appearance sentinels ("" = use mod default)
+user string tflv_tt_font    = "";
+user string tflv_tt_colour  = "";
+user string tflv_tt_texture = "";

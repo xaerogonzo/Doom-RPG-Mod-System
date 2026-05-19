@@ -1,0 +1,18 @@
+// ============================================================================
+// VUAS - Vortex's Universal Achievement System - Key Configuration
+// ============================================================================
+// Aliases bridge console commands to netevents handled by AchievementCommands.zs.
+// Type any alias name in the console to execute the command.
+// ============================================================================
+
+// --- Console Commands (no args) ---
+alias ach_help "netevent ach_help"
+alias ach_list "netevent ach_list"
+alias ach_debug "netevent ach_debug"
+alias ach_clear_all "netevent ach_clear_all"
+alias ach_unlock_all "netevent ach_unlock_all"
+
+// --- Keybind Section ---
+addkeysection "Achievements" ach_controls
+addmenukey "Achievement Menu" ach_open_menu
+alias ach_open_menu "openmenu VUASAchievementBrowse"
