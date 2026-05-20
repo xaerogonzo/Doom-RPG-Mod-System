@@ -1207,6 +1207,8 @@ OptionMenu "GunBonsaiStatElemental"
   TFLV_Tooltip "Tune Corrosive Inscription conversion, AcidDot threshold/DPS, Concentrated Acid curve, Acid Spray range, Embrittlement bonus."
   TFLV_AnimatedSubmenu "Lightning", "GunBonsaiStatLightning"
   TFLV_Tooltip "Tune Shocking Inscription stack rate/softcap, Thunderbolt stun/radius/cap, Chain Lightning arc range, Revivification damage/armour."
+  TFLV_AnimatedSubmenu "Blood",     "GunBonsaiStatBlood"
+  TFLV_Tooltip "Tune Sanguine Inscription drain, heal ratio, VitalDrain bonus, Exsanguinate burst heal, stacks and softcap."
 
   StaticText ""
   StaticText "Elemental Synthesis (Rare Upgrades)", GOLD
@@ -1438,6 +1440,50 @@ OptionMenu "GunBonsaiStatLightning"
   StaticText ""
   StaticText "Reset", CYAN
   Command ">> Reset Lightning to Defaults", "resetcvar bonsai_stat_lightning_mult; resetcvar bonsai_stat_lightning_stack_rate; resetcvar bonsai_stat_lightning_softcap; resetcvar bonsai_stat_lightning_tbolt_stun_base; resetcvar bonsai_stat_lightning_tbolt_stun_per_level; resetcvar bonsai_stat_lightning_tbolt_radius_base; resetcvar bonsai_stat_lightning_tbolt_radius_per_level; resetcvar bonsai_stat_lightning_tbolt_cap_base; resetcvar bonsai_stat_lightning_chain_radius; resetcvar bonsai_stat_lightning_reviv_damage; resetcvar bonsai_stat_lightning_reviv_armour"
+}
+
+// Blood
+OptionMenu "GunBonsaiStatBlood"
+{
+  class TFLV_Menu_StatMenu
+  Title "Blood"
+
+  StaticText ""
+  Slider "Blood Damage Multiplier", "bonsai_stat_blood_mult", 0.0, 3.0, 0.1, 1
+  TFLV_Tooltip "Multiplier applied to all Blood DoT damage. Default 1.0."
+
+  StaticText ""
+  StaticText "Sanguine Inscription (Apprentice)", RED
+  StaticText ""
+
+  Slider "  Drain per Tick (% of current HP x level)", "bonsai_stat_blood_drain_pct", 0.001, 0.05, 0.001, 3
+  TFLV_Tooltip "Fraction of enemy's current HP dealt as damage per DoT tick, multiplied by upgrade level. Default 0.015 (1.5%/level). Anti-tank: damage fades naturally as HP drops."
+  Slider "  Heal Ratio", "bonsai_stat_blood_heal_ratio", 0.0, 1.0, 0.05, 2
+  TFLV_Tooltip "Fraction of damage dealt per tick returned to the player as health. Default 0.4 (40%)."
+  Slider "  Stacks per Damage Point", "bonsai_stat_blood_stacks_per_damage", 0.1, 2.0, 0.05, 2
+  TFLV_Tooltip "Blood stacks applied per point of damage dealt on hit. Default 0.5."
+  Slider "  Softcap (x level)", "bonsai_stat_blood_softcap", 1.0, 50.0, 1.0, 0
+  TFLV_Tooltip "Softcap = level * this. Stacks above the softcap suffer diminishing returns. Default 20/level."
+  Slider "  Stack Drain Rate per Tick", "bonsai_stat_blood_stack_drain_rate", 0.01, 1.0, 0.01, 2
+  TFLV_Tooltip "Stacks consumed per DoT tick. Default 0.2 — roughly 5 seconds of duration per 35 stacks."
+
+  StaticText ""
+  StaticText "Vital Drain (Journeyman)", RED
+  StaticText ""
+
+  Slider "  Bonus Heal Ratio per Level", "bonsai_stat_blood_vitaldrain_bonus", 0.0, 1.0, 0.05, 2
+  TFLV_Tooltip "Added to the heal ratio per Vital Drain upgrade level. Default 0.5 (+50% heal at level 1)."
+
+  StaticText ""
+  StaticText "Exsanguinate (Master)", RED
+  StaticText ""
+
+  Slider "  Burst Heal (% of spawn HP x level)", "bonsai_stat_blood_burst_ratio", 0.001, 0.10, 0.001, 3
+  TFLV_Tooltip "On kill of a blood-cursed enemy: heal = spawn_health * this * level. Default 0.02 (2% of spawn HP per level)."
+
+  StaticText ""
+  StaticText "Reset", RED
+  Command ">> Reset Blood to Defaults", "resetcvar bonsai_stat_blood_mult; resetcvar bonsai_stat_blood_drain_pct; resetcvar bonsai_stat_blood_heal_ratio; resetcvar bonsai_stat_blood_stacks_per_damage; resetcvar bonsai_stat_blood_softcap; resetcvar bonsai_stat_blood_stack_drain_rate; resetcvar bonsai_stat_blood_vitaldrain_bonus; resetcvar bonsai_stat_blood_burst_ratio"
 }
 
 // =============================================================================

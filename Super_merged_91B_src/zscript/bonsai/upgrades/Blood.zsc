@@ -91,7 +91,9 @@ class TFLV_Upgrade_BloodDot : TFLV_Upgrade_Dot {
   override double GetElementMultiplier() { return bonsai_stat_blood_mult; }
 
   override string GetParticleColour() {
-    static const string colours[] = { "crimson", "darkred", "firebrick", "darkred" };
+    // "crimson" and "darkred" are CSS names not in GZDoom's X11 colour table.
+    // "red4" is X11's dark red (#8B0000); "firebrick" is valid X11 (#B22222).
+    static const string colours[] = { "red", "red4", "firebrick", "red4" };
     return colours[random[TFLV_Upgrade_RNG_BloodColour](0, 3)];
   }
 
