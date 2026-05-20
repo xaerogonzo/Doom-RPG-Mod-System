@@ -1,5 +1,26 @@
-# tokensave shadow extension hardlinks (ZScript → C++, ACS → C)
+# Claude Code local session data
+.claude/
+
+# Tokensave index (local code-graph database)
+.tokensave/
+
+# Tokensave shadow extension hardlinks (ZScript → C++, ACS → C)
 # These are NTFS hardlinks, not real files. Git ignores them; tokensave indexes them.
 *.zs.cpp
 *.zsc.cpp
 *.acs.c
+
+# Added by TokenSave Manager
+*.local.json
+__pycache__/
+*.pyc
+*.pyo
+*.onefile-build/
+*.build/
+dist/
+build/
+.venv/
+venv/
+logs/
+Thumbs.db
+.DS_Store
