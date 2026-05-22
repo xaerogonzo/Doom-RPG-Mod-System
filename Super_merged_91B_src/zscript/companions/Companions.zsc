@@ -163,34 +163,31 @@ class TFCO_CompanionsSystem play {
 
     for (int i = 0; i < count; ++i) {
       Actor frend;
+      // Pick the tier ONCE per spawn (0 = regular, 1 = dangerous, 2 = boss).
+      // Each case below maps the tier to its roster-specific index range.
+      int tier = PickTier(allowBoss, allowArch, bossChance);
       switch (roster) {
-        case 2: // Heretic
-          if (allowBoss && random(0, 256) <= bossChance)
-            frend = pl.Spawn(heretic[random(12, 13)], pl.pos, ALLOW_REPLACE);
-          else if (allowArch)
-            frend = pl.Spawn(heretic[random(0, 11)], pl.pos, ALLOW_REPLACE);
-          else
-            frend = pl.Spawn(heretic[random(0, 10)], pl.pos, ALLOW_REPLACE);
+        case 2: { // Heretic
+          int idx = (tier == 2) ? random(12, 13)
+                  : (tier == 1) ? random(0, 11)
+                  :               random(0, 10);
+          frend = pl.Spawn(heretic[idx], pl.pos, ALLOW_REPLACE);
           break;
+        }
         case 4: { // Chex Quest 3
           // Look up a class by name at runtime. Returns null if chex.wad isn't loaded.
-          Class<Actor> cls;
-          if (allowBoss && random(0, 256) <= bossChance)
-            cls = (Class<Actor>)(FindClass(chexNames[7]));
-          else if (allowArch)
-            cls = (Class<Actor>)(FindClass(chexNames[random(0, 7)]));
-          else
-            cls = (Class<Actor>)(FindClass(chexNames[random(0, 6)]));
+          int idx = (tier == 2) ? 7
+                  : (tier == 1) ? random(0, 7)
+                  :               random(0, 6);
+          Class<Actor> cls = (Class<Actor>)(FindClass(chexNames[idx]));
           // Fall back to Doom 2 roster if Chex classes aren't available.
-          if (cls)
+          if (cls) {
             frend = pl.Spawn(cls, pl.pos, ALLOW_REPLACE);
-          else {
-            if (allowBoss && random(0, 256) <= bossChance)
-              frend = pl.Spawn(doom2[random(15, 16)], pl.pos, ALLOW_REPLACE);
-            else if (allowArch)
-              frend = pl.Spawn(doom2[random(0, 14)], pl.pos, ALLOW_REPLACE);
-            else
-              frend = pl.Spawn(doom2[random(0, 13)], pl.pos, ALLOW_REPLACE);
+          } else {
+            int didx = (tier == 2) ? random(15, 16)
+                     : (tier == 1) ? random(0, 14)
+                     :               random(0, 13);
+            frend = pl.Spawn(doom2[didx], pl.pos, ALLOW_REPLACE);
           }
           break;
         }
@@ -228,18 +225,16 @@ class TFCO_CompanionsSystem play {
           Class<Actor> cls;
           if (pool.Size() == 0) {
             // Strife classes not available — fall back to Doom 2.
-            if (allowBoss && random(0, 256) <= bossChance)
-              frend = pl.Spawn(doom2[random(15, 16)], pl.pos, ALLOW_REPLACE);
-            else if (allowArch)
-              frend = pl.Spawn(doom2[random(0, 14)], pl.pos, ALLOW_REPLACE);
-            else
-              frend = pl.Spawn(doom2[random(0, 13)], pl.pos, ALLOW_REPLACE);
+            int didx = (tier == 2) ? random(15, 16)
+                     : (tier == 1) ? random(0, 14)
+                     :               random(0, 13);
+            frend = pl.Spawn(doom2[didx], pl.pos, ALLOW_REPLACE);
           } else {
-            // Boss roll: only fires if Order is enabled and has a boss class.
-            if (allowBoss && bossPool.Size() > 0 && random(0, 256) <= bossChance)
+            // Boss tier: only fires if Order is enabled and has a boss class.
+            if (tier == 2 && bossPool.Size() > 0)
               cls = bossPool[0];
-            // Dangerous roll: only fires if Order is enabled and has a bishop class.
-            else if (allowArch && bishopPool.Size() > 0)
+            // Dangerous tier: only fires if Order is enabled and has a bishop class.
+            else if (tier == 1 && bishopPool.Size() > 0)
               cls = (random(0, 1) == 0) ? bishopPool[0] : pool[random(0, pool.Size() - 1)];
             else
               cls = pool[random(0, pool.Size() - 1)];
@@ -248,27 +243,25 @@ class TFCO_CompanionsSystem play {
           }
           break;
         }
-          if (allowBoss && random(0, 256) <= bossChance)
-            frend = pl.Spawn(hexen[7], pl.pos, ALLOW_REPLACE);
-          else if (allowArch)
-            frend = pl.Spawn(hexen[random(0, 6)], pl.pos, ALLOW_REPLACE);
-          else
-            frend = pl.Spawn(hexen[random(0, 5)], pl.pos, ALLOW_REPLACE);
+        case 3: { // Hexen
+          int idx = (tier == 2) ? 7
+                  : (tier == 1) ? random(0, 6)
+                  :               random(0, 5);
+          frend = pl.Spawn(hexen[idx], pl.pos, ALLOW_REPLACE);
           break;
-        case 1: // Doom 2
-          if (allowBoss && random(0, 256) <= bossChance)
-            frend = pl.Spawn(doom2[random(15, 16)], pl.pos, ALLOW_REPLACE);
-          else if (allowArch)
-            frend = pl.Spawn(doom2[random(0, 14)], pl.pos, ALLOW_REPLACE);
-          else
-            frend = pl.Spawn(doom2[random(0, 13)], pl.pos, ALLOW_REPLACE);
+        }
+        case 1: { // Doom 2
+          int idx = (tier == 2) ? random(15, 16)
+                  : (tier == 1) ? random(0, 14)
+                  :               random(0, 13);
+          frend = pl.Spawn(doom2[idx], pl.pos, ALLOW_REPLACE);
           break;
-        default: // 0 = Doom 1
-          if (allowBoss && random(0, 256) <= bossChance)
-            frend = pl.Spawn(doom1[random(8, 9)], pl.pos, ALLOW_REPLACE);
-          else
-            frend = pl.Spawn(doom1[random(0, 7)], pl.pos, ALLOW_REPLACE);
+        }
+        default: { // 0 = Doom 1 (no archvile tier — only regular/boss)
+          int idx = (tier == 2) ? random(8, 9) : random(0, 7);
+          frend = pl.Spawn(doom1[idx], pl.pos, ALLOW_REPLACE);
           break;
+        }
       }
 
       if (frend) {
@@ -283,6 +276,16 @@ class TFCO_CompanionsSystem play {
         frend.A_ChangeVelocity(frandom(-8, 8), frandom(-8, 8));
       }
     }
+  }
+
+  // Pick a companion tier based on flags and the boss roll.
+  // Returns 0 = regular, 1 = dangerous (archvile/bishop), 2 = boss.
+  // Each case in PlayerEntered's switch then maps this tier to its own roster's index range.
+  // Note: Doom 1 has no dangerous tier — tier 1 falls through to regular spawn there.
+  private static int PickTier(bool allowBoss, bool allowArch, int bossChance) {
+    if (allowBoss && random(0, 256) <= bossChance) return 2;
+    if (allowArch) return 1;
+    return 0;
   }
 
   // How many allies to spawn — from upgrade level or flat CVar.
@@ -424,7 +427,58 @@ class TFCO_FriendEnhancer : Inventory {
     Actor act = owner;
     if (!act || act.bDESTROYED) return;
 
-    // Pointer arrow above companion.
+    UpdatePointerArrow(act);
+
+    // Safety valve: strip enhancer from non-friendly or player actors.
+    if (!act.bFRIENDLY || act is "DoomPlayer") {
+      StripCompanionState(act);
+      Destroy();
+      return;
+    }
+
+    if (!owner || act.bDESTROYED) return;
+    if (act.health > 0 && !SafeInState(act, st_Raise)) {
+      // Flags + damage scaling — applied every tic in case a mod clears them.
+      ApplyCompanionFlags(act);
+
+      if (act.master) {
+        // Cache master to a local so it can't be cleared by another event handler
+        // mid-tic (happens with heavy mod stacks like Brutal Pack + Corruption Cards).
+        Actor master = act.master;
+        if (!master || master.bDESTROYED) return;
+
+        // Compute master distance and sight once — used by multiple sub-systems.
+        double distToMaster = act.Distance3D(master);
+        bool   canSeeMaster = act.CheckSight(master);
+
+        // Friendly fire prevention token on master.
+        master.SetInventory("TFCO_NoFriendlyFire", F_NoFriendlyFire ? 1 : 0);
+
+        // Visuals are throttled to every 4 tics (cosmetic — saves ~75% of the cost).
+        if ((level.time % 4) == 0)
+          UpdateVisuals(act, distToMaster);
+
+        TickAI(act, master, distToMaster, canSeeMaster);
+        TickHealing(act, distToMaster, canSeeMaster);
+        TickTeleport(act, master, distToMaster, canSeeMaster);
+      }
+    }
+
+    // Resurrection system.
+    if (!owner || act.bDESTROYED) return;
+    if (act.health <= 0)
+      TickResurrection(act);
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Per-tic helpers — called from DoEffect to keep that method scannable.
+  // All read self.F_* CVars, the cached state pointers (st_*), and the per-
+  // instance counters (AlertCD, TargetForget, Reviving*, etc.) directly.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  // Pop the pointer arrow above the companion when F_Pointer is on.
+  // Tracks ArrowPopped so we only spawn one arrow per enable-cycle.
+  private void UpdatePointerArrow(Actor act) {
     if (F_Pointer) {
       if (!ArrowPopped) {
         act.A_SpawnItemEx("TFCO_FriendPointer", 0, 0, act.height * 2,
@@ -434,318 +488,319 @@ class TFCO_FriendEnhancer : Inventory {
     } else {
       ArrowPopped = false;
     }
+  }
 
-    // Safety valve: strip enhancer from non-friendly or player actors.
-    if (!act.bFRIENDLY || act is "DoomPlayer") {
-      act.A_SetSize(act.default.radius, act.default.height);
-      act.speed          = act.default.speed;
-      act.damagefactor   = act.default.damagefactor;
-      act.damagemultiply = act.default.damagemultiply;
-      Destroy();
+  // Reset an actor's stats to defaults before destroying the enhancer.
+  // Called when the actor is no longer a valid companion (turned hostile, etc.).
+  private void StripCompanionState(Actor act) {
+    act.A_SetSize(act.default.radius, act.default.height);
+    act.speed          = act.default.speed;
+    act.damagefactor   = act.default.damagefactor;
+    act.damagemultiply = act.default.damagemultiply;
+  }
+
+  // Re-apply companion behaviour flags + damage scaling every tic.
+  // Some mods clear these flags mid-game, so we re-assert them.
+  private void ApplyCompanionFlags(Actor act) {
+    act.bDROPOFF          = true;
+    act.bQUICKTORETALIATE = true;
+    act.bJUMPDOWN         = true;
+    act.bNOBLOCKMONST     = true;
+    act.damagefactor   = act.default.damagefactor   * F_DamageFactor;
+    act.damagemultiply = act.default.damagemultiply * F_DamageMult;
+  }
+
+  // Throttled visual styling — tint, walkable proximity, translucency.
+  // Called every 4 tics (cosmetic, saves ~75% of the cost).
+  private void UpdateVisuals(Actor act, double distToMaster) {
+    // Custom tint.
+    if (F_Colored) {
+      act.A_SetRenderStyle(act.default.alpha, STYLE_Stencil);
+      act.SetShade(F_Color);
+    } else {
+      act.A_SetRenderStyle(act.default.alpha, act.getRenderStyle());
+    }
+
+    // Walk-through when very close.
+    if (F_Walkable)
+      act.bTHRUACTORS = (distToMaster <= F_WalkableRange);
+
+    // Translucency when close.
+    if (F_TranslucentProx) {
+      bool close = (distToMaster <= F_WalkableRange);
+      if (F_Colored) {
+        act.A_SetRenderStyle(close ? 0.5 : 1.0,
+                             close ? STYLE_AddShaded : STYLE_Shaded);
+      } else {
+        if (close) {
+          act.A_SetRenderStyle(0.5, STYLE_Translucent);
+        } else {
+          let def = GetDefaultByType(act.GetClass());
+          if (def) act.A_SetRenderStyle(def.alpha, def.getRenderStyle());
+        }
+      }
+    } else {
+      act.A_SetRenderStyle(act.default.alpha, act.default.getRenderStyle());
+    }
+  }
+
+  // Per-tic AI: follow/idle when no target, attack-alert, pain-reaction,
+  // and target memory (with strafing). Mutates AlertCD and TargetForget.
+  private void TickAI(Actor act, Actor master, double distToMaster, bool canSeeMaster) {
+    // Following and idle behaviour (only when no active target).
+    if (!act.target) {
+      if (F_Follow && canSeeMaster && distToMaster > F_IdleRange) {
+        act.bSPRITEANGLE = true;
+        act.SpriteAngle  = 180;
+        act.A_FaceMaster();
+        if (act.speed > 0)
+          act.A_Recoil(-0.5 - (act.speed * 0.03));
+      }
+
+      if (!canSeeMaster || distToMaster <= F_IdleRange)
+        act.bSPRITEANGLE = false;
+
+      if (F_Idle) {
+        if (distToMaster <= F_IdleRange && !SafeInState(act, st_Spawn)) {
+          act.A_ClearTarget();
+          act.SetStateLabel("Spawn");
+        } else if (distToMaster > (F_IdleRange + 32)
+                   && SafeInState(act, st_Spawn)) {
+          act.SetStateLabel("See");
+        }
+      }
+    }
+
+    // Alert hostile monsters when companion attacks.
+    if (F_AttackAlert) {
+      if (AlertCD <= 0
+          && (SafeInState(act, st_Missile) || SafeInState(act, st_Melee))) {
+        AlertCD = 1;
+        act.A_AlertMonsters(2048, AMF_TARGETEMITTER);
+      }
+    }
+    if (AlertCD >= 1) ++AlertCD;
+    if (AlertCD >= 3)  AlertCD = 0;
+
+    // Switch to player's attacker when master takes damage.
+    // Pain state check is quick — master.FindState cached here inline since
+    // it's the *master's* state not ours (can't cache at AttachToOwner).
+    State masterPain = master.FindState("Pain");
+    if (SafeInState(master, masterPain)) {
+      act.A_ClearTarget();
+      Actor attackerTgt = master.target;
+      if (attackerTgt && !attackerTgt.bDESTROYED)
+        act.target = attackerTgt;
+      if (!SafeInState(act, st_See))
+        act.SetStateLabel("See");
+    }
+
+    // Target memory — forget after 5 seconds without line-of-sight.
+    Actor tgt = act.target;
+    if (tgt && !tgt.bDESTROYED) {
+      act.bSPRITEANGLE = false;
+      bool canSeeTarget = act.CheckSight(tgt);
+      if (canSeeTarget)
+        TargetForget = 0;
+      if (!canSeeTarget && (level.time % 35) == 0)
+        ++TargetForget;
+      if (TargetForget >= 5) {
+        TargetForget = 0;
+        act.A_ClearTarget();
+      }
+
+      // Strafing — reuses canSeeTarget computed above.
+      if (F_Strafing && canSeeTarget && has_Missile
+          && !SafeInState(act, st_Melee) && act.speed > 0)
+        act.A_ChangeVelocity(frandom(-2.6, 2.6), frandom(-0.9, 0.9));
+    }
+  }
+
+  // Per-tic passive healing, gated by F_Healing mode and proximity to master.
+  private void TickHealing(Actor act, double distToMaster, bool canSeeMaster) {
+    int maxHP = int(act.default.health * F_HPMult);
+    if (act.health >= maxHP || (level.time % F_HealRate) != 0) return;
+
+    bool doHeal = (F_Healing == 1)
+      || (F_Healing == 2 && canSeeMaster
+          && distToMaster <= (F_HealRange + act.radius));
+    if (!doHeal) return;
+
+    for (int i = 0; i < 10; ++i)
+      act.A_SpawnParticle("#61fc53",
+        SPF_RELATIVE | SPF_NOTIMEFREEZE | SPF_FULLBRIGHT,
+        100, frandom(1, 6), 0, 0, 0, act.height / 2,
+        frandom(-4, 4), frandom(-4, 4), frandom(-4, 4), 0, 0, 0, 1, 0, -0.38);
+    act.A_DamageSelf(-int(act.default.health * 0.02));
+  }
+
+  // Per-tic teleport-to-master logic. Mutates CantSeeMaster (sight timer).
+  private void TickTeleport(Actor act, Actor master, double distToMaster, bool canSeeMaster) {
+    if (!F_Teleport || act.speed <= 0) return;
+
+    if (canSeeMaster)
+      CantSeeMaster = 0;
+    else if (F_TeleportNoSight && !act.target
+             && (level.time % 35) == 0)
+      ++CantSeeMaster;
+
+    bool doTeleport = false;
+    if (distToMaster >= F_TeleportRange) {
+      CantSeeMaster = 0;
+      doTeleport = true;
+    } else if (F_TeleportNoSight && CantSeeMaster >= F_TeleportDelay) {
+      CantSeeMaster = 0;
+      doTeleport = true;
+    }
+
+    Actor tgt2 = act.target;
+    if (tgt2 && !tgt2.bDESTROYED && act.CheckSight(tgt2))
+      CantSeeMaster = 0;
+
+    if (doTeleport) {
+      act.SetStateLabel("See");
+      act.A_ClearTarget();
+      if (F_FogTel) act.Spawn("TeleportFog", act.pos);
+      act.Warp(master, 0, 0, 0, random(0, 360), WARPF_NOCHECKPOSITION);
+      if (F_FogTel) act.Spawn("TeleportFog", act.pos);
+      if (F_WarpPush) act.A_ChangeVelocity(frandom(-20, 20), frandom(-20, 20));
+    }
+  }
+
+  // Full resurrection state machine — runs every tic when the companion is dead.
+  // Owns: RevValue, RevivingGoal, Reviving, RevivingProcess, ReviveCount,
+  //       ReviveMessage, ReviveMessage2, ReviveExhaustedMsg.
+  private void TickResurrection(Actor act) {
+    if (!RevValue) {
+      RevivingGoal = int((5 + act.default.health * 0.5
+        + random(act.default.health / 4, act.default.health / 2))
+        * F_ReviveSpeed);
+      RevValue = true;
+    }
+
+    // Get revive limit — from upgrade level if in Gun Bonsai mode.
+    int revLimit = GetCurrentReviveLimit();
+    bool limitReached = (revLimit > 0 && ReviveCount >= revLimit);
+
+    if (!F_Revive || !act.master || act.master.health <= 0) return;
+    Actor master = act.master; // cache to prevent null dereference mid-tic
+    if (master.bDESTROYED) return;
+
+    if (limitReached) {
+      if (F_ReviveMsg && !ReviveExhaustedMsg) {
+        act.A_StartSound("f_ally/down", CHAN_5, CHANF_OVERLAP, attenuation: ATTN_NONE);
+        Console.PrintF("\cJYour \cD%s \cJhas died. \cRNo resurrections remaining!", act.GetTag());
+        ReviveExhaustedMsg = true;
+      }
       return;
     }
 
-    if (!owner || act.bDESTROYED) return;
-    if (act.health > 0 && !SafeInState(act, st_Raise)) {
-      // Flags — set every tic in case a mod clears them.
-      act.bDROPOFF         = true;
-      act.bQUICKTORETALIATE = true;
-      act.bJUMPDOWN        = true;
-      act.bNOBLOCKMONST    = true;
+    if (F_ReviveMsg && !ReviveMessage) {
+      act.A_StartSound("f_ally/down", CHAN_5, CHANF_OVERLAP, attenuation: ATTN_NONE);
+      act.A_SpawnItemEx("TFCO_ReviveMeMate", 0, 0, act.height * 2,
+                          flags: SXF_NOCHECKPOSITION | SXF_SETMASTER);
+      Console.PrintF("\cJYour \cD%s \cJhas \cGdied!", act.GetTag());
+      ReviveMessage = true;
+    }
 
-      // Damage scaling.
-      act.damagefactor   = act.default.damagefactor   * F_DamageFactor;
-      act.damagemultiply = act.default.damagemultiply * F_DamageMult;
+    double distToMaster = act.Distance3D(master);
 
-      if (act.master) {
-        // Cache master to a local so it can't be cleared by another event handler
-        // mid-tic (happens with heavy mod stacks like Brutal Pack + Corruption Cards).
-        Actor master = act.master;
-        if (!master || master.bDESTROYED) return;
+    // Blue particles pulse around corpse while awaiting revival.
+    if ((level.time % 5) == 0 && distToMaster > 78 + act.radius)
+      act.A_SpawnParticle("#2b84ff", SPF_RELATIVE | SPF_NOTIMEFREEZE | SPF_FULLBRIGHT,
+        10, frandom(1, 6), 0,
+        random(-act.radius + 5, act.radius + 5),
+        random(-act.radius + 5, act.radius + 5),
+        random(0, act.height + 5),
+        0, 0, frandom(0.5, 2.1), 0, 0, 0, 1, 0.1, 0.05);
 
-        // Compute master distance and sight once — used in multiple branches below.
-        double distToMaster  = act.Distance3D(master);
-        bool   canSeeMaster  = act.CheckSight(master);
+    int warmup = F_ReviveWarmup;
+    if (distToMaster > 78 + act.radius) {
+      // Player walked away — decay revival progress.
+      if ((level.time % 4) == 0 && Reviving > 0) --Reviving;
+      if (Reviving < 0) Reviving = 0;
+      RevivingProcess = 0;
+      ReviveMessage2  = false;
+      return;
+    }
 
-        // Friendly fire prevention token on master.
-        master.SetInventory("TFCO_NoFriendlyFire", F_NoFriendlyFire ? 1 : 0);
+    // Player is close enough — actively reviving.
+    if ((level.time % 1) == 0 && RevivingProcess < warmup)
+      ++RevivingProcess;
 
-        // Visual effects — run every 4 tics (fine for cosmetics, saves ~75% cost).
-        if ((level.time % 4) == 0) {
-          // Custom tint.
-          if (F_Colored) {
-            act.A_SetRenderStyle(act.default.alpha, STYLE_Stencil);
-            act.SetShade(F_Color);
-          } else {
-            act.A_SetRenderStyle(act.default.alpha, act.getRenderStyle());
-          }
+    if (RevivingProcess >= warmup && !ReviveMessage2) {
+      act.A_StartSound("f_ally/attempt", CHAN_5, CHANF_OVERLAP);
+      Console.PrintF("\cGReviving the \cD%s...", act.GetTag());
+      ReviveMessage2 = true;
+    }
 
-          // Walk-through when very close.
-          if (F_Walkable)
-            act.bTHRUACTORS = (distToMaster <= F_WalkableRange);
+    if (RevivingProcess >= warmup && (level.time % random(2, 3)) == 0) {
+      ++Reviving;
+      act.A_SpawnParticle("#f51111", SPF_RELATIVE | SPF_NOTIMEFREEZE | SPF_FULLBRIGHT,
+        10, frandom(1, 6), 0,
+        random(-act.radius + 5, act.radius + 5),
+        random(-act.radius + 5, act.radius + 5),
+        random(0, act.height + 5),
+        0, 0, frandom(1.2, 6.1), 0, 0, 0, 1, 0.1, 0.05);
+    }
 
-          // Translucency when close.
-          if (F_TranslucentProx) {
-            bool close = (distToMaster <= F_WalkableRange);
-            if (F_Colored) {
-              act.A_SetRenderStyle(close ? 0.5 : 1.0,
-                                     close ? STYLE_AddShaded : STYLE_Shaded);
-            } else {
-              if (close) {
-                act.A_SetRenderStyle(0.5, STYLE_Translucent);
-              } else {
-                let def = GetDefaultByType(act.GetClass());
-                if (def) act.A_SetRenderStyle(def.alpha, def.getRenderStyle());
-              }
-            }
-          } else {
-            act.A_SetRenderStyle(act.default.alpha, act.default.getRenderStyle());
-          }
-        }
-
-        // Following and idle behaviour (only when no active target).
-        if (!act.target) {
-          if (F_Follow && canSeeMaster && distToMaster > F_IdleRange) {
-            act.bSPRITEANGLE = true;
-            act.SpriteAngle   = 180;
-            act.A_FaceMaster();
-            if (act.speed > 0)
-              act.A_Recoil(-0.5 - (act.speed * 0.03));
-          }
-
-          if (!canSeeMaster || distToMaster <= F_IdleRange)
-            act.bSPRITEANGLE = false;
-
-          if (F_Idle) {
-            if (distToMaster <= F_IdleRange && !SafeInState(act, st_Spawn)) {
-              act.A_ClearTarget();
-              act.SetStateLabel("Spawn");
-            } else if (distToMaster > (F_IdleRange + 32)
-                       && SafeInState(act, st_Spawn)) {
-              act.SetStateLabel("See");
-            }
-          }
-        }
-
-        // Alert hostile monsters when companion attacks.
-        if (F_AttackAlert) {
-          if (AlertCD <= 0
-              && (SafeInState(act, st_Missile) || SafeInState(act, st_Melee))) {
-            AlertCD = 1;
-            act.A_AlertMonsters(2048, AMF_TARGETEMITTER);
-          }
-        }
-        if (AlertCD >= 1) ++AlertCD;
-        if (AlertCD >= 3)  AlertCD = 0;
-
-        // Switch to player's attacker when master takes damage.
-        // Pain state check is quick — master.FindState cached here inline since
-        // it's the *master's* state not ours (can't cache at AttachToOwner).
-        State masterPain = master.FindState("Pain");
-        if (SafeInState(master, masterPain)) {
-          act.A_ClearTarget();
-          Actor attackerTgt = master.target;
-          if (attackerTgt && !attackerTgt.bDESTROYED)
-            act.target = attackerTgt;
-          if (!SafeInState(act, st_See))
-            act.SetStateLabel("See");
-        }
-
-        // Target memory — forget after 5 seconds without line-of-sight.
-        Actor tgt = act.target;
-        if (tgt && !tgt.bDESTROYED) {
-          act.bSPRITEANGLE = false;
-          bool canSeeTarget = act.CheckSight(tgt);
-          if (canSeeTarget)
-            TargetForget = 0;
-          if (!canSeeTarget && (level.time % 35) == 0)
-            ++TargetForget;
-          if (TargetForget >= 5) {
-            TargetForget = 0;
-            act.A_ClearTarget();
-          }
-
-          // Strafing — reuses canSeeTarget computed above.
-          if (F_Strafing && canSeeTarget && has_Missile
-              && !SafeInState(act, st_Melee) && act.speed > 0)
-            act.A_ChangeVelocity(frandom(-2.6, 2.6), frandom(-0.9, 0.9));
-        }
-
-        // Passive healing.
-        int maxHP = int(act.default.health * F_HPMult);
-        if (act.health < maxHP && (level.time % F_HealRate) == 0) {
-          bool doHeal = (F_Healing == 1)
-            || (F_Healing == 2 && canSeeMaster
-                && distToMaster <= (F_HealRange + act.radius));
-          if (doHeal) {
-            for (int i = 0; i < 10; ++i)
-              act.A_SpawnParticle("#61fc53",
-                SPF_RELATIVE | SPF_NOTIMEFREEZE | SPF_FULLBRIGHT,
-                100, frandom(1, 6), 0, 0, 0, act.height / 2,
-                frandom(-4, 4), frandom(-4, 4), frandom(-4, 4), 0, 0, 0, 1, 0, -0.38);
-            act.A_DamageSelf(-int(act.default.health * 0.02));
-          }
-        }
-
-        // Teleportation back to player.
-        if (F_Teleport && act.speed > 0) {
-          if (canSeeMaster)
-            CantSeeMaster = 0;
-          else if (F_TeleportNoSight && !act.target
-                   && (level.time % 35) == 0)
-            ++CantSeeMaster;
-
-          bool doTeleport = false;
-          if (distToMaster >= F_TeleportRange) {
-            CantSeeMaster = 0;
-            doTeleport = true;
-          } else if (F_TeleportNoSight && CantSeeMaster >= F_TeleportDelay) {
-            CantSeeMaster = 0;
-            doTeleport = true;
-          }
-
-          Actor tgt2 = act.target;
-          if (tgt2 && !tgt2.bDESTROYED && act.CheckSight(tgt2))
-            CantSeeMaster = 0;
-
-          if (doTeleport) {
-            act.SetStateLabel("See");
-            act.A_ClearTarget();
-            if (F_FogTel) act.Spawn("TeleportFog", act.pos);
-            act.Warp(master, 0, 0, 0, random(0, 360), WARPF_NOCHECKPOSITION);
-            if (F_FogTel) act.Spawn("TeleportFog", act.pos);
-            if (F_WarpPush) act.A_ChangeVelocity(frandom(-20, 20), frandom(-20, 20));
-          }
-        }
+    // Pulse sound and shock effect as revival builds.
+    if (RevivingProcess >= warmup) {
+      double prog = double(Reviving) / RevivingGoal;
+      int pulseTic = (prog < 0.25) ? 40 : (prog < 0.5) ? 20 : (prog < 0.666) ? 10 : 5;
+      if ((level.time % pulseTic) == 0) {
+        act.A_StartSound("f_ally/pulse", CHAN_5, CHANF_OVERLAP, volume: 0.22, pitch: 1.78);
+        act.A_SpawnItemEx("TFCO_ResurrectionShock", 0, 0, 16, flags: SXF_NOCHECKPOSITION);
       }
     }
 
-    // Resurrection system.
-    if (!owner || act.bDESTROYED) return;
-    if (owner && act.health <= 0) {
-      if (!RevValue) {
-        RevivingGoal = int((5 + act.default.health * 0.5
-          + random(act.default.health / 4, act.default.health / 2))
-          * F_ReviveSpeed);
-        RevValue = true;
-      }
+    // Revival complete.
+    if (RevivingProcess >= warmup && Reviving >= RevivingGoal)
+      CompleteResurrection(act, master, revLimit);
+  }
 
-      // Get revive limit — from upgrade level if in Gun Bonsai mode.
-      // We find the player number from master reference.
-      int revLimit = GetCurrentReviveLimit();
-      bool limitReached = (revLimit > 0 && ReviveCount >= revLimit);
+  // Final step of resurrection — reset counters, restore the actor, log message.
+  private void CompleteResurrection(Actor act, Actor master, int revLimit) {
+    ++ReviveCount;
+    TFCO_CompanionsSystem.NotifyCompanionResurrect(); // VUAS achievement hook
+    Reviving = 0; RevivingProcess = 0;
+    RevivingGoal = int((5 + act.default.health * 0.5
+      + random(act.default.health / 4, act.default.health / 2))
+      * F_ReviveSpeed);
+    act.A_Quake(3, 18, 0, 1024, "");
+    act.A_StartSound("f_ally/revive", CHAN_5, CHANF_OVERLAP);
+    master.A_SetBlend("#f51111", 0.4, 12);
 
-      if (F_Revive && act.master && act.master.health > 0) {
-        Actor master = act.master; // cache to prevent null dereference mid-tic
-        if (master.bDESTROYED) return;
-        if (limitReached) {
-          if (F_ReviveMsg && !ReviveExhaustedMsg) {
-            act.A_StartSound("f_ally/down", CHAN_5, CHANF_OVERLAP, attenuation: ATTN_NONE);
-            Console.PrintF("\cJYour \cD%s \cJhas died. \cRNo resurrections remaining!", act.GetTag());
-            ReviveExhaustedMsg = true;
-          }
-        } else {
-          if (F_ReviveMsg && !ReviveMessage) {
-            act.A_StartSound("f_ally/down", CHAN_5, CHANF_OVERLAP, attenuation: ATTN_NONE);
-            act.A_SpawnItemEx("TFCO_ReviveMeMate", 0, 0, act.height * 2,
-                                flags: SXF_NOCHECKPOSITION | SXF_SETMASTER);
-            Console.PrintF("\cJYour \cD%s \cJhas \cGdied!", act.GetTag());
-            ReviveMessage = true;
-          }
-
-          // Blue particles pulse around corpse while awaiting revival.
-          if ((level.time % 5) == 0 && act.Distance3D(master) > 78 + act.radius)
-            act.A_SpawnParticle("#2b84ff", SPF_RELATIVE | SPF_NOTIMEFREEZE | SPF_FULLBRIGHT,
-              10, frandom(1, 6), 0,
-              random(-act.radius + 5, act.radius + 5),
-              random(-act.radius + 5, act.radius + 5),
-              random(0, act.height + 5),
-              0, 0, frandom(0.5, 2.1), 0, 0, 0, 1, 0.1, 0.05);
-
-          int warmup = F_ReviveWarmup;
-          if (act.Distance3D(master) <= 78 + act.radius) {
-            if ((level.time % 1) == 0 && RevivingProcess < warmup)
-              ++RevivingProcess;
-
-            if (RevivingProcess >= warmup && !ReviveMessage2) {
-              act.A_StartSound("f_ally/attempt", CHAN_5, CHANF_OVERLAP);
-              Console.PrintF("\cGReviving the \cD%s...", act.GetTag());
-              ReviveMessage2 = true;
-            }
-
-            if (RevivingProcess >= warmup && (level.time % random(2, 3)) == 0) {
-              ++Reviving;
-              act.A_SpawnParticle("#f51111", SPF_RELATIVE | SPF_NOTIMEFREEZE | SPF_FULLBRIGHT,
-                10, frandom(1, 6), 0,
-                random(-act.radius + 5, act.radius + 5),
-                random(-act.radius + 5, act.radius + 5),
-                random(0, act.height + 5),
-                0, 0, frandom(1.2, 6.1), 0, 0, 0, 1, 0.1, 0.05);
-            }
-
-            // Pulse sound and shock effect as revival builds.
-            if (RevivingProcess >= warmup) {
-              double prog = double(Reviving) / RevivingGoal;
-              int pulseTic = (prog < 0.25) ? 40 : (prog < 0.5) ? 20 : (prog < 0.666) ? 10 : 5;
-              if ((level.time % pulseTic) == 0) {
-                act.A_StartSound("f_ally/pulse", CHAN_5, CHANF_OVERLAP, volume: 0.22, pitch: 1.78);
-                act.A_SpawnItemEx("TFCO_ResurrectionShock", 0, 0, 16, flags: SXF_NOCHECKPOSITION);
-              }
-            }
-
-            // Revival complete.
-            if (RevivingProcess >= warmup && Reviving >= RevivingGoal) {
-              ++ReviveCount;
-              TFCO_CompanionsSystem.NotifyCompanionResurrect(); // VUAS achievement hook
-              Reviving = 0; RevivingProcess = 0;
-              RevivingGoal = int((5 + act.default.health * 0.5
-                + random(act.default.health / 4, act.default.health / 2))
-                * F_ReviveSpeed);
-              act.A_Quake(3, 18, 0, 1024, "");
-              act.A_StartSound("f_ally/revive", CHAN_5, CHANF_OVERLAP);
-              master.A_SetBlend("#f51111", 0.4, 12);
-
-              if (revLimit > 0) {
-                int remaining = revLimit - ReviveCount;
-                if (remaining > 0)
-                  Console.PrintF("\cFYour \cD%s \cFhas been \cGreanimated! \cJ(%i resurrection(s) remaining)",
-                    act.GetTag(), remaining);
-                else
-                  Console.PrintF("\cFYour \cD%s \cFhas been \cGreanimated! \cRThis was the last resurrection.",
-                    act.GetTag());
-              } else {
-                Console.PrintF("\cFYour \cD%s \cFhas been \cGreanimated!", act.GetTag());
-              }
-
-              for (int i = 0; i < 120; ++i)
-                act.A_SpawnParticle("#f51111", SPF_RELATIVE | SPF_NOTIMEFREEZE | SPF_FULLBRIGHT,
-                  100, frandom(1, 6), 0, 0, 0, 0,
-                  frandom(-4, 4), frandom(-4, 4), frandom(-4, 4), 0, 0, 0, 1, 0, -0.02);
-
-              if (act.FindState("Raise", false))
-                act.A_RaiseSelf(RF_NOCHECKPOSITION);
-              else {
-                act.health       = act.default.health;
-                act.bSHOOTABLE   = true;
-                act.A_SetSize(act.default.radius, act.default.height);
-                act.A_SpawnItemEx("ArchvileFire", 0, 0, 32);
-                act.SetStateLabel("Spawn");
-              }
-              act.bFRIENDLY  = true;
-              ReviveMessage  = false;
-              ReviveMessage2 = false;
-              RevValue       = false;
-            }
-          } else {
-            // Player walked away — decay revival progress.
-            if ((level.time % 4) == 0 && Reviving > 0) --Reviving;
-            if (Reviving < 0) Reviving = 0;
-            RevivingProcess = 0;
-            ReviveMessage2  = false;
-          }
-        }
-      }
+    if (revLimit > 0) {
+      int remaining = revLimit - ReviveCount;
+      if (remaining > 0)
+        Console.PrintF("\cFYour \cD%s \cFhas been \cGreanimated! \cJ(%i resurrection(s) remaining)",
+          act.GetTag(), remaining);
+      else
+        Console.PrintF("\cFYour \cD%s \cFhas been \cGreanimated! \cRThis was the last resurrection.",
+          act.GetTag());
+    } else {
+      Console.PrintF("\cFYour \cD%s \cFhas been \cGreanimated!", act.GetTag());
     }
+
+    for (int i = 0; i < 120; ++i)
+      act.A_SpawnParticle("#f51111", SPF_RELATIVE | SPF_NOTIMEFREEZE | SPF_FULLBRIGHT,
+        100, frandom(1, 6), 0, 0, 0, 0,
+        frandom(-4, 4), frandom(-4, 4), frandom(-4, 4), 0, 0, 0, 1, 0, -0.02);
+
+    if (act.FindState("Raise", false))
+      act.A_RaiseSelf(RF_NOCHECKPOSITION);
+    else {
+      act.health     = act.default.health;
+      act.bSHOOTABLE = true;
+      act.A_SetSize(act.default.radius, act.default.height);
+      act.A_SpawnItemEx("ArchvileFire", 0, 0, 32);
+      act.SetStateLabel("Spawn");
+    }
+    act.bFRIENDLY  = true;
+    ReviveMessage  = false;
+    ReviveMessage2 = false;
+    RevValue       = false;
   }
 
   // Look up the revive limit from the upgrade system if active.

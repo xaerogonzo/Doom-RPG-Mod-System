@@ -156,6 +156,16 @@ class TFLV_Profiles play
     n.Push("bonsai_hyperv_hook_stun_max_base");
     n.Push("bonsai_hyperv_hook_stun_min_per_level");
     n.Push("bonsai_hyperv_hook_stun_max_per_level");
+    // Blood — appended after Hyper-V to preserve positional order of all
+    // existing entries (the file's append-only convention).
+    n.Push("bonsai_stat_blood_mult");
+    n.Push("bonsai_stat_blood_stacks_per_damage");
+    n.Push("bonsai_stat_blood_softcap");
+    n.Push("bonsai_stat_blood_drain_pct");
+    n.Push("bonsai_stat_blood_stack_drain_rate");
+    n.Push("bonsai_stat_blood_heal_ratio");
+    n.Push("bonsai_stat_blood_vitaldrain_bonus");
+    n.Push("bonsai_stat_blood_burst_ratio");
   }
 
   static void GetIntCVarNames(out Array<String> n)
@@ -364,6 +374,9 @@ class TFLV_Profiles play
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
     // hook_stun_min_base, hook_stun_max_base, hook_stun_min_per_level, hook_stun_max_per_level
+    // Blood — mult, stacks_per_damage, softcap, drain_pct, stack_drain_rate, heal_ratio, vitaldrain_bonus, burst_ratio
+    v.Push(1.00); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
+    v.Push(0.40); v.Push(0.50); v.Push(0.020);
   }
 
   static void BalancedFloats(out Array<double> v)
@@ -374,12 +387,12 @@ class TFLV_Profiles play
     v.Push(0.75); v.Push(0.92); v.Push(0.85); v.Push(0.60); v.Push(0.18); v.Push(0.40);
     v.Push(21.0); v.Push(5.00); v.Push(3.50); v.Push(0.12); v.Push(0.40);
     v.Push(5.50); v.Push(8.00);
-    v.Push(0.75); v.Push(0.15); v.Push(0.50); v.Push(0.90); v.Push(2.80); v.Push(0.78); v.Push(0.70);
-    v.Push(0.75); v.Push(0.80); v.Push(10.0); v.Push(0.25); v.Push(0.993);
+    v.Push(0.85); v.Push(0.15); v.Push(0.50); v.Push(0.90); v.Push(2.80); v.Push(0.78); v.Push(0.70);
+    v.Push(0.85); v.Push(0.80); v.Push(10.0); v.Push(0.25); v.Push(0.993);
     v.Push(0.007); v.Push(0.96); v.Push(0.50); v.Push(0.40);
-    v.Push(0.75); v.Push(0.40); v.Push(0.08); v.Push(0.50); v.Push(0.75);
+    v.Push(0.85); v.Push(0.40); v.Push(0.08); v.Push(0.50); v.Push(0.75);
     v.Push(3.50); v.Push(0.85); v.Push(0.90); v.Push(0.007);
-    v.Push(0.75); v.Push(0.16); v.Push(5.00); v.Push(4.00); v.Push(4.00);
+    v.Push(0.85); v.Push(0.16); v.Push(5.00); v.Push(4.00); v.Push(4.00);
     v.Push(0.90); v.Push(2.40); v.Push(0.15); v.Push(0.84);
     v.Push(1.00); v.Push(1.00); // damage_to_xp, score_to_xp
     v.Push(0.50); v.Push(0.50); // melee_mul, wimpy_mul
@@ -397,6 +410,9 @@ class TFLV_Profiles play
     v.Push(1.5);  v.Push(0.75);
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
+    // Blood — heal/burst mirror damage curve (mult=0.85 → heal ratio scaled the same)
+    v.Push(0.85); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
+    v.Push(0.34); v.Push(0.43); v.Push(0.017);
   }
 
   static void ChallengingFloats(out Array<double> v)
@@ -407,12 +423,12 @@ class TFLV_Profiles play
     v.Push(0.82); v.Push(0.94); v.Push(0.88); v.Push(0.60); v.Push(0.12); v.Push(0.30);
     v.Push(14.0); v.Push(3.50); v.Push(2.50); v.Push(0.07); v.Push(0.30);
     v.Push(4.00); v.Push(6.00);
-    v.Push(0.50); v.Push(0.12); v.Push(0.50); v.Push(0.90); v.Push(1.80); v.Push(0.84); v.Push(0.50);
-    v.Push(0.50); v.Push(0.60); v.Push(10.0); v.Push(0.30); v.Push(0.996);
+    v.Push(0.70); v.Push(0.12); v.Push(0.50); v.Push(0.90); v.Push(1.80); v.Push(0.84); v.Push(0.50);
+    v.Push(0.70); v.Push(0.60); v.Push(10.0); v.Push(0.30); v.Push(0.996);
     v.Push(0.004); v.Push(0.97); v.Push(0.50); v.Push(0.30);
-    v.Push(0.50); v.Push(0.30); v.Push(0.06); v.Push(0.50); v.Push(0.50);
+    v.Push(0.70); v.Push(0.30); v.Push(0.06); v.Push(0.50); v.Push(0.50);
     v.Push(2.00); v.Push(0.88); v.Push(0.90); v.Push(0.004);
-    v.Push(0.50); v.Push(0.12); v.Push(5.00); v.Push(3.00); v.Push(3.00);
+    v.Push(0.70); v.Push(0.12); v.Push(5.00); v.Push(3.00); v.Push(3.00);
     v.Push(0.90); v.Push(1.80); v.Push(0.10); v.Push(0.88);
     v.Push(1.00); v.Push(1.00); // damage_to_xp, score_to_xp
     v.Push(0.50); v.Push(0.50); // melee_mul, wimpy_mul
@@ -430,6 +446,9 @@ class TFLV_Profiles play
     v.Push(1.5);  v.Push(0.75);
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
+    // Blood — heal/burst mirror damage curve (mult=0.70 → heal ratio scaled the same)
+    v.Push(0.70); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
+    v.Push(0.28); v.Push(0.35); v.Push(0.014);
   }
 
   static void PunishingFloats(out Array<double> v)
@@ -440,12 +459,12 @@ class TFLV_Profiles play
     v.Push(0.88); v.Push(0.96); v.Push(0.92); v.Push(0.60); v.Push(0.07); v.Push(0.20);
     v.Push(9.00); v.Push(2.50); v.Push(1.50); v.Push(0.04); v.Push(0.20);
     v.Push(3.00); v.Push(4.00);
-    v.Push(0.30); v.Push(0.08); v.Push(0.50); v.Push(0.90); v.Push(1.00); v.Push(0.90); v.Push(0.30);
-    v.Push(0.30); v.Push(0.40); v.Push(10.0); v.Push(0.35); v.Push(0.998);
+    v.Push(0.50); v.Push(0.08); v.Push(0.50); v.Push(0.90); v.Push(1.00); v.Push(0.90); v.Push(0.30);
+    v.Push(0.50); v.Push(0.40); v.Push(10.0); v.Push(0.35); v.Push(0.998);
     v.Push(0.002); v.Push(0.98); v.Push(0.50); v.Push(0.20);
-    v.Push(0.30); v.Push(0.20); v.Push(0.04); v.Push(0.50); v.Push(0.30);
+    v.Push(0.50); v.Push(0.20); v.Push(0.04); v.Push(0.50); v.Push(0.30);
     v.Push(1.20); v.Push(0.92); v.Push(0.90); v.Push(0.002);
-    v.Push(0.30); v.Push(0.08); v.Push(5.00); v.Push(2.00); v.Push(2.00);
+    v.Push(0.50); v.Push(0.08); v.Push(5.00); v.Push(2.00); v.Push(2.00);
     v.Push(0.90); v.Push(1.20); v.Push(0.06); v.Push(0.92);
     v.Push(1.00); v.Push(1.00); // damage_to_xp, score_to_xp
     v.Push(0.50); v.Push(0.50); // melee_mul, wimpy_mul
@@ -463,6 +482,9 @@ class TFLV_Profiles play
     v.Push(1.5);  v.Push(0.75);
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
+    // Blood — heal/burst mirror damage curve (mult=0.50 → heal ratio scaled the same)
+    v.Push(0.50); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
+    v.Push(0.20); v.Push(0.25); v.Push(0.010);
   }
 
   static void BrutalFloats(out Array<double> v)
@@ -497,6 +519,9 @@ class TFLV_Profiles play
     v.Push(1.5);  v.Push(0.75);
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
+    // Blood — matches Default (Brutal keeps full upgrade power, only pacing differs)
+    v.Push(1.00); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
+    v.Push(0.40); v.Push(0.50); v.Push(0.020);
   }
 
   static void DefaultInts(out Array<int> v)
