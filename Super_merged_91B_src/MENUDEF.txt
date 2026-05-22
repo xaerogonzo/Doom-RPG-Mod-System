@@ -1442,12 +1442,17 @@ OptionMenu "GunBonsaiStatLightning"
   Command ">> Reset Lightning to Defaults", "resetcvar bonsai_stat_lightning_mult; resetcvar bonsai_stat_lightning_stack_rate; resetcvar bonsai_stat_lightning_softcap; resetcvar bonsai_stat_lightning_tbolt_stun_base; resetcvar bonsai_stat_lightning_tbolt_stun_per_level; resetcvar bonsai_stat_lightning_tbolt_radius_base; resetcvar bonsai_stat_lightning_tbolt_radius_per_level; resetcvar bonsai_stat_lightning_tbolt_cap_base; resetcvar bonsai_stat_lightning_chain_radius; resetcvar bonsai_stat_lightning_reviv_damage; resetcvar bonsai_stat_lightning_reviv_armour"
 }
 
+// -----------------------------------------------------------------------------
 // Blood
+// -----------------------------------------------------------------------------
 OptionMenu "GunBonsaiStatBlood"
 {
-  class TFLV_Menu_StatMenu
+  class TFLV_TooltipOptionMenu
   Title "Blood"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
 
+  StaticText "Output Multiplier", RED
   StaticText ""
   Slider "Blood Damage Multiplier", "bonsai_stat_blood_mult", 0.0, 3.0, 0.1, 1
   TFLV_Tooltip "Multiplier applied to all Blood DoT damage. Default 1.0."
@@ -1482,7 +1487,7 @@ OptionMenu "GunBonsaiStatBlood"
   TFLV_Tooltip "On kill of a blood-cursed enemy: heal = spawn_health * this * level. Default 0.02 (2% of spawn HP per level)."
 
   StaticText ""
-  StaticText "Reset", RED
+  StaticText "Reset", CYAN
   Command ">> Reset Blood to Defaults", "resetcvar bonsai_stat_blood_mult; resetcvar bonsai_stat_blood_drain_pct; resetcvar bonsai_stat_blood_heal_ratio; resetcvar bonsai_stat_blood_stacks_per_damage; resetcvar bonsai_stat_blood_softcap; resetcvar bonsai_stat_blood_stack_drain_rate; resetcvar bonsai_stat_blood_vitaldrain_bonus; resetcvar bonsai_stat_blood_burst_ratio"
 }
 
