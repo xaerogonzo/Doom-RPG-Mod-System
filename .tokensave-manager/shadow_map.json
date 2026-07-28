@@ -1,0 +1,18 @@
+{
+  "ext_map": {
+    ".zs": ".cpp",
+    ".zsc": ".cpp",
+    ".acs": ".c",
+    "DECORATE": ".cpp",
+    "MAPINFO": ".cpp",
+    "ZMAPINFO": ".cpp",
+    "SNDINFO": ".cpp",
+    "SBARINFO": ".cpp",
+    "LANGUAGE": ".cpp",
+    "GLDEFS": ".cpp",
+    "ANIMDEFS": ".cpp",
+    "MENUDEF": ".cpp",
+    "CVARINFO": ".cpp",
+    "KEYCONF": ".cpp"
+  }
+}
