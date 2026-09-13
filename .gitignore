@@ -39,3 +39,7 @@ ANIMDEFS.cpp
 MENUDEF.cpp
 CVARINFO.cpp
 KEYCONF.cpp
+
+
+# tokensave MCP binding (TokenSave Manager) — machine-local by choice
+.mcp.json

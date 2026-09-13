@@ -1,4 +1,4 @@
-@D:/Claude Co worker/Token Save Manager Source/templates\project-baseline.md
+@project-baseline.md
 @BASIC_INSTRUCTIONS.md
 
 # Doom RPG Mod - Claude Instructions
