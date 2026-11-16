@@ -29,6 +29,7 @@ Third-party components (Gun Bonsai, Hyper-V, VUAS, Indestructible, Doom Points, 
 - **Overdrive level 3 gap fixed** — `GetMaxStacks()` now uses `min(1 + level*2, max_stacks)`; each level gives distinct stack counts (Lv1→3, Lv2→5, Lv3→7); `bonsai_stat_overdrive_max_stacks` ceiling raised from 5 to 10
 
 ### Fixed
+- **Hyper-V permanent-powerup option stripped normal powerups** — `ProlongOne` (`vmm_attributes.txt`) called `TakeInventory` for every powerup class whose `vmm_perm_*` CVar was off, so any picked-up radsuit, blursphere, invulnerability, infrared etc. vanished within ~1 second (checked on UZDoom 5.0.3 with Simple Inventory Items); the disabled branch now leaves powerups alone
 - **VUAS `WorldPreSave` compile error** — `WorldPreSave` does not exist on `StaticEventHandler` in UZDoom 4.14.3; removed the override from `AchievementHandler.zs` and replaced the bulk sync-on-save approach with per-slot `SyncTrackerAt` calls that keep `VUAS_PersistentTracker` current at all times; mid-map saves now preserve achievement progress correctly
 - **Slomo HUD bar overwrite** — the cooldown state was overwriting the points bar in the same render row; fixed by using a single bar (points remaining) with a separate pip overlay for cooldown state
 

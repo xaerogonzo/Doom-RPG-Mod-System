@@ -491,12 +491,11 @@ class VPlayerPropModifier : EventHandler
 				pw.effectTics += 35;
 			}
 		}
-		else
-		{
-			// If disabled mid-game, remove it
-			let pw = Powerup(pawn.FindInventory(powerClass));
-			if(pw != null) pawn.TakeInventory(powerClass, 1);
-		}
+		// Disabled: do nothing. This used to TakeInventory() the powerup, which
+		// stripped every normally picked-up powerup (radsuit, blursphere, invuln,
+		// ...) from the player within a second, including ones from other mods
+		// such as Simple Inventory Items. A permanent powerup granted earlier
+		// simply expires on its own once top-ups stop.
 	}
 
 	private bool _isInitialized;
