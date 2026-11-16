@@ -7,6 +7,10 @@ Third-party components (Gun Bonsai, Hyper-V, VUAS, Indestructible, Doom Points, 
 
 ## [Unreleased]
 
+### Fixed
+- **Hyper-V Upgrades balance menu — sliders now actually bind to the CVars the gameplay code reads.** `GunBonsaiStatHyperV` in `MENUDEF.txt` referenced `_lv1/_lv2/_lv3`-suffixed CVars (e.g. `bonsai_hyperv_slomo_pts_lv1`, `bonsai_hyperv_hregen_tick_lv1/lv2/lv3`, `bonsai_hyperv_tp_range_lv1/lv2`) that were never declared in `CVARINFO.txt`; the real integration code in `HyperV_GunBonsai.zsc` reads the `_base` + `_per_level` pair (per the project rule in `CLAUDE.md`). UZDoom 4.14.3 silently created phantom user CVars for the orphan names, letting sliders appear to work while doing nothing; UZDoom 5.0.3 no longer accepts input on them, which is what surfaced the bug. Collapsed each Lv1/Lv2/Lv3 slider group to the actual `_base` CVar and added sliders for the missing `_per_level` / `_min` knobs (armor-regen tick-per-level/min-tick, teleporter range-per-level/cooldown-per-level/cooldown-min). `resetcvar` reset command updated to match.
+- Known follow-up: `Profiles.zsc` still lists the same phantom `_lv1/_lv2/_lv3` names in its positional serialization arrays (profile save/load writes to orphan CVars). Does not affect menu adjustability; profile save/restore of those specific values silently no-ops. Not addressed here because fixing it requires preserving the positional contract against existing saved profile strings.
+
 ### Added
 - **Blood elemental upgrade** — new 5th element with lifesteal/anti-tank fantasy
   - `TFLV_Upgrade_SanguineShots` (apprentice): applies blood stacks; DoT deals % of enemy current HP per tick; heals player proportional to damage dealt

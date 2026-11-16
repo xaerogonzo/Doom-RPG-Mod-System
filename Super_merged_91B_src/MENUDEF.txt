@@ -874,10 +874,8 @@ OptionMenu "GunBonsaiStatHyperV"
 
   StaticText ""
   StaticText "Bullet Time", GOLD
-  Slider "Slomo pool at Lv1",         "bonsai_hyperv_slomo_pts_lv1",         20, 300, 10, 0
-  TFLV_Tooltip "Slomo point pool granted at Bullet Time Lv1 (60% capacity). Default 120."
-  Slider "Slomo pool at Lv2",         "bonsai_hyperv_slomo_pts_lv2",         40, 500, 10, 0
-  TFLV_Tooltip "Slomo point pool at Lv2+ (full capacity, base for scaling levels). Default 200."
+  Slider "Base slomo pool (Lv1)",     "bonsai_hyperv_slomo_pts_base",        20, 500, 10, 0
+  TFLV_Tooltip "Slomo point pool at Bullet Time Lv1; scales up by the per-level value each level. Default 120."
   Slider "Base slowdown depth (%)",   "bonsai_hyperv_slomo_base_depth",      10, 100, 5, 0
   TFLV_Tooltip "Base slowdown depth percentage at Lv1 (100 = full bullet time). 100 is the effective cap — the engine clamps depth there. Default 100."
   Option "Allow on all weapons",      "bonsai_hyperv_slomo_any_weapon",      "OnOff"
@@ -893,44 +891,38 @@ OptionMenu "GunBonsaiStatHyperV"
   TFLV_Tooltip "HP healed per regen tick. Higher values recover health faster at the cost of less granularity. Default 1."
   Slider "HP cap per unlock level",   "bonsai_hyperv_hregen_cap_base",       5, 50, 5, 0
   TFLV_Tooltip "HP cap gained per unlock level (Lv1-3). At default 25: Lv1=25, Lv2=50, Lv3=75. Default 25."
-  Slider "Tick interval at Lv1 (s)",  "bonsai_hyperv_hregen_tick_lv1",       1.0, 15.0, 0.5, 1
-  TFLV_Tooltip "Regen tick interval in seconds at Lv1. Smaller = faster regen. Default 5.0."
-  Slider "Tick interval at Lv2 (s)",  "bonsai_hyperv_hregen_tick_lv2",       1.0, 12.0, 0.5, 1
-  TFLV_Tooltip "Regen tick interval in seconds at Lv2. Default 3.5."
-  Slider "Tick interval at Lv3 (s)",  "bonsai_hyperv_hregen_tick_lv3",       0.5, 10.0, 0.5, 1
-  TFLV_Tooltip "Regen tick interval in seconds at Lv3 (base for scaling levels). Default 2.5."
+  Slider "Base tick interval (Lv1, s)","bonsai_hyperv_hregen_tick_base",     1.0, 15.0, 0.5, 1
+  TFLV_Tooltip "Regen tick interval in seconds at Lv1; reduced by the per-level value each level. Smaller = faster regen. Default 5.0."
   Slider "Min tick interval (s)",     "bonsai_hyperv_hregen_min_tick",        0.25, 5.0, 0.25, 2
   TFLV_Tooltip "Minimum regen interval floor — scaling cannot push it below this. Default 1.0."
   Slider "HP cap bonus per level",    "bonsai_hyperv_hregen_cap_per_level",   0, 30, 5, 0
   TFLV_Tooltip "Additional HP cap per level above 3. Default 15."
-  Slider "Tick speed per level (s)",  "bonsai_hyperv_hregen_tick_per_level",  0.0, 1.0, 0.1, 1
-  TFLV_Tooltip "Seconds removed from regen interval per level above 3. Default 0.5."
+  Slider "Tick speed per level (s)",  "bonsai_hyperv_hregen_tick_per_level",  0.0, 3.0, 0.25, 2
+  TFLV_Tooltip "Seconds removed from regen interval per level above 1. Default 1.25."
 
   StaticText ""
   StaticText "Armor Recovery", GOLD
   Slider "Armor restored per tick",   "bonsai_hyperv_aregen_amount",         1, 20, 1, 0
   TFLV_Tooltip "Armor restored per regen tick. Default 1."
-  Slider "Armor cap at Lv1",          "bonsai_hyperv_aregen_cap_lv1",        10, 150, 5, 0
-  TFLV_Tooltip "Maximum armor Armor Recovery regen targets at Lv1. Default 50."
-  Slider "Armor cap at Lv2",          "bonsai_hyperv_aregen_cap_lv2",        20, 200, 5, 0
-  TFLV_Tooltip "Maximum armor at Lv2 (base for scaling levels). Default 100."
-  Slider "Tick interval at Lv1 (s)",  "bonsai_hyperv_aregen_tick_lv1",       1.0, 20.0, 0.5, 1
-  TFLV_Tooltip "Armor regen tick interval in seconds at Lv1. Default 6.0."
-  Slider "Tick interval at Lv2 (s)",  "bonsai_hyperv_aregen_tick_lv2",       1.0, 15.0, 0.5, 1
-  TFLV_Tooltip "Armor regen tick interval in seconds at Lv2+. Default 4.0."
-  Slider "Armor cap bonus per level", "bonsai_hyperv_aregen_cap_per_level",  0, 50, 5, 0
-  TFLV_Tooltip "Additional armor cap per level above 2. Default 25."
+  Slider "Base armor cap (Lv1)",      "bonsai_hyperv_aregen_cap_base",       10, 200, 5, 0
+  TFLV_Tooltip "Maximum armor Armor Recovery regen targets at Lv1; grows by the per-level value each level. Default 50."
+  Slider "Base tick interval (Lv1, s)","bonsai_hyperv_aregen_tick_base",     1.0, 20.0, 0.5, 1
+  TFLV_Tooltip "Armor regen tick interval in seconds at Lv1; reduced by the per-level value each level. Default 6.0."
+  Slider "Min tick interval (s)",     "bonsai_hyperv_aregen_min_tick",        0.5, 5.0, 0.25, 2
+  TFLV_Tooltip "Minimum armor regen interval floor — scaling cannot push it below this. Default 1.0."
+  Slider "Armor cap bonus per level", "bonsai_hyperv_aregen_cap_per_level",  0, 100, 5, 0
+  TFLV_Tooltip "Additional armor cap per level above 1. Default 50."
+  Slider "Tick speed per level (s)",  "bonsai_hyperv_aregen_tick_per_level",  0.0, 4.0, 0.25, 2
+  TFLV_Tooltip "Seconds removed from armor regen interval per level above 1. Default 2.0."
 
   StaticText ""
   StaticText "Resupply (Ammo Regen)", GOLD
-  Slider "Tick interval at Lv1 (s)",  "bonsai_hyperv_ammoregen_tick_lv1",    2.0, 30.0, 0.5, 1
-  TFLV_Tooltip "Ammo regen tick interval in seconds at Lv1. Default 10.0."
-  Slider "Tick interval at Lv2 (s)",  "bonsai_hyperv_ammoregen_tick_lv2",    1.0, 20.0, 0.5, 1
-  TFLV_Tooltip "Ammo regen tick interval in seconds at Lv2 (base for scaling). Default 6.0."
+  Slider "Base tick interval (Lv1, s)","bonsai_hyperv_ammoregen_tick_base",  1.0, 30.0, 0.5, 1
+  TFLV_Tooltip "Ammo regen tick interval in seconds at Lv1; reduced by the per-level value each level. Default 10.0."
   Slider "Min tick interval (s)",     "bonsai_hyperv_ammoregen_min_tick",     0.5, 8.0, 0.5, 1
   TFLV_Tooltip "Minimum ammo regen interval floor. Default 2.0."
-  Slider "Tick speed per level (s)",  "bonsai_hyperv_ammoregen_tick_per_level", 0.0, 2.0, 0.5, 1
-  TFLV_Tooltip "Seconds removed from ammo regen interval per level above 2. Default 1.0."
+  Slider "Tick speed per level (s)",  "bonsai_hyperv_ammoregen_tick_per_level", 0.0, 6.0, 0.5, 1
+  TFLV_Tooltip "Seconds removed from ammo regen interval per level above 1. Default 4.0."
 
   StaticText ""
   StaticText "Agility", GOLD
@@ -956,17 +948,19 @@ OptionMenu "GunBonsaiStatHyperV"
 
   StaticText ""
   StaticText "Teleporter", GOLD
-  Slider "Range at Lv1 (map units)",  "bonsai_hyperv_tp_range_lv1",   256, 2048, 64, 0
-  TFLV_Tooltip "Teleport beam maximum range at Lv1. Default 1024."
-  Slider "Range at Lv2 (map units)",  "bonsai_hyperv_tp_range_lv2",   512, 4096, 64, 0
-  TFLV_Tooltip "Teleport beam maximum range at Lv2. Default 2048."
-  Slider "Cooldown at Lv1 (s)",       "bonsai_hyperv_tp_cd_lv1",      0.25, 5.0, 0.25, 2
-  TFLV_Tooltip "Teleporter cooldown in seconds at Lv1. Default 1.5."
-  Slider "Cooldown at Lv2 (s)",       "bonsai_hyperv_tp_cd_lv2",      0.1,  3.0, 0.1,  1
-  TFLV_Tooltip "Teleporter cooldown in seconds at Lv2. Default 0.75."
+  Slider "Base range (Lv1, map units)","bonsai_hyperv_tp_range_base",  256, 4096, 64, 0
+  TFLV_Tooltip "Teleport beam maximum range at Lv1; grows by the per-level value each level. Default 1024."
+  Slider "Range bonus per level",     "bonsai_hyperv_tp_range_per_level", 0, 2048, 64, 0
+  TFLV_Tooltip "Additional teleport range per level above 1. Default 1024."
+  Slider "Base cooldown (Lv1, s)",    "bonsai_hyperv_tp_cd_base",      0.25, 5.0, 0.25, 2
+  TFLV_Tooltip "Teleporter cooldown in seconds at Lv1; reduced by the per-level value each level. Default 1.5."
+  Slider "Cooldown reduction per level (s)","bonsai_hyperv_tp_cd_per_level", 0.0, 2.0, 0.05, 2
+  TFLV_Tooltip "Seconds removed from teleport cooldown per level above 1. Default 0.75."
+  Slider "Min cooldown (s)",          "bonsai_hyperv_tp_cd_min",       0.05, 2.0, 0.05, 2
+  TFLV_Tooltip "Minimum teleport cooldown floor — scaling cannot push it below this. Default 0.25."
 
   StaticText ""
-  Command ">> Reset Hyper-V Upgrades to Defaults", "resetcvar bonsai_hyperv_mobility_max_level; resetcvar bonsai_hyperv_melee_max_level; resetcvar bonsai_hyperv_slomo_max_level; resetcvar bonsai_hyperv_hregen_max_level; resetcvar bonsai_hyperv_aregen_max_level; resetcvar bonsai_hyperv_ammoregen_max_level; resetcvar bonsai_hyperv_agility_max_level; resetcvar bonsai_hyperv_hook_max_level; resetcvar bonsai_hyperv_tp_max_level; resetcvar bonsai_hyperv_mobility_base_cooldown; resetcvar bonsai_hyperv_mobility_min_cooldown; resetcvar bonsai_hyperv_mobility_cd_per_level; resetcvar bonsai_hyperv_melee_base_dmg_min; resetcvar bonsai_hyperv_melee_base_dmg_max; resetcvar bonsai_hyperv_melee_base_tics; resetcvar bonsai_hyperv_melee_base_crit; resetcvar bonsai_hyperv_melee_base_parry; resetcvar bonsai_hyperv_melee_dmg_per_level; resetcvar bonsai_hyperv_melee_cd_per_level; resetcvar bonsai_hyperv_melee_crit_per_level; resetcvar bonsai_hyperv_melee_parry_per_level; resetcvar bonsai_hyperv_slomo_pts_lv1; resetcvar bonsai_hyperv_slomo_pts_lv2; resetcvar bonsai_hyperv_slomo_base_depth; resetcvar bonsai_hyperv_slomo_any_weapon; resetcvar bonsai_hyperv_slomo_pts_per_level; resetcvar bonsai_hyperv_slomo_depth_per_level; resetcvar bonsai_hyperv_hregen_amount; resetcvar bonsai_hyperv_hregen_cap_base; resetcvar bonsai_hyperv_hregen_tick_lv1; resetcvar bonsai_hyperv_hregen_tick_lv2; resetcvar bonsai_hyperv_hregen_tick_lv3; resetcvar bonsai_hyperv_hregen_min_tick; resetcvar bonsai_hyperv_hregen_cap_per_level; resetcvar bonsai_hyperv_hregen_tick_per_level; resetcvar bonsai_hyperv_aregen_amount; resetcvar bonsai_hyperv_aregen_cap_lv1; resetcvar bonsai_hyperv_aregen_cap_lv2; resetcvar bonsai_hyperv_aregen_tick_lv1; resetcvar bonsai_hyperv_aregen_tick_lv2; resetcvar bonsai_hyperv_aregen_cap_per_level; resetcvar bonsai_hyperv_ammoregen_tick_lv1; resetcvar bonsai_hyperv_ammoregen_tick_lv2; resetcvar bonsai_hyperv_ammoregen_min_tick; resetcvar bonsai_hyperv_ammoregen_tick_per_level; resetcvar bonsai_hyperv_agility_base_speed; resetcvar bonsai_hyperv_agility_base_jump; resetcvar bonsai_hyperv_agility_speed_per_level; resetcvar bonsai_hyperv_agility_jump_per_level; resetcvar bonsai_hyperv_hook_stun_min_base; resetcvar bonsai_hyperv_hook_stun_max_base; resetcvar bonsai_hyperv_hook_stun_min_per_level; resetcvar bonsai_hyperv_hook_stun_max_per_level; resetcvar bonsai_hyperv_tp_range_lv1; resetcvar bonsai_hyperv_tp_range_lv2; resetcvar bonsai_hyperv_tp_cd_lv1; resetcvar bonsai_hyperv_tp_cd_lv2"
+  Command ">> Reset Hyper-V Upgrades to Defaults", "resetcvar bonsai_hyperv_mobility_max_level; resetcvar bonsai_hyperv_melee_max_level; resetcvar bonsai_hyperv_slomo_max_level; resetcvar bonsai_hyperv_hregen_max_level; resetcvar bonsai_hyperv_aregen_max_level; resetcvar bonsai_hyperv_ammoregen_max_level; resetcvar bonsai_hyperv_agility_max_level; resetcvar bonsai_hyperv_hook_max_level; resetcvar bonsai_hyperv_tp_max_level; resetcvar bonsai_hyperv_mobility_base_cooldown; resetcvar bonsai_hyperv_mobility_min_cooldown; resetcvar bonsai_hyperv_mobility_cd_per_level; resetcvar bonsai_hyperv_melee_base_dmg_min; resetcvar bonsai_hyperv_melee_base_dmg_max; resetcvar bonsai_hyperv_melee_base_tics; resetcvar bonsai_hyperv_melee_base_crit; resetcvar bonsai_hyperv_melee_base_parry; resetcvar bonsai_hyperv_melee_dmg_per_level; resetcvar bonsai_hyperv_melee_cd_per_level; resetcvar bonsai_hyperv_melee_crit_per_level; resetcvar bonsai_hyperv_melee_parry_per_level; resetcvar bonsai_hyperv_slomo_pts_base; resetcvar bonsai_hyperv_slomo_base_depth; resetcvar bonsai_hyperv_slomo_any_weapon; resetcvar bonsai_hyperv_slomo_pts_per_level; resetcvar bonsai_hyperv_slomo_depth_per_level; resetcvar bonsai_hyperv_hregen_amount; resetcvar bonsai_hyperv_hregen_cap_base; resetcvar bonsai_hyperv_hregen_tick_base; resetcvar bonsai_hyperv_hregen_min_tick; resetcvar bonsai_hyperv_hregen_cap_per_level; resetcvar bonsai_hyperv_hregen_tick_per_level; resetcvar bonsai_hyperv_aregen_amount; resetcvar bonsai_hyperv_aregen_cap_base; resetcvar bonsai_hyperv_aregen_tick_base; resetcvar bonsai_hyperv_aregen_min_tick; resetcvar bonsai_hyperv_aregen_cap_per_level; resetcvar bonsai_hyperv_aregen_tick_per_level; resetcvar bonsai_hyperv_ammoregen_tick_base; resetcvar bonsai_hyperv_ammoregen_min_tick; resetcvar bonsai_hyperv_ammoregen_tick_per_level; resetcvar bonsai_hyperv_agility_base_speed; resetcvar bonsai_hyperv_agility_base_jump; resetcvar bonsai_hyperv_agility_speed_per_level; resetcvar bonsai_hyperv_agility_jump_per_level; resetcvar bonsai_hyperv_hook_stun_min_base; resetcvar bonsai_hyperv_hook_stun_max_base; resetcvar bonsai_hyperv_hook_stun_min_per_level; resetcvar bonsai_hyperv_hook_stun_max_per_level; resetcvar bonsai_hyperv_tp_range_base; resetcvar bonsai_hyperv_tp_range_per_level; resetcvar bonsai_hyperv_tp_cd_base; resetcvar bonsai_hyperv_tp_cd_per_level; resetcvar bonsai_hyperv_tp_cd_min"
   TFLV_Tooltip "Reset all Hyper-V upgrade balance values back to their defaults."
 }
 
