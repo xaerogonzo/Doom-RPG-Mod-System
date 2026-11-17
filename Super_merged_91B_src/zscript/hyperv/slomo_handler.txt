@@ -17,6 +17,14 @@
 
 class SlomoHandler : EventHandler
 {
+	// Gun Bonsai gate: sm_enabled is the user's choice and is never rewritten by the gate.
+	private vmm_GbGate _gbSlomo;
+
+	private vmm_GbGate GbSlomo()
+	{
+		if (!_gbSlomo) _gbSlomo = vmm_GbGate.of("slomo");
+		return _gbSlomo;
+	}
 
 	override void OnRegister()
 	{
@@ -34,6 +42,7 @@ class SlomoHandler : EventHandler
 		{
 			CVar enabled = CVar.FindCVar("sm_enabled");
 			if(enabled && !enabled.GetBool()) return;
+			if(!GbSlomo().open(1)) return;
 			CVar ext = CVar.FindCVar("m8f_sm_externaltoggle");
 			if(ext) ext.SetInt(1);
 		}
@@ -410,7 +419,7 @@ class SlomoHandler : EventHandler
 	private void LoadSettings()
 	{
 		allowSlomoHud           = GetBool("sm_allowslomohud");
-		slomoEnabled            = GetBool("sm_enabled");
+		slomoEnabled            = GetBool("sm_enabled") && GbSlomo().open(1);
 		hideHudAtFull           = GetBool("sm_hidefullslomohud");
 		showCoolMessage         = GetBool("sm_enablecoolmessage");
 		freezeMomentum          = GetBool("sm_enablefreezemomentum");
@@ -428,12 +437,12 @@ class SlomoHandler : EventHandler
 		slomoPointDrain         = GetInt("sm_slomodraindelay");
 		slomoPointRefillAmount  = GetInt("sm_slomorefillamount");
 		hudCooldownDivFactor    = GetInt("sm_hudcooldowndivfactor");
-		berserkSlomoEnabled     = GetBool("sm_berserk_enabled");
+		berserkSlomoEnabled     = GetBool("sm_berserk_enabled") && GbSlomo().open(2);
 		berserkDrainReduction   = GetInt("sm_berserk_drain_reduction");
 		berserkPointsBonus      = GetInt("sm_berserk_points_bonus");
 		berserkDepthBonus       = GetInt("sm_berserk_depth_bonus");
 		berserkCooldownReduce   = GetInt("sm_berserk_cooldown_reduce");
-		invulnEnabled           = GetBool("sm_invuln_enabled");
+		invulnEnabled           = GetBool("sm_invuln_enabled") && GbSlomo().open(2);
 		invulnDepth             = GetInt("sm_invuln_depth");
 		invulnInfinite          = GetBool("sm_invuln_infinite");
 		invulnZeroCooldown      = GetBool("sm_invuln_zero_cooldown");

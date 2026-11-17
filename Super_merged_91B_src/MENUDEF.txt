@@ -2036,7 +2036,7 @@ OptionMenu "VMM_Movement" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_mobility is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2059,7 +2059,7 @@ OptionMenu "VMM_Dash" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_mobility is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2127,7 +2127,7 @@ OptionMenu "VMM_Melee" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_melee is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2197,7 +2197,7 @@ OptionMenu "VMM_MeleeStamina" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_melee is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2226,7 +2226,7 @@ OptionMenu "VMM_MeleeCombo" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_melee is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2265,7 +2265,7 @@ OptionMenu "VMM_MeleeParry" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_melee is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2371,7 +2371,7 @@ OptionMenu "VMM_PlayerRules" {
 	StaticText "Movement", "Gold"
 	StaticText " "
 	StaticText "Note: When hyperv_gb_agility is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "are overridden by your Gun Bonsai Agility level.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	Slider "Jump Strength",						"vmm_jump_mult", "0.5", "5.0", "0.1", "1"
 	TFLV_Tooltip "$VMM_TT_JUMP_MULT"
@@ -2504,7 +2504,7 @@ OptionMenu "VMM_Health" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_health_regen is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2542,7 +2542,7 @@ OptionMenu "VMM_ArmorRegen" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_armor_regen is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2580,7 +2580,7 @@ OptionMenu "VMM_AmmoRegen" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_ammo_regen is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2610,7 +2610,7 @@ OptionMenu "VMM_Teleport" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_teleporter is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2644,7 +2644,7 @@ OptionMenu "VMM_Hook" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_hook is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2719,7 +2719,7 @@ OptionMenu "VMM_Slomo" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_slomo is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2749,7 +2749,7 @@ OptionMenu "VMM_SlomoPool" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_slomo is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
@@ -2779,7 +2779,7 @@ OptionMenu "VMM_SlomoCooldown" {
 
 	StaticText " "
 	StaticText "Note: When hyperv_gb_slomo is ON, these settings", DARKGRAY
-	StaticText "are overridden by your Gun Bonsai upgrade level.", DARKGRAY
+	StaticText "set what is allowed; Gun Bonsai upgrades unlock them.", DARKGRAY
 	StaticText "Tune scaling in: Balance Tuning > Hyper-V Upgrades.", DARKGRAY
 	TFLV_TooltipGeometry 1.0, 0.5, 0.32, 1.0, 0.5
 	TFLV_TooltipAppearance "", "Gold", ""
