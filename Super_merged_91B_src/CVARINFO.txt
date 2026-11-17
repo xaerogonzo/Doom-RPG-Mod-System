@@ -792,6 +792,18 @@ server bool hyperv_gb_agility      = true;   // Gate speed/jump mult behind upgr
 server bool hyperv_gb_hook         = true;   // Gate grappling hook behind weapon upgrade
 server bool hyperv_gb_teleporter   = true;   // Gate teleporter behind weapon upgrade
 
+// Gun Bonsai gate cache: the player's current level of each Hyper-V upgrade. Written only by
+// TFLV_HyperV_IntegrationHandler when an upgrade changes (level-up, weapon switch, map load);
+// read by vmm_GbGate. Never a user setting. Weapon-bound ones (slomo/hook/teleporter) reflect the wielded weapon.
+server int  hyperv_gb_lvl_mobility      = 0;
+server int  hyperv_gb_lvl_melee         = 0;
+server int  hyperv_gb_lvl_slomo         = 0;
+server int  hyperv_gb_lvl_health_regen  = 0;
+server int  hyperv_gb_lvl_armor_regen   = 0;
+server int  hyperv_gb_lvl_ammo_regen    = 0;
+server int  hyperv_gb_lvl_hook          = 0;
+server int  hyperv_gb_lvl_teleporter    = 0;
+
 // =============================================================================
 // Hyper-V Upgrade Pool Rarity Tiers
 // 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored

@@ -62,10 +62,10 @@ class vmm_Settings
   bool permTimeFreezer()              { return permTimeFreezerCvar.getBool();      }
   bool permTorch()                    { return permTorchCvar.getBool();            }
   bool permWeaponLevel2()             { return permWeaponLevel2Cvar.getBool();     }
-  bool dashEnabled()					{ return dashCvar.getBool();					}
+  bool dashEnabled()					{ return dashCvar.getBool() && gbMobility.open(1);					}
   double dashMultiplier()   			{ return dashMultiplierCvar.getDouble();   		}
   double dashCooldown()   				{ return dashCooldownCvar.getDouble();   		}
-  bool doubleDashEnabled()   			{ return doubleDashCvar.getBool();   			}
+  bool doubleDashEnabled()   			{ return doubleDashCvar.getBool() && gbMobility.open(2);   			}
   bool dashFwdLeap()					{ return dashFwdLeapCvar.getBool();				}
   bool dashSideEnabled()				{ return dashSideCvar.getBool();				}
   double dashSideMult()					{ return dashSideMultCvar.getDouble();			}
@@ -75,10 +75,10 @@ class vmm_Settings
   int dashFwdCost()						{ return dashFwdCostCvar.getInt();				}
   int dashSideCost()					{ return dashSideCostCvar.getInt();				}
   int dashBackCost()					{ return dashBackCostCvar.getInt();				}
-  bool doubleJumpEnabled()   			{ return doubleJumpCvar.getBool();   			}
-  bool ledgeClimbEnabled()   			{ return ledgeClimbCvar.getBool();   			}
+  bool doubleJumpEnabled()   			{ return doubleJumpCvar.getBool() && gbMobility.open(3);   			}
+  bool ledgeClimbEnabled()   			{ return ledgeClimbCvar.getBool() && gbMobility.open(2);   			}
   // Health regen
-  bool   healthRegenEnabled()         { return helthRegenCvar.getBool();              }
+  bool   healthRegenEnabled()         { return helthRegenCvar.getBool() && gbHealthRegen.open(1);              }
   int    healthRegenAmount()          { return healthRegenAmountCvar.getInt();        }
   int    healthRegenType()            { return healthRegenTypeCvar.getInt();          }
   double healthRegenTime()            { return healthRegenTimeCvar.getDouble();       }
@@ -88,7 +88,7 @@ class vmm_Settings
   double healthRegenVisual()          { return healthRegenVisualCvar.getDouble();     }
   int    healthRegenColor()           { return healthRegenColorCvar.getInt();         }
   // Armor regen
-  bool   armorRegenEnabled()          { return armorRegenCvar.getBool();              }
+  bool   armorRegenEnabled()          { return armorRegenCvar.getBool() && gbArmorRegen.open(1);              }
   int    armorRegenAmount()           { return armorRegenAmountCvar.getInt();         }
   int    armorRegenType()             { return armorRegenTypeCvar.getInt();           }
   double armorRegenTime()             { return armorRegenTimeCvar.getDouble();        }
@@ -98,13 +98,13 @@ class vmm_Settings
   double armorRegenVisual()           { return armorRegenVisualCvar.getDouble();      }
   int    armorRegenColor()            { return armorRegenColorCvar.getInt();          }
   // Ammo regen
-  bool   ammoRegenEnabled()           { return ammoRegenCvar.getBool();               }
+  bool   ammoRegenEnabled()           { return ammoRegenCvar.getBool() && gbAmmoRegen.open(1);               }
   double ammoRegenTime()              { return ammoRegenTimeCvar.getDouble();         }
   bool   ammoRegenBackpack()          { return ammoRegenBackpackCvar.getBool();       }
   double ammoRegenSoundVol()          { return ammoRegenSoundVolCvar.getDouble();     }
   double ammoRegenVisual()            { return ammoRegenVisualCvar.getDouble();       }
   int    ammoRegenColor()             { return ammoRegenColorCvar.getInt();           }
-  bool meleeEnabled()   				{ return meleeCvar.getBool();   				}
+  bool meleeEnabled()   				{ return meleeCvar.getBool() && gbMelee.open(1);   				}
   bool meleeVRMode()					{ return meleeVRModeCvar.getBool();				}
   bool meleeKeyMode()					{ return meleeKeyCvar.getBool();				}
   bool meleeSoundEnabled()				{ return meleeSoundCvar.getBool();				}
@@ -120,13 +120,13 @@ class vmm_Settings
   int meleeIndicator()					{ return meleeIndicatorCvar.getInt();			}
   bool meleeIndicatorOn()				{ return meleeIndicatorOnCvar.getBool();		}
   double meleeIndicatorRange()			{ return meleeIndicatorRangeCvar.getDouble();	}
-  bool meleeCombo()   					{ return meleeComboCvar.getBool();   			}
+  bool meleeCombo()   					{ return meleeComboCvar.getBool() && gbMelee.open(2);   			}
   int meleeComboHit()   				{ return meleeComboHitCvar.getInt();   			}
   int meleeComboCrit()   				{ return meleeComboCritCvar.getInt();   		}
   double meleeKnockback()   			{ return meleeKnockbackCvar.getDouble();   		}
   int meleeKnockbackMass()   			{ return meleeKnockbackMassCvar.getInt();   	}
   int meleeComboStun()   				{ return meleeComboStunCvar.getInt();   		}
-  bool parryEnabled()					{ return parryCvar.getBool();				}
+  bool parryEnabled()					{ return parryCvar.getBool() && gbMelee.open(3);				}
   int parryResist()						{ return parryResistCvar.getInt();			}
   int parryCritResist()					{ return parryCritResistCvar.getInt();		}
   bool parryAlways()					{ return parryAlwaysCvar.getBool();			}
@@ -153,12 +153,12 @@ class vmm_Settings
   int  slot1RapidCrit()					{ return slot1RapidCritCvar.getInt();			}
   double ghookCooldown()   				{ return ghookCooldownCvar.getDouble();   		}
   double ghookMaxDist()					{ return ghookMaxDistCvar.getDouble();			}
-  bool ghookEnabled()					{ return ghookCvar.getBool();					}
-  bool ghookPullEnabled()				{ return ghookPullCvar.getBool();				}
-  bool ghookStunEnabled()				{ return ghookStunCvar.getBool();				}
+  bool ghookEnabled()					{ return ghookCvar.getBool() && gbHook.open(1);					}
+  bool ghookPullEnabled()				{ return ghookPullCvar.getBool() && gbHook.open(2);				}
+  bool ghookStunEnabled()				{ return ghookStunCvar.getBool() && gbHook.open(2);				}
   double ghookStunMin()				{ return ghookStunMinCvar.getDouble();			}
   double ghookStunMax()				{ return ghookStunMaxCvar.getDouble();			}
-  bool teleportEnabled()				{ return teleportCvar.getBool();				}
+  bool teleportEnabled()				{ return teleportCvar.getBool() && gbTeleporter.open(1);				}
   bool teleportRestricted()				{ return teleportRestrictCvar.getBool();			}
   double teleportBeamSpeed()			{ return teleportBeamSpeedCvar.getDouble();		}
   double teleportMaxRange()				{ return teleportMaxRangeCvar.getDouble();		}
@@ -228,6 +228,15 @@ class vmm_Settings
     result.dashBackCostCvar				= vmm_Cvar.of("vmm_dash_back_cost");
     result.doubleJumpCvar   			= vmm_Cvar.of("vmm_double_jump");
     result.ledgeClimbCvar   			= vmm_Cvar.of("vmm_ledge_climb");
+
+    // Gun Bonsai gates: a feature runs only if the user allows it above AND (GB mode is off OR the upgrade level is reached)
+    result.gbMobility     = vmm_GbGate.of("mobility");
+    result.gbMelee        = vmm_GbGate.of("melee");
+    result.gbHealthRegen  = vmm_GbGate.of("health_regen");
+    result.gbArmorRegen   = vmm_GbGate.of("armor_regen");
+    result.gbAmmoRegen    = vmm_GbGate.of("ammo_regen");
+    result.gbHook         = vmm_GbGate.of("hook");
+    result.gbTeleporter   = vmm_GbGate.of("teleporter");
     // Health regen
     result.helthRegenCvar           = vmm_Cvar.of("vmm_health_regen");
     result.healthRegenAmountCvar    = vmm_Cvar.of("vmm_regen_amount");
@@ -377,6 +386,14 @@ class vmm_Settings
   private vmm_Cvar dashBackCostCvar;
   private vmm_Cvar doubleJumpCvar;
   private vmm_Cvar ledgeClimbCvar;
+
+  private vmm_GbGate gbMobility;
+  private vmm_GbGate gbMelee;
+  private vmm_GbGate gbHealthRegen;
+  private vmm_GbGate gbArmorRegen;
+  private vmm_GbGate gbAmmoRegen;
+  private vmm_GbGate gbHook;
+  private vmm_GbGate gbTeleporter;
   // Health regen
   private vmm_Cvar helthRegenCvar;
   private vmm_Cvar healthRegenAmountCvar;
@@ -513,3 +530,30 @@ class vmm_Cvar
   private transient Cvar _cvar;
 
 } // class vmm_Cvar
+
+/**
+ * Gun Bonsai gate for one Hyper-V feature group. Open when Gun Bonsai mode is off
+ * for the group (hyperv_gb_<key>), otherwise when the cached upgrade level
+ * (hyperv_gb_lvl_<key>) has reached minLevel. Read-only: the user's own Hyper-V
+ * settings are never modified by the gate.
+ */
+class vmm_GbGate
+{
+  static
+  vmm_GbGate of(String key)
+  {
+    let result = new("vmm_GbGate");
+    result._mode  = vmm_Cvar.of(String.Format("hyperv_gb_%s", key));
+    result._level = vmm_Cvar.of(String.Format("hyperv_gb_lvl_%s", key));
+    return result;
+  }
+
+  bool open(int minLevel)
+  {
+    return !_mode.getBool() || _level.getInt() >= minLevel;
+  }
+
+  private vmm_Cvar _mode;
+  private vmm_Cvar _level;
+
+} // class vmm_GbGate

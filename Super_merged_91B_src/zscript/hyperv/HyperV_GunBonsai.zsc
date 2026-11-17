@@ -5,7 +5,6 @@
 class TFLV_HyperV_IntegrationHandler : EventHandler
 {
     Array<int> pendingEnforce;
-    int enforceTick;
 
     override void WorldLoaded(WorldEvent e)
     {
@@ -34,46 +33,53 @@ class TFLV_HyperV_IntegrationHandler : EventHandler
 
     override void WorldTick()
     {
-        // Drain the one-shot queue (from PlayerEntered/Respawned/WorldLoaded).
-        if (pendingEnforce.Size() > 0)
+        // Event-driven only: drains the queue filled by PlayerEntered / PlayerRespawned /
+        // WorldLoaded. Costs one Size() check per tic when idle.
+        if (pendingEnforce.Size() == 0) return;
+        for (int i = pendingEnforce.Size() - 1; i >= 0; i--)
         {
-            for (int i = pendingEnforce.Size() - 1; i >= 0; i--)
-            {
-                int pnum = pendingEnforce[i];
-                if (!playeringame[pnum] || !players[pnum].mo) continue;
-                EnforceForPlayer(pnum);
-                pendingEnforce.Delete(i);
-            }
-        }
-
-        // Continuous enforcement (every 35 tics / ~1s). Without this, any user
-        // flip of a vmm_*/sm_enabled CVar via menu or console bypasses the
-        // Gun Bonsai gate until the next respawn.
-        enforceTick++;
-        if (enforceTick >= 35)
-        {
-            enforceTick = 0;
-            for (int p = 0; p < MAXPLAYERS; p++)
-            {
-                if (playeringame[p] && players[p].mo)
-                    EnforceForPlayer(p);
-            }
+            int pnum = pendingEnforce[i];
+            if (!playeringame[pnum] || !players[pnum].mo) continue;
+            EnforceForPlayer(pnum);
+            pendingEnforce.Delete(i);
         }
     }
 
+    // Records the player's current upgrade levels in the hyperv_gb_lvl_* cache that
+    // vmm_GbGate reads, and applies per-level scaling values. Called only when an
+    // upgrade changes (OnActivate), on map load and on (re)spawn — never per tic.
+    // The user's own Hyper-V on/off settings are never written here: the gate is
+    // applied at read time in vmm_Settings, so a feature the user turned off stays
+    // off no matter what level its upgrade reaches.
     static void EnforceForPlayer(int pnum)
     {
         if (!playeringame[pnum] || !players[pnum].mo) return;
         let pawn = players[pnum].mo;
         let stats = TFLV_PerPlayerStats.GetStatsFor(pawn);
+        let winfo = stats ? stats.GetInfoForCurrentWeapon() : null;
+
+        uint lvMobility    = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_Mobility")    : 0;
+        uint lvMelee       = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_Melee")       : 0;
+        uint lvHealthRegen = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_HealthRegen") : 0;
+        uint lvArmorRegen  = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_ArmorRegen")  : 0;
+        uint lvAmmoRegen   = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_AmmoRegen")   : 0;
+        // Weapon-bound upgrades follow the wielded weapon.
+        uint lvSlomo       = winfo ? winfo.upgrades.Level("TFLV_Upgrade_HyperV_BulletTime")  : 0;
+        uint lvHook        = winfo ? winfo.upgrades.Level("TFLV_Upgrade_HyperV_Hook")        : 0;
+        uint lvTeleporter  = winfo ? winfo.upgrades.Level("TFLV_Upgrade_HyperV_Teleporter")  : 0;
+
+        SetI("hyperv_gb_lvl_mobility",     int(lvMobility));
+        SetI("hyperv_gb_lvl_melee",        int(lvMelee));
+        SetI("hyperv_gb_lvl_health_regen", int(lvHealthRegen));
+        SetI("hyperv_gb_lvl_armor_regen",  int(lvArmorRegen));
+        SetI("hyperv_gb_lvl_ammo_regen",   int(lvAmmoRegen));
+        SetI("hyperv_gb_lvl_slomo",        int(lvSlomo));
+        SetI("hyperv_gb_lvl_hook",         int(lvHook));
+        SetI("hyperv_gb_lvl_teleporter",   int(lvTeleporter));
 
         if (CV("hyperv_gb_mobility"))
         {
-            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_Mobility") : 0;
-            SetB("vmm_dash",        lv >= 1);
-            SetB("vmm_double_dash", lv >= 2);
-            SetB("vmm_ledge_climb", lv >= 2);
-            SetB("vmm_double_jump", lv >= 3);
+            uint lv = lvMobility;
             if (lv >= 1)
             {
                 int scaleLvs  = max(0, int(lv) - 3);
@@ -86,10 +92,7 @@ class TFLV_HyperV_IntegrationHandler : EventHandler
 
         if (CV("hyperv_gb_melee"))
         {
-            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_Melee") : 0;
-            SetB("vmm_melee",       lv >= 1);
-            SetB("vmm_melee_combo", lv >= 2);
-            SetB("vmm_melee_parry", lv >= 3);
+            uint lv = lvMelee;
             if (lv >= 1)
             {
                 int scaleLvs  = max(0, int(lv) - 3);
@@ -115,8 +118,7 @@ class TFLV_HyperV_IntegrationHandler : EventHandler
 
         if (CV("hyperv_gb_health_regen"))
         {
-            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_HealthRegen") : 0;
-            SetB("vmm_health_regen", lv >= 1);
+            uint lv = lvHealthRegen;
             if (lv >= 1)
             {
                 int scaleLvs  = max(0, int(lv) - 3);
@@ -133,8 +135,7 @@ class TFLV_HyperV_IntegrationHandler : EventHandler
 
         if (CV("hyperv_gb_armor_regen"))
         {
-            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_ArmorRegen") : 0;
-            SetB("vmm_armor_regen", lv >= 1);
+            uint lv = lvArmorRegen;
             if (lv >= 1)
             {
                 int cap  = CVI("bonsai_hyperv_aregen_cap_base") + (int(lv) - 1) * CVI("bonsai_hyperv_aregen_cap_per_level");
@@ -148,8 +149,7 @@ class TFLV_HyperV_IntegrationHandler : EventHandler
 
         if (CV("hyperv_gb_ammo_regen"))
         {
-            uint lv = stats ? stats.upgrades.Level("TFLV_Upgrade_HyperV_AmmoRegen") : 0;
-            SetB("vmm_ammo_regen", lv >= 1);
+            uint lv = lvAmmoRegen;
             if (lv >= 1)
             {
                 double tick = max(CVf("bonsai_hyperv_ammoregen_min_tick"),
@@ -169,29 +169,6 @@ class TFLV_HyperV_IntegrationHandler : EventHandler
                 + scaleLvs * CVf("bonsai_hyperv_agility_jump_per_level");
             SetF("vmm_speed_mult", spd);
             SetF("vmm_jump_mult",  jmp);
-        }
-
-        // Weapon upgrades: reflect the CURRENT weapon's upgrade level so the
-        // periodic enforce doesn't clobber an active weapon's unlocked features.
-        // OnActivate/OnDeactivate still handle per-weapon transitions.
-        let winfo = stats ? stats.GetInfoForCurrentWeapon() : null;
-
-        if (CV("hyperv_gb_hook"))
-        {
-            uint lv = winfo ? winfo.upgrades.Level("TFLV_Upgrade_HyperV_Hook") : 0;
-            SetB("vmm_hook",      lv >= 1);
-            SetB("vmm_hook_pull", lv >= 2);
-            SetB("vmm_hook_stun", lv >= 2);
-        }
-        if (CV("hyperv_gb_teleporter"))
-        {
-            uint lv = winfo ? winfo.upgrades.Level("TFLV_Upgrade_HyperV_Teleporter") : 0;
-            SetB("vmm_teleport", lv >= 1);
-        }
-        if (CV("hyperv_gb_slomo"))
-        {
-            uint lv = winfo ? winfo.upgrades.Level("TFLV_Upgrade_HyperV_BulletTime") : 0;
-            SetB("sm_enabled", lv >= 1);
         }
     }
 
@@ -302,7 +279,7 @@ class TFLV_Upgrade_HyperV_BulletTime : TFLV_Upgrade_BaseUpgrade
     override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
     {
         uint lv = info.upgrades.Level("TFLV_Upgrade_HyperV_BulletTime");
-        TFLV_HyperV_IntegrationHandler.SetB("sm_enabled", true);
+        TFLV_HyperV_IntegrationHandler.SetI("hyperv_gb_lvl_slomo", int(lv));
         int scaleLvs = max(0, int(lv) - 1);
         int pts   = CVar.FindCVar("bonsai_hyperv_slomo_pts_base").GetInt()
                     + scaleLvs * CVar.FindCVar("bonsai_hyperv_slomo_pts_per_level").GetInt();
@@ -310,13 +287,10 @@ class TFLV_Upgrade_HyperV_BulletTime : TFLV_Upgrade_BaseUpgrade
                     + scaleLvs * CVar.FindCVar("bonsai_hyperv_slomo_depth_per_level").GetInt();
         TFLV_HyperV_IntegrationHandler.SetI("sm_totalslomopoints", pts);
         TFLV_HyperV_IntegrationHandler.SetI("sm_slowdown_depth",   min(100, depth));
-        TFLV_HyperV_IntegrationHandler.SetB("sm_berserk_enabled",  lv >= 2);
-        TFLV_HyperV_IntegrationHandler.SetB("sm_invuln_enabled",   lv >= 2);
     }
     override void OnDeactivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
     {
-        if (CVar.FindCVar("hyperv_gb_slomo").GetBool())
-            TFLV_HyperV_IntegrationHandler.SetB("sm_enabled", false);
+        TFLV_HyperV_IntegrationHandler.SetI("hyperv_gb_lvl_slomo", 0);
     }
     override void GetTooltipFields(Dictionary fields, uint level) const
     {
@@ -465,9 +439,7 @@ class TFLV_Upgrade_HyperV_Hook : TFLV_Upgrade_BaseUpgrade
     override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
     {
         uint lv = info.upgrades.Level("TFLV_Upgrade_HyperV_Hook");
-        TFLV_HyperV_IntegrationHandler.SetB("vmm_hook",      lv >= 1);
-        TFLV_HyperV_IntegrationHandler.SetB("vmm_hook_pull", lv >= 2);
-        TFLV_HyperV_IntegrationHandler.SetB("vmm_hook_stun", lv >= 2);
+        TFLV_HyperV_IntegrationHandler.SetI("hyperv_gb_lvl_hook", int(lv));
         if (lv >= 2)
         {
             int scaleLvs = max(0, int(lv) - 2);
@@ -481,8 +453,7 @@ class TFLV_Upgrade_HyperV_Hook : TFLV_Upgrade_BaseUpgrade
     }
     override void OnDeactivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
     {
-        if (CVar.FindCVar("hyperv_gb_hook").GetBool())
-            TFLV_HyperV_IntegrationHandler.SetB("vmm_hook", false);
+        TFLV_HyperV_IntegrationHandler.SetI("hyperv_gb_lvl_hook", 0);
     }
     override void GetTooltipFields(Dictionary fields, uint level) const
     {
@@ -522,7 +493,7 @@ class TFLV_Upgrade_HyperV_Teleporter : TFLV_Upgrade_BaseUpgrade
     override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
     {
         uint lv = info.upgrades.Level("TFLV_Upgrade_HyperV_Teleporter");
-        TFLV_HyperV_IntegrationHandler.SetB("vmm_teleport", lv >= 1);
+        TFLV_HyperV_IntegrationHandler.SetI("hyperv_gb_lvl_teleporter", int(lv));
         if (lv >= 1)
         {
             int scaleLvs = int(lv) - 1;
@@ -537,8 +508,7 @@ class TFLV_Upgrade_HyperV_Teleporter : TFLV_Upgrade_BaseUpgrade
     }
     override void OnDeactivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
     {
-        if (CVar.FindCVar("hyperv_gb_teleporter").GetBool())
-            TFLV_HyperV_IntegrationHandler.SetB("vmm_teleport", false);
+        TFLV_HyperV_IntegrationHandler.SetI("hyperv_gb_lvl_teleporter", 0);
     }
     override void GetTooltipFields(Dictionary fields, uint level) const
     {
