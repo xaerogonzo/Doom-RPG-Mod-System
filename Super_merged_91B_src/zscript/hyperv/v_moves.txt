@@ -537,6 +537,17 @@ class V_Moves : CustomInventory
 		if(dash_cooldown <= randompick(6, 7, 8) && owner.bspectral == true)
 		{ owner.bspectral = false; }
 		
+		// Stamina recovery: every tic. Lives here, not in Perform_Melee(), which returns early
+		// when melee is disabled; dash spends this pool, so it must refill regardless.
+		if(melee_stamina && !melee_vr_mode)
+		{
+			if(melee_stamina_val < 100) melee_stamina_val++;
+		}
+		else
+		{
+			melee_stamina_val = 100;
+		}
+		
 	//////////////////////////////////////
 	// Double Jump						//
 	//////////////////////////////////////
@@ -985,16 +996,6 @@ class V_Moves : CustomInventory
 		{
 			slot1_active   = false;
 			slot1_is_rapid = false;
-		}
-		
-		// Stamina recovery — every tic regardless of attacking
-		if(melee_stamina && !melee_vr_mode)
-		{
-			if(melee_stamina_val < 100) melee_stamina_val++;
-		}
-		else
-		{
-			melee_stamina_val = 100;
 		}
 		
 		// Retaliation window countdown
