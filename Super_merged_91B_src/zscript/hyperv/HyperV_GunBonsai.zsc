@@ -5,6 +5,18 @@
 class TFLV_HyperV_IntegrationHandler : EventHandler
 {
     Array<int> pendingEnforce;
+    int enforceTick;
+
+    override void WorldLoaded(WorldEvent e)
+    {
+        // Queue every live player on map start; PlayerEntered isn't reliable
+        // for the initial game launch (handler may register after it fires).
+        for (int p = 0; p < MAXPLAYERS; p++)
+        {
+            if (playeringame[p] && pendingEnforce.Find(p) == pendingEnforce.Size())
+                pendingEnforce.Push(p);
+        }
+    }
 
     override void PlayerEntered(PlayerEvent e)
     {
@@ -22,13 +34,30 @@ class TFLV_HyperV_IntegrationHandler : EventHandler
 
     override void WorldTick()
     {
-        if (pendingEnforce.Size() == 0) return;
-        for (int i = pendingEnforce.Size() - 1; i >= 0; i--)
+        // Drain the one-shot queue (from PlayerEntered/Respawned/WorldLoaded).
+        if (pendingEnforce.Size() > 0)
         {
-            int pnum = pendingEnforce[i];
-            if (!playeringame[pnum] || !players[pnum].mo) continue;
-            EnforceForPlayer(pnum);
-            pendingEnforce.Delete(i);
+            for (int i = pendingEnforce.Size() - 1; i >= 0; i--)
+            {
+                int pnum = pendingEnforce[i];
+                if (!playeringame[pnum] || !players[pnum].mo) continue;
+                EnforceForPlayer(pnum);
+                pendingEnforce.Delete(i);
+            }
+        }
+
+        // Continuous enforcement (every 35 tics / ~1s). Without this, any user
+        // flip of a vmm_*/sm_enabled CVar via menu or console bypasses the
+        // Gun Bonsai gate until the next respawn.
+        enforceTick++;
+        if (enforceTick >= 35)
+        {
+            enforceTick = 0;
+            for (int p = 0; p < MAXPLAYERS; p++)
+            {
+                if (playeringame[p] && players[p].mo)
+                    EnforceForPlayer(p);
+            }
         }
     }
 
@@ -142,10 +171,28 @@ class TFLV_HyperV_IntegrationHandler : EventHandler
             SetF("vmm_jump_mult",  jmp);
         }
 
-        // Weapon upgrades: default to OFF, OnActivate/OnDeactivate handle per-weapon toggling
-        if (CV("hyperv_gb_hook"))       SetB("vmm_hook",      false);
-        if (CV("hyperv_gb_teleporter")) SetB("vmm_teleport",  false);
-        if (CV("hyperv_gb_slomo"))      SetB("sm_enabled",    false);
+        // Weapon upgrades: reflect the CURRENT weapon's upgrade level so the
+        // periodic enforce doesn't clobber an active weapon's unlocked features.
+        // OnActivate/OnDeactivate still handle per-weapon transitions.
+        let winfo = stats ? stats.GetInfoForCurrentWeapon() : null;
+
+        if (CV("hyperv_gb_hook"))
+        {
+            uint lv = winfo ? winfo.upgrades.Level("TFLV_Upgrade_HyperV_Hook") : 0;
+            SetB("vmm_hook",      lv >= 1);
+            SetB("vmm_hook_pull", lv >= 2);
+            SetB("vmm_hook_stun", lv >= 2);
+        }
+        if (CV("hyperv_gb_teleporter"))
+        {
+            uint lv = winfo ? winfo.upgrades.Level("TFLV_Upgrade_HyperV_Teleporter") : 0;
+            SetB("vmm_teleport", lv >= 1);
+        }
+        if (CV("hyperv_gb_slomo"))
+        {
+            uint lv = winfo ? winfo.upgrades.Level("TFLV_Upgrade_HyperV_BulletTime") : 0;
+            SetB("sm_enabled", lv >= 1);
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
