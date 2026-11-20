@@ -40,6 +40,22 @@ class TFCO_CompanionsSystem play {
     EventHandler.SendNetworkEvent("vuas_event:companion_resurrect");
   }
 
+  // Companion TIDs: every friendly monster gets a TID from this range, so ACS (the Colorful
+  // Hell fountain heal) can find companions by TID. Slots are checked with ActorIterator, so a
+  // freed slot (a companion that was destroyed) is reused.
+  static void AssignFriendTid(Actor a) {
+    if (!a || a.TID != 0) return;
+    int base = 30000;   // first companion TID
+    int count = 64;     // companion TID slots
+    for (int t = base; t < base + count; t++) {
+      ActorIterator it = ActorIterator.Create(t);
+      if (!it.Next()) {
+        a.ChangeTID(t);
+        return;
+      }
+    }
+  }
+
   // Removes healing fountains spawned by a Sentinel that just turned friendly.
   // Colorful Hell fountains link to their spawner via SXF_SETMASTER, so this
   // matches by ownership, never by proximity. One scan per conversion, no tick.
@@ -51,7 +67,7 @@ class TFCO_CompanionsSystem play {
     ThinkerIterator it = ThinkerIterator.Create(fountainBase);
     Actor f;
     while (f = Actor(it.Next())) {
-      if (f.master == sentinel) f.Destroy();
+      if (f.tracer == sentinel) f.Destroy();
     }
   }
 
@@ -66,6 +82,7 @@ class TFCO_CompanionsSystem play {
       // Friendly: give enhancer if missing, then set targeting flag.
       if (!thing.FindInventory("TFCO_FriendEnhancer"))
         thing.GiveInventory("TFCO_FriendEnhancer", 1);
+      TFCO_CompanionsSystem.AssignFriendTid(thing);
       if (F_Targetting)
         thing.bSEEFRIENDLYMONSTERS = true;
     } else {
@@ -292,6 +309,7 @@ class TFCO_CompanionsSystem play {
         // Give it now, so the Colorful Hell Sentinel gate (TFCO_FriendEnhancer) sees them.
         if (!frend.FindInventory("TFCO_FriendEnhancer"))
           frend.GiveInventory("TFCO_FriendEnhancer", 1);
+        TFCO_CompanionsSystem.AssignFriendTid(frend);
         if (!frend.bBOSS)
           Console.PrintF("\cJA random \cD%s \cJhas joined your team!", frend.GetTag());
         else
@@ -876,6 +894,7 @@ class TFCO_FriendApplicator : Actor {
               && nfren.bISMONSTER && !nfren.bFRIENDLY && nfren.bSHOOTABLE) {
             nfren.bFRIENDLY = true;
             nfren.GiveInventory("TFCO_FriendEnhancer", 1);
+            TFCO_CompanionsSystem.AssignFriendTid(nfren);
             TFCO_CompanionsSystem.ClearFountainsOf(nfren);
           }
         }
