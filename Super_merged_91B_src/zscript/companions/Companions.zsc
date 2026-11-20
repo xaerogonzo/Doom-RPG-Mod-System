@@ -40,6 +40,21 @@ class TFCO_CompanionsSystem play {
     EventHandler.SendNetworkEvent("vuas_event:companion_resurrect");
   }
 
+  // Removes healing fountains spawned by a Sentinel that just turned friendly.
+  // Colorful Hell fountains link to their spawner via SXF_SETMASTER, so this
+  // matches by ownership, never by proximity. One scan per conversion, no tick.
+  // Class names are looked up at runtime, so this loads without Colorful Hell.
+  static void ClearFountainsOf(Actor sentinel) {
+    class<Actor> sentinelBase = "WhitePE2";
+    class<Actor> fountainBase = "HealthFountainWhitePE";
+    if (!sentinelBase || !fountainBase || !(sentinel is sentinelBase)) return;
+    ThinkerIterator it = ThinkerIterator.Create(fountainBase);
+    Actor f;
+    while (f = Actor(it.Next())) {
+      if (f.master == sentinel) f.Destroy();
+    }
+  }
+
 
   // Called when any thing spawns.
   // Handles both friendly monsters (give FriendEnhancer, set targeting flag)
@@ -166,7 +181,14 @@ class TFCO_CompanionsSystem play {
       // Pick the tier ONCE per spawn (0 = regular, 1 = dangerous, 2 = boss).
       // Each case below maps the tier to its roster-specific index range.
       int tier = PickTier(allowBoss, allowArch, bossChance);
-      switch (roster) {
+      // TEST HOOK (off unless the test CVar is set): spawn the named class for the first ally.
+      // Used by the Doom Live Tester to exercise the real spawn path with a Colorful Hell monster.
+      CVar testCv = CVar.FindCVar("companions_test_class");
+      String testName = testCv ? testCv.GetString() : "";
+      if (i == 0 && testName != "") {
+        class<Actor> testCls = testName;
+        if (testCls) frend = pl.Spawn(testCls, pl.pos, ALLOW_REPLACE);
+      } else switch (roster) {
         case 2: { // Heretic
           int idx = (tier == 2) ? random(12, 13)
                   : (tier == 1) ? random(0, 11)
@@ -266,6 +288,10 @@ class TFCO_CompanionsSystem play {
 
       if (frend) {
         frend.bFRIENDLY = true;
+        // Map-start companions spawn hostile, so the spawn hook never gave them the enhancer.
+        // Give it now, so the Colorful Hell Sentinel gate (TFCO_FriendEnhancer) sees them.
+        if (!frend.FindInventory("TFCO_FriendEnhancer"))
+          frend.GiveInventory("TFCO_FriendEnhancer", 1);
         if (!frend.bBOSS)
           Console.PrintF("\cJA random \cD%s \cJhas joined your team!", frend.GetTag());
         else
@@ -850,6 +876,7 @@ class TFCO_FriendApplicator : Actor {
               && nfren.bISMONSTER && !nfren.bFRIENDLY && nfren.bSHOOTABLE) {
             nfren.bFRIENDLY = true;
             nfren.GiveInventory("TFCO_FriendEnhancer", 1);
+            TFCO_CompanionsSystem.ClearFountainsOf(nfren);
           }
         }
       }
