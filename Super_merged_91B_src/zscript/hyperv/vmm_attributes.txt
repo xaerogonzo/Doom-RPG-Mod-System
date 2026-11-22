@@ -100,22 +100,39 @@ class CustomPlayerProperties play
 		pawn.damageFactor = base * mult;
 	}
 
-	private static void updateMaxHealth(PlayerPawn pawn, vmm_Settings s, readonly<PlayerPawn> default)
+	// Max Health setting (vmm_max_health): 0 means "use the class default", and with 0 this module must NOT touch the pawn's
+	// MaxHealth. It used to write the class default back on every update, which erased any max-health bonus another mod had
+	// given the player (e.g. La Tailor Girl's burger raises it through ACS APROP_SpawnHealth, which is MaxHealth for a player).
+	// A non-zero setting is still enforced as before. If the setting goes back to 0, the value this module forced is undone once.
+	private void updateMaxHealth(PlayerPawn pawn, vmm_Settings s, readonly<PlayerPawn> default)
 	{
-		int newMax = s.maxHealth();
-		if(newMax <= 0) newMax = default.maxHealth > 0 ? default.maxHealth : 100;
+		int setting = s.maxHealth();
+		int classDefault = default.maxHealth > 0 ? default.maxHealth : 100;
+
+		if(setting <= 0)
+		{
+			if(_forcedMaxHealth > 0)
+			{
+				_forcedMaxHealth = 0;
+				pawn.maxHealth = classDefault;
+				if(pawn.health > classDefault) pawn.A_SetHealth(classDefault);
+			}
+			return;
+		}
+
+		_forcedMaxHealth = setting;
 		// Only update if value changed — avoids scaling health every second
-		if(pawn.maxHealth == newMax) return;
+		if(pawn.maxHealth == setting) return;
 
 		// Scale current health proportionally only on the first application
 		// (i.e. when maxHealth transitions from default to a new value).
 		// Don't rescale if health was changed by damage/pickups since last check.
-		int safeOld = pawn.maxHealth > 0 ? pawn.maxHealth : 100;
-		pawn.maxHealth = newMax;
+		pawn.maxHealth = setting;
 		// Clamp health to new max without rescaling — let the player keep their HP
-		if(pawn.health > newMax) pawn.A_SetHealth(newMax);
+		if(pawn.health > setting) pawn.A_SetHealth(setting);
 	}
 
+	private int _forcedMaxHealth;
 	private double _jumpZ;
 	private vmm_Settings _settings;
 }
