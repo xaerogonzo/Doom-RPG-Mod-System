@@ -408,7 +408,33 @@ class dp_ScoreStorage
 
 class dp_MapScoreItem : ScoreItem
 {
-  dp_MapScoreItem init(int n) { amount = n; return self; }
+  // The item this token was created for. A token with no item left is removed
+  // (after a short grace period so a player who just picked the item up can still
+  // touch the token). Without this, transient power-up givers spawned by other
+  // mods (e.g. Champions' AggroGiver, dozens per second) each left a permanent
+  // token behind: 11,000+ of them on one map, which cost real FPS.
+  Actor src;
+  bool hasSrc;
+  int goneTics;
+
+  dp_MapScoreItem init(int n, Actor source = null) {
+    amount = n;
+    src = source;
+    hasSrc = (source != null);
+    return self;
+  }
+
+  override void Tick() {
+    Super.Tick();
+    if (!hasSrc) return;
+    let srcInv = Inventory(src);
+    if (!src || src.bDESTROYED || (srcInv && srcInv.owner)) {
+      if (++goneTics > 35) Destroy();
+    } else {
+      goneTics = 0;
+    }
+  }
+
   Default
   {
     -CountItem;
@@ -496,7 +522,7 @@ class dp_Spawner
 
   private play void spawnScoreItem(Actor thing, int pts)
   {
-    dp_MapScoreItem(Actor.Spawn("dp_MapScoreItem", thing.pos)).init(pts);
+    dp_MapScoreItem(Actor.Spawn("dp_MapScoreItem", thing.pos)).init(pts, thing);
   }
 
   // Cached CVar pointers — transient so they are cleared on save/load and
