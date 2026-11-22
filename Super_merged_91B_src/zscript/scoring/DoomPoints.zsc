@@ -916,6 +916,33 @@ class dp_ScoringSystem play
       if (playeringame[i])
         playerScores.push(makePlayerScore(i));
     }
+    adoptLegacyTokens();
+  }
+
+  // Score tokens stored in saves made before tokens tracked their item have no
+  // source and would never go away (one save had 11,000 of them, ~9 ms per frame).
+  // Link each to the pickup lying under it, or remove it when nothing is there.
+  // One pass per map load; a no-op once no legacy token is left.
+  void adoptLegacyTokens()
+  {
+    ThinkerIterator it = ThinkerIterator.Create("dp_MapScoreItem");
+    dp_MapScoreItem tok;
+    while (tok = dp_MapScoreItem(it.Next()))
+    {
+      if (tok.hasSrc) continue;
+      Actor best = null;
+      double bestd = 16;
+      BlockThingsIterator bi = BlockThingsIterator.Create(tok, 16);
+      while (bi.Next())
+      {
+        Actor o = bi.thing;
+        if (!o || o == tok || o is "dp_MapScoreItem" || !o.bSPECIAL) continue;
+        double d = (tok.pos.xy - o.pos.xy).Length();
+        if (d < bestd) { bestd = d; best = o; }
+      }
+      if (best) { tok.src = best; tok.hasSrc = true; }
+      else tok.Destroy();
+    }
   }
 
   void PlayerEntered(int playerNumber)
