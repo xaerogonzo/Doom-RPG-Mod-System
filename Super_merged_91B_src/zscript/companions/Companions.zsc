@@ -295,7 +295,12 @@ class TFCO_CompanionsSystem play {
         frend.bFRIENDLY = true;
         // Map-start companions spawn hostile, so the spawn hook never gave them the enhancer.
         // Give it now, so the Colorful Hell Sentinel gate (TFCO_FriendEnhancer) sees them.
-        if (!frend.FindInventory("TFCO_FriendEnhancer"))
+        // Only for real monsters: with Colorful Hell, ALLOW_REPLACE hands back an RNG spawner
+        // (a stateless TNT1 actor). The enhancer's AttachToOwner forces the owner into its "See"
+        // state, which a spawner lacks, so the spawner was removed before it could create the
+        // monster and the companion never appeared. The Applicator below gives the enhancer to
+        // the real monster once the spawner has produced it.
+        if (frend.bISMONSTER && !frend.FindInventory("TFCO_FriendEnhancer"))
           frend.GiveInventory("TFCO_FriendEnhancer", 1);
         if (!frend.bBOSS)
           Console.PrintF("\cJA random \cD%s \cJhas joined your team!", frend.GetTag());
