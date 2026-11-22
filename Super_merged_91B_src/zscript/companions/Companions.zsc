@@ -45,8 +45,13 @@ class TFCO_CompanionsSystem play {
   // matches by ownership, never by proximity. One scan per conversion, no tick.
   // Class names are looked up at runtime, so this loads without Colorful Hell.
   static void ClearFountainsOf(Actor sentinel) {
-    class<Actor> sentinelBase = "WhitePE2";
-    class<Actor> fountainBase = "HealthFountainWhitePE";
+    // Names go through String variables on purpose: a string literal assigned
+    // to class<Actor> is resolved at compile time and a missing class is a
+    // fatal script error, so without Colorful Hell the whole mod failed to load.
+    String sentinelName = "WhitePE2";
+    String fountainName = "HealthFountainWhitePE";
+    class<Actor> sentinelBase = sentinelName;
+    class<Actor> fountainBase = fountainName;
     if (!sentinelBase || !fountainBase || !(sentinel is sentinelBase)) return;
     ThinkerIterator it = ThinkerIterator.Create(fountainBase);
     Actor f;
