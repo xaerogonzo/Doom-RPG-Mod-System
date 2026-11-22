@@ -135,12 +135,15 @@ extend class TFLV_WeaponInfo {
   }
   bool IsMelee() const {
     if (typeflags) return typeflags & TFLV_TYPE_MELEE;
-    return wpn.bMELEEWEAPON;
+    // wpn is null for an orphaned info (weapon dropped/consumed); the death XP
+    // penalty loop still reaches those, so don't dereference it blindly.
+    return wpn && wpn.bMELEEWEAPON;
   }
   bool IsWimpy() const {
     if (wimpy_override > 0) return true;   // player forced ON
     if (wimpy_override < 0) return false;  // player forced OFF
     if (typeflags) return typeflags & TFLV_TYPE_WIMPY;
+    if (!wpn) return false;  // orphaned info, see IsMelee
     return wpn.bWIMPY_WEAPON || (!wpn.AmmoType1 && !wpn.AmmoType2);
   }
   // For additional modifiers we use a cutoff of 50%.
