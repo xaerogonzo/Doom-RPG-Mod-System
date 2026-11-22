@@ -1521,6 +1521,16 @@ Class HookProjectile : Actor {
 		spawnPos = pos;
 	}
 
+	// The hook flies through the thrower's allies (companions, friendly monsters,
+	// other players). Without this it collided with a companion standing next to
+	// the player, stopped dead a few units out and never reached a wall or enemy.
+	override bool CanCollideWith(Actor other, bool passive)
+	{
+		if (other && other != target && (other.bFRIENDLY || other.player || (target && target.IsFriend(other))))
+			return false;
+		return super.CanCollideWith(other, passive);
+	}
+
 	override void Tick()
 	{
 		super.Tick();
