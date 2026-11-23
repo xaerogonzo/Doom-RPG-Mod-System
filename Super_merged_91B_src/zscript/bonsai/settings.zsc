@@ -90,6 +90,18 @@ class TFLV_Settings : Object {
     return uint(feat);
   }
 
+  // Should a sound cue play? 'tier' is the lowest global level that plays it by default:
+  // 1 = essential, 2 = full. Global Off silences everything; a per-feature override
+  // (-1 follow global, 0 off, 1 on) wins otherwise. Called at event sites only.
+  static bool sfx_for(string feature_cvar, int tier) {
+    int global = GetInt("bonsai_sfx_mode");
+    if (global <= 0) return false;
+    int feat = GetInt(feature_cvar);
+    if (feat == 0) return false;
+    if (feat == 1) return true;
+    return global >= tier;
+  }
+
   static string levelup_sound() {
     // Must be kept in sync with the GunBonsaiLevelUpSoundOption in MENUDEF
     static const string sounds[] = { "", "bonsai/gunlevelup", "misc/secret", "misc/teleport" };

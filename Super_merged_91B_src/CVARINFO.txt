@@ -29,6 +29,10 @@ user bool bonsai_levelup_flash = true;
 user color bonsai_levelup_flash_rgb = "FF FF FF";
 user int bonsai_levelup_sound_mode = 1;
 user string bonsai_levelup_sound = "";
+// Gun Bonsai sound effects (new cues; the level-up sound keeps its own option above).
+// Global: 0 = off, 1 = essential cues only, 2 = full. Per-feature: -1 = follow global, 0 = off, 1 = on (never while global is off).
+user int bonsai_sfx_mode = 1;
+user int bonsai_sfx_parry = -1;            // parry cue (essential tier)
 user int bonsai_vfx_mode = 2;              // global VFX level: 0=off 1=reduced 2=full
 // Per-feature VFX overrides. -1 = follow global setting, 0 = off, 1 = reduced, 2 = full.
 user int bonsai_vfx_dot        = -1;       // DoT tick particles (fire/poison/acid/lightning)

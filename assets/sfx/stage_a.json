@@ -1,0 +1,290 @@
+{
+  "schema_version": 1,
+  "seed": 2026,
+  "sounds": [
+    {
+      "id": "rpg_levelup",
+      "alias": "rpgfx/levelup",
+      "fm": {
+        "duration": 1.0,
+        "pitch": 440,
+        "sample_rate": 44100,
+        "gain": 0.8,
+        "operators": [
+          {
+            "ratio": 1.0,
+            "env": {
+              "a": 0.004,
+              "d": 0.55,
+              "s": 0.0,
+              "r": 0.35
+            }
+          },
+          {
+            "ratio": 1.25,
+            "env": {
+              "a": 0.1,
+              "d": 0.5,
+              "s": 0.0,
+              "r": 0.35
+            }
+          },
+          {
+            "ratio": 1.5,
+            "env": {
+              "a": 0.2,
+              "d": 0.45,
+              "s": 0.0,
+              "r": 0.35
+            }
+          },
+          {
+            "ratio": 4.0,
+            "env": {
+              "a": 0.2,
+              "d": 0.18,
+              "s": 0.0,
+              "r": 0.1
+            }
+          }
+        ],
+        "carriers": [
+          0,
+          1,
+          2
+        ],
+        "mods": [
+          [
+            3,
+            2,
+            1.2
+          ]
+        ],
+        "filter": {
+          "type": "lp",
+          "cutoff": 9000,
+          "q": 0.8
+        }
+      }
+    },
+    {
+      "id": "rpg_parry",
+      "alias": "rpgfx/parry_crit",
+      "fm": {
+        "sample_rate": 44100,
+        "duration": 0.3,
+        "pitch": 170,
+        "gain": 0.9,
+        "pitch_env": {
+          "start": 1.8,
+          "end": 1.0,
+          "time": 0.05,
+          "curve": 5.0
+        },
+        "operators": [
+          {
+            "ratio": 1.0,
+            "env": {
+              "a": 0.001,
+              "d": 0.1,
+              "s": 0.0,
+              "r": 0.03
+            }
+          },
+          {
+            "ratio": 1.52,
+            "level": 0.5,
+            "env": {
+              "a": 0.001,
+              "d": 0.07,
+              "s": 0.0,
+              "r": 0.03
+            }
+          },
+          {
+            "ratio": 2.9,
+            "level": 0.25,
+            "env": {
+              "a": 0.001,
+              "d": 0.05,
+              "s": 0.0,
+              "r": 0.03
+            }
+          },
+          {
+            "ratio": 5.1,
+            "env": {
+              "a": 0.001,
+              "d": 0.012,
+              "s": 0.0,
+              "r": 0.01
+            }
+          }
+        ],
+        "carriers": [
+          0,
+          1,
+          2
+        ],
+        "mods": [
+          [
+            3,
+            1,
+            1.5
+          ]
+        ],
+        "noise": {
+          "level": 0.9,
+          "env": {
+            "a": 0.0,
+            "d": 0.022,
+            "s": 0.0,
+            "r": 0.01
+          }
+        },
+        "filter": {
+          "type": "lp",
+          "cutoff": 3200,
+          "q": 0.8
+        }
+      }
+    },
+    {
+      "id": "rpg_parry2",
+      "alias": "rpgfx/parry_normal",
+      "fm": {
+        "sample_rate": 44100,
+        "duration": 0.22,
+        "pitch": 125,
+        "gain": 0.85,
+        "pitch_env": {
+          "start": 1.6,
+          "end": 1.0,
+          "time": 0.04,
+          "curve": 5.0
+        },
+        "operators": [
+          {
+            "ratio": 1.0,
+            "env": {
+              "a": 0.001,
+              "d": 0.07,
+              "s": 0.0,
+              "r": 0.03
+            }
+          },
+          {
+            "ratio": 2.1,
+            "level": 0.3,
+            "env": {
+              "a": 0.001,
+              "d": 0.04,
+              "s": 0.0,
+              "r": 0.03
+            }
+          }
+        ],
+        "carriers": [
+          0,
+          1
+        ],
+        "noise": {
+          "level": 0.8,
+          "env": {
+            "a": 0.0,
+            "d": 0.03,
+            "s": 0.0,
+            "r": 0.01
+          }
+        },
+        "filter": {
+          "type": "lp",
+          "cutoff": 1800,
+          "q": 0.8
+        }
+      }
+    },
+    {
+      "id": "rpg_parry_armor",
+      "alias": "rpgfx/parry_armor",
+      "fm": {
+        "sample_rate": 44100,
+        "duration": 0.36,
+        "pitch": 140,
+        "gain": 0.9,
+        "pitch_env": {
+          "start": 1.7,
+          "end": 1.0,
+          "time": 0.05,
+          "curve": 5.0
+        },
+        "operators": [
+          {
+            "ratio": 1.0,
+            "env": {
+              "a": 0.001,
+              "d": 0.11,
+              "s": 0.0,
+              "r": 0.03
+            }
+          },
+          {
+            "ratio": 2.76,
+            "level": 0.35,
+            "env": {
+              "a": 0.001,
+              "d": 0.16,
+              "s": 0.0,
+              "r": 0.05
+            }
+          },
+          {
+            "ratio": 4.07,
+            "level": 0.2,
+            "env": {
+              "a": 0.001,
+              "d": 0.12,
+              "s": 0.0,
+              "r": 0.04
+            }
+          },
+          {
+            "ratio": 7.3,
+            "env": {
+              "a": 0.001,
+              "d": 0.015,
+              "s": 0.0,
+              "r": 0.01
+            }
+          }
+        ],
+        "carriers": [
+          0,
+          1,
+          2
+        ],
+        "mods": [
+          [
+            3,
+            1,
+            1.2
+          ]
+        ],
+        "noise": {
+          "level": 0.7,
+          "env": {
+            "a": 0.0,
+            "d": 0.02,
+            "s": 0.0,
+            "r": 0.01
+          }
+        },
+        "filter": {
+          "type": "lp",
+          "cutoff": 3800,
+          "q": 0.8
+        }
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
-bonsai/gunlevelup win_loud
+// Level-up, parry: original sounds generated with Doom Creator from assets/sfx/stage_a.json (CC0).
+bonsai/gunlevelup "sounds/rpg_levelup.wav"
 // TODO: include a sound effect here that will work with non-doom iwads
 $alias bonsai/smallboom imp/shotx
 
@@ -42,5 +43,6 @@ $volume Slomo_loop 0.4
 
 $random parry/crit   { parry/crit1 }
 $random parry/normal { parry/normal1 }
-parry/crit1     "sounds/chord.ogg"
-parry/normal1   "sounds/Windows XP Ding.ogg"
+// parry/crit: wooden-shield knock (rpg_parry.wav). Alternative heavier armour thunk: sounds/rpg_parry_armor.wav
+parry/crit1     "sounds/rpg_parry.wav"
+parry/normal1   "sounds/rpg_parry2.wav"

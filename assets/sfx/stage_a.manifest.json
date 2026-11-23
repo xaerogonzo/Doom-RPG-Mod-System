@@ -1,0 +1,422 @@
+{
+  "archive_sha256": "a2a336a4a2e6d339413c225478154684218dcf94410bbc5e005b40d281fac070",
+  "assets": [
+    {
+      "bytes": 212,
+      "path": "SNDINFO",
+      "provenance": "generated",
+      "sha256": "53f8acce0ab3ea8b510c365c09e7d053f3a8cf25e1f17a995e619560b61494b0",
+      "type": "definition"
+    },
+    {
+      "alias": "rpgfx/levelup",
+      "bytes": 88244,
+      "id": "rpg_levelup",
+      "kind": "fm",
+      "params": {
+        "carriers": [
+          0,
+          1,
+          2
+        ],
+        "duration": 1.0,
+        "env": {
+          "a": 0.0,
+          "d": 0.1,
+          "r": 0.01,
+          "s": 1.0
+        },
+        "filter": {
+          "cutoff": 9000.0,
+          "q": 0.8,
+          "type": "lp"
+        },
+        "gain": 0.8,
+        "mods": [
+          [
+            3,
+            2,
+            1.2
+          ]
+        ],
+        "noise": {
+          "env": {
+            "a": 0.002,
+            "d": 0.1,
+            "r": 0.02,
+            "s": 0.0
+          },
+          "level": 0.0
+        },
+        "operators": [
+          {
+            "env": {
+              "a": 0.004,
+              "d": 0.55,
+              "r": 0.35,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 1.0,
+            "ratio": 1.0
+          },
+          {
+            "env": {
+              "a": 0.1,
+              "d": 0.5,
+              "r": 0.35,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 1.0,
+            "ratio": 1.25
+          },
+          {
+            "env": {
+              "a": 0.2,
+              "d": 0.45,
+              "r": 0.35,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 1.0,
+            "ratio": 1.5
+          },
+          {
+            "env": {
+              "a": 0.2,
+              "d": 0.18,
+              "r": 0.1,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 1.0,
+            "ratio": 4.0
+          }
+        ],
+        "pitch": 440.0,
+        "pitch_env": {
+          "curve": 3.0,
+          "end": 1.0,
+          "start": 1.0,
+          "time": 0.1
+        },
+        "sample_rate": 44100
+      },
+      "path": "sounds/rpg_levelup.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 8171967340901791319,
+      "sha256": "3a7cabda436c2bfdc93ef107732b49c5e7d7946c9f1ffa1af4c80a598902790c",
+      "type": "sound"
+    },
+    {
+      "alias": "rpgfx/parry_crit",
+      "bytes": 26504,
+      "id": "rpg_parry",
+      "kind": "fm",
+      "params": {
+        "carriers": [
+          0,
+          1,
+          2
+        ],
+        "duration": 0.3,
+        "env": {
+          "a": 0.0,
+          "d": 0.1,
+          "r": 0.01,
+          "s": 1.0
+        },
+        "filter": {
+          "cutoff": 3200.0,
+          "q": 0.8,
+          "type": "lp"
+        },
+        "gain": 0.9,
+        "mods": [
+          [
+            3,
+            1,
+            1.5
+          ]
+        ],
+        "noise": {
+          "env": {
+            "a": 0.0,
+            "d": 0.022,
+            "r": 0.01,
+            "s": 0.0
+          },
+          "level": 0.9
+        },
+        "operators": [
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.1,
+              "r": 0.03,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 1.0,
+            "ratio": 1.0
+          },
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.07,
+              "r": 0.03,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 0.5,
+            "ratio": 1.52
+          },
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.05,
+              "r": 0.03,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 0.25,
+            "ratio": 2.9
+          },
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.012,
+              "r": 0.01,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 1.0,
+            "ratio": 5.1
+          }
+        ],
+        "pitch": 170.0,
+        "pitch_env": {
+          "curve": 5.0,
+          "end": 1.0,
+          "start": 1.8,
+          "time": 0.05
+        },
+        "sample_rate": 44100
+      },
+      "path": "sounds/rpg_parry.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 5171202197949432073,
+      "sha256": "727f091a6b349ab9c85f3a64252aed743d62db689dbdf9e33366937b186a08b9",
+      "type": "sound"
+    },
+    {
+      "alias": "rpgfx/parry_normal",
+      "bytes": 19448,
+      "id": "rpg_parry2",
+      "kind": "fm",
+      "params": {
+        "carriers": [
+          0,
+          1
+        ],
+        "duration": 0.22,
+        "env": {
+          "a": 0.0,
+          "d": 0.1,
+          "r": 0.01,
+          "s": 1.0
+        },
+        "filter": {
+          "cutoff": 1800.0,
+          "q": 0.8,
+          "type": "lp"
+        },
+        "gain": 0.85,
+        "mods": [],
+        "noise": {
+          "env": {
+            "a": 0.0,
+            "d": 0.03,
+            "r": 0.01,
+            "s": 0.0
+          },
+          "level": 0.8
+        },
+        "operators": [
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.07,
+              "r": 0.03,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 1.0,
+            "ratio": 1.0
+          },
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.04,
+              "r": 0.03,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 0.3,
+            "ratio": 2.1
+          }
+        ],
+        "pitch": 125.0,
+        "pitch_env": {
+          "curve": 5.0,
+          "end": 1.0,
+          "start": 1.6,
+          "time": 0.04
+        },
+        "sample_rate": 44100
+      },
+      "path": "sounds/rpg_parry2.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 17955469408812681711,
+      "sha256": "13d675eed2f0920303d448c1220077ed92508188960d788eb9af46b0b8756d37",
+      "type": "sound"
+    },
+    {
+      "alias": "rpgfx/parry_armor",
+      "bytes": 31796,
+      "id": "rpg_parry_armor",
+      "kind": "fm",
+      "params": {
+        "carriers": [
+          0,
+          1,
+          2
+        ],
+        "duration": 0.36,
+        "env": {
+          "a": 0.0,
+          "d": 0.1,
+          "r": 0.01,
+          "s": 1.0
+        },
+        "filter": {
+          "cutoff": 3800.0,
+          "q": 0.8,
+          "type": "lp"
+        },
+        "gain": 0.9,
+        "mods": [
+          [
+            3,
+            1,
+            1.2
+          ]
+        ],
+        "noise": {
+          "env": {
+            "a": 0.0,
+            "d": 0.02,
+            "r": 0.01,
+            "s": 0.0
+          },
+          "level": 0.7
+        },
+        "operators": [
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.11,
+              "r": 0.03,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 1.0,
+            "ratio": 1.0
+          },
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.16,
+              "r": 0.05,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 0.35,
+            "ratio": 2.76
+          },
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.12,
+              "r": 0.04,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 0.2,
+            "ratio": 4.07
+          },
+          {
+            "env": {
+              "a": 0.001,
+              "d": 0.015,
+              "r": 0.01,
+              "s": 0.0
+            },
+            "feedback": 0.0,
+            "fixed_hz": 0.0,
+            "level": 1.0,
+            "ratio": 7.3
+          }
+        ],
+        "pitch": 140.0,
+        "pitch_env": {
+          "curve": 5.0,
+          "end": 1.0,
+          "start": 1.7,
+          "time": 0.05
+        },
+        "sample_rate": 44100
+      },
+      "path": "sounds/rpg_parry_armor.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 17118834913823351966,
+      "sha256": "d4488cc37be0edd38be84ee191040b4da0369d012cc07fa0ef09cda690f572e9",
+      "type": "sound"
+    }
+  ],
+  "determinism": "byte-identical within a pinned Python/NumPy environment (see README)",
+  "environment": {
+    "implementation": "CPython",
+    "numpy": "2.4.4",
+    "python": "3.13.12"
+  },
+  "generator_version": 1,
+  "schema_version": 1,
+  "script_seed": 2026,
+  "script_sha256": "3f77e873982f95385066fc8f2ef272acd1b1ba84b42f084484fec1ae0ef95961",
+  "tool": "doomcreator",
+  "tool_version": "0.1.0",
+  "warnings": []
+}

@@ -80,6 +80,8 @@ OptionMenu "GunBonsaiOptions"
   TFLV_Tooltip "$TFLV_OPT_TT_VFX_MODE"
   TFLV_AnimatedSubmenu "Performance / VFX Detail",        "GunBonsaiVfxDetail"
   TFLV_Tooltip "Per-feature visual effects quality settings. Override individual systems independently of the global VFX level above."
+  TFLV_AnimatedSubmenu "Sound Effects",                   "GunBonsaiSfx"
+  TFLV_Tooltip "Turn Gun Bonsai sound cues off, essential-only or full, and override single cues. The weapon level-up sound keeps its own option above. Hyper-V movement sounds are in the Hyper-V options."
   Option "$TFLV_OPT_NAME_LEVELUP_FLASH", "bonsai_levelup_flash", "OnOff"
   TFLV_Tooltip "$TFLV_OPT_TT_LEVELUP_FLASH"
   ColorPicker "$TFLV_OPT_NAME_LEVELUP_FLASH_RGB", "bonsai_levelup_flash_rgb"
@@ -494,6 +496,28 @@ OptionValue "GunBonsaiVfxFeature" { -1, "Follow global"  0, "Off"  1, "Reduced" 
 // =============================================================================
 // Performance / VFX Detail
 // =============================================================================
+
+OptionValue "GunBonsaiSfxMode" { 0, "Off"  1, "Essential"  2, "Full" }
+OptionValue "GunBonsaiSfxFeature" { -1, "Follow global"  0, "Off"  1, "On" }
+
+OptionMenu "GunBonsaiSfx"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Sound Effects"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Applies to Gun Bonsai cues. The weapon level-up sound has its own option in Gun Bonsai Options.", DARKGRAY
+  StaticText ""
+  Option "Global sound level", "bonsai_sfx_mode", "GunBonsaiSfxMode"
+  TFLV_Tooltip "Off silences every cue listed below. Essential plays the low-repetition cues only. Full also plays the cues that can repeat often (none yet)."
+  StaticText ""
+  StaticText "Per-Cue Overrides", GOLD
+  StaticText "'On' still stays silent while the global level is Off.", DARKGRAY
+  StaticText ""
+  Option "Parry cue", "bonsai_sfx_parry", "GunBonsaiSfxFeature"
+  TFLV_Tooltip "The sound when a Hyper-V parry blocks damage. Essential tier."
+}
 
 OptionMenu "GunBonsaiVfxDetail"
 {
