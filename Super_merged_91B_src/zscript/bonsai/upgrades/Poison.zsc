@@ -87,6 +87,7 @@ class TFLV_Upgrade_Putrefaction : TFLV_Upgrade_ElementalUpgrade {
 
     let aux = TFLV_Upgrade_Putrefaction_Aux(target.Spawn("TFLV_Upgrade_Putrefaction_Aux", target.pos));
     aux.target = player;
+    TFLV_Upgrade_Dot.ElementCue(target, player, "bonsai_sfx_poison", TFLV_PerPlayerStats.ELEM_POISON, "poison/putrefy", 20);
     let pdot = TFLV_Upgrade_Dot(target.FindInventory("TFLV_Upgrade_PoisonDot"));
     aux.srcWeapon = pdot ? pdot.srcWeapon : null;
     aux.level = max(stacks - (stacks * bonsai_stat_poison_putref_transfer**level), 1);
@@ -171,6 +172,7 @@ class TFLV_Upgrade_PoisonDot : TFLV_Upgrade_Dot {
     if (hallucinogens > 0 && GetTotalDamage() >= owner.health && !owner.bFRIENDLY) {
 //      DEBUG("Made the %s friendly!", owner.GetClassName());
       owner.A_SetFriendly(true);
+      ElementCue(owner, self.target, "bonsai_sfx_poison", TFLV_PerPlayerStats.ELEM_POISON, "poison/hallucinate", 20);
       owner.bDONTHARMCLASS = false;
       owner.bDONTHARMSPECIES = false;
     }

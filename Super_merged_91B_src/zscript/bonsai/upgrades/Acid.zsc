@@ -152,6 +152,7 @@ class TFLV_Upgrade_AcidDot : TFLV_Upgrade_Dot {
         // Splash-specific parameters.
         aux.stacks = surplus;
         aux.softcap = cap * self.splash * 0.2;
+        ElementCue(owner, self.target, "bonsai_sfx_acid", TFLV_PerPlayerStats.ELEM_ACID, "acid/spray", 20);
       }
       damage_this_tick = 0;
     }
@@ -204,7 +205,10 @@ class TFLV_Upgrade_AcidDot : TFLV_Upgrade_Dot {
 
     if (damageType == "Acid") {
 //      DEBUG("Instakill? %d < %d", owner.health, InstakillThreshold());
-      if (owner.health < InstakillThreshold()) newdamage = owner.health+1;
+      if (owner.health < InstakillThreshold()) {
+        newdamage = owner.health+1;
+        ElementCue(owner, self.target, "bonsai_sfx_acid", TFLV_PerPlayerStats.ELEM_ACID, "acid/embrittle", 20);
+      }
       return;
     }
 

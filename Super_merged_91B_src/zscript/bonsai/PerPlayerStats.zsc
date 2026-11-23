@@ -273,14 +273,31 @@ class TFLV_PerPlayerStats : Object play {
   // events in a burst gives one cue. Two ints, written at cue time. 'now' is passed in so it can be tested.
   const ELEM_FIRE = 0;
   const ELEM_LIGHTNING = 1;
+  const ELEM_ACID = 2;
+  const ELEM_POISON = 3;
   int elemCueUntil0;
   int elemCueUntil1;
+  int elemCueUntil2;
+  int elemCueUntil3;
   int elemCuesGiven;
+  int ElemCueUntil(int kind) const {
+    switch (kind) {
+      case 0: return elemCueUntil0;
+      case 1: return elemCueUntil1;
+      case 2: return elemCueUntil2;
+    }
+    return elemCueUntil3;
+  }
   bool ElemCueOpen(int now, int kind) const {
-    return now >= (kind == ELEM_FIRE ? elemCueUntil0 : elemCueUntil1);
+    return now >= ElemCueUntil(kind);
   }
   void ElemCueClaim(int now, int kind, int gap) {
-    if (kind == ELEM_FIRE) elemCueUntil0 = now + gap; else elemCueUntil1 = now + gap;
+    switch (kind) {
+      case 0: elemCueUntil0 = now + gap; break;
+      case 1: elemCueUntil1 = now + gap; break;
+      case 2: elemCueUntil2 = now + gap; break;
+      default: elemCueUntil3 = now + gap; break;
+    }
     ++elemCuesGiven;
   }
 

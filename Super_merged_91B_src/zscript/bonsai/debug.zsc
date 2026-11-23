@@ -130,6 +130,16 @@ class TFLV_Debug : Object play {
       er = er .. (ok ? "1" : "0");
     }
     console.printf("BONSAI elem gate result=%s", er);
+    // Acid (2) and Poison (3) gates are independent too. {tic, kind}. Expected 1110011
+    let as2 = new("TFLV_PerPlayerStats");
+    static const int atics[] = { 100, 2,  100, 3,  110, 0,  110, 2,  119, 3,  120, 2,  125, 3 };
+    string ar = "";
+    for (int i = 0; i < 7; ++i) {
+      bool ok = as2.ElemCueOpen(atics[i*2], atics[i*2+1]);
+      if (ok) as2.ElemCueClaim(atics[i*2], atics[i*2+1], 20);
+      ar = ar .. (ok ? "1" : "0");
+    }
+    console.printf("BONSAI elem gate2 result=%s", ar);
   }
 
   static void ShowInfoConsole(Actor pawn) {
