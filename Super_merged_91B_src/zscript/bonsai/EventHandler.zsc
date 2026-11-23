@@ -35,10 +35,12 @@ class TFLV_EventHandler : StaticEventHandler {
   private bool cached_indestructible_on;
   private bool cached_dp_on;
   private bool cached_companions_on;
-  private transient int last_cache_tic = -1; // -1: first call (gametic 0) must still refresh
+  private transient int last_cache_tic;
+  private transient bool cache_valid; // false until first refresh, so gametic 0 still refreshes
 
   void RefreshMasterSwitches() {
-    if (last_cache_tic == gametic) return;
+    if (cache_valid && last_cache_tic == gametic) return;
+    cache_valid = true;
     last_cache_tic = gametic;
     let cv_b = CVar.FindCVar("bonsai_enabled");
     cached_bonsai_on = cv_b ? cv_b.GetBool() : true;
