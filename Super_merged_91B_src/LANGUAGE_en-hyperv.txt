@@ -285,11 +285,11 @@ VMM_TT_RESET_HUD = "Resets all HUD position, size, and visibility settings to de
 
 TFLV_Upgrade_HyperV_Mobility_Name      = "Mobility";
 TFLV_Upgrade_HyperV_Mobility_Desc      = "Lv1: jump, crouch, dash. Lv2: double dash, ledge climb. Lv3: double jump.";
-TFLV_Upgrade_HyperV_Mobility_TT        = "Mobility (@next)";
+TFLV_Upgrade_HyperV_Mobility_TT        = "Mobility (@unlocked) @cd";
 
 TFLV_Upgrade_HyperV_Melee_Name         = "Combat Training";
 TFLV_Upgrade_HyperV_Melee_Desc         = "Unlocks close-quarters combat. Level 1: auto-melee. Level 2: combo system and knockback. Level 3: parry.";
-TFLV_Upgrade_HyperV_Melee_TT           = "Combat Training (@next)";
+TFLV_Upgrade_HyperV_Melee_TT           = "Combat Training (@feat)";
 
 TFLV_Upgrade_HyperV_BulletTime_Name    = "Bullet Time";
 TFLV_Upgrade_HyperV_BulletTime_Desc    = "Unlocks slow-motion bullet time on this weapon. Melee and wimpy weapons only. Level 1: 60% capacity. Level 2: full capacity with Berserk and Invulnerability bonuses.";
