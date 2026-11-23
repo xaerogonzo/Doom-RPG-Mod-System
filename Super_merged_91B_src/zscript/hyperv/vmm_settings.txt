@@ -79,6 +79,11 @@ class vmm_Settings
   int dashBackCost()					{ return dashBackCostCvar.getInt();				}
   bool doubleJumpEnabled()   			{ return doubleJumpCvar.getBool() && gbMobility.open(3);   			}
   bool ledgeClimbEnabled()   			{ return ledgeClimbCvar.getBool() && gbMobility.open(2);   			}
+  // Movement sound cues (read when settings are refreshed, not per tic)
+  bool sfxJump()						{ return sfxJumpCvar.getBool();				}
+  bool sfxDash()						{ return sfxDashCvar.getBool();				}
+  bool sfxDoubleJump()					{ return sfxDoubleJumpCvar.getBool();		}
+  bool sfxLedgeClimb()					{ return sfxLedgeClimbCvar.getBool();		}
   // Health regen
   bool   healthRegenEnabled()         { return helthRegenCvar.getBool() && gbHealthRegen.open(1);              }
   int    healthRegenAmount()          { return healthRegenAmountCvar.getInt();        }
@@ -230,6 +235,10 @@ class vmm_Settings
     result.dashBackCostCvar				= vmm_Cvar.of("vmm_dash_back_cost");
     result.doubleJumpCvar   			= vmm_Cvar.of("vmm_double_jump");
     result.ledgeClimbCvar   			= vmm_Cvar.of("vmm_ledge_climb");
+    result.sfxJumpCvar   				= vmm_Cvar.of("vmm_sfx_jump");
+    result.sfxDashCvar   				= vmm_Cvar.of("vmm_sfx_dash");
+    result.sfxDoubleJumpCvar   			= vmm_Cvar.of("vmm_sfx_double_jump");
+    result.sfxLedgeClimbCvar   			= vmm_Cvar.of("vmm_sfx_ledge_climb");
 
     // Gun Bonsai gates: a feature runs only if the user allows it above AND (GB mode is off OR the upgrade level is reached)
     result.gbMobility     = vmm_GbGate.of("mobility");
@@ -388,6 +397,10 @@ class vmm_Settings
   private vmm_Cvar dashBackCostCvar;
   private vmm_Cvar doubleJumpCvar;
   private vmm_Cvar ledgeClimbCvar;
+  private vmm_Cvar sfxJumpCvar;
+  private vmm_Cvar sfxDashCvar;
+  private vmm_Cvar sfxDoubleJumpCvar;
+  private vmm_Cvar sfxLedgeClimbCvar;
 
   private vmm_GbGate gbMobility;
   private vmm_GbGate gbMelee;

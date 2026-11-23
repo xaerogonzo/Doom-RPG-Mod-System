@@ -51,3 +51,27 @@ parry/crit3     "sounds/rpg_parry2.wav"
 parry/normal1   "sounds/rpg_parry2.wav"
 parry/normal2   "sounds/rpg_parry.wav"
 parry/normal3   "sounds/rpg_parry_armor.wav"
+
+// Hyper-V movement sounds, generated with Doom Creator (assets/sfx/gen_stage_b.py and gen_stage_b2.py, CC0).
+// Loudness is set per sound (audible RMS about -23 to -25 dBFS, quieter than Doom's pistol at -12). Picks are provisional:
+// three variants each, chosen as the most different from each other by their spectra and envelopes (jump f4 dropped by request).
+// Jump: rustle + tiny click; double jump: floaty, no click; dash: whoosh + faint electronic zip (c3 is the earlier, plainer dash).
+$random hv/jump { hv/jump1 hv/jump2 hv/jump3 }
+hv/jump1 "sounds/rpg_jump__f1.wav"
+hv/jump2 "sounds/rpg_jump__f3.wav"
+hv/jump3 "sounds/rpg_jump__f5.wav"
+$random hv/dash { hv/dash1 hv/dash2 hv/dash3 }
+hv/dash1 "sounds/rpg_dash__c3.wav"
+hv/dash2 "sounds/rpg_dash__h3.wav"
+hv/dash3 "sounds/rpg_dash__h6.wav"
+$random hv/doublejump { hv/doublejump1 hv/doublejump2 hv/doublejump3 }
+hv/doublejump1 "sounds/rpg_doublejump__g1.wav"
+hv/doublejump2 "sounds/rpg_doublejump__g4.wav"
+hv/doublejump3 "sounds/rpg_doublejump__g5.wav"
+// Ledge climb: a looping sound started when the climb starts and stopped when it ends (silent at both ends so the repeat is clean); one of two loops per climb
+$random hv/climb { hv/climb1 hv/climb2 }
+hv/climb1 "sounds/rpg_climb__d3.wav"
+hv/climb2 "sounds/rpg_climb__d2.wav"
+$random hv/climbtop { hv/climbtop1 hv/climbtop2 }
+hv/climbtop1 "sounds/rpg_climbtop__e2.wav"
+hv/climbtop2 "sounds/rpg_climbtop__e1.wav"

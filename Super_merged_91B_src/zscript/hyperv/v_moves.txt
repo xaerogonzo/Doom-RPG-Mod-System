@@ -96,6 +96,16 @@ class VMovesHandler : EventHandler
 		V_Moves(hyperv).dash_back_cost		= _settings.dashBackCost();
 		V_Moves(hyperv).double_jumping 		= _settings.doubleJumpEnabled();
 		V_Moves(hyperv).ledge_climbing 		= _settings.ledgeClimbEnabled();
+		V_Moves(hyperv).sfx_jump			= _settings.sfxJump();
+		V_Moves(hyperv).sfx_dash			= _settings.sfxDash();
+		V_Moves(hyperv).sfx_double_jump		= _settings.sfxDoubleJump();
+		V_Moves(hyperv).sfx_ledge_climb		= _settings.sfxLedgeClimb();
+		// Ledge climbing switched off while climbing: end the climb and its sound loop
+		if(!V_Moves(hyperv).ledge_climbing && V_Moves(hyperv).climbing)
+		{
+			V_Moves(hyperv).climbing = false;
+			if(V_Moves(hyperv).owner) V_Moves(hyperv).owner.A_StopSound(CHAN_5);
+		}
 		V_Moves(hyperv).melee_enabled			= _settings.meleeEnabled();
 		V_Moves(hyperv).melee_vr_mode			= _settings.meleeVRMode();
 		V_Moves(hyperv).melee_disabled			= _settings.hyperVMeleeDisabled();
@@ -214,6 +224,13 @@ class VMovesHandler : EventHandler
 			V_Moves(hyperv).jump_thrust = true;
 			V_Moves(hyperv).jump_buttons_press++;
 			countdown_for_djump_stop = 35;
+
+			// Regular jump sound, once per jump key press, only when the engine will really jump:
+			// standing on the ground, jump height above 0 (it is 0 while Mobility is locked), not swimming.
+			let vmj = V_Moves(hyperv);
+			if(vmj.sfx_jump && vmj.owner && vmj.owner.player && vmj.owner.player.onground
+				&& vmj.owner.player.jumpTics == 0 && vmj.owner.player.mo.JumpZ > 0 && vmj.owner.WaterLevel < 2 && !vmj.owner.bNOGRAVITY)
+				vmj.owner.A_StartSound("hv/jump", CHAN_AUTO, CHANF_NOPAUSE, 0.8);
 		}
 		
 		// Grapple hook
@@ -505,6 +522,7 @@ class V_Moves : CustomInventory
 				}
 				
 				owner.bspectral = true;
+				if(sfx_dash) owner.A_StartSound("hv/dash", CHAN_AUTO, CHANF_NOPAUSE, 0.8);
 				
 				if(dash_stamina && cost > 0)
 					melee_stamina_val = clamp(melee_stamina_val - cost, 0, 100);
@@ -563,7 +581,7 @@ class V_Moves : CustomInventory
 				jump_thrust = false;
 				jump_buttons_press = 0;
 
-				//owner.a_playsound("");
+				if(sfx_double_jump) owner.A_StartSound("hv/doublejump", CHAN_AUTO, CHANF_NOPAUSE, 0.8);
 			}
 		}
 		
@@ -705,11 +723,13 @@ class V_Moves : CustomInventory
             if (jump && ledgeHeight > owner.maxStepHeight && ledgeHeight <= maxLedgeHeight)
             {
                 climbing = true;
-                //A_PlaySound("*Climb", CHAN_BODY);
+                // Looping climb sound on CHAN_5 of the player (free on the owner: slomo uses 6, parry/hook 7)
+                if(sfx_ledge_climb) owner.A_StartSound("hv/climb", CHAN_5, CHANF_LOOP | CHANF_NOPAUSE);
             }
         }
         else
         {
+            bool reachedTop = false;
             if (!jump || ledgeHeight > maxLedgeHeight)  // Drop down/get knocked down from ledge
             {
                 climbing = false;
@@ -717,6 +737,7 @@ class V_Moves : CustomInventory
             else if (ledgeHeight <= owner.maxStepHeight && clearance >= 0.5 * owner.height)    // Reach top of ledge
             {
                 climbing = false;
+                reachedTop = true;
 
                 // Crouch, so player can fit into small spaces
                 owner.player.crouchFactor = 0.5;
@@ -728,6 +749,8 @@ class V_Moves : CustomInventory
 
             if (!climbing)  // Exit climbing state
             {
+                owner.A_StopSound(CHAN_5);   // end the climb loop (always, even if the setting was turned off mid-climb)
+                if (sfx_ledge_climb && reachedTop) owner.A_StartSound("hv/climbtop", CHAN_AUTO, CHANF_NOPAUSE, 0.8);
                 owner.player.SetPsprite(PSP_WEAPON, owner.player.readyWeapon.GetUpState());
                 owner.player.jumpTics = -1;
             }
@@ -1293,6 +1316,22 @@ class V_Moves : CustomInventory
 	
 	//Ledge Climb
 	bool ledge_climbing; //set by cvar
+	// Movement sound cues (set by cvar when settings refresh). One sound per dash / double jump;
+	// the climb sound is a loop started when climbing begins and stopped when it ends (no per-tic work).
+	bool sfx_jump;
+	bool sfx_dash;
+	bool sfx_double_jump;
+	bool sfx_ledge_climb;
+
+	// A looping climb sound must not outlive the player
+	override void OwnerDied()
+	{
+		if(climbing && owner)
+		{
+			climbing = false;
+			owner.A_StopSound(CHAN_5);
+		}
+	}
 	const climbReach = 64;
     const thrustSpeed = 4;
     bool climbing;
