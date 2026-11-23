@@ -1,5 +1,5 @@
 {
-  "archive_sha256": "a2a336a4a2e6d339413c225478154684218dcf94410bbc5e005b40d281fac070",
+  "archive_sha256": "22fd8394bed9f44e1aaa0d11922b4e984e48508c3be2985ef1d2ea3f73b95444",
   "assets": [
     {
       "bytes": 212,
@@ -117,7 +117,7 @@
     },
     {
       "alias": "rpgfx/parry_crit",
-      "bytes": 26504,
+      "bytes": 37088,
       "id": "rpg_parry",
       "kind": "fm",
       "params": {
@@ -126,7 +126,7 @@
           1,
           2
         ],
-        "duration": 0.3,
+        "duration": 0.42,
         "env": {
           "a": 0.0,
           "d": 0.1,
@@ -134,7 +134,7 @@
           "s": 1.0
         },
         "filter": {
-          "cutoff": 3200.0,
+          "cutoff": 3000.0,
           "q": 0.8,
           "type": "lp"
         },
@@ -143,24 +143,24 @@
           [
             3,
             1,
-            1.5
+            1.4
           ]
         ],
         "noise": {
           "env": {
             "a": 0.0,
-            "d": 0.022,
+            "d": 0.025,
             "r": 0.01,
             "s": 0.0
           },
-          "level": 0.9
+          "level": 0.8
         },
         "operators": [
           {
             "env": {
               "a": 0.001,
-              "d": 0.1,
-              "r": 0.03,
+              "d": 0.16,
+              "r": 0.06,
               "s": 0.0
             },
             "feedback": 0.0,
@@ -171,26 +171,26 @@
           {
             "env": {
               "a": 0.001,
-              "d": 0.07,
-              "r": 0.03,
+              "d": 0.11,
+              "r": 0.05,
               "s": 0.0
             },
             "feedback": 0.0,
             "fixed_hz": 0.0,
-            "level": 0.5,
-            "ratio": 1.52
+            "level": 0.45,
+            "ratio": 2.45
           },
           {
             "env": {
               "a": 0.001,
-              "d": 0.05,
-              "r": 0.03,
+              "d": 0.09,
+              "r": 0.04,
               "s": 0.0
             },
             "feedback": 0.0,
             "fixed_hz": 0.0,
-            "level": 0.25,
-            "ratio": 2.9
+            "level": 0.22,
+            "ratio": 3.6
           },
           {
             "env": {
@@ -202,15 +202,15 @@
             "feedback": 0.0,
             "fixed_hz": 0.0,
             "level": 1.0,
-            "ratio": 5.1
+            "ratio": 6.3
           }
         ],
-        "pitch": 170.0,
+        "pitch": 130.0,
         "pitch_env": {
           "curve": 5.0,
           "end": 1.0,
-          "start": 1.8,
-          "time": 0.05
+          "start": 1.7,
+          "time": 0.06
         },
         "sample_rate": 44100
       },
@@ -219,7 +219,7 @@
       "replaces": null,
       "reproducible": true,
       "seed": 5171202197949432073,
-      "sha256": "727f091a6b349ab9c85f3a64252aed743d62db689dbdf9e33366937b186a08b9",
+      "sha256": "2bdff9bf739cd56e1a2a93f68431ed9addf3f76fce5c8eb959f81f7ad293c491",
       "type": "sound"
     },
     {
@@ -415,7 +415,7 @@
   "generator_version": 1,
   "schema_version": 1,
   "script_seed": 2026,
-  "script_sha256": "3f77e873982f95385066fc8f2ef272acd1b1ba84b42f084484fec1ae0ef95961",
+  "script_sha256": "d35b93c3b51f0bfc8c8853ded08035d08e86a72bdebca09e38ee6c04edd651f7",
   "tool": "doomcreator",
   "tool_version": "0.1.0",
   "warnings": []

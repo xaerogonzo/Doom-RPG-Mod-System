@@ -43,6 +43,6 @@ $volume Slomo_loop 0.4
 
 $random parry/crit   { parry/crit1 }
 $random parry/normal { parry/normal1 }
-// parry/crit: wooden-shield knock (rpg_parry.wav). Alternative heavier armour thunk: sounds/rpg_parry_armor.wav
+// parry/crit: composite-armour knock (rpg_parry.wav). Alternative heavier armour thunk: sounds/rpg_parry_armor.wav
 parry/crit1     "sounds/rpg_parry.wav"
 parry/normal1   "sounds/rpg_parry2.wav"
