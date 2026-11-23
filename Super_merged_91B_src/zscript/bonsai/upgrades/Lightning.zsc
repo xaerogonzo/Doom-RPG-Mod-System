@@ -245,6 +245,7 @@ class TFLV_Upgrade_ShockDot : TFLV_Upgrade_Dot {
     let aux = TFLV_Upgrade_ChainLightning_Aux(self.Spawn("TFLV_Upgrade_ChainLightning_Aux", pos));
     aux.tracer = owner;
     aux.target = self.target;
+    aux.srcWeapon = self.srcWeapon;
     aux.level = self.chain; // determines max jumps
     aux.damage = owner.SpawnHealth() * (0.5 + 0.003 * stacks);
 //    DEBUG("Chain lightning, base damage=%d", aux.damage);
@@ -265,7 +266,7 @@ class TFLV_Upgrade_ShockDot : TFLV_Upgrade_Dot {
       if (targets[i] == owner) continue;
 
       let zap = TFLV_Upgrade_ShockDot(
-        TFLV_Upgrade_Dot.GiveStacks(self.target, targets[i], "TFLV_Upgrade_ShockDot", stacks, thunderbolt * bonsai_stat_lightning_softcap));
+        TFLV_Upgrade_Dot.GiveStacks(self.target, targets[i], "TFLV_Upgrade_ShockDot", stacks, thunderbolt * bonsai_stat_lightning_softcap, self.srcWeapon));
       zap.stacks = max(zap.stacks, self.stacks);
       zap.bolt_cap = max(zap.bolt_cap, ceil(zap.level * bonsai_stat_lightning_softcap));
     }
@@ -509,7 +510,7 @@ class TFLV_Upgrade_ChainLightning_Arc : Object play {
   }
 }
 
-class TFLV_Upgrade_ChainLightning_Aux : Actor {
+class TFLV_Upgrade_ChainLightning_Aux : TFLV_Upgrade_AuxActor {
   Array<Actor> targets;
   Array<TFLV_Upgrade_ChainLightning_Arc> arcs;
   uint next_target;

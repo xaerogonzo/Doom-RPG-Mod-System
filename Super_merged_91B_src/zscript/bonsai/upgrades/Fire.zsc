@@ -202,6 +202,7 @@ class TFLV_Upgrade_FireDot : TFLV_Upgrade_Dot {
   void SpreadFlames() {
     let aux = TFLV_Upgrade_Conflagration_Aux(Spawn("TFLV_Upgrade_Conflagration_Aux", owner.pos));
     aux.target = self.target;
+    aux.srcWeapon = self.srcWeapon;
     aux.spread = self.spread;
     aux.stacks = self.stacks;
     aux.terror = self.terror;
@@ -216,7 +217,7 @@ class TFLV_Upgrade_FireDot : TFLV_Upgrade_Dot {
   }
 }
 
-class TFLV_Upgrade_Conflagration_Aux : Actor {
+class TFLV_Upgrade_Conflagration_Aux : TFLV_Upgrade_AuxActor {
   double stacks;
   uint terror; // level of Burning Terror upgrade
   uint spread; // level of Conflagration upgrade
@@ -240,7 +241,7 @@ class TFLV_Upgrade_Conflagration_Aux : Actor {
   }
 
   void SpreadTo(Actor target) {
-    let fdot = TFLV_Upgrade_FireDot(TFLV_Upgrade_Dot.GiveStacks(self.target, target, "TFLV_Upgrade_FireDot", 0, 1));
+    let fdot = TFLV_Upgrade_FireDot(TFLV_Upgrade_Dot.GiveStacks(self.target, target, "TFLV_Upgrade_FireDot", 0, 1, self.srcWeapon));
     if (fdot.stacks < self.stacks) {
       fdot.AddStacks(1, spread);
 //      DEBUG("Transfer: %s with softcap %d -> %.1f stacks", TAG(target), spread, fdot.stacks);

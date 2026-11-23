@@ -8,6 +8,9 @@
 
 class TFLV_Upgrade_Dot : Inventory {
   double stacks;
+  // The weapon progression record whose attack (most recently) applied this dot. XP from the dot's
+  // damage is credited to it even after the player switches weapons.
+  TFLV_WeaponInfo srcWeapon;
   property UpgradePriority: weaponspecial;
 
   Default {
@@ -61,7 +64,15 @@ class TFLV_Upgrade_Dot : Inventory {
   // Give count stacks of cls to the target, but don't let their total amount
   // exceed max. Assign the dot's parent (via the target pointer) to owner, so
   // that damage it deals is properly attributed.
-  static TFLV_Upgrade_Dot GiveStacks(Actor owner, Actor target, string cls, double count, double max = double.infinity) {
+  // The most recent application owns the dot's future damage attribution: srcWeapon is set on every call.
+  // Secondary applications (spreads, chains, copies) must pass the source's weapon in src; when src is
+  // null the player's currently wielded weapon is used.
+  static TFLV_WeaponInfo CurrentWeaponOf(Actor owner) {
+    let st = TFLV_PerPlayerStats.GetStatsFor(owner);
+    return st ? st.GetInfoForCurrentWeapon() : null;
+  }
+
+  static TFLV_Upgrade_Dot GiveStacks(Actor owner, Actor target, string cls, double count, double max = double.infinity, TFLV_WeaponInfo src = null) {
 //    DEBUG("GiveStacks: %f of %s", count, cls);
     TFLV_Upgrade_Dot item = TFLV_Upgrade_Dot(target.FindInventory(cls));
     if (!item) item = TFLV_Upgrade_Dot(target.GiveInventoryType(cls));
@@ -72,6 +83,7 @@ class TFLV_Upgrade_Dot : Inventory {
     }
 
     item.target = owner;
+    item.srcWeapon = src ? src : CurrentWeaponOf(owner);
     item.AddStacks(count, max);
     return item;
   }
@@ -164,5 +176,12 @@ class TFLV_Upgrade_Dot : Inventory {
   // Used by Elemental Synthesis effects to correctly copy secondary effect stacks.
   virtual void CopyFrom(TFLV_Upgrade_Dot src) {
     self.stacks = max(self.stacks, src.stacks);
+    if (src.srcWeapon) self.srcWeapon = src.srcWeapon; // copies keep the original provenance
   }
+}
+
+// Base for actors spawned by upgrades that apply dots or deal damage later (spreads, chains).
+// srcWeapon is copied from the dot that spawned them so their effects keep the original credit.
+class TFLV_Upgrade_AuxActor : Actor {
+  TFLV_WeaponInfo srcWeapon;
 }

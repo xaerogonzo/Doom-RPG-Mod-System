@@ -145,6 +145,7 @@ class TFLV_Upgrade_AcidDot : TFLV_Upgrade_Dot {
         let aux = TFLV_Upgrade_AcidSpray_Aux(owner.Spawn("TFLV_Upgrade_AcidSpray_Aux", owner.pos));
         // Copy parameters from self.
         aux.target = self.target;
+        aux.srcWeapon = self.srcWeapon;
         aux.level = self.level;
         aux.splash = self.splash;
         aux.concentration = self.concentration;
@@ -212,7 +213,7 @@ class TFLV_Upgrade_AcidDot : TFLV_Upgrade_Dot {
   }
 }
 
-class TFLV_Upgrade_AcidSpray_Aux : Actor {
+class TFLV_Upgrade_AcidSpray_Aux : TFLV_Upgrade_AuxActor {
   double stacks; // amount of acid to stack on each target
   double softcap; // softcap to apply to targets.
   uint level, concentration, splash; // copied from original dot
@@ -229,7 +230,7 @@ class TFLV_Upgrade_AcidSpray_Aux : Actor {
   }
 
   void SpreadTo(Actor target) {
-    let acid = TFLV_Upgrade_AcidDot(TFLV_Upgrade_Dot.GiveStacks(self.target, target, "TFLV_Upgrade_AcidDot", stacks, softcap));
+    let acid = TFLV_Upgrade_AcidDot(TFLV_Upgrade_Dot.GiveStacks(self.target, target, "TFLV_Upgrade_AcidDot", stacks, softcap, self.srcWeapon));
     acid.level = max(acid.level, level);
     acid.concentration = max(acid.concentration, concentration);
     acid.splash = max(acid.splash, splash);

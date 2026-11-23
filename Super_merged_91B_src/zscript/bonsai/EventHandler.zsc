@@ -128,6 +128,9 @@ class TFLV_EventHandler : StaticEventHandler {
   int mapnum;
   bool playerDiedThisMap;       // reset each map load, used for deathless achievement
   bool mapWasPlayed;            // true once the player has actually taken any action this map
+  // Score attribution for the damage event being processed (see WorldThingDamaged).
+  TFLV_PerPlayerStats creditedSource;
+  int creditedScoreBefore;
   bool pendingDeathlessCheck;   // set in WorldUnloaded, consumed in WorldLoaded (skipped on save loads)
 
   override void WorldLoaded(WorldEvent evt) {
@@ -319,8 +322,29 @@ class TFLV_EventHandler : StaticEventHandler {
       }
     }
 
+    // Kill/timer bonus points go to the weapon that landed the killing blow.
+    TFLV_PerPlayerStats killStats = null;
+    int killScoreBefore = 0;
+    if (BonsaiEnabled() && DoomPointsEnabled() && died.target) {
+      let killer = PlayerPawn(died.target);
+      if (killer) {
+        killStats = TFLV_PerPlayerStats.GetStatsFor(killer);
+        if (killStats && killStats.killCredit && killStats.killCreditTarget == died) {
+          killStats.pendingCredit = killStats.killCredit;
+          killScoreBefore = killer.score;
+        } else {
+          killStats = null;
+        }
+      }
+    }
     if (DoomPointsEnabled())
       scoring.WorldThingDied(died);
+    if (killStats) {
+      killStats.CreditScoreDelta(killScoreBefore);
+      killStats.pendingCredit = null;
+      killStats.killCredit = null;
+      killStats.killCreditTarget = null;
+    }
     if (IndestructibleEnabled())
       indestructible.WorldThingDied(died);
   }
@@ -350,9 +374,17 @@ class TFLV_EventHandler : StaticEventHandler {
       PlayerPawn source = GetPlayerDamageSource(evt);
       if (source) {
         let stats = TFLV_PerPlayerStats.GetStatsFor(PlayerPawn(source));
+        stats.pendingCredit = null;
         stats.OnDamageDealt(evt.inflictor, evt.thing, evt.damage);
-        if (evt.thing.health <= 0)
+        if (evt.thing.health <= 0) {
           stats.OnKill(evt.inflictor, evt.thing);
+          // Remember who landed the killing blow so the kill/timer bonus (added when the
+          // death event follows) is credited to that weapon.
+          stats.killCredit = stats.pendingCredit;
+          stats.killCreditTarget = evt.thing;
+        }
+        creditedSource = stats;
+        creditedScoreBefore = source.score;
       }
     }
 
@@ -380,6 +412,12 @@ class TFLV_EventHandler : StaticEventHandler {
       if (scoringSource) {
         scoring.WorldThingDamaged(evt.thing, evt.damage, evt.damagetype, scoringSource);
       }
+    }
+    // Score added for this damage event goes to the weapon that caused it.
+    if (creditedSource) {
+      creditedSource.CreditScoreDelta(creditedScoreBefore);
+      creditedSource.pendingCredit = null;
+      creditedSource = null;
     }
   }
 

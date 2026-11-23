@@ -44,7 +44,7 @@ class TFLV_Upgrade_ElementalSynthesis : TFLV_Upgrade_ElementalUpgrade {
       let srcdot = TFLV_Upgrade_Dot(src.FindInventory(dotname));
       if (!srcdot) continue;
 //      DEBUG("  srcdot: %s", srcdot.GetTag());
-      let dstdot = TFLV_Upgrade_Dot.GiveStacks(srcdot.target, dst, dotname, 0);
+      let dstdot = TFLV_Upgrade_Dot.GiveStacks(srcdot.target, dst, dotname, 0, double.infinity, srcdot.srcWeapon);
       dstdot.CopyFrom(srcdot);
 //      DEBUG("  afterwards dst stacks=%f", dstdot.amount);
     }

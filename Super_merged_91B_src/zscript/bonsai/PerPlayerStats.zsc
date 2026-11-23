@@ -302,11 +302,53 @@ class TFLV_PerPlayerStats : Object play {
 
   // Add XP to the current weapon.
   void AddXP(double xp) {
+    AddXPTo(GetInfoForCurrentWeapon(), xp);
+  }
+
+  // Add XP to a specific weapon's progression record (used to credit the weapon that
+  // caused the damage rather than the one in hand).
+  void AddXPTo(TFLV_WeaponInfo info, double xp) {
     // If progression is frozen, don't add any XP.
     if (bonsai_freeze_progression) return;
-    TFLV_WeaponInfo info = GetInfoForCurrentWeapon();
     if (!info) return;
     info.AddXP(xp);
+  }
+
+  // True if the record is non-null, belongs to this player and is still in the weapon list.
+  bool OwnsWeaponInfo(TFLV_WeaponInfo i) const {
+    if (!i || i.stats != self) return false;
+    return weapons.Find(i) != weapons.Size();
+  }
+
+  // The weapon record that should be credited for damage dealt by 'shot'. Dots (and the
+  // spread/chain actors they spawn) remember the weapon that applied them; everything else
+  // is credited to the weapon in hand, as before.
+  TFLV_WeaponInfo ResolveCredit(Actor shot, TFLV_WeaponInfo current) {
+    TFLV_WeaponInfo src = null;
+    let dotItem = TFLV_Upgrade_Dot(shot);
+    if (dotItem) src = dotItem.srcWeapon;
+    else {
+      let aux = TFLV_Upgrade_AuxActor(shot);
+      if (aux) src = aux.srcWeapon;
+    }
+    return OwnsWeaponInfo(src) ? src : current;
+  }
+
+  // Set by OnDamageDealt for the damage event being processed and consumed by the event
+  // handler right after the scoring system has added points for that same event.
+  TFLV_WeaponInfo pendingCredit;
+  TFLV_WeaponInfo killCredit; // weapon that landed the latest killing blow
+  Actor killCreditTarget;     // ...and the victim, so only that victim's kill bonus uses it
+
+  // Credit score points that were just added by one damage/kill event to the weapon that
+  // caused it, and move prevScore forward so TickStats does not count them again.
+  void CreditScoreDelta(int scoreBefore) {
+    let credit = pendingCredit;
+    if (!credit) return;
+    int delta = owner.score - scoreBefore;
+    if (delta <= 0 || bonsai_score_to_xp_factor <= 0 || prevScore < 0) return;
+    AddXPTo(credit, delta * bonsai_score_to_xp_factor);
+    prevScore += delta;
   }
 
   double GetXPForDamage(Actor target, uint damage) const {
@@ -340,13 +382,19 @@ class TFLV_PerPlayerStats : Object play {
   void OnDamageDealt(Actor shot, Actor target, uint damage) {
     upgrades.OnDamageDealt(owner, shot, target, damage);
     let info = GetInfoForCurrentWeapon();
-    if (!info) return;
-    info.upgrades.OnDamageDealt(owner, shot, target, damage);
+    // The weapon that caused this damage: a dot keeps crediting the weapon that applied it after
+    // the player switches; everything else is credited to the weapon in hand, as before.
+    // The upgrade callbacks stay on the weapon in hand.
+    let credit = ResolveCredit(shot, info);
+    pendingCredit = credit;
+    if (!info && !credit) return;
+    if (info) info.upgrades.OnDamageDealt(owner, shot, target, damage);
     // Always grant direct damage XP scaled by bonsai_damage_to_xp_factor.
     // If score-to-XP is also active, both paths run at their respective factors.
     // The user controls the split by setting each factor (e.g. 0.5 + 0.5).
     // Setting damage_to_xp_factor = 0 disables direct damage XP entirely.
-    AddXP(GetXPForDamage(target, damage));
+    AddXPTo(credit, GetXPForDamage(target, damage));
+    if (!info) return;
 
     if (!shot || shot.weaponspecial == TFLV_Upgrade_PRI_MISSING)
       info.InferWeaponTypeFromDamage(owner, shot, target);
