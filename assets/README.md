@@ -22,3 +22,5 @@ Procedurally generated from the scripts only, no samples used; released under CC
 `rpg_parry.wav`, `rpg_parry2.wav` and `rpg_parry_armor.wav` are layered (composite) sounds: a short low thud, a noise slap, three tiny grit bursts, a hard tick, a noisy low rattle tail and a settling thump, mixed by the toolkit's `layers` feature (branch `feature/sound-layers` of Doom Creator Toolkit). Each layer's `level` in `sfx/stage_a.json` is the knob for roughness (grit layers), weight (thud layers) and tail (rattle).
 
 Audition and balance: `python -m doomcreator audition assets/sfx/stage_b_candidates.json -o audition.html --reference "Doom pistol=-12.2"` makes one page where every candidate can be played and rated; each sound has `target_rms_dbfs` so its loudness is chosen on purpose (Doom reference audible RMS: pistol -12.2, player pain -14.1, oof -18.3, item pickup -25.3).
+
+ECM cues: `sfx/gen_ecm.py` -> `sfx/ecm_candidates.json` (seed 2030, 10 candidates); shipped (provisional): `rpg_ecm_hacked__a1/a2/a4`, `rpg_ecm_failed__b1/b2/b5` as `ecm/hacked` and `ecm/failed` in `SNDINFO.txt`.

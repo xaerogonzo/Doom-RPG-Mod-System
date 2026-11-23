@@ -517,6 +517,8 @@ OptionMenu "GunBonsaiSfx"
   StaticText ""
   Option "Parry cue", "bonsai_sfx_parry", "GunBonsaiSfxFeature"
   TFLV_Tooltip "The sound when a Hyper-V parry blocks damage. Essential tier."
+  Option "ECM cues", "bonsai_sfx_ecm", "GunBonsaiSfxFeature"
+  TFLV_Tooltip "A soft rising tone when the ECM upgrade redirects or reprograms an incoming seeker missile, and a soft falling tone when the hack fails. Once per missile. Essential tier."
 }
 
 OptionMenu "GunBonsaiVfxDetail"

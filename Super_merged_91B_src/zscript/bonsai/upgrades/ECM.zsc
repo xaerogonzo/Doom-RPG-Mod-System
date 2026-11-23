@@ -37,6 +37,18 @@ class TFLV_Upgrade_ECM : TFLV_Upgrade_BaseUpgrade {
   int last_tick;
   // Outcome tallies (cheap integers; read by the debug dump so tests can see what happened).
   uint n_redirected, n_reprogrammed, n_failed;
+  // Sound cue throttle: several missiles decided in the same moment (a volley) make one cue, not a chord.
+  int last_cue_tic;
+  const CUE_GAP_TICS = 10;
+
+  // Soft confirmation cues. Called only from the three outcome functions below (one per missile),
+  // so there is no per-tic work; the gate and the gap check are two cheap tests at that event.
+  private void Cue(Actor owner, bool success) {
+    if (gametic - last_cue_tic < CUE_GAP_TICS) return;
+    if (!TFLV_Settings.sfx_for("bonsai_sfx_ecm", 1)) return;
+    last_cue_tic = gametic;
+    owner.A_StartSound(success ? "ecm/hacked" : "ecm/failed", CHAN_AUTO, CHANF_NOPAUSE | CHANF_OVERLAP, 0.9);
+  }
 
   // Called from WorldThingSpawned for every missile not fired by a player. A tracer is usually
   // not set yet at this point (e.g. A_SkelMissile assigns it just after spawning), so only
@@ -69,6 +81,7 @@ class TFLV_Upgrade_ECM : TFLV_Upgrade_BaseUpgrade {
   // Outcome 1: redirected against a nearby monster.
   private void Redirect(Actor owner, Actor shot, Array<Actor> monsters) {
     ++n_redirected;
+    Cue(owner, true);
     shot.tracer = monsters[random[TFLV_Upgrade_RNG_ECMTarget](0, monsters.size()-1)];
     shot.target = owner;
   }
@@ -76,6 +89,7 @@ class TFLV_Upgrade_ECM : TFLV_Upgrade_BaseUpgrade {
   // Outcome 2: reprogrammed to hunt its launcher.
   private void Reprogram(Actor owner, Actor shot) {
     ++n_reprogrammed;
+    Cue(owner, true);
     shot.tracer = shot.target;
     shot.target = owner;
   }
@@ -87,6 +101,7 @@ class TFLV_Upgrade_ECM : TFLV_Upgrade_BaseUpgrade {
   // conversational.
   private void Fail(Actor owner, Actor shot) {
     ++n_failed;
+    Cue(owner, false);
     shot.bINCOMBAT = true;
   }
 

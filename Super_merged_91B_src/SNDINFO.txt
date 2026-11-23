@@ -75,3 +75,14 @@ hv/climb2 "sounds/rpg_climb__d2.wav"
 $random hv/climbtop { hv/climbtop1 hv/climbtop2 }
 hv/climbtop1 "sounds/rpg_climbtop__e2.wav"
 hv/climbtop2 "sounds/rpg_climbtop__e1.wav"
+
+// ECM feedback (assets/sfx/gen_ecm.py, CC0): soft synth notes, quiet (audible RMS about -27 dBFS). Provisional picks.
+// ecm/hacked: a missile was redirected or reprogrammed (rising); ecm/failed: the hack did not work (falling).
+$random ecm/hacked { ecm/hacked1 ecm/hacked2 ecm/hacked3 }
+ecm/hacked1 "sounds/rpg_ecm_hacked__a1.wav"
+ecm/hacked2 "sounds/rpg_ecm_hacked__a2.wav"
+ecm/hacked3 "sounds/rpg_ecm_hacked__a4.wav"
+$random ecm/failed { ecm/failed1 ecm/failed2 ecm/failed3 }
+ecm/failed1 "sounds/rpg_ecm_failed__b1.wav"
+ecm/failed2 "sounds/rpg_ecm_failed__b2.wav"
+ecm/failed3 "sounds/rpg_ecm_failed__b5.wav"

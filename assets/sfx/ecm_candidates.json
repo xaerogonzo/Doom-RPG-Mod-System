@@ -1,0 +1,1276 @@
+{
+ "schema_version": 1,
+ "seed": 2030,
+ "sounds": [
+  {
+   "id": "hacked__a1",
+   "alias": "cand3/hacked/a1",
+   "fm": {
+    "duration": 0.55,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -27,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 523.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3200,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.1,
+      "level": 0.85,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 783.99,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3200,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "hacked__a2",
+   "alias": "cand3/hacked/a2",
+   "fm": {
+    "duration": 0.61,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -27,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 523.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3200,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.08,
+      "level": 0.9,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 659.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3200,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.16,
+      "level": 0.81,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 783.99,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3200,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "hacked__a3",
+   "alias": "cand3/hacked/a3",
+   "fm": {
+    "duration": 0.56,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -27,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 659.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.7,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2800,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.11,
+      "level": 0.85,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 880.0,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.7,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2800,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "hacked__a4",
+   "alias": "cand3/hacked/a4",
+   "fm": {
+    "duration": 0.5,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.45999999999999996,
+       "pitch": 783.99,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.16,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.15,
+         "env": {
+          "a": 0.015,
+          "d": 0.11199999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.16,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3800,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.09,
+      "level": 0.85,
+      "patch": {
+       "duration": 0.45999999999999996,
+       "pitch": 1046.5,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.16,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.15,
+         "env": {
+          "a": 0.015,
+          "d": 0.11199999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.16,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3800,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "hacked__a5",
+   "alias": "cand3/hacked/a5",
+   "fm": {
+    "duration": 0.62,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -27,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.52,
+       "pitch": 523.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.154,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.6,
+         "env": {
+          "a": 0.018,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3200,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.075,
+      "level": 0.85,
+      "patch": {
+       "duration": 0.52,
+       "pitch": 783.99,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.154,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.6,
+         "env": {
+          "a": 0.018,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3200,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.15,
+      "level": 0.7224999999999999,
+      "patch": {
+       "duration": 0.52,
+       "pitch": 1046.5,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.154,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.6,
+         "env": {
+          "a": 0.018,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 3200,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "failed__b1",
+   "alias": "cand3/failed/b1",
+   "fm": {
+    "duration": 0.5800000000000001,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.52,
+       "pitch": 783.99,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.154,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2200,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.11,
+      "level": 0.85,
+      "patch": {
+       "duration": 0.52,
+       "pitch": 659.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.154,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.22,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2200,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "failed__b2",
+   "alias": "cand3/failed/b2",
+   "fm": {
+    "duration": 0.61,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.54,
+       "pitch": 659.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.24,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.16799999999999998,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.7,
+         "env": {
+          "a": 0.018,
+          "d": 0.24,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2000,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.12,
+      "level": 0.85,
+      "patch": {
+       "duration": 0.54,
+       "pitch": 523.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.24,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.16799999999999998,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.7,
+         "env": {
+          "a": 0.018,
+          "d": 0.24,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2000,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "failed__b3",
+   "alias": "cand3/failed/b3",
+   "fm": {
+    "duration": 0.64,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.56,
+       "pitch": 440.0,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.26,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.182,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.26,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 1800,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.13,
+      "level": 0.85,
+      "patch": {
+       "duration": 0.56,
+       "pitch": 329.63,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.26,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.182,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.26,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 1800,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "failed__b4",
+   "alias": "cand3/failed/b4",
+   "fm": {
+    "duration": 0.63,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -29,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 783.99,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2200,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.09,
+      "level": 0.8,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 659.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2200,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.18,
+      "level": 0.6400000000000001,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 523.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.25,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2200,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "failed__b5",
+   "alias": "cand3/failed/b5",
+   "fm": {
+    "duration": 0.55,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 659.25,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.15,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2100,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.1,
+      "level": 0.85,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 587.33,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.015,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.15,
+         "env": {
+          "a": 0.015,
+          "d": 0.13999999999999999,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.004,
+         "level": 0.5,
+         "env": {
+          "a": 0.018,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 2100,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  }
+ ]
+}
