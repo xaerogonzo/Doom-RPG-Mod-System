@@ -240,6 +240,35 @@ class TFLV_PerPlayerStats : Object play {
     }
   }
 
+  // Shared gate for the defensive sound cues that fire from the same incoming hit: the Thorns chime
+  // (kind 1) and the melee Shield absorb pulse (kind 2). The first cue that would play opens a window
+  // and claims it; the other kind joins in the same tic, so when both effects are active you hear both
+  // together or neither, never one alone; each kind plays at most once per tic. After that nothing plays
+  // until the window closes. The window is the longest gap of the cues that played (Thorns 20, Shield 12).
+  // 'now' is passed in (gametic) so the logic can be tested. No ticking: two ints, written at cue time.
+  int defenseCueTic;   // tic of the last claimed window
+  int defenseCueMask;  // kinds that already played in that tic
+  int defenseCueUntil; // no new window before this tic
+  const DEFENSE_THORNS = 1;
+  const DEFENSE_SHIELD = 2;
+
+  // Cheap look before the cvar checks: could a cue of this kind play now?
+  bool DefenseCueOpen(int now, int kind) const {
+    if (now == defenseCueTic) return !(defenseCueMask & kind);
+    return now >= defenseCueUntil;
+  }
+
+  // Claim the slot for a cue of this kind (call only after DefenseCueOpen and the settings checks).
+  void DefenseCueClaim(int now, int kind, int gap) {
+    if (now == defenseCueTic) {
+      defenseCueMask |= kind;
+    } else {
+      defenseCueTic = now;
+      defenseCueMask = kind;
+    }
+    defenseCueUntil = max(defenseCueUntil, now + gap);
+  }
+
   // Take back player XP that weapon levels had contributed (death penalty). Clamped at zero;
   // never changes the player's level, upgrades or pending level-ups.
   void RemovePlayerXP(uint amount) {

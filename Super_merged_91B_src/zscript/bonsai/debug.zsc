@@ -24,6 +24,8 @@ class TFLV_Debug : Object play {
       service.GetDouble("add-w-xp", "", player, arg, null);
     } else if (argv[1] == "p-xp") {
       service.GetDouble("add-p-xp", "", player, arg);
+    } else if (argv[1] == "gate-test") {
+      GateTest();
     } else if (argv[1] == "dump") {
       Dump(player);
     } else if (argv[1] == "w-level") {
@@ -85,6 +87,25 @@ class TFLV_Debug : Object play {
       stats.lastPenaltyRequested, stats.lastPenaltyLevelsLost,
       stats.lastPenaltyUpgradesRemoved, stats.lastPenaltyWeapons);
     console.printf("BONSAI end");
+  }
+
+  // Logic test for the shared defense-cue gate with synthetic tics (no game state is touched).
+  // Prints "BONSAI gate result=..." : 1 = the cue would play, 0 = blocked.
+  static void GateTest() {
+    let st = new("TFLV_PerPlayerStats");
+    // {tic, kind, gap}
+    static const int steps[] = {   // kind: 1 = Thorns, 2 = Shield
+      100, 2, 12,  100, 1, 20,  100, 1, 20,  105, 2, 12,  119, 1, 20,  120, 1, 20,  120, 2, 12,
+      200, 2, 12,  205, 2, 12,  212, 2, 12,
+      300, 1, 20,  315, 1, 20,  320, 1, 20 };
+    string r = "";
+    for (int i = 0; i < 13; ++i) {
+      int now = steps[i*3], kind = steps[i*3+1], gap = steps[i*3+2];
+      bool ok = st.DefenseCueOpen(now, kind);
+      if (ok) st.DefenseCueClaim(now, kind, gap);
+      r = r .. (ok ? "1" : "0");
+    }
+    console.printf("BONSAI gate result=%s", r);
   }
 
   static void ShowInfoConsole(Actor pawn) {
