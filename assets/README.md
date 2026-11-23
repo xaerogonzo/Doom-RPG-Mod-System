@@ -5,7 +5,7 @@ The generated files are copied into `Super_merged_91B_src/` (this folder is not 
 
 | script | output | used by |
 |---|---|---|
-| `sfx/stage_a.json` (seed 2026) | `sounds/rpg_levelup.wav`, `rpg_parry.wav` (layered composite-armour hit), `rpg_parry2.wav` (softer layered thud), `rpg_parry_armor.wav` (unused alternative: layered armour hit) | `SNDINFO.txt`: `bonsai/gunlevelup`, `parry/crit1`, `parry/normal1` |
+| `sfx/stage_a.json` (seed 2026) | `sounds/rpg_levelup.wav`, `rpg_parry.wav` (layered composite-armour hit), `rpg_parry2.wav` (softer layered thud), `rpg_parry_armor.wav` (metal-led variant); all three are played at random for both `parry/crit` and `parry/normal` | `SNDINFO.txt`: `bonsai/gunlevelup`, `parry/crit1`, `parry/normal1` |
 
 Regenerate and check:
 

@@ -41,8 +41,13 @@ Slomo_off   "sounds/SLOWEXIT.ogg"
 Slomo_loop  "sounds/SLOWLOOP.wav"
 $volume Slomo_loop 0.4
 
-$random parry/crit   { parry/crit1 }
-$random parry/normal { parry/normal1 }
-// parry/crit: composite-armour knock (rpg_parry.wav). Alternative heavier armour thunk: sounds/rpg_parry_armor.wav
+// Parry: three layered variants, picked at random for both logical sounds:
+//   rpg_parry.wav = thuds and slaps lead, rpg_parry_armor.wav = metal plate clanks lead, rpg_parry2.wav = shorter, softer
+$random parry/crit   { parry/crit1 parry/crit2 parry/crit3 }
+$random parry/normal { parry/normal1 parry/normal2 parry/normal3 }
 parry/crit1     "sounds/rpg_parry.wav"
+parry/crit2     "sounds/rpg_parry_armor.wav"
+parry/crit3     "sounds/rpg_parry2.wav"
 parry/normal1   "sounds/rpg_parry2.wav"
+parry/normal2   "sounds/rpg_parry.wav"
+parry/normal3   "sounds/rpg_parry_armor.wav"
