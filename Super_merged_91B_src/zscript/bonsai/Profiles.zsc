@@ -138,19 +138,14 @@ class TFLV_Profiles play
     // Hyper-V float base value CVars (appended — do not reorder above)
     n.Push("bonsai_hyperv_mobility_base_cooldown");
     n.Push("bonsai_hyperv_mobility_min_cooldown");
-    n.Push("bonsai_hyperv_hregen_tick_lv1");
-    n.Push("bonsai_hyperv_hregen_tick_lv2");
-    n.Push("bonsai_hyperv_hregen_tick_lv3");
+    n.Push("bonsai_hyperv_hregen_tick_base");
     n.Push("bonsai_hyperv_hregen_min_tick");
-    n.Push("bonsai_hyperv_aregen_tick_lv1");
-    n.Push("bonsai_hyperv_aregen_tick_lv2");
-    n.Push("bonsai_hyperv_ammoregen_tick_lv1");
-    n.Push("bonsai_hyperv_ammoregen_tick_lv2");
+    n.Push("bonsai_hyperv_aregen_tick_base");
+    n.Push("bonsai_hyperv_ammoregen_tick_base");
     n.Push("bonsai_hyperv_ammoregen_min_tick");
     n.Push("bonsai_hyperv_agility_base_speed");
     n.Push("bonsai_hyperv_agility_base_jump");
-    n.Push("bonsai_hyperv_tp_cd_lv1");
-    n.Push("bonsai_hyperv_tp_cd_lv2");
+    n.Push("bonsai_hyperv_tp_cd_base");
     // Hook stun scaling CVars (appended — do not reorder above)
     n.Push("bonsai_hyperv_hook_stun_min_base");
     n.Push("bonsai_hyperv_hook_stun_max_base");
@@ -274,13 +269,10 @@ class TFLV_Profiles play
     n.Push("bonsai_hyperv_melee_base_crit");
     n.Push("bonsai_hyperv_melee_base_parry");
     n.Push("bonsai_hyperv_hregen_cap_base");
-    n.Push("bonsai_hyperv_aregen_cap_lv1");
-    n.Push("bonsai_hyperv_aregen_cap_lv2");
-    n.Push("bonsai_hyperv_slomo_pts_lv1");
-    n.Push("bonsai_hyperv_slomo_pts_lv2");
+    n.Push("bonsai_hyperv_aregen_cap_base");
+    n.Push("bonsai_hyperv_slomo_pts_base");
     n.Push("bonsai_hyperv_slomo_base_depth");
-    n.Push("bonsai_hyperv_tp_range_lv1");
-    n.Push("bonsai_hyperv_tp_range_lv2");
+    n.Push("bonsai_hyperv_tp_range_base");
     // Hyper-V new int/bool CVars (appended — do not reorder above)
     n.Push("bonsai_hyperv_slomo_any_weapon");  // bool stored as 0/1
     n.Push("bonsai_hyperv_hregen_amount");
@@ -337,9 +329,9 @@ class TFLV_Profiles play
     // Hyper-V int base value CVars
     v.Push(1); v.Push(6); v.Push(35); v.Push(4); v.Push(10); // melee: base_dmg_min/max, base_tics, base_crit, base_parry
     v.Push(25);                                               // hregen_cap_base
-    v.Push(50); v.Push(100);                                  // aregen_cap_lv1, aregen_cap_lv2
-    v.Push(120); v.Push(200); v.Push(100);                    // slomo_pts_lv1/2, slomo_base_depth
-    v.Push(1024); v.Push(2048);                               // tp_range_lv1, tp_range_lv2
+    v.Push(50);                                               // aregen_cap_base
+    v.Push(120); v.Push(100);                                 // slomo_pts_base, slomo_base_depth
+    v.Push(1024);                                             // tp_range_base
     // Hyper-V new int/bool CVars
     v.Push(0); v.Push(1); v.Push(1);
     // slomo_any_weapon (false=0), hregen_amount, aregen_amount
@@ -370,11 +362,11 @@ class TFLV_Profiles play
     // mobility_cd_per_level, melee_cd_per_level, hregen_tick_per_level, ammoregen_tick_per_level, agility_speed_per_level, agility_jump_per_level
     // Hyper-V float base value CVars
     v.Push(1.0);  v.Push(0.2);  // mobility_base_cooldown, mobility_min_cooldown
-    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0); // hregen_tick_lv1/2/3, hregen_min_tick
-    v.Push(6.0);  v.Push(4.0);  // aregen_tick_lv1, aregen_tick_lv2
-    v.Push(10.0); v.Push(6.0);  v.Push(2.0); // ammoregen_tick_lv1/2, ammoregen_min_tick
+    v.Push(5.0);  v.Push(1.0); // hregen_tick_base, hregen_min_tick
+    v.Push(6.0);  // aregen_tick_base
+    v.Push(10.0); v.Push(2.0); // ammoregen_tick_base, ammoregen_min_tick
     v.Push(1.25); v.Push(1.35); // agility_base_speed, agility_base_jump
-    v.Push(1.5);  v.Push(0.75); // tp_cd_lv1, tp_cd_lv2
+    v.Push(1.5); // tp_cd_base
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
     // hook_stun_min_base, hook_stun_max_base, hook_stun_min_per_level, hook_stun_max_per_level
@@ -407,11 +399,11 @@ class TFLV_Profiles play
     v.Push(0.10); v.Push(0.10); v.Push(0.5); v.Push(1.0); v.Push(0.05); v.Push(0.05);
     // Hyper-V float base value CVars
     v.Push(1.0);  v.Push(0.2);
-    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0);
-    v.Push(6.0);  v.Push(4.0);
-    v.Push(10.0); v.Push(6.0);  v.Push(2.0);
+    v.Push(5.0);  v.Push(1.0);
+    v.Push(6.0);
+    v.Push(10.0); v.Push(2.0);
     v.Push(1.25); v.Push(1.35);
-    v.Push(1.5);  v.Push(0.75);
+    v.Push(1.5);
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
     // Blood — heal/burst mirror damage curve (mult=0.85 → heal ratio scaled the same)
@@ -443,11 +435,11 @@ class TFLV_Profiles play
     v.Push(0.10); v.Push(0.10); v.Push(0.5); v.Push(1.0); v.Push(0.05); v.Push(0.05);
     // Hyper-V float base value CVars
     v.Push(1.0);  v.Push(0.2);
-    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0);
-    v.Push(6.0);  v.Push(4.0);
-    v.Push(10.0); v.Push(6.0);  v.Push(2.0);
+    v.Push(5.0);  v.Push(1.0);
+    v.Push(6.0);
+    v.Push(10.0); v.Push(2.0);
     v.Push(1.25); v.Push(1.35);
-    v.Push(1.5);  v.Push(0.75);
+    v.Push(1.5);
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
     // Blood — heal/burst mirror damage curve (mult=0.70 → heal ratio scaled the same)
@@ -479,11 +471,11 @@ class TFLV_Profiles play
     v.Push(0.10); v.Push(0.10); v.Push(0.5); v.Push(1.0); v.Push(0.05); v.Push(0.05);
     // Hyper-V float base value CVars
     v.Push(1.0);  v.Push(0.2);
-    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0);
-    v.Push(6.0);  v.Push(4.0);
-    v.Push(10.0); v.Push(6.0);  v.Push(2.0);
+    v.Push(5.0);  v.Push(1.0);
+    v.Push(6.0);
+    v.Push(10.0); v.Push(2.0);
     v.Push(1.25); v.Push(1.35);
-    v.Push(1.5);  v.Push(0.75);
+    v.Push(1.5);
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
     // Blood — heal/burst mirror damage curve (mult=0.50 → heal ratio scaled the same)
@@ -516,11 +508,11 @@ class TFLV_Profiles play
     v.Push(0.10); v.Push(0.10); v.Push(0.5); v.Push(1.0); v.Push(0.05); v.Push(0.05);
     // Hyper-V float base value CVars
     v.Push(1.0);  v.Push(0.2);
-    v.Push(5.0);  v.Push(3.5);  v.Push(2.5); v.Push(1.0);
-    v.Push(6.0);  v.Push(4.0);
-    v.Push(10.0); v.Push(6.0);  v.Push(2.0);
+    v.Push(5.0);  v.Push(1.0);
+    v.Push(6.0);
+    v.Push(10.0); v.Push(2.0);
     v.Push(1.25); v.Push(1.35);
-    v.Push(1.5);  v.Push(0.75);
+    v.Push(1.5);
     // Hook stun scaling CVars
     v.Push(2.0);  v.Push(4.0);  v.Push(0.5); v.Push(1.0);
     // Blood — matches Default (Brutal keeps full upgrade power, only pacing differs)
