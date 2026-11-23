@@ -400,7 +400,7 @@ Gun Bonsai Unified uses only event handlers and inventory items — no actor rep
 - Some scripted/instant damage sources (crushers, telefrags) bypass Indestructible.
 - Balance profiles (Save/Apply/Reset) require an active game session.
 - Legendoom integration menu is always present but has no effect without Legendoom loaded.
-- XP death penalty (`bonsai_death_xp_penalty`) applies a proportional reduction to within-level progress. Weapons cannot lose an earned level.
+- XP death penalty (`bonsai_death_xp_penalty`) applies a proportional reduction to within-level progress and cannot remove a level on its own. For a real penalty use `bonsai_death_levels_lost` (weapons lose levels and, optionally, upgrade points; see CHANGELOG). It only applies while your progress survives death (`bonsai_keep_upgrades_on_death`, now on by default).
 - Level-up rejection (Reject mode) deducts exactly the per-level XP cost. Surplus XP is preserved. Negative XP can result if surplus is zero.
 - Strife Reaver and Crusader companions explode on death, which can damage the player. Excluded from the default Strife roster.
 - Parry system balance is still being tuned — default values may feel inconsistent against some enemy types.

@@ -61,7 +61,8 @@ class TFLV_Debug : Object play {
   static void Dump(int player) {
     let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
     if (!stats) { console.printf("BONSAI dump: no stats"); return; }
-    console.printf("BONSAI player level=%d xp=%d", stats.level, stats.XP);
+    console.printf("BONSAI player level=%d xp=%d score=%d score_to_xp=%.2f damage_to_xp=%.2f",
+      stats.level, stats.XP, players[player].mo.score, bonsai_score_to_xp_factor, bonsai_damage_to_xp_factor);
     for (uint i = 0; stats.upgrades && i < stats.upgrades.upgrades.Size(); ++i) {
       let u = stats.upgrades.upgrades[i];
       console.printf("BONSAI pupgrade class=%s level=%d max=%d enabled=%d", u.GetClassName(), u.level, u.max_level, u.enabled);
