@@ -88,6 +88,20 @@ class TFLV_Upgrade_Dot : Inventory {
     return item;
   }
 
+  // Quiet one-shot cue for a Journeyman/Master element upgrade, played from 'src' (the affected enemy).
+  // Cheap order: player check, distance (nothing beyond hearing range plays or claims the gate), the
+  // per-element gate, then the settings. Called only at discrete events, never per tick.
+  const ELEM_CUE_MAX_DIST = 700;
+  static void ElementCue(Actor src, Actor attacker, string cvar, int kind, string snd, int gap, double vol = 0.5) {
+    let pp = PlayerPawn(attacker);
+    if (!pp || !src || pp.Distance3D(src) > ELEM_CUE_MAX_DIST) return;
+    let st = TFLV_PerPlayerStats.GetStatsFor(pp);
+    if (!st || !st.ElemCueOpen(gametic, kind)) return;
+    if (!TFLV_Settings.sfx_for(cvar, 2)) return;
+    st.ElemCueClaim(gametic, kind, gap);
+    src.A_StartSound(snd, CHAN_AUTO, CHANF_OVERLAP, vol, 2.0);
+  }
+
   // Count how many stacks of the dot the target has. Return 0 if they don't have
   // it at all.
   static uint CountStacks(Actor target, string cls) {

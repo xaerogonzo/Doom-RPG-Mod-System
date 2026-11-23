@@ -269,6 +269,21 @@ class TFLV_PerPlayerStats : Object play {
     defenseCueUntil = max(defenseCueUntil, now + gap);
   }
 
+  // Elemental upgrade cues (Fire, Lightning): one gate per element, so a crowd that triggers many
+  // events in a burst gives one cue. Two ints, written at cue time. 'now' is passed in so it can be tested.
+  const ELEM_FIRE = 0;
+  const ELEM_LIGHTNING = 1;
+  int elemCueUntil0;
+  int elemCueUntil1;
+  int elemCuesGiven;
+  bool ElemCueOpen(int now, int kind) const {
+    return now >= (kind == ELEM_FIRE ? elemCueUntil0 : elemCueUntil1);
+  }
+  void ElemCueClaim(int now, int kind, int gap) {
+    if (kind == ELEM_FIRE) elemCueUntil0 = now + gap; else elemCueUntil1 = now + gap;
+    ++elemCuesGiven;
+  }
+
   // Bouncy Shots sound cue gate, decided when a projectile is created: only one projectile per window
   // gets the bounce sound, so rapid-fire weapons (plasma) do not turn into a rattle. Two ints, written at
   // projectile creation. 'now' is passed in so the logic can be tested.

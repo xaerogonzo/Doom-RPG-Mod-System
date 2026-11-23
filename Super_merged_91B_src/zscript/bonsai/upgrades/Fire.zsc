@@ -191,6 +191,7 @@ class TFLV_Upgrade_FireDot : TFLV_Upgrade_Dot {
       let missing_health = 1 - double(owner.health)/owner.SpawnHealth();
       if (missing_health >= bonsai_stat_fire_terror_base ** (stacks+terror)) {
         owner.bFRIGHTENED = true;
+        ElementCue(owner, self.target, "bonsai_sfx_fire", TFLV_PerPlayerStats.ELEM_FIRE, "fire/terror", 20);
       }
     } else if (owner.bFRIGHTENED && frandom[TFLV_Upgrade_RNG_FireTerror](0.0, 1.0) > 0.95) {
       owner.bFRIGHTENED = false;
@@ -241,7 +242,9 @@ class TFLV_Upgrade_Conflagration_Aux : TFLV_Upgrade_AuxActor {
   }
 
   void SpreadTo(Actor target) {
+    bool fresh = !target.FindInventory("TFLV_Upgrade_FireDot");
     let fdot = TFLV_Upgrade_FireDot(TFLV_Upgrade_Dot.GiveStacks(self.target, target, "TFLV_Upgrade_FireDot", 0, 1, self.srcWeapon));
+    if (fresh && fdot) TFLV_Upgrade_Dot.ElementCue(target, self.target, "bonsai_sfx_fire", TFLV_PerPlayerStats.ELEM_FIRE, "fire/spread", 20);
     if (fdot.stacks < self.stacks) {
       fdot.AddStacks(1, spread);
 //      DEBUG("Transfer: %s with softcap %d -> %.1f stacks", TAG(target), spread, fdot.stacks);

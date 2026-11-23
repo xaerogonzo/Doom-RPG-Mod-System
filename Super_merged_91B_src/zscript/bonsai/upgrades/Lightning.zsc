@@ -248,6 +248,7 @@ class TFLV_Upgrade_ShockDot : TFLV_Upgrade_Dot {
     aux.srcWeapon = self.srcWeapon;
     aux.level = self.chain; // determines max jumps
     aux.damage = owner.SpawnHealth() * (0.5 + 0.003 * stacks);
+    ElementCue(owner, self.target, "bonsai_sfx_lightning", TFLV_PerPlayerStats.ELEM_LIGHTNING, "lightning/chain", 20);
 //    DEBUG("Chain lightning, base damage=%d", aux.damage);
     return;
   }
@@ -271,6 +272,7 @@ class TFLV_Upgrade_ShockDot : TFLV_Upgrade_Dot {
       zap.bolt_cap = max(zap.bolt_cap, ceil(zap.level * bonsai_stat_lightning_softcap));
     }
     owner.Spawn("TFLV_Upgrade_Thunderbolt_VFX", owner.pos);
+    ElementCue(owner, self.target, "bonsai_sfx_lightning", TFLV_PerPlayerStats.ELEM_LIGHTNING, "lightning/thunder", 20);
   }
 
   override void OwnerDied() {
@@ -351,6 +353,7 @@ class TFLV_Upgrade_Revivification_Aux : Actor {
       upgrade.minion.A_Die("extreme");
     }
     upgrade.minion = tracer;
+    TFLV_Upgrade_Dot.ElementCue(tracer, self.target, "bonsai_sfx_lightning", TFLV_PerPlayerStats.ELEM_LIGHTNING, "lightning/revive", 20);
 
     // Clear any dots on it.
     tracer.TakeInventory("TFLV_Upgrade_FireDot", 255);

@@ -120,6 +120,16 @@ class TFLV_Debug : Object play {
     string sr = "";
     for (int i = 0; i < 4; ++i) sr = sr .. (ss.SubmunitionGone() ? "1" : "0");
     console.printf("BONSAI submunition counter result=%s", sr);
+    // Elemental cue gates: independent per element, 20-tic window. {tic, kind}. Expected 101101
+    let es = new("TFLV_PerPlayerStats");
+    static const int etics[] = { 100, 0,  110, 0,  110, 1,  120, 0,  129, 1,  130, 1 };
+    string er = "";
+    for (int i = 0; i < 6; ++i) {
+      bool ok = es.ElemCueOpen(etics[i*2], etics[i*2+1]);
+      if (ok) es.ElemCueClaim(etics[i*2], etics[i*2+1], 20);
+      er = er .. (ok ? "1" : "0");
+    }
+    console.printf("BONSAI elem gate result=%s", er);
   }
 
   static void ShowInfoConsole(Actor pawn) {

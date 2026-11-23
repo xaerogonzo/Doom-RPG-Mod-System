@@ -37,6 +37,8 @@ user int bonsai_sfx_ecm = -1;              // ECM hacked / failed cues (essentia
 user int bonsai_sfx_shield = -1;           // melee Shield up/down (essential tier) and absorb (full tier)
 user int bonsai_sfx_thorns = -1;           // Thorns chime when damage is reflected (full tier)
 user int bonsai_sfx_bounce = -1;           // Bouncy Shots energy-field sound on bounces (full tier)
+user int bonsai_sfx_fire = -1;              // Fire upgrade cues: Burning Terror, Conflagration (full tier)
+user int bonsai_sfx_lightning = -1;         // Lightning upgrade cues: Thunderbolt, Chain Lightning, Revivification (full tier)
 user int bonsai_sfx_submunitions = -1;     // Submunitions multi-ball cluster sound (full tier)
 user int bonsai_vfx_mode = 2;              // global VFX level: 0=off 1=reduced 2=full
 // Per-feature VFX overrides. -1 = follow global setting, 0 = off, 1 = reduced, 2 = full.
