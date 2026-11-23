@@ -1,0 +1,2004 @@
+{
+ "schema_version": 1,
+ "seed": 2031,
+ "sounds": [
+  {
+   "id": "thorns__v1",
+   "alias": "cand4/thorns/v1",
+   "fm": {
+    "duration": 0.22,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -26,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 0.8,
+      "patch": {
+       "duration": 0.14,
+       "pitch": 900,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.06,
+          "s": 0.0,
+          "r": 0.02
+         }
+        },
+        {
+         "ratio": 1.6,
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.041999999999999996,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "mods": [
+        [
+         1,
+         0,
+         1.8
+        ]
+       ],
+       "pitch_env": {
+        "start": 2.4,
+        "end": 0.6,
+        "time": 0.06,
+        "curve": 4.0
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 4000,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.004,
+      "level": 0.6,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "hp",
+        "cutoff": 3200,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.022,
+      "level": 0.42,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2800,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.039999999999999994,
+      "level": 0.29399999999999993,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2400,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.15,
+      "patch": {
+       "duration": 0.06,
+       "pitch": 1900,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.001,
+          "d": 0.03,
+          "s": 0.0,
+          "r": 0.01
+         }
+        },
+        {
+         "ratio": 2.7,
+         "level": 0.5,
+         "env": {
+          "a": 0.001,
+          "d": 0.020999999999999998,
+          "s": 0.0,
+          "r": 0.01
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 5000,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "thorns__v2",
+   "alias": "cand4/thorns/v2",
+   "fm": {
+    "duration": 0.18,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -26,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.14,
+       "pitch": 1100,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.06,
+          "s": 0.0,
+          "r": 0.02
+         }
+        },
+        {
+         "ratio": 1.6,
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.041999999999999996,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "mods": [
+        [
+         1,
+         0,
+         1.8
+        ]
+       ],
+       "pitch_env": {
+        "start": 2.4,
+        "end": 0.6,
+        "time": 0.06,
+        "curve": 4.0
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 4000,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.004,
+      "level": 0.4,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "hp",
+        "cutoff": 3200,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.022,
+      "level": 0.27999999999999997,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2800,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "thorns__v3",
+   "alias": "cand4/thorns/v3",
+   "fm": {
+    "duration": 0.24,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -26,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 0.5,
+      "patch": {
+       "duration": 0.14,
+       "pitch": 800,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.06,
+          "s": 0.0,
+          "r": 0.02
+         }
+        },
+        {
+         "ratio": 1.6,
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.041999999999999996,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "mods": [
+        [
+         1,
+         0,
+         1.8
+        ]
+       ],
+       "pitch_env": {
+        "start": 2.4,
+        "end": 0.6,
+        "time": 0.06,
+        "curve": 4.0
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 4000,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.004,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "hp",
+        "cutoff": 3200,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.022,
+      "level": 0.7,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2800,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.039999999999999994,
+      "level": 0.48999999999999994,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2400,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.057999999999999996,
+      "level": 0.3429999999999999,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2000,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.2,
+      "patch": {
+       "duration": 0.06,
+       "pitch": 1900,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.001,
+          "d": 0.03,
+          "s": 0.0,
+          "r": 0.01
+         }
+        },
+        {
+         "ratio": 2.7,
+         "level": 0.5,
+         "env": {
+          "a": 0.001,
+          "d": 0.020999999999999998,
+          "s": 0.0,
+          "r": 0.01
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 5000,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "thorns__v4",
+   "alias": "cand4/thorns/v4",
+   "fm": {
+    "duration": 0.2,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -26,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 0.7,
+      "patch": {
+       "duration": 0.14,
+       "pitch": 1400,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.06,
+          "s": 0.0,
+          "r": 0.02
+         }
+        },
+        {
+         "ratio": 1.6,
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.041999999999999996,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "mods": [
+        [
+         1,
+         0,
+         1.8
+        ]
+       ],
+       "pitch_env": {
+        "start": 2.4,
+        "end": 0.6,
+        "time": 0.06,
+        "curve": 4.0
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 4000,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.004,
+      "level": 0.5,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "hp",
+        "cutoff": 3200,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.022,
+      "level": 0.35,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2800,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.35,
+      "patch": {
+       "duration": 0.06,
+       "pitch": 1900,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.001,
+          "d": 0.03,
+          "s": 0.0,
+          "r": 0.01
+         }
+        },
+        {
+         "ratio": 2.7,
+         "level": 0.5,
+         "env": {
+          "a": 0.001,
+          "d": 0.020999999999999998,
+          "s": 0.0,
+          "r": 0.01
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 5000,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "thorns__v5",
+   "alias": "cand4/thorns/v5",
+   "fm": {
+    "duration": 0.26,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -26,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 0.9,
+      "patch": {
+       "duration": 0.14,
+       "pitch": 700,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.06,
+          "s": 0.0,
+          "r": 0.02
+         }
+        },
+        {
+         "ratio": 1.6,
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.041999999999999996,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "mods": [
+        [
+         1,
+         0,
+         1.8
+        ]
+       ],
+       "pitch_env": {
+        "start": 2.4,
+        "end": 0.6,
+        "time": 0.06,
+        "curve": 4.0
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 4000,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.004,
+      "level": 0.7,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "hp",
+        "cutoff": 3200,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.022,
+      "level": 0.48999999999999994,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2800,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.039999999999999994,
+      "level": 0.3429999999999999,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2400,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.1,
+      "patch": {
+       "duration": 0.06,
+       "pitch": 1900,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.001,
+          "d": 0.03,
+          "s": 0.0,
+          "r": 0.01
+         }
+        },
+        {
+         "ratio": 2.7,
+         "level": 0.5,
+         "env": {
+          "a": 0.001,
+          "d": 0.020999999999999998,
+          "s": 0.0,
+          "r": 0.01
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 5000,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "thorns__v6",
+   "alias": "cand4/thorns/v6",
+   "fm": {
+    "duration": 0.16,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -26,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 0.6,
+      "patch": {
+       "duration": 0.14,
+       "pitch": 1600,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.06,
+          "s": 0.0,
+          "r": 0.02
+         }
+        },
+        {
+         "ratio": 1.6,
+         "level": 1.0,
+         "env": {
+          "a": 0.002,
+          "d": 0.041999999999999996,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "mods": [
+        [
+         1,
+         0,
+         1.8
+        ]
+       ],
+       "pitch_env": {
+        "start": 2.4,
+        "end": 0.6,
+        "time": 0.06,
+        "curve": 4.0
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 4000,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.004,
+      "level": 0.5,
+      "patch": {
+       "duration": 0.04,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "hp",
+        "cutoff": 3200,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.25,
+      "patch": {
+       "duration": 0.06,
+       "pitch": 1900,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.001,
+          "d": 0.03,
+          "s": 0.0,
+          "r": 0.01
+         }
+        },
+        {
+         "ratio": 2.7,
+         "level": 0.5,
+         "env": {
+          "a": 0.001,
+          "d": 0.020999999999999998,
+          "s": 0.0,
+          "r": 0.01
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 5000,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_up__s1",
+   "alias": "cand4/shield_up/s1",
+   "fm": {
+    "duration": 0.42,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -25,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.42,
+       "pitch": 220,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.12,
+          "d": 0.21,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.3,
+         "env": {
+          "a": 0.12,
+          "d": 0.168,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.6,
+         "env": {
+          "a": 0.144,
+          "d": 0.21,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 0.6,
+        "end": 1.5,
+        "time": 0.3,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2600,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.15,
+      "patch": {
+       "duration": 0.294,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.05,
+         "d": 0.126,
+         "s": 0.0,
+         "r": 0.1
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 1400,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_up__s2",
+   "alias": "cand4/shield_up/s2",
+   "fm": {
+    "duration": 0.5,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -25,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 180,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.18,
+          "d": 0.25,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.3,
+         "env": {
+          "a": 0.18,
+          "d": 0.2,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.6,
+         "env": {
+          "a": 0.216,
+          "d": 0.25,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 0.5,
+        "end": 1.8,
+        "time": 0.4,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2200,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.2,
+      "patch": {
+       "duration": 0.35,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.05,
+         "d": 0.15,
+         "s": 0.0,
+         "r": 0.1
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 1400,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_up__s3",
+   "alias": "cand4/shield_up/s3",
+   "fm": {
+    "duration": 0.34,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -25,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.34,
+       "pitch": 260,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.08,
+          "d": 0.17,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.3,
+         "env": {
+          "a": 0.08,
+          "d": 0.136,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.6,
+         "env": {
+          "a": 0.096,
+          "d": 0.17,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 0.7,
+        "end": 1.4,
+        "time": 0.2,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 3000,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.1,
+      "patch": {
+       "duration": 0.238,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.05,
+         "d": 0.10200000000000001,
+         "s": 0.0,
+         "r": 0.1
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 1400,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_up__s4",
+   "alias": "cand4/shield_up/s4",
+   "fm": {
+    "duration": 0.46,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -25,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.46,
+       "pitch": 200,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.14,
+          "d": 0.23,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.3,
+         "env": {
+          "a": 0.14,
+          "d": 0.18400000000000002,
+          "s": 0.0,
+          "r": 0.12
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.6,
+         "env": {
+          "a": 0.168,
+          "d": 0.23,
+          "s": 0.0,
+          "r": 0.12
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 0.6,
+        "end": 1.6,
+        "time": 0.35,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2400,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.0,
+      "patch": {
+       "duration": 0.322,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.05,
+         "d": 0.138,
+         "s": 0.0,
+         "r": 0.1
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 1400,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_down__t1",
+   "alias": "cand4/shield_down/t1",
+   "fm": {
+    "duration": 0.4,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.4,
+       "pitch": 330,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.03,
+          "d": 0.22000000000000003,
+          "s": 0.0,
+          "r": 0.15
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.2,
+         "env": {
+          "a": 0.03,
+          "d": 0.17600000000000005,
+          "s": 0.0,
+          "r": 0.15
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.6,
+         "env": {
+          "a": 0.036,
+          "d": 0.22000000000000003,
+          "s": 0.0,
+          "r": 0.15
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 1.3,
+        "end": 0.55,
+        "time": 0.3,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2000,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_down__t2",
+   "alias": "cand4/shield_down/t2",
+   "fm": {
+    "duration": 0.46,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.46,
+       "pitch": 260,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.03,
+          "d": 0.25300000000000006,
+          "s": 0.0,
+          "r": 0.15
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.2,
+         "env": {
+          "a": 0.03,
+          "d": 0.20240000000000005,
+          "s": 0.0,
+          "r": 0.15
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.6,
+         "env": {
+          "a": 0.036,
+          "d": 0.25300000000000006,
+          "s": 0.0,
+          "r": 0.15
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 1.2,
+        "end": 0.5,
+        "time": 0.4,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 1800,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_down__t3",
+   "alias": "cand4/shield_down/t3",
+   "fm": {
+    "duration": 0.32,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.32,
+       "pitch": 380,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.03,
+          "d": 0.17600000000000002,
+          "s": 0.0,
+          "r": 0.15
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.2,
+         "env": {
+          "a": 0.03,
+          "d": 0.1408,
+          "s": 0.0,
+          "r": 0.15
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.6,
+         "env": {
+          "a": 0.036,
+          "d": 0.17600000000000002,
+          "s": 0.0,
+          "r": 0.15
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 1.4,
+        "end": 0.7,
+        "time": 0.22,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2200,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_hit__u1",
+   "alias": "cand4/shield_hit/u1",
+   "fm": {
+    "duration": 0.16,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.16,
+       "pitch": 300,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.004,
+          "d": 0.08,
+          "s": 0.0,
+          "r": 0.04
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.4,
+         "env": {
+          "a": 0.004,
+          "d": 0.064,
+          "s": 0.0,
+          "r": 0.04
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.4,
+         "env": {
+          "a": 0.0048,
+          "d": 0.08,
+          "s": 0.0,
+          "r": 0.04
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 1.2,
+        "end": 0.85,
+        "time": 0.05,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2400,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.2,
+      "patch": {
+       "duration": 0.08,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.03,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 1500,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_hit__u2",
+   "alias": "cand4/shield_hit/u2",
+   "fm": {
+    "duration": 0.18,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.18,
+       "pitch": 240,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.004,
+          "d": 0.09,
+          "s": 0.0,
+          "r": 0.04
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.4,
+         "env": {
+          "a": 0.004,
+          "d": 0.072,
+          "s": 0.0,
+          "r": 0.04
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.4,
+         "env": {
+          "a": 0.0048,
+          "d": 0.09,
+          "s": 0.0,
+          "r": 0.04
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 1.2,
+        "end": 0.85,
+        "time": 0.05,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2000,
+        "q": 0.7
+       }
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "shield_hit__u3",
+   "alias": "cand4/shield_hit/u3",
+   "fm": {
+    "duration": 0.14,
+    "sample_rate": 44100,
+    "gain": 0.9,
+    "target_rms_dbfs": -28,
+    "layers": [
+     {
+      "offset": 0.0,
+      "level": 1.0,
+      "patch": {
+       "duration": 0.14,
+       "pitch": 380,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.004,
+          "d": 0.07,
+          "s": 0.0,
+          "r": 0.04
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.4,
+         "env": {
+          "a": 0.004,
+          "d": 0.05600000000000001,
+          "s": 0.0,
+          "r": 0.04
+         }
+        },
+        {
+         "ratio": 1.005,
+         "level": 0.4,
+         "env": {
+          "a": 0.0048,
+          "d": 0.07,
+          "s": 0.0,
+          "r": 0.04
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "pitch_env": {
+        "start": 1.2,
+        "end": 0.85,
+        "time": 0.05,
+        "curve": 2.5
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 2800,
+        "q": 0.7
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.3,
+      "patch": {
+       "duration": 0.07,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.03,
+         "s": 0.0,
+         "r": 0.02
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 1500,
+        "q": 0.8
+       }
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

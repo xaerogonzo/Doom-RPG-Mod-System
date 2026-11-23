@@ -24,3 +24,5 @@ Procedurally generated from the scripts only, no samples used; released under CC
 Audition and balance: `python -m doomcreator audition assets/sfx/stage_b_candidates.json -o audition.html --reference "Doom pistol=-12.2"` makes one page where every candidate can be played and rated; each sound has `target_rms_dbfs` so its loudness is chosen on purpose (Doom reference audible RMS: pistol -12.2, player pain -14.1, oof -18.3, item pickup -25.3).
 
 ECM cues: `sfx/gen_ecm.py` -> `sfx/ecm_candidates.json` (seed 2030, 10 candidates); shipped (provisional): `rpg_ecm_hacked__a1/a2/a4`, `rpg_ecm_failed__b1/b2/b5` as `ecm/hacked` and `ecm/failed` in `SNDINFO.txt`.
+
+Thorns and Shield: `sfx/gen_thorns_shield.py` -> `sfx/thorns_shield_candidates.json` (seed 2031, 16 candidates); shipped (provisional): `rpg_thorns__v2/v3/v4` (`thorns/zap`), `rpg_shield_up__s1/s3`, `rpg_shield_down__t1/t2`, `rpg_shield_hit__u1/u2` (`shield/up`, `shield/down`, `shield/hit`).

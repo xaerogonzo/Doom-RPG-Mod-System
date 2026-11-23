@@ -8,15 +8,34 @@
 class TFLV_Upgrade_Shield : TFLV_Upgrade_BaseUpgrade {
   // Timer for when the shield is active.
   uint ticks;
+  // Sound cues, all at edges that already exist: the shield switching on (ticks 0 -> >0), off
+  // (ticks reaching 0, inside the existing countdown) and absorbing a blow (throttled).
+  int last_hit_cue;
+  const HIT_CUE_GAP_TICS = 12;
+
+  private void Cue(Actor owner, string snd, int tier, double vol) {
+    if (!owner || !TFLV_Settings.sfx_for("bonsai_sfx_shield", tier)) return;
+    owner.A_StartSound(snd, CHAN_AUTO, CHANF_OVERLAP | CHANF_NOPAUSE, vol);
+  }
+
+  private void Raise(Actor owner, uint ttl) {
+    bool was_up = ticks > 0;
+    ticks = max(ticks, ttl);
+    if (!was_up) Cue(owner, "shield/up", 1, 0.9);
+  }
+
   override void Tick(Actor owner) {
-    if (ticks) --ticks;
+    if (ticks) {
+      --ticks;
+      if (!ticks) Cue(owner, "shield/down", 1, 0.8);
+    }
   }
 
   override void OnDamageDealt(Actor pawn, Actor shot, Actor target, int damage) {
-    ticks = max(ticks, AttackTTL(level));
+    Raise(pawn, AttackTTL(level));
   }
   override void OnKill(PlayerPawn pawn, Actor shot, Actor target) {
-    ticks = max(ticks, KillTTL(level));
+    Raise(pawn, KillTTL(level));
   }
 
   override double ModifyDamageReceived(Actor pawn, Actor shot, Actor attacker, double damage, Name attacktype) {
@@ -31,6 +50,10 @@ class TFLV_Upgrade_Shield : TFLV_Upgrade_BaseUpgrade {
     // linear interpolation between melee and ranged damage reduction
     let interpolation = clamp((range - short_range)/(long_range - short_range), 0.0, 1.0);
     let factor = short_factor + (long_factor - short_factor) * interpolation;
+    if (factor < 1.0 && damage > 0 && gametic - last_hit_cue >= HIT_CUE_GAP_TICS) {
+      last_hit_cue = gametic;
+      Cue(pawn, "shield/hit", 2, 0.7);
+    }
 //    DEBUG("Attacker %s at range %.1f, damage factor is %.2f", TAG(attacker), range, factor);
 //    DEBUG("short=%f long=%f range=%f interpolation=%f", short_range, long_range, range, interpolation);
     return damage * factor;
