@@ -114,11 +114,11 @@ class TFLV_Debug : Object play {
     string br = "";
     for (int i = 0; i < 6; ++i) br = br .. (bs.BounceCueTry(btics[i], 25) ? "1" : "0");
     console.printf("BONSAI bounce gate result=%s", br);
-    // Submunitions gate: one cluster cue per 40 tics. Expected 1,0,0,1,0,1
+    // Submunitions gate: one cluster cue per 120 tics. Expected 1,0,0,1,0,1
     let ss = new("TFLV_PerPlayerStats");
-    static const int stics[] = { 100, 120, 139, 140, 170, 181 };
+    static const int stics[] = { 100, 160, 219, 220, 300, 341 };
     string sr = "";
-    for (int i = 0; i < 6; ++i) sr = sr .. (ss.SubmunitionCueTry(stics[i], 40) ? "1" : "0");
+    for (int i = 0; i < 6; ++i) sr = sr .. (ss.SubmunitionCueTry(stics[i], 120) ? "1" : "0");
     console.printf("BONSAI submunition gate result=%s", sr);
   }
 

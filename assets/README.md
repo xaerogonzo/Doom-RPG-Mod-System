@@ -29,4 +29,4 @@ Thorns and Shield: `sfx/gen_thorns_shield.py` -> `sfx/thorns_shield_candidates.j
 
 Bouncy Shots: `sfx/gen_bouncy2.py` -> `sfx/bouncy2_candidates.json` (seed 2035, 8 layered candidates, shipped: `rpg_bouncy2__m1/m2/m6`, provisional; round 1 single-tone blips in `bouncy_candidates.json` were too close to the Thorns chimes) as `bouncy/field` in `SNDINFO.txt`.
 
-Submunitions: `sfx/gen_submunitions.py` -> `sfx/submunitions_candidates.json` (seed 2036, 6 cluster variants, all shipped, provisional; needs the toolkit's 96-layer limit) as `submunitions/cluster` in `SNDINFO.txt`.
+Submunitions: `sfx/gen_submunitions.py` -> `sfx/submunitions_candidates.json` (seed 2036, 6 longer cluster variants, all shipped, provisional; needs the toolkit's 96-layer limit) as `submunitions/cluster` in `SNDINFO.txt`.
