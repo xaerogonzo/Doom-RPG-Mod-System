@@ -354,55 +354,211 @@
    "id": "rpg_parry2",
    "alias": "rpgfx/parry_normal",
    "fm": {
+    "duration": 0.26,
     "sample_rate": 44100,
-    "duration": 0.22,
-    "pitch": 125,
     "gain": 0.85,
-    "pitch_env": {
-     "start": 1.6,
-     "end": 1.0,
-     "time": 0.04,
-     "curve": 5.0
-    },
-    "operators": [
+    "layers": [
      {
-      "ratio": 1.0,
-      "env": {
-       "a": 0.001,
-       "d": 0.07,
-       "s": 0.0,
-       "r": 0.03
+      "offset": 0.0,
+      "level": 1.5,
+      "patch": {
+       "duration": 0.11,
+       "pitch": 110,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.001,
+          "d": 0.06,
+          "s": 0.0,
+          "r": 0.03
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "pitch_env": {
+        "start": 2.0,
+        "end": 1.0,
+        "time": 0.04,
+        "curve": 5.0
+       }
       }
      },
      {
-      "ratio": 2.1,
-      "level": 0.3,
-      "env": {
-       "a": 0.001,
-       "d": 0.04,
-       "s": 0.0,
-       "r": 0.03
+      "offset": 0.0,
+      "level": 0.4,
+      "patch": {
+       "duration": 0.06,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.028,
+         "s": 0.0,
+         "r": 0.01
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 1100,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.004,
+      "level": 0.14,
+      "patch": {
+       "duration": 0.035,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.012,
+         "s": 0.0,
+         "r": 0.01
+        }
+       },
+       "filter": {
+        "type": "hp",
+        "cutoff": 1200,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.02,
+      "level": 0.1,
+      "patch": {
+       "duration": 0.045,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.0,
+         "d": 0.018,
+         "s": 0.0,
+         "r": 0.01
+        }
+       },
+       "filter": {
+        "type": "hp",
+        "cutoff": 900,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.02,
+      "level": 0.45,
+      "patch": {
+       "duration": 0.2,
+       "pitch": 440,
+       "operators": [
+        {
+         "level": 0.0,
+         "env": {
+          "a": 0,
+          "d": 0.01,
+          "s": 0.0,
+          "r": 0.02
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "noise": {
+        "level": 1.0,
+        "env": {
+         "a": 0.008,
+         "d": 0.1,
+         "s": 0.0,
+         "r": 0.06
+        }
+       },
+       "filter": {
+        "type": "lp",
+        "cutoff": 650,
+        "q": 0.8
+       }
+      }
+     },
+     {
+      "offset": 0.045,
+      "level": 0.22,
+      "patch": {
+       "duration": 0.12,
+       "pitch": 80,
+       "operators": [
+        {
+         "level": 1.0,
+         "env": {
+          "a": 0.001,
+          "d": 0.08,
+          "s": 0.0,
+          "r": 0.04
+         }
+        }
+       ],
+       "carriers": [
+        0
+       ],
+       "pitch_env": {
+        "start": 1.3,
+        "end": 1.0,
+        "time": 0.07,
+        "curve": 5.0
+       }
       }
      }
-    ],
-    "carriers": [
-     0,
-     1
-    ],
-    "noise": {
-     "level": 0.8,
-     "env": {
-      "a": 0.0,
-      "d": 0.03,
-      "s": 0.0,
-      "r": 0.01
-     }
-    },
-    "filter": {
-     "type": "lp",
-     "cutoff": 1800,
-     "q": 0.8
-    }
+    ]
    }
   },
   {
