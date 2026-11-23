@@ -1,7 +1,6 @@
 // #namespace TFLV::Upgrade;
 
 class TFLV_Upgrade_Submunitions : TFLV_Upgrade_BaseUpgrade {
-  const CUE_GAP_TICS = 120;     // the cluster lasts 4-5.6 s: one at a time, about every 3.4 s at most
   const CUE_MAX_DIST = 700;     // a burst farther away than this is not heard, so it does not play or claim the gate
   override TFLV_Upgrade_UpgradePriority Priority() { return TFLV_Upgrade_PRI_EXPLOSIVE; }
 
@@ -17,16 +16,18 @@ class TFLV_Upgrade_Submunitions : TFLV_Upgrade_BaseUpgrade {
     aux.ttl = ceil(level*5 * bonsai_stat_submunitions_lifetime); // in seconds
 
     // Sound: ONE soft multi-ball "cluster" cue (several small metal balls pinging and settling) for the
-    // whole burst instead of a sound per bomblet. It comes from where the burst is (the dead monster) with
-    // steeper distance attenuation, and a burst farther than CUE_MAX_DIST from the player is skipped
-    // altogether (it would be inaudible, and must not use up the gate for a nearer one). A gate allows one
-    // per CUE_GAP_TICS tics; one event per kill, no per-bomblet or per-bounce work. The sound starts with a
-    // short silence so it lines up with the first bomblets leaving the spawner.
+    // whole burst instead of a sound per bomblet. The bomblets bounce at a steady rhythm (about every 17 tics,
+    // measured in the Live Tester: they drop 32 units, rebound elastically and land almost together), so the
+    // sound is a rhythmic loop of that period. An invisible source actor (see below) owns the loop: it
+    // starts 12 tics after the kill, when the bomblets are about to land, comes from where the burst is with
+    // steeper distance attenuation, and is stopped when the last bomblet in the level has exploded
+    // (counted at each bomblet's spawn and death, no ticking). Only one cluster at a time, and a burst
+    // farther than CUE_MAX_DIST from the player is skipped (it would be inaudible).
     if (player.Distance3D(target) <= CUE_MAX_DIST) {
       let st = TFLV_PerPlayerStats.GetStatsFor(player);
-      if (st && gametic >= st.submunitionCueUntil && TFLV_Settings.sfx_for("bonsai_sfx_submunitions", 2)) {
-        st.SubmunitionCueTry(gametic, CUE_GAP_TICS);
-        target.A_StartSound("submunitions/cluster", CHAN_AUTO, CHANF_OVERLAP, 0.8, 2.0);
+      if (st && !st.submunitionCueSource && TFLV_Settings.sfx_for("bonsai_sfx_submunitions", 2)) {
+        st.submunitionCueSource = target.Spawn("TFLV_Upgrade_Submunitions_CueSource", target.pos);
+        ++st.submunitionCuesGiven;
       }
     }
   }
@@ -40,6 +41,26 @@ class TFLV_Upgrade_Submunitions : TFLV_Upgrade_BaseUpgrade {
     fields.insert("bonusdamage", ""..(level * bonsai_stat_submunitions_bonus_damage));
     fields.insert("damage", AsPercent(1.0 - bonsai_stat_submunitions_health_scale ** level));
     fields.insert("ttl", AsSeconds(ceil(level*5 * bonsai_stat_submunitions_lifetime)*35));
+  }
+}
+
+// Invisible owner of the cluster loop. Its states do all the timing (no per-tic script): wait 12 tics,
+// start the looping sound, and as a safety net stop and vanish after 20 s even if the bomblet count was
+// somehow not brought back to zero. TFLV_PerPlayerStats.SubmunitionGone stops it earlier.
+class TFLV_Upgrade_Submunitions_CueSource : Actor {
+  Default {
+    +NOINTERACTION;
+    +NOBLOCKMAP;
+    +NOGRAVITY;
+    RenderStyle "None";
+  }
+  States {
+    Spawn:
+      TNT1 A 12;
+      TNT1 A 0 A_StartSound("submunitions/cluster", CHAN_5, CHANF_LOOP, 0.8, 2.0);
+      TNT1 A 700;
+      TNT1 A 0 A_StopSound(CHAN_5);
+      Stop;
   }
 }
 
@@ -63,6 +84,8 @@ class TFLV_Upgrade_Submunitions_Spawner : Actor {
       CMF_AIMDIRECTION|CMF_ABSOLUTEANGLE));
     aux.weaponspecial = weaponspecial;
     aux.target = target;
+    let st = TFLV_PerPlayerStats.GetStatsFor(target);
+    if (st) st.SubmunitionSpawned();
     aux.damage = damage;
     aux.blast_radius = blast_radius;
     aux.ReactionTime = ttl*5 + random[TFLV_Upgrade_RNG_GrenadeTimer](0,5); // bomblets tick 5 times a second, so multiply by 5
@@ -92,6 +115,12 @@ class TFLV_Upgrade_Submunitions_Grenade : Actor {
     BounceFactor 1.0;
   }
 
+  // One event per bomblet: lets the cluster sound stop when none are left.
+  void BombletGone() {
+    let st = TFLV_PerPlayerStats.GetStatsFor(target);
+    if (st) st.SubmunitionGone();
+  }
+
   override int DoSpecialDamage(Actor target, int damage, Name damagetype) {
     if (target == self.target) {
       return 1;
@@ -104,6 +133,7 @@ class TFLV_Upgrade_Submunitions_Grenade : Actor {
       LSUB DCBA 7 A_CountDown();
       LOOP;
     Death:
+      BNFX A 0 BombletGone();
       BNFX A 0 A_Explode(damage, blast_radius, XF_NOSPLASH, false, blast_radius);
       BNFX A 0 A_AlertMonsters();
       BNFX A 0 A_StartSound("bonsai/smallboom", CHAN_WEAPON, CHANF_OVERLAP, 1, 0.5);

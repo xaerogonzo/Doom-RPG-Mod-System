@@ -84,7 +84,7 @@ class TFLV_Debug : Object play {
       }
     }
     console.printf("BONSAI bounce_cues_given=%d", stats.bounceCuesGiven);
-    console.printf("BONSAI submunition_cues_given=%d", stats.submunitionCuesGiven);
+    console.printf("BONSAI submunition_cues_given=%d alive=%d source=%d", stats.submunitionCuesGiven, stats.submunitionsAlive, stats.submunitionCueSource ? 1 : 0);
     console.printf("BONSAI death_penalty requested=%d levels_lost=%d upgrades_removed=%d weapons=%d",
       stats.lastPenaltyRequested, stats.lastPenaltyLevelsLost,
       stats.lastPenaltyUpgradesRemoved, stats.lastPenaltyWeapons);
@@ -114,12 +114,12 @@ class TFLV_Debug : Object play {
     string br = "";
     for (int i = 0; i < 6; ++i) br = br .. (bs.BounceCueTry(btics[i], 25) ? "1" : "0");
     console.printf("BONSAI bounce gate result=%s", br);
-    // Submunitions gate: one cluster cue per 120 tics. Expected 1,0,0,1,0,1
+    // Submunitions bomblet counter: 3 spawned, then 4 deaths: only the third death is "the last". Expected 0010
     let ss = new("TFLV_PerPlayerStats");
-    static const int stics[] = { 100, 160, 219, 220, 300, 341 };
+    ss.SubmunitionSpawned(); ss.SubmunitionSpawned(); ss.SubmunitionSpawned();
     string sr = "";
-    for (int i = 0; i < 6; ++i) sr = sr .. (ss.SubmunitionCueTry(stics[i], 120) ? "1" : "0");
-    console.printf("BONSAI submunition gate result=%s", sr);
+    for (int i = 0; i < 4; ++i) sr = sr .. (ss.SubmunitionGone() ? "1" : "0");
+    console.printf("BONSAI submunition counter result=%s", sr);
   }
 
   static void ShowInfoConsole(Actor pawn) {

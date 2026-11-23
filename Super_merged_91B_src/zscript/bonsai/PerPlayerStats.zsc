@@ -281,14 +281,26 @@ class TFLV_PerPlayerStats : Object play {
     return true;
   }
 
-  // Submunitions sound cue gate: one multi-ball "cluster" sound per window, however many kills spawn
-  // bomblets in it. Two ints written at cue time; 'now' is passed in so the logic can be tested.
-  int submunitionCueUntil;
+  // Submunitions sound: ONE looping multi-ball cluster at a time. It starts with the first burst and
+  // is stopped when no bomblet is left alive (counted at each bomblet's spawn and death, so no ticking).
+  // submunitionCueSource is the invisible actor that owns the looping sound; it is also the gate: a new
+  // cluster can only start when there is none.
+  int submunitionsAlive;
   int submunitionCuesGiven;
-  bool SubmunitionCueTry(int now, int gap) {
-    if (now < submunitionCueUntil) return false;
-    submunitionCueUntil = now + gap;
-    ++submunitionCuesGiven;
+  Actor submunitionCueSource;
+
+  void SubmunitionSpawned() { ++submunitionsAlive; }
+
+  // A bomblet died. Returns true when it was the last one, in which case the cluster sound is stopped.
+  bool SubmunitionGone() {
+    if (submunitionsAlive <= 0) return false;
+    --submunitionsAlive;
+    if (submunitionsAlive > 0) return false;
+    if (submunitionCueSource) {
+      submunitionCueSource.A_StopSound(CHAN_5);
+      submunitionCueSource.Destroy();
+      submunitionCueSource = null;
+    }
     return true;
   }
 
@@ -517,6 +529,8 @@ class TFLV_PerPlayerStats : Object play {
   }
 
   void OnMapEntry(string mapname, uint mapnum) {
+    submunitionsAlive = 0;
+    submunitionCueSource = null;
     upgrades.OnMapEntry(mapname, mapnum);
     for (uint i = 0; i < weapons.size(); ++i) {
       // TODO this is kind of hinky.
@@ -608,6 +622,8 @@ class TFLV_PerPlayerStats : Object play {
 //      DEBUG("this is OLD, id=%d", id);
     }
     weaponinfo_dirty = true; // Force a full rebuild of the weaponinfo on startup.
+    submunitionsAlive = 0;   // a load or new pawn: bomblets and their sound source are gone
+    submunitionCueSource = null;
     prevScore = -1;
     if (!upgrades) upgrades = new("TFLV_Upgrade_UpgradeBag");
     self.proxy = proxy;

@@ -126,13 +126,11 @@ bouncy/field2 "sounds/rpg_bouncy2__m2.wav"
 bouncy/field3 "sounds/rpg_bouncy2__m6.wav"
 $limit bouncy/field 3
 
-// Submunitions (assets/sfx/gen_submunitions.py, CC0): ONE soft multi-ball cluster sound (several small metal balls pinging and settling) per burst, not per bomblet. Six longer variants (4-5.6 s), provisional.
-// Played once per kill that spawns bomblets, gated to one per 120 tics and only within 700 units of the player (Submunitions.zsc); played from the dead monster's position with steeper distance attenuation.
-$random submunitions/cluster { submunitions/cluster1 submunitions/cluster2 submunitions/cluster3 submunitions/cluster4 submunitions/cluster5 submunitions/cluster6 }
-submunitions/cluster1 "sounds/rpg_submunitions__p1.wav"
-submunitions/cluster2 "sounds/rpg_submunitions__p2.wav"
-submunitions/cluster3 "sounds/rpg_submunitions__p3.wav"
-submunitions/cluster4 "sounds/rpg_submunitions__p4.wav"
-submunitions/cluster5 "sounds/rpg_submunitions__p5.wav"
-submunitions/cluster6 "sounds/rpg_submunitions__p6.wav"
-$limit submunitions/cluster 2
+// Submunitions (assets/sfx/gen_submunitions.py, CC0): a rhythmic LOOP of small metal balls pinging, 12 beats of 17 tics (5.83 s) matching how the bomblets really bounce (measured).
+// Started 12 tics after the kill by an invisible source actor with CHANF_LOOP and stopped when the last bomblet has exploded (Submunitions.zsc, PerPlayerStats.SubmunitionGone). Five variants, provisional.
+$random submunitions/cluster { submunitions/cluster1 submunitions/cluster2 submunitions/cluster3 submunitions/cluster4 submunitions/cluster5 }
+submunitions/cluster1 "sounds/rpg_submunitions__q1.wav"
+submunitions/cluster2 "sounds/rpg_submunitions__q2.wav"
+submunitions/cluster3 "sounds/rpg_submunitions__q3.wav"
+submunitions/cluster4 "sounds/rpg_submunitions__q4.wav"
+submunitions/cluster5 "sounds/rpg_submunitions__q5.wav"
