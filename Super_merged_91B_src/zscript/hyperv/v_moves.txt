@@ -1485,7 +1485,8 @@ Class ParryShieldCrit : Inventory
 		if(!passive || damage <= 0 || resistPercent <= 0) return;
 
 		newdamage = max(0, damage * (100 - resistPercent) / 100);
-		owner.A_StartSound("parry/crit", 7, CHANF_NOPAUSE);
+		if(TFLV_Settings.sfx_for("bonsai_sfx_parry", 1))
+			owner.A_StartSound("parry/crit", 7, CHANF_NOPAUSE);
 
 		let vm = V_Moves(owner.FindInventory("V_Moves"));
 		if(vm)

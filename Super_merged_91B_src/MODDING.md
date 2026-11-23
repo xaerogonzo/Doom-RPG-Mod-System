@@ -522,7 +522,7 @@ The pk3 must contain:
 - `FISTPUN1-3`, `FISTSTR1-3`, `DSRIP1-2` — Hyper-V melee sounds (from Beautiful Doom)
 - `hbeat1-3` — Hyper-V heartbeat sounds
 - `SLOWENTR`, `SLOWEXIT`, `SLOWLOOP` — Hyper-V slomo sounds
-- `chord.ogg`, `Windows XP Ding.ogg` — Hyper-V parry sounds
+- `rpg_levelup.wav`, `rpg_parry.wav`, `rpg_parry2.wav` — level-up and Hyper-V parry sounds, generated with Doom Creator from `assets/sfx/stage_a.json` (CC0)
 
 ---
 
