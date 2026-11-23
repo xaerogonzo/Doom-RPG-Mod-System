@@ -88,11 +88,14 @@ ecm/failed2 "sounds/rpg_ecm_failed__b2.wav"
 ecm/failed3 "sounds/rpg_ecm_failed__b5.wav"
 
 // Thorns and melee Shield (assets/sfx/gen_thorns_shield.py, CC0), quiet, provisional picks.
-// thorns/zap: a short spark when thorns reflect damage. shield/up, shield/down: the melee shield switching on/off. shield/hit: it absorbing a blow.
-$random thorns/zap { thorns/zap1 thorns/zap2 thorns/zap3 }
-thorns/zap1 "sounds/rpg_thorns__v2.wav"
-thorns/zap2 "sounds/rpg_thorns__v3.wav"
-thorns/zap3 "sounds/rpg_thorns__v4.wav"
+// thorns/zap: a soft tonal chime when thorns reflect damage. shield/up, shield/down: the melee shield switching on/off. shield/hit: it absorbing a blow.
+// Thorns round 2 (assets/sfx/gen_thorns2.py): soft tonal, no noise; five variants on different notes so repeated hits do not sound identical.
+$random thorns/zap { thorns/zap1 thorns/zap2 thorns/zap3 thorns/zap4 thorns/zap5 }
+thorns/zap1 "sounds/rpg_thorns2__w1.wav"
+thorns/zap2 "sounds/rpg_thorns2__w2.wav"
+thorns/zap3 "sounds/rpg_thorns2__w4.wav"
+thorns/zap4 "sounds/rpg_thorns2__w5.wav"
+thorns/zap5 "sounds/rpg_thorns2__w7.wav"
 $random shield/up { shield/up1 shield/up2 }
 shield/up1 "sounds/rpg_shield_up__s1.wav"
 shield/up2 "sounds/rpg_shield_up__s3.wav"

@@ -28,9 +28,9 @@ class TFLV_Upgrade_Thorns : TFLV_Upgrade_BaseUpgrade {
 // to proc elemental effects or not.
 class TFLV_Upgrade_Thorns_Aux : Actor {
   property UpgradePriority: weaponspecial;
-  // Sound cue throttle: a swarm of attackers gives a spark at most every CUE_GAP_TICS tics.
+  // Sound cue throttle: Thorns can fire on every hit taken, so a swarm gives a chime at most every CUE_GAP_TICS tics.
   int last_cue_tic;
-  const CUE_GAP_TICS = 8;
+  const CUE_GAP_TICS = 14;
 
   Default {
     RenderStyle "None";
@@ -47,7 +47,7 @@ class TFLV_Upgrade_Thorns_Aux : Actor {
     self.weaponspecial = multiplier >= 0.9/level ? TFLV_Upgrade_PRI_THORNS : TFLV_Upgrade_PRI_NULL;
     attacker.DamageMobj(self, player,
       max(level, damage * (level+1) * multiplier), "Thorns", DMG_THRUSTLESS);
-    // Spark cue, only where reflected damage was really dealt (one event per hit taken).
+    // Chime cue, only where reflected damage was really dealt (one event per hit taken).
     if (gametic - last_cue_tic >= CUE_GAP_TICS && TFLV_Settings.sfx_for("bonsai_sfx_thorns", 2)) {
       last_cue_tic = gametic;
       attacker.A_StartSound("thorns/zap", CHAN_AUTO, CHANF_OVERLAP | CHANF_NOPAUSE, 0.8);

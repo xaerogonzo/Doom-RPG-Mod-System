@@ -520,7 +520,7 @@ OptionMenu "GunBonsaiSfx"
   Option "Melee Shield cues", "bonsai_sfx_shield", "GunBonsaiSfxFeature"
   TFLV_Tooltip "A soft rising tone when the melee Shield switches on and a falling tone when it fades (Essential tier); a very quiet pulse when it absorbs a blow (Full tier, at most every 12 tics)."
   Option "Thorns cue", "bonsai_sfx_thorns", "GunBonsaiSfxFeature"
-  TFLV_Tooltip "A short spark when Thorns reflect damage onto an attacker, at most every 8 tics. Full tier (off at the default Essential level)."
+  TFLV_Tooltip "A soft tonal chime when Thorns reflect damage onto an attacker, at most every 14 tics (0.4 s). Full tier (off at the default Essential level)."
   Option "ECM cues", "bonsai_sfx_ecm", "GunBonsaiSfxFeature"
   TFLV_Tooltip "A soft rising tone when the ECM upgrade redirects or reprograms an incoming seeker missile, and a soft falling tone when the hack fails. Once per missile. Essential tier."
 }

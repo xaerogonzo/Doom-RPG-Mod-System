@@ -1,0 +1,1348 @@
+{
+  "archive_sha256": "c3d2269a3e1a1658937e5e3b060d75d1ceef802ea4f6d48ffedc39bbb04e0a41",
+  "assets": [
+    {
+      "bytes": 379,
+      "path": "SNDINFO",
+      "provenance": "generated",
+      "sha256": "2c9c327ec3d5f4b01927a49c7bc300a84bd4322c8c217b4c47d730767423e8ea",
+      "type": "definition"
+    },
+    {
+      "alias": "cand5/thorns2/w1",
+      "bytes": 31796,
+      "id": "thorns2__w1",
+      "kind": "fm",
+      "params": {
+        "duration": 0.36,
+        "gain": 0.9,
+        "layers": [
+          {
+            "level": 1.0,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.5,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2600.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [
+                [
+                  3,
+                  0,
+                  0.9
+                ],
+                [
+                  3,
+                  2,
+                  0.63
+                ]
+              ],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.008,
+                    "d": 0.2,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.008,
+                    "d": 0.13999999999999999,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.2,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.010400000000000001,
+                    "d": 0.2,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.5,
+                  "ratio": 1.006
+                },
+                {
+                  "env": {
+                    "a": 0.008,
+                    "d": 0.09000000000000001,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 2.0
+                }
+              ],
+              "pitch": 783.99,
+              "pitch_env": {
+                "curve": 2.5,
+                "end": 1.0,
+                "start": 1.35,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          }
+        ],
+        "sample_rate": 44100,
+        "target_rms_dbfs": -28.0
+      },
+      "path": "sounds/thorns2__w1.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 14511366610757263123,
+      "sha256": "30e13336e7d76e1a4d41e1200ae701772d7467c2dfdad0af6a165095a6301e5a",
+      "type": "sound"
+    },
+    {
+      "alias": "cand5/thorns2/w2",
+      "bytes": 35324,
+      "id": "thorns2__w2",
+      "kind": "fm",
+      "params": {
+        "duration": 0.4,
+        "gain": 0.9,
+        "layers": [
+          {
+            "level": 1.0,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.4,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2600.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.16,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.11199999999999999,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.2,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.013000000000000001,
+                    "d": 0.16,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.5,
+                  "ratio": 1.006
+                }
+              ],
+              "pitch": 523.25,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          },
+          {
+            "level": 0.9,
+            "offset": 0.055,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.4,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2600.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.16,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.11199999999999999,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.2,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.013000000000000001,
+                    "d": 0.16,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.5,
+                  "ratio": 1.006
+                }
+              ],
+              "pitch": 587.33,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          },
+          {
+            "level": 0.8,
+            "offset": 0.11,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.4,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2600.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.2,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.13999999999999999,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.2,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.013000000000000001,
+                    "d": 0.2,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.5,
+                  "ratio": 1.006
+                }
+              ],
+              "pitch": 783.99,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          }
+        ],
+        "sample_rate": 44100,
+        "target_rms_dbfs": -28.0
+      },
+      "path": "sounds/thorns2__w2.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 9705325548647432658,
+      "sha256": "a60931e068854f5596d9231adc692bfc0abe6e1a0c5048246bfdd71453d2ac24",
+      "type": "sound"
+    },
+    {
+      "alias": "cand5/thorns2/w3",
+      "bytes": 33560,
+      "id": "thorns2__w3",
+      "kind": "fm",
+      "params": {
+        "duration": 0.38,
+        "gain": 0.9,
+        "layers": [
+          {
+            "level": 1.0,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.5,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2200.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [
+                [
+                  3,
+                  0,
+                  0.55
+                ],
+                [
+                  3,
+                  2,
+                  0.385
+                ]
+              ],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.004,
+                    "d": 0.22,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.004,
+                    "d": 0.154,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.1,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.005200000000000001,
+                    "d": 0.22,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.5,
+                  "ratio": 1.006
+                },
+                {
+                  "env": {
+                    "a": 0.004,
+                    "d": 0.099,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 3.5
+                }
+              ],
+              "pitch": 440.0,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          }
+        ],
+        "sample_rate": 44100,
+        "target_rms_dbfs": -28.0
+      },
+      "path": "sounds/thorns2__w3.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 5327102020813657785,
+      "sha256": "047746c209ec81a6208e3e98c3fecde6b21b29ea85ce5b9fd418f64d42b6b346",
+      "type": "sound"
+    },
+    {
+      "alias": "cand5/thorns2/w4",
+      "bytes": 37088,
+      "id": "thorns2__w4",
+      "kind": "fm",
+      "params": {
+        "duration": 0.42,
+        "gain": 0.9,
+        "layers": [
+          {
+            "level": 0.7,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.45,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2000.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.14,
+                    "d": 0.2,
+                    "r": 0.1,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.14,
+                    "d": 0.13999999999999999,
+                    "r": 0.1,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.2,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.18200000000000002,
+                    "d": 0.2,
+                    "r": 0.1,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.7,
+                  "ratio": 1.006
+                }
+              ],
+              "pitch": 587.33,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          },
+          {
+            "level": 0.9,
+            "offset": 0.14,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.3,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2400.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.006,
+                    "d": 0.18,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.006,
+                    "d": 0.126,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.2,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.0078000000000000005,
+                    "d": 0.18,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.5,
+                  "ratio": 1.006
+                }
+              ],
+              "pitch": 880.0,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          }
+        ],
+        "sample_rate": 44100,
+        "target_rms_dbfs": -28.0
+      },
+      "path": "sounds/thorns2__w4.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 6635837635180486660,
+      "sha256": "2dd0634bce62571930125dab5cf35bbe1f681324048ec2572d3513d12f13e285",
+      "type": "sound"
+    },
+    {
+      "alias": "cand5/thorns2/w5",
+      "bytes": 38852,
+      "id": "thorns2__w5",
+      "kind": "fm",
+      "params": {
+        "duration": 0.44,
+        "gain": 0.9,
+        "layers": [
+          {
+            "level": 1.0,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.5,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2300.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.03,
+                    "d": 0.26,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.03,
+                    "d": 0.182,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.1,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.039,
+                    "d": 0.26,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.011
+                }
+              ],
+              "pitch": 659.25,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          },
+          {
+            "level": 0.5,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.5,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2300.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.05,
+                    "d": 0.22,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.05,
+                    "d": 0.154,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.0,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.065,
+                    "d": 0.22,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.8,
+                  "ratio": 1.009
+                }
+              ],
+              "pitch": 988.875,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          }
+        ],
+        "sample_rate": 44100,
+        "target_rms_dbfs": -28.0
+      },
+      "path": "sounds/thorns2__w5.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 15315092403291136684,
+      "sha256": "74b6034d561710ff15700f021d2c4f0c576b3a917798c6b9f8c355065f3c2267",
+      "type": "sound"
+    },
+    {
+      "alias": "cand5/thorns2/w6",
+      "bytes": 35324,
+      "id": "thorns2__w6",
+      "kind": "fm",
+      "params": {
+        "duration": 0.4,
+        "gain": 0.9,
+        "layers": [
+          {
+            "level": 1.0,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.45,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2600.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.24,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.16799999999999998,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.35,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.013000000000000001,
+                    "d": 0.24,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.5,
+                  "ratio": 1.006
+                }
+              ],
+              "pitch": 880.0,
+              "pitch_env": {
+                "curve": 2.5,
+                "end": 0.75,
+                "start": 1.0,
+                "time": 0.2
+              },
+              "sample_rate": 44100
+            }
+          }
+        ],
+        "sample_rate": 44100,
+        "target_rms_dbfs": -28.0
+      },
+      "path": "sounds/thorns2__w6.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 16655515965181901364,
+      "sha256": "50be07b0f09fb363e0340c9edc9548d16deb922464da970459edeb34e3412dc8",
+      "type": "sound"
+    },
+    {
+      "alias": "cand5/thorns2/w7",
+      "bytes": 33560,
+      "id": "thorns2__w7",
+      "kind": "fm",
+      "params": {
+        "duration": 0.38,
+        "gain": 0.9,
+        "layers": [
+          {
+            "level": 1.0,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.45,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 1800.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [
+                [
+                  3,
+                  0,
+                  0.4
+                ],
+                [
+                  3,
+                  2,
+                  0.27999999999999997
+                ]
+              ],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.012,
+                    "d": 0.24,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.012,
+                    "d": 0.16799999999999998,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.15,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.015600000000000001,
+                    "d": 0.24,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.7,
+                  "ratio": 1.006
+                },
+                {
+                  "env": {
+                    "a": 0.012,
+                    "d": 0.108,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 2.0
+                }
+              ],
+              "pitch": 293.66,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          }
+        ],
+        "sample_rate": 44100,
+        "target_rms_dbfs": -28.0
+      },
+      "path": "sounds/thorns2__w7.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 16343475136548852828,
+      "sha256": "675462797b4082d7ca88e57bcc2ec8a5f39d2508e6e28e1905c88097976c40ba",
+      "type": "sound"
+    },
+    {
+      "alias": "cand5/thorns2/w8",
+      "bytes": 35324,
+      "id": "thorns2__w8",
+      "kind": "fm",
+      "params": {
+        "duration": 0.4,
+        "gain": 0.9,
+        "layers": [
+          {
+            "level": 1.0,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.45,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2600.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [
+                [
+                  3,
+                  0,
+                  0.5
+                ],
+                [
+                  3,
+                  2,
+                  0.35
+                ]
+              ],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.22,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.154,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.2,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.013000000000000001,
+                    "d": 0.22,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.5,
+                  "ratio": 1.006
+                },
+                {
+                  "env": {
+                    "a": 0.01,
+                    "d": 0.099,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 2.0
+                }
+              ],
+              "pitch": 587.33,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          },
+          {
+            "level": 0.8,
+            "offset": 0.0,
+            "patch": {
+              "carriers": [
+                0,
+                1,
+                2
+              ],
+              "duration": 0.45,
+              "env": {
+                "a": 0.0,
+                "d": 0.1,
+                "r": 0.01,
+                "s": 1.0
+              },
+              "filter": {
+                "cutoff": 2600.0,
+                "q": 0.7,
+                "type": "lp"
+              },
+              "gain": 1.0,
+              "mods": [
+                [
+                  3,
+                  0,
+                  0.5
+                ],
+                [
+                  3,
+                  2,
+                  0.35
+                ]
+              ],
+              "noise": {
+                "env": {
+                  "a": 0.002,
+                  "d": 0.1,
+                  "r": 0.02,
+                  "s": 0.0
+                },
+                "level": 0.0
+              },
+              "operators": [
+                {
+                  "env": {
+                    "a": 0.012,
+                    "d": 0.2,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 1.0
+                },
+                {
+                  "env": {
+                    "a": 0.012,
+                    "d": 0.13999999999999999,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.2,
+                  "ratio": 2.0
+                },
+                {
+                  "env": {
+                    "a": 0.015600000000000001,
+                    "d": 0.2,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 0.5,
+                  "ratio": 1.006
+                },
+                {
+                  "env": {
+                    "a": 0.012,
+                    "d": 0.09000000000000001,
+                    "r": 0.12,
+                    "s": 0.0
+                  },
+                  "feedback": 0.0,
+                  "fixed_hz": 0.0,
+                  "level": 1.0,
+                  "ratio": 2.0
+                }
+              ],
+              "pitch": 783.99,
+              "pitch_env": {
+                "curve": 3.0,
+                "end": 1.0,
+                "start": 1.0,
+                "time": 0.1
+              },
+              "sample_rate": 44100
+            }
+          }
+        ],
+        "sample_rate": 44100,
+        "target_rms_dbfs": -28.0
+      },
+      "path": "sounds/thorns2__w8.wav",
+      "provenance": "procedural",
+      "replaces": null,
+      "reproducible": true,
+      "seed": 12012856681530246566,
+      "sha256": "ec4231cab429cbbbfc0868a871818e08950c8902466c62b9ee784e8cfb9006c8",
+      "type": "sound"
+    }
+  ],
+  "determinism": "byte-identical within a pinned Python/NumPy environment (see README)",
+  "environment": {
+    "implementation": "CPython",
+    "numpy": "2.4.4",
+    "python": "3.13.12"
+  },
+  "generator_version": 1,
+  "schema_version": 1,
+  "script_seed": 2032,
+  "script_sha256": "94e18410df9c2f88dcbb5ba2de27ebd564ffa90f7330d4d80b482146d9204d3c",
+  "tool": "doomcreator",
+  "tool_version": "0.1.0",
+  "warnings": []
+}
