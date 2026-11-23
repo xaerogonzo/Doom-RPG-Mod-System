@@ -1,6 +1,7 @@
 // #namespace TFLV::Upgrade;
 
 class TFLV_Upgrade_Submunitions : TFLV_Upgrade_BaseUpgrade {
+  const CUE_GAP_TICS = 40;
   override TFLV_Upgrade_UpgradePriority Priority() { return TFLV_Upgrade_PRI_EXPLOSIVE; }
 
   override void OnKill(PlayerPawn player, Actor shot, Actor target) {
@@ -13,6 +14,16 @@ class TFLV_Upgrade_Submunitions : TFLV_Upgrade_BaseUpgrade {
     aux.damage = ((target.SpawnHealth() + abs(target.health)) * (1.0 - bonsai_stat_submunitions_health_scale ** level))/count + bonsai_stat_submunitions_bonus_damage*level;
     aux.blast_radius = target.radius*2.5;
     aux.ttl = ceil(level*5 * bonsai_stat_submunitions_lifetime); // in seconds
+
+    // Sound: ONE soft multi-ball "cluster" cue (several small metal balls pinging and settling) for the
+    // whole burst instead of a sound per bomblet. A gate allows one per CUE_GAP_TICS tics however many
+    // kills spawn bomblets; one event per kill, no per-bomblet or per-bounce work. The sound starts with a
+    // short silence so it lines up with the first bomblets leaving the spawner.
+    let st = TFLV_PerPlayerStats.GetStatsFor(player);
+    if (st && gametic >= st.submunitionCueUntil && TFLV_Settings.sfx_for("bonsai_sfx_submunitions", 2)) {
+      st.SubmunitionCueTry(gametic, CUE_GAP_TICS);
+      target.A_StartSound("submunitions/cluster", CHAN_AUTO, CHANF_OVERLAP, 0.8);
+    }
   }
 
   override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {

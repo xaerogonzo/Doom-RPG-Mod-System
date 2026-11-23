@@ -125,3 +125,14 @@ bouncy/field1 "sounds/rpg_bouncy2__m1.wav"
 bouncy/field2 "sounds/rpg_bouncy2__m2.wav"
 bouncy/field3 "sounds/rpg_bouncy2__m6.wav"
 $limit bouncy/field 3
+
+// Submunitions (assets/sfx/gen_submunitions.py, CC0): ONE soft multi-ball cluster sound (several small metal balls pinging and settling) per burst, not per bomblet. Six variants, provisional.
+// Played once per kill that spawns bomblets, gated to one per 40 tics (Submunitions.zsc).
+$random submunitions/cluster { submunitions/cluster1 submunitions/cluster2 submunitions/cluster3 submunitions/cluster4 submunitions/cluster5 submunitions/cluster6 }
+submunitions/cluster1 "sounds/rpg_submunitions__n1.wav"
+submunitions/cluster2 "sounds/rpg_submunitions__n2.wav"
+submunitions/cluster3 "sounds/rpg_submunitions__n3.wav"
+submunitions/cluster4 "sounds/rpg_submunitions__n4.wav"
+submunitions/cluster5 "sounds/rpg_submunitions__n5.wav"
+submunitions/cluster6 "sounds/rpg_submunitions__n6.wav"
+$limit submunitions/cluster 2

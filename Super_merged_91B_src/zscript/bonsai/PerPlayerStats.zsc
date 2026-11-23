@@ -281,6 +281,17 @@ class TFLV_PerPlayerStats : Object play {
     return true;
   }
 
+  // Submunitions sound cue gate: one multi-ball "cluster" sound per window, however many kills spawn
+  // bomblets in it. Two ints written at cue time; 'now' is passed in so the logic can be tested.
+  int submunitionCueUntil;
+  int submunitionCuesGiven;
+  bool SubmunitionCueTry(int now, int gap) {
+    if (now < submunitionCueUntil) return false;
+    submunitionCueUntil = now + gap;
+    ++submunitionCuesGiven;
+    return true;
+  }
+
   // Take back player XP that weapon levels had contributed (death penalty). Clamped at zero;
   // never changes the player's level, upgrades or pending level-ups.
   void RemovePlayerXP(uint amount) {
