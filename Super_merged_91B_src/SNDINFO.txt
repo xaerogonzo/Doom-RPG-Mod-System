@@ -51,3 +51,16 @@ parry/crit3     "sounds/rpg_parry2.wav"
 parry/normal1   "sounds/rpg_parry2.wav"
 parry/normal2   "sounds/rpg_parry.wav"
 parry/normal3   "sounds/rpg_parry_armor.wav"
+
+// Hyper-V movement sounds, generated with Doom Creator from assets/sfx/stage_b.json (CC0).
+$random hv/dash { hv/dash1 hv/dash2 hv/dash3 }
+hv/dash1 "sounds/rpg_dash1.wav"
+hv/dash2 "sounds/rpg_dash2.wav"
+hv/dash3 "sounds/rpg_dash3.wav"
+$random hv/doublejump { hv/doublejump1 hv/doublejump2 }
+hv/doublejump1 "sounds/rpg_dj1.wav"
+hv/doublejump2 "sounds/rpg_dj2.wav"
+// Ledge climb: a 0.64 s two-pulse loop (silent at both ends so the loop point is clean), started and stopped by climb start/exit
+hv/climb "sounds/rpg_climb.wav"
+$volume hv/climb 0.7
+hv/climbtop "sounds/rpg_climb_top.wav"

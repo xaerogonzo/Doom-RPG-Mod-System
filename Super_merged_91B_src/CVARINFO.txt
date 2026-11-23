@@ -575,6 +575,10 @@ user int	vmm_dash_back_cost		= 20;
 // Movement
 user bool	vmm_double_jump			= false;
 user bool	vmm_ledge_climb			= false;
+// Movement sounds (Hyper-V): original cues for dash, double jump and ledge climb
+user bool	vmm_sfx_dash			= true;
+user bool	vmm_sfx_double_jump		= true;
+user bool	vmm_sfx_ledge_climb		= true;
 
 // Health Regeneration
 // Health Regeneration

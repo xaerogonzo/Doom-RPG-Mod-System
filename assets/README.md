@@ -7,6 +7,8 @@ The generated files are copied into `Super_merged_91B_src/` (this folder is not 
 |---|---|---|
 | `sfx/stage_a.json` (seed 2026) | `sounds/rpg_levelup.wav`, `rpg_parry.wav` (layered composite-armour hit), `rpg_parry2.wav` (softer layered thud), `rpg_parry_armor.wav` (metal-led variant); all three are played at random for both `parry/crit` and `parry/normal` | `SNDINFO.txt`: `bonsai/gunlevelup`, `parry/crit1`, `parry/normal1` |
 
+| `sfx/stage_b.json` (seed 2027) | `sounds/rpg_dash1-3.wav`, `rpg_dj1-2.wav`, `rpg_climb.wav`, `rpg_climb_top.wav` | `SNDINFO.txt`: `hv/dash`, `hv/doublejump`, `hv/climb`, `hv/climbtop` |
+
 Regenerate and check:
 
 ```
