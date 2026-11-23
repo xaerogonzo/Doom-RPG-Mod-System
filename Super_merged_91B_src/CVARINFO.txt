@@ -35,7 +35,8 @@ user int bonsai_sfx_mode = 1;
 user int bonsai_sfx_parry = -1;            // parry cue (essential tier)
 user int bonsai_sfx_ecm = -1;              // ECM hacked / failed cues (essential tier)
 user int bonsai_sfx_shield = -1;           // melee Shield up/down (essential tier) and absorb (full tier)
-user int bonsai_sfx_thorns = -1;           // Thorns spark when damage is reflected (full tier)
+user int bonsai_sfx_thorns = -1;           // Thorns chime when damage is reflected (full tier)
+user int bonsai_sfx_bounce = -1;           // Bouncy Shots energy-field sound on bounces (full tier)
 user int bonsai_vfx_mode = 2;              // global VFX level: 0=off 1=reduced 2=full
 // Per-feature VFX overrides. -1 = follow global setting, 0 = off, 1 = reduced, 2 = full.
 user int bonsai_vfx_dot        = -1;       // DoT tick particles (fire/poison/acid/lightning)

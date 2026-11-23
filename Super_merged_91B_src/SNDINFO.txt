@@ -117,3 +117,16 @@ shield/hit5 "sounds/rpg_shield_hit2__x5.wav"
 shield/hit6 "sounds/rpg_shield_hit2__x1b.wav"
 shield/hit7 "sounds/rpg_shield_hit2__x2b.wav"
 shield/hit8 "sounds/rpg_shield_hit2__x4b.wav"
+
+// Bouncy Shots (assets/sfx/gen_bouncy.py, CC0): a soft energy-field blip on bounces, weapon neutral, eight variants. Provisional.
+// Assigned to the projectile's BounceSound / WallBounceSound at creation (one projectile per 25 tics, see SimpleUpgrades.zsc).
+$random bouncy/field { bouncy/field1 bouncy/field2 bouncy/field3 bouncy/field4 bouncy/field5 bouncy/field6 bouncy/field7 bouncy/field8 }
+bouncy/field1 "sounds/rpg_bouncy__k1.wav"
+bouncy/field2 "sounds/rpg_bouncy__k2.wav"
+bouncy/field3 "sounds/rpg_bouncy__k3.wav"
+bouncy/field4 "sounds/rpg_bouncy__k4.wav"
+bouncy/field5 "sounds/rpg_bouncy__k5.wav"
+bouncy/field6 "sounds/rpg_bouncy__k6.wav"
+bouncy/field7 "sounds/rpg_bouncy__k7.wav"
+bouncy/field8 "sounds/rpg_bouncy__k8.wav"
+$limit bouncy/field 3

@@ -269,6 +269,18 @@ class TFLV_PerPlayerStats : Object play {
     defenseCueUntil = max(defenseCueUntil, now + gap);
   }
 
+  // Bouncy Shots sound cue gate, decided when a projectile is created: only one projectile per window
+  // gets the bounce sound, so rapid-fire weapons (plasma) do not turn into a rattle. Two ints, written at
+  // projectile creation. 'now' is passed in so the logic can be tested.
+  int bounceCueUntil;
+  int bounceCuesGiven; // how many projectiles were given the sound (shown by the debug dump)
+  bool BounceCueTry(int now, int gap) {
+    if (now < bounceCueUntil) return false;
+    bounceCueUntil = now + gap;
+    ++bounceCuesGiven;
+    return true;
+  }
+
   // Take back player XP that weapon levels had contributed (death penalty). Clamped at zero;
   // never changes the player's level, upgrades or pending level-ups.
   void RemovePlayerXP(uint amount) {

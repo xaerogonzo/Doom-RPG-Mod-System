@@ -83,6 +83,7 @@ class TFLV_Debug : Object play {
           info.wpnClass, u.GetClassName(), u.level, u.max_level, u.enabled);
       }
     }
+    console.printf("BONSAI bounce_cues_given=%d", stats.bounceCuesGiven);
     console.printf("BONSAI death_penalty requested=%d levels_lost=%d upgrades_removed=%d weapons=%d",
       stats.lastPenaltyRequested, stats.lastPenaltyLevelsLost,
       stats.lastPenaltyUpgradesRemoved, stats.lastPenaltyWeapons);
@@ -106,6 +107,12 @@ class TFLV_Debug : Object play {
       r = r .. (ok ? "1" : "0");
     }
     console.printf("BONSAI gate result=%s", r);
+    // Bouncy Shots gate: one projectile per 25 tics. Expected 1,0,0,1,0,1
+    let bs = new("TFLV_PerPlayerStats");
+    static const int btics[] = { 100, 110, 124, 125, 140, 150 };
+    string br = "";
+    for (int i = 0; i < 6; ++i) br = br .. (bs.BounceCueTry(btics[i], 25) ? "1" : "0");
+    console.printf("BONSAI bounce gate result=%s", br);
   }
 
   static void ShowInfoConsole(Actor pawn) {

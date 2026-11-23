@@ -17,6 +17,8 @@ class TFLV_Upgrade_BlastShaping : TFLV_Upgrade_BaseUpgrade {
 }
 
 class TFLV_Upgrade_BouncyShots : TFLV_Upgrade_BaseUpgrade {
+  const BOUNCE_CUE_GAP_TICS = 25;
+
   override void OnProjectileCreated(Actor player, Actor shot) {
     shot.bBOUNCEONWALLS = true;
     shot.bBOUNCEONCEILINGS = true;
@@ -24,6 +26,16 @@ class TFLV_Upgrade_BouncyShots : TFLV_Upgrade_BaseUpgrade {
     shot.bBOUNCEAUTOOFFFLOORONLY = true;
     shot.BounceCount = max(shot.BounceCount, 2 + level);
     shot.BounceFactor = 1.0;
+    // Sound: the engine plays BounceSound / WallBounceSound at each bounce, so there is no script work per
+    // bounce. Decided once per projectile, here, with a time gate (about one projectile per 25 tics gets the
+    // cue) so rapid-fire weapons stay quiet. Weapon neutral: the same soft energy-field sound for rockets,
+    // plasma or anything else. Setting changes only affect projectiles created afterwards.
+    let st = TFLV_PerPlayerStats.GetStatsFor(player);
+    if (st && gametic >= st.bounceCueUntil && TFLV_Settings.sfx_for("bonsai_sfx_bounce", 2)) {
+      st.BounceCueTry(gametic, BOUNCE_CUE_GAP_TICS);
+      shot.BounceSound = "bouncy/field";
+      shot.WallBounceSound = "bouncy/field";
+    }
     if (level >= 3) {
       shot.bALLOWBOUNCEONACTORS = true;
       shot.bBOUNCEONACTORS = true;
