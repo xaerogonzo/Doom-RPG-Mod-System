@@ -4,8 +4,8 @@ Run:  python assets/sfx/gen_acid_poison.py
 Then: python -m doomcreator audition assets/sfx/acid_poison_candidates.json -o audition_acid_poison.html
 
 Played once from the affected enemy at discrete events, within ~20 m, gated per element (see gen_fire_lightning.py).
-  acid/spray       - Acid Spray splashes: a soft fizz, low-passed noise with a gentle swell and a low wet tone.
-  acid/embrittle   - Embrittlement shatters an enemy: a dull crumble, low thump with a slow low-passed noise tail.
+  acid/spray       - Acid Spray splashes: a tonal sizzle of tiny soft pentatonic pings over a faint low hum (round 3, no noise).
+  acid/embrittle   - Embrittlement shatters an enemy: soft tones stepping down while fading and thinning out (a tonal disintegration).
   poison/hallucinate - Hallucinogens turn an enemy friendly: a woozy slow-wobbling low tone pair gliding up.
   poison/putrefy   - Putrefaction bursts a corpse: three or four soft low bubbles over a quiet wet noise bed.
 Quiet (about -30 dBFS), 0.35-0.7 s.
@@ -59,65 +59,119 @@ def L(off, level, patch):
 
 
 def snd(sid, dur, layers, rms=-30):
-    return {"id": sid, "alias": "cand11/" + sid.replace("__", "/"),
+    return {"id": sid, "alias": "cand13/" + sid.replace("__", "/"),
             "fm": {"duration": dur, "sample_rate": RATE, "gain": 0.9, "target_rms_dbfs": rms, "layers": layers}}
 
 
-def spray(sid, seed, dur, hz, cut, swell):
-    return snd(sid, dur, [
-        L(0.0, 1.0, noisy(dur, swell, dur * 0.55, cut, r=0.12)),
-        L(0.0, 0.5, tone(hz, dur, 0.04, dur * 0.5, glide=(1.4, 0.15), cutoff=1000, partial=0.0)),
-        L(0.0, 0.25, noisy(dur * 0.6, 0.01, dur * 0.3, cut * 2.0, r=0.1)),
-    ])
+def ping(hz, dur, decay, ratio=2.76, metal=0.5, cutoff=3500):
+    """A short inharmonic glassy tick (a chip of something brittle), not a drum."""
+    return {"duration": dur, "pitch": hz,
+            "operators": [{"ratio": 1.0, "level": 1.0, "env": env(0.001, decay, 0.01)}, {"ratio": ratio, "level": metal, "env": env(0.001, decay * 0.5, 0.01)}],
+            "carriers": [0, 1], "filter": {"type": "lp", "cutoff": cutoff, "q": 0.8}}
 
 
-def embrittle(sid, seed, dur, hz, cut):
-    return snd(sid, dur, [
-        L(0.0, 1.0, thump(hz, dur * 0.7, dur * 0.25, drop=1.9)),
-        L(0.02, 0.9, noisy(dur, 0.01, dur * 0.5, cut, r=0.15)),
-        L(0.0, 0.4, tone(hz * 2.5, dur * 0.5, 0.02, 0.15, glide=(0.7, 0.2), cutoff=900, partial=0.0)),
-    ])
-
-
-def hallucinate(sid, seed, dur, hz, rate_ratio, depth, glide):
-    return snd(sid, dur, [
-        L(0.0, 1.0, wobble(hz, dur, 0.08, dur * 0.55, rate_ratio, depth, glide=glide)),
-        L(0.05, 0.4, wobble(hz * 1.5, dur * 0.8, 0.1, dur * 0.45, rate_ratio * 1.3, depth * 0.8, glide=glide, cutoff=1100)),
-        L(0.0, 0.25, tone(hz / 2, dur, 0.1, dur * 0.5, cutoff=600, partial=0.0)),
-    ])
-
-
-def putrefy(sid, seed, dur, bubbles, base, cut):
+def spray(sid, seed, dur, density, lo, hi, tail):
+    """Round 3: a TONAL sizzle, like fizzing sparkles: many tiny soft sine pings on pentatonic notes (1.2-3.5 kHz), dense
+    first then sparser, each only 20-45 ms with a rounded attack. A faint low 'acid' hum underneath. No noise at all."""
     rng = random.Random(seed)
-    layers = [L(0.0, 0.6, noisy(dur, 0.05, dur * 0.6, cut, r=0.15))]
+    pen = [1.0, 9 / 8, 5 / 4, 3 / 2, 5 / 3]
+    layers = [L(0.0, 0.3, tone(lo / 6, dur, 0.03, dur * tail, cutoff=900, partial=0.0, chorus=0.9, detune=1.015))]
+    for _ in range(density):
+        t = rng.random() ** 1.6 * dur * 0.8
+        hz = rng.uniform(lo, hi)
+        hz = lo * pen[rng.randrange(5)] * rng.choice([1.0, 1.0, 2.0]) if rng.random() < 0.7 else hz
+        layers.append(L(t, rng.uniform(0.25, 0.8), tone(min(hz, 4200), 0.07, 0.003, rng.uniform(0.012, 0.03), cutoff=4500, partial=0.0, chorus=0.0)))
+    return snd(sid, dur, layers)
+
+
+def embrittle(sid, seed, dur, top, steps, low):
+    """Round 3: a tonal DISINTEGRATION: soft rounded tones stepping down in pitch (top -> low) while getting shorter, quieter
+    and sparser, each slightly detuned, like something crumbling away. Sine/FM-free, low-passed, no glass, no thump."""
+    rng = random.Random(seed)
+    layers = []
+    t = 0.0
+    for i in range(steps):
+        f = i / max(1, steps - 1)
+        hz = top * (low / top) ** f * rng.uniform(0.97, 1.03)
+        d = 0.09 * (1.0 - 0.6 * f)
+        layers.append(L(t, 0.9 * (1.0 - 0.7 * f), tone(hz, 0.2, 0.005, d, glide=(1.05, 0.05), cutoff=1500, partial=0.1, chorus=0.7, detune=1.012)))
+        t += rng.uniform(0.03, 0.05) * (1.0 + 1.5 * f)
+    return snd(sid, dur, layers)
+
+
+def trippy(hz, dur, a, d, ratio, depth, glide=None, cutoff=2600, detune=1.007):
+    """Inharmonic FM shimmer pair: a slightly off-harmonic modulator makes a glassy, bending, 'wrong but pretty' tone."""
+    p = {"duration": dur, "pitch": hz,
+         "operators": [{"ratio": 1.0, "level": 1.0, "env": env(a, d)}, {"ratio": detune, "level": 0.7, "env": env(a, d)},
+                       {"ratio": ratio, "level": 1.0, "env": env(a, d * 0.8)}],
+         "carriers": [0, 1], "mods": [[2, 0, depth], [2, 1, depth * 0.8]],
+         "filter": {"type": "lp", "cutoff": cutoff, "q": 0.8}}
+    if glide:
+        p["pitch_env"] = {"start": glide[0], "end": 1.0, "time": glide[1], "curve": 2.0}
+    return p
+
+
+def hallucinate(sid, seed, dur, root, ratio, depth, echoes, rms=-25):
+    """Round 2: psychedelic and a little confusing, pleasant: a rising lydian run of bending inharmonic shimmer tones,
+    each answered by a quieter, detuned, pitch-bent echo of itself (a smeared, doubled feeling). Deliberately the most
+    prominent of the element cues (louder, longer, more layers)."""
+    rng = random.Random(seed)
+    scale = [1.0, 9 / 8, 5 / 4, 45 / 32, 3 / 2, 5 / 3, 15 / 8, 2.0]      # C lydian-ish
+    layers = [L(0.0, 0.25, trippy(root / 2, dur, 0.1, dur * 0.7, 1.5, 0.6, cutoff=900))]
+    idx = sorted(rng.sample(range(8), 4))
+    t = 0.0
+    for k, i in enumerate(idx):
+        hz = root * scale[i]
+        layers.append(L(t, 0.9 - 0.1 * k, trippy(hz, 0.45, 0.006, 0.2, ratio, depth, glide=(rng.choice([0.94, 1.06]), 0.12))))
+        for e in range(echoes):
+            layers.append(L(t + 0.09 * (e + 1) + rng.uniform(0, 0.02), (0.55 - 0.15 * e) * 0.9, trippy(hz * rng.choice([1.0, 1.0, 2.0]) * rng.choice([0.99, 1.01]), 0.4, 0.01, 0.18, ratio * 1.01, depth * 0.8, glide=(rng.choice([0.9, 1.1]), 0.15), detune=1.015)))
+        t += rng.uniform(0.07, 0.1)
+    return snd(sid, dur, layers, rms=rms)
+
+
+def blorp(hz, dur, decay, rise=0.55, cutoff=1400):
+    """A liquid bubble: a sine whose pitch rises quickly (the pop of a gas bubble), a touch of upper partial."""
+    return {"duration": dur, "pitch": hz,
+            "operators": [{"ratio": 1.0, "level": 1.0, "env": env(0.004, decay, 0.02)}, {"ratio": 2.0, "level": 0.15, "env": env(0.004, decay * 0.6, 0.02)}],
+            "carriers": [0, 1], "pitch_env": {"start": rise, "end": 1.0, "time": decay * 0.9, "curve": 2.5},
+            "filter": {"type": "lp", "cutoff": cutoff, "q": 0.9}}
+
+
+def putrefy(sid, seed, dur, bubbles, base, spread):
+    """Round 2: chemical bubbling like a beaker: liquid 'blorp' bubbles (fast rising pitch, different sizes), a couple of
+    tiny glassy ticks for the surface popping. No noise bed, so no whoosh."""
+    rng = random.Random(seed)
+    layers = []
     t = 0.0
     for _ in range(bubbles):
-        hz = base * rng.uniform(0.8, 1.5)
-        layers.append(L(t, rng.uniform(0.7, 1.0), tone(hz, 0.16, 0.008, 0.07, glide=(0.6, 0.07), cutoff=900, partial=0.0, chorus=0.3)))
-        t += rng.uniform(0.07, 0.13)
+        hz = base * rng.uniform(1.0, spread)
+        layers.append(L(t, rng.uniform(0.6, 1.0), blorp(hz, 0.14, rng.uniform(0.05, 0.1), rise=rng.uniform(0.45, 0.7))))
+        if rng.random() < 0.5:
+            layers.append(L(t + 0.01, 0.25, ping(hz * 6, 0.06, 0.015, metal=0.3, cutoff=3000)))
+        t += rng.uniform(0.05, 0.11)
     return snd(sid, dur, layers)
 
 
 sounds = [
-    spray("acid_spray__a1", 1, 0.4, 260, 1400, 0.04),
-    spray("acid_spray__a2", 2, 0.5, 200, 1100, 0.06),
-    spray("acid_spray__a3", 3, 0.35, 330, 1700, 0.03),
-    spray("acid_spray__a4", 4, 0.45, 230, 1250, 0.05),
-    embrittle("acid_embrittle__e1", 11, 0.5, 80, 700),
-    embrittle("acid_embrittle__e2", 12, 0.6, 65, 550),
-    embrittle("acid_embrittle__e3", 13, 0.45, 95, 850),
-    embrittle("acid_embrittle__e4", 14, 0.55, 72, 620),
-    hallucinate("poison_hallucinate__h1", 21, 0.65, 220, 0.04, 1.5, (0.8, 0.4)),
-    hallucinate("poison_hallucinate__h2", 22, 0.7, 175, 0.05, 2.0, (0.75, 0.45)),
-    hallucinate("poison_hallucinate__h3", 23, 0.6, 262, 0.035, 1.2, (0.85, 0.35)),
-    hallucinate("poison_hallucinate__h4", 24, 0.7, 196, 0.06, 1.8, (0.8, 0.5)),
-    putrefy("poison_putrefy__p1", 31, 0.5, 3, 200, 900),
-    putrefy("poison_putrefy__p2", 32, 0.6, 4, 160, 700),
-    putrefy("poison_putrefy__p3", 33, 0.45, 3, 240, 1000),
-    putrefy("poison_putrefy__p4", 34, 0.6, 4, 180, 800),
+    spray("acid_spray__c1", 81, 0.4, 36, 1300, 3000, 0.5),
+    spray("acid_spray__c2", 82, 0.5, 44, 1000, 2600, 0.6),
+    spray("acid_spray__c3", 83, 0.35, 28, 1500, 3500, 0.4),
+    spray("acid_spray__c4", 84, 0.45, 40, 1200, 2800, 0.5),
+    embrittle("acid_embrittle__d1", 91, 0.55, 520, 9, 130),
+    embrittle("acid_embrittle__d2", 92, 0.65, 440, 11, 110),
+    embrittle("acid_embrittle__d3", 93, 0.5, 600, 8, 150),
+    embrittle("acid_embrittle__d4", 94, 0.6, 480, 10, 120),
+    hallucinate("poison_hallucinate__y1", 61, 0.9, 330, 1.414, 1.2, 2),
+    hallucinate("poison_hallucinate__y2", 62, 1.0, 262, 1.618, 1.5, 3),
+    hallucinate("poison_hallucinate__y3", 63, 0.85, 392, 1.272, 1.0, 2),
+    hallucinate("poison_hallucinate__y4", 64, 1.0, 294, 1.5, 1.8, 3),
+    putrefy("poison_putrefy__b1", 71, 0.5, 5, 260, 1.8),
+    putrefy("poison_putrefy__b2", 72, 0.6, 6, 200, 2.0),
+    putrefy("poison_putrefy__b3", 73, 0.45, 4, 320, 1.6),
+    putrefy("poison_putrefy__b4", 74, 0.6, 6, 230, 1.9),
 ]
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "acid_poison_candidates.json")
 with open(out, "w", encoding="utf-8", newline="\n") as f:
-    json.dump({"schema_version": 1, "seed": 2039, "sounds": sounds}, f, indent=1)
+    json.dump({"schema_version": 1, "seed": 2041, "sounds": sounds}, f, indent=1)
 print("wrote", out, len(sounds), "sounds")
