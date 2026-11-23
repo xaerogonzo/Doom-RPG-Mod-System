@@ -23,31 +23,45 @@ class TFLV_Upgrade_ECM : TFLV_Upgrade_BaseUpgrade {
     return 0.8 ** level;
   }
 
-  // Seeker missiles that may still need a decision. Filled by OnSeekerSpawned (event driven)
+  // Missiles that may still need a decision. Filled by OnHostileMissileSpawned (event driven)
   // instead of scanning every actor each tic. Entries leave the list once decided, dead, or
   // when their tracer turns out to be someone else.
+  // born[i] is -1 for a missile that is known to be a seeker, otherwise the tic it spawned:
+  // a missile that is not (yet) +SEEKERMISSILE is only kept for GRACE_TICS tics, in case an
+  // actor sets the flag from its first state.
   Array<Actor> pending;
-  // The list is seeded with one full scan the first time Tick runs (covers seekers already in
-  // flight when ECM is acquired, and games saved before this list existed).
-  bool primed;
+  Array<int> born;
+  const GRACE_TICS = 5;
+  // gametic of the last Tick. A gap (ECM toggled off, player frozen, map change, old save)
+  // means missiles may have been missed, so the list is rebuilt with one full scan.
+  int last_tick;
   // Outcome tallies (cheap integers; read by the debug dump so tests can see what happened).
   uint n_redirected, n_reprogrammed, n_failed;
 
-  // Called from WorldThingSpawned for every +SEEKERMISSILE actor. Their tracer is usually not
-  // set yet at this point (e.g. A_SkelMissile assigns it just after spawning), so only remember
-  // the missile; Tick reads the tracer later.
-  override void OnSeekerSpawned(Actor pawn, Actor shot) {
+  // Called from WorldThingSpawned for every missile not fired by a player. A tracer is usually
+  // not set yet at this point (e.g. A_SkelMissile assigns it just after spawning), so only
+  // remember the missile; Tick reads the tracer later.
+  override void OnHostileMissileSpawned(Actor pawn, Actor shot) {
     pending.Push(shot);
+    born.Push(shot.bSEEKERMISSILE ? -1 : gametic);
   }
 
   private void Prime(Actor owner) {
-    primed = true;
+    pending.Clear();
+    born.Clear();
     ThinkerIterator it = ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT);
     Actor shot;
     while (shot = Actor(it.next())) {
-      if (shot.bSEEKERMISSILE && shot.bMISSILE && shot.tracer == owner && !shot.bINCOMBAT)
+      if (shot.bSEEKERMISSILE && shot.bMISSILE && shot.tracer == owner && !shot.bINCOMBAT) {
         pending.Push(shot);
+        born.Push(-1);
+      }
     }
+  }
+
+  private void Forget(int i) {
+    pending.Delete(i);
+    born.Delete(i);
   }
 
   // --- The three outcomes. Each happens in exactly one place, once per missile. ---
@@ -77,7 +91,8 @@ class TFLV_Upgrade_ECM : TFLV_Upgrade_BaseUpgrade {
   }
 
   override void Tick(Actor owner) {
-    if (!primed) Prime(owner);
+    if (gametic != last_tick + 1) Prime(owner);
+    last_tick = gametic;
     if (pending.Size() == 0) return;
     let radius = EcmRange(self.level);
     Array<Actor> monsters; bool did_monsters = false;
@@ -86,13 +101,24 @@ class TFLV_Upgrade_ECM : TFLV_Upgrade_BaseUpgrade {
       // Gone, exploded, already handled, or aimed at somebody else: forget it. A tracer that is
       // still null stays listed, since it may be assigned a tic or two after spawning.
       if (!shot || !shot.bMISSILE || shot.bINCOMBAT || (shot.tracer && shot.tracer != owner)) {
-        pending.Delete(i);
+        Forget(i);
+        continue;
+      }
+      // Not a seeker (yet): give it a few tics to become one, then forget it.
+      if (born[i] >= 0) {
+        if (!shot.bSEEKERMISSILE) {
+          if (gametic - born[i] > GRACE_TICS) Forget(i);
+          continue;
+        }
+        born[i] = -1;
+      } else if (!shot.bSEEKERMISSILE) {
+        Forget(i);
         continue;
       }
       // Not (yet) aimed at the player, or still out of range: check again next tic.
       if (shot.tracer != owner || owner.Distance3D(shot) > radius) continue;
       // Found a seeker missile aimed at the player. It is decided now and leaves the list.
-      pending.Delete(i);
+      Forget(i);
       // First, try to redirect it against a nearby enemy.
       if (!did_monsters) {
         TFLV_Util.MonstersInRadius(owner, LockRange(self.level), monsters);

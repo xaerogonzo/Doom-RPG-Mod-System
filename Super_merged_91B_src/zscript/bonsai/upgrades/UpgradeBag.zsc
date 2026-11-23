@@ -129,9 +129,9 @@ class TFLV_Upgrade_UpgradeBag : Object play {
     }
   }
 
-  void OnSeekerSpawned(Actor pawn, Actor shot) {
+  void OnHostileMissileSpawned(Actor pawn, Actor shot) {
     for (uint i = 0; i < upgrades.Size(); ++i) {
-      if (upgrades[i].enabled) upgrades[i].OnSeekerSpawned(pawn, shot);
+      if (upgrades[i].enabled) upgrades[i].OnHostileMissileSpawned(pawn, shot);
     }
   }
 

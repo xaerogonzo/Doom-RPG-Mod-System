@@ -418,8 +418,8 @@ class TFLV_PerPlayerStats : Object play {
   }
 
   // Player (not weapon) upgrades only: today just ECM listens.
-  void OnSeekerSpawned(Actor shot) {
-    upgrades.OnSeekerSpawned(owner, shot);
+  void OnHostileMissileSpawned(Actor shot) {
+    upgrades.OnHostileMissileSpawned(owner, shot);
   }
 
   void OnDamageDealt(Actor shot, Actor target, uint damage) {

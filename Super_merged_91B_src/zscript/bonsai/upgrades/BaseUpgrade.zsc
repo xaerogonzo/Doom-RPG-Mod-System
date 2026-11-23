@@ -138,7 +138,7 @@ class TFLV_Upgrade_BaseUpgrade : Object play {
 
   // Called for every +SEEKERMISSILE actor that spawns (any owner), without priority checks.
   // *pawn* is the player whose upgrades are being notified. Tracer is usually not set yet.
-  virtual void OnSeekerSpawned(Actor pawn, Actor shot) {
+  virtual void OnHostileMissileSpawned(Actor pawn, Actor shot) {
     return;
   }
 
