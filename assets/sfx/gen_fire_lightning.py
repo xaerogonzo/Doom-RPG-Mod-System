@@ -72,6 +72,27 @@ def terror(sid, seed, dur, hz, swell, cut):
     ])
 
 
+def spread2(sid, seed, dur, hz, cut, swell):
+    """Round 2: no pops. A soft 'fwoof': low-passed noise with a slow swell, a warm low tone and a gentle thump."""
+    return snd(sid, dur, [
+        L(0.0, 1.0, noisy(dur, swell, dur * 0.5, cut, r=0.12)),
+        L(0.0, 0.7, tone(hz, dur, 0.05, dur * 0.5, glide=(0.8, 0.2), cutoff=900, partial=0.05, chorus=0.8, detune=1.01)),
+        L(0.0, 0.5, thump(hz / 2, 0.22, 0.1, drop=1.5)),
+    ])
+
+
+def chain2(sid, seed, dur, hz, cut, swell, notes):
+    """Round 2: no bright zip. A low rounded arc: a soft noise swell, a falling warm tone, and two low rounded notes."""
+    rng = random.Random(seed)
+    layers = [L(0.0, 0.9, noisy(dur, swell, dur * 0.45, cut, r=0.1)),
+              L(0.0, 1.0, tone(hz, dur, 0.02, dur * 0.5, glide=(1.5, 0.12), cutoff=1300, partial=0.08, chorus=0.8, detune=1.01))]
+    t = 0.06
+    for n in notes:
+        layers.append(L(t, 0.5, tone(n, 0.3, 0.015, 0.14, cutoff=1500, partial=0.05)))
+        t += rng.uniform(0.05, 0.08)
+    return snd(sid, dur, layers)
+
+
 def spread(sid, seed, dur, ember_hz, pops, cut):
     rng = random.Random(seed)
     layers = [L(0.0, 0.5, tone(ember_hz, dur, 0.02, dur * 0.6, cutoff=1500, partial=0.1))]
@@ -113,15 +134,17 @@ sounds = [
     terror("fire_terror__f1", 1, 0.55, 150, 0.12, 1100),
     terror("fire_terror__f2", 2, 0.65, 120, 0.2, 900),
     terror("fire_terror__f3", 3, 0.5, 185, 0.08, 1300),
-    spread("fire_spread__s1", 11, 0.4, 330, 3, 1500),
-    spread("fire_spread__s2", 12, 0.45, 262, 4, 1200),
-    spread("fire_spread__s3", 13, 0.35, 392, 3, 1800),
+    spread2("fire_spread__s4", 14, 0.4, 150, 800, 0.06),
+    spread2("fire_spread__s5", 15, 0.5, 120, 650, 0.1),
+    spread2("fire_spread__s6", 16, 0.35, 180, 1000, 0.05),
+    spread2("fire_spread__s7", 17, 0.45, 135, 900, 0.08),
+    chain2("lightning_chain__c4", 34, 0.45, 330, 1100, 0.03, [392.0, 523.25]),
+    chain2("lightning_chain__c5", 35, 0.5, 260, 900, 0.04, [330.0, 440.0]),
+    chain2("lightning_chain__c6", 36, 0.4, 400, 1300, 0.02, [523.25, 659.25]),
+    chain2("lightning_chain__c7", 37, 0.55, 220, 800, 0.05, [294.0, 392.0, 494.0]),
     thunder("lightning_thunder__t1", 21, 0.7, 60, 500, 0.25),
     thunder("lightning_thunder__t2", 22, 0.6, 75, 650, 0.2),
     thunder("lightning_thunder__t3", 23, 0.8, 50, 420, 0.3),
-    chain("lightning_chain__c1", 31, 0.4, 1300, 2, 3000),
-    chain("lightning_chain__c2", 32, 0.45, 1000, 3, 2600),
-    chain("lightning_chain__c3", 33, 0.35, 1600, 2, 3400),
     revive("lightning_revive__r1", 41, 0.55, 392.0, [1.0, 1.25, 1.5], 0.09),
     revive("lightning_revive__r2", 42, 0.6, 440.0, [1.0, 1.5, 2.0], 0.1),
     revive("lightning_revive__r3", 43, 0.5, 349.23, [1.0, 1.2, 1.5, 2.0], 0.07),

@@ -141,19 +141,21 @@ $random fire/terror { fire/terror1 fire/terror2 fire/terror3 }
 fire/terror1 "sounds/rpg_fire_terror__f1.wav"
 fire/terror2 "sounds/rpg_fire_terror__f2.wav"
 fire/terror3 "sounds/rpg_fire_terror__f3.wav"
-$random fire/spread { fire/spread1 fire/spread2 fire/spread3 }
-fire/spread1 "sounds/rpg_fire_spread__s1.wav"
-fire/spread2 "sounds/rpg_fire_spread__s2.wav"
-fire/spread3 "sounds/rpg_fire_spread__s3.wav"
 $random lightning/thunder { lightning/thunder1 lightning/thunder2 lightning/thunder3 }
 lightning/thunder1 "sounds/rpg_lightning_thunder__t1.wav"
 lightning/thunder2 "sounds/rpg_lightning_thunder__t2.wav"
 lightning/thunder3 "sounds/rpg_lightning_thunder__t3.wav"
-$random lightning/chain { lightning/chain1 lightning/chain2 lightning/chain3 }
-lightning/chain1 "sounds/rpg_lightning_chain__c1.wav"
-lightning/chain2 "sounds/rpg_lightning_chain__c2.wav"
-lightning/chain3 "sounds/rpg_lightning_chain__c3.wav"
 $random lightning/revive { lightning/revive1 lightning/revive2 lightning/revive3 }
 lightning/revive1 "sounds/rpg_lightning_revive__r1.wav"
 lightning/revive2 "sounds/rpg_lightning_revive__r2.wav"
 lightning/revive3 "sounds/rpg_lightning_revive__r3.wav"
+$random fire/spread { fire/spread1 fire/spread2 fire/spread3 fire/spread4 }
+fire/spread1 "sounds/rpg_fire_spread__s4.wav"
+fire/spread2 "sounds/rpg_fire_spread__s5.wav"
+fire/spread3 "sounds/rpg_fire_spread__s6.wav"
+fire/spread4 "sounds/rpg_fire_spread__s7.wav"
+$random lightning/chain { lightning/chain1 lightning/chain2 lightning/chain3 lightning/chain4 }
+lightning/chain1 "sounds/rpg_lightning_chain__c4.wav"
+lightning/chain2 "sounds/rpg_lightning_chain__c5.wav"
+lightning/chain3 "sounds/rpg_lightning_chain__c6.wav"
+lightning/chain4 "sounds/rpg_lightning_chain__c7.wav"

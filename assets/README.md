@@ -29,4 +29,6 @@ Thorns and Shield: `sfx/gen_thorns_shield.py` -> `sfx/thorns_shield_candidates.j
 
 Bouncy Shots: `sfx/gen_bouncy2.py` -> `sfx/bouncy2_candidates.json` (seed 2035, 8 layered candidates, shipped: `rpg_bouncy2__m1/m2/m6`, provisional; round 1 single-tone blips in `bouncy_candidates.json` were too close to the Thorns chimes) as `bouncy/field` in `SNDINFO.txt`.
 
+Fire/Lightning cues: `sfx/gen_fire_lightning.py` -> `sfx/fire_lightning_candidates.json` (seed 2038; 17 quiet one-shots, all shipped, provisional) as `fire/terror`, `fire/spread`, `lightning/thunder`, `lightning/chain`, `lightning/revive` in `SNDINFO.txt`.
+
 Submunitions: `sfx/gen_submunitions.py` -> `sfx/submunitions_candidates.json` (seed 2037, 5 rhythmic 5.83 s loop variants matched to the measured bomblet bounce rhythm, all shipped, provisional; needs the toolkit's 96-layer limit) as `submunitions/cluster` in `SNDINFO.txt`.
