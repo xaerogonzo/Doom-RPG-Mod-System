@@ -7,7 +7,7 @@ The generated files are copied into `Super_merged_91B_src/` (this folder is not 
 |---|---|---|
 | `sfx/stage_a.json` (seed 2026) | `sounds/rpg_levelup.wav`, `rpg_parry.wav` (layered composite-armour hit), `rpg_parry2.wav` (softer layered thud), `rpg_parry_armor.wav` (metal-led variant); all three are played at random for both `parry/crit` and `parry/normal` | `SNDINFO.txt`: `bonsai/gunlevelup`, `parry/crit1`, `parry/normal1` |
 
-| `sfx/gen_stage_b.py` -> `stage_b_candidates.json` (seed 2028), `sfx/gen_stage_b2.py` -> `stage_b2_candidates.json` (seed 2029) | candidates (round 1: 22, round 2: 16); shipped (provisional): `rpg_jump__f1/f2`, `rpg_dash__c3/h2/h3`, `rpg_doublejump__g1/g2/g4`, `rpg_climb__d3/d2`, `rpg_climbtop__e2/e1` | `SNDINFO.txt`: `hv/jump`, `hv/dash`, `hv/doublejump`, `hv/climb`, `hv/climbtop` |
+| `sfx/gen_stage_b.py` -> `stage_b_candidates.json` (seed 2028), `sfx/gen_stage_b2.py` -> `stage_b2_candidates.json` (seed 2029) | candidates (round 1: 22, round 2: 16); shipped (provisional): `rpg_jump__f1/f3/f5`, `rpg_dash__c3/h3/h6`, `rpg_doublejump__g1/g4/g5`, `rpg_climb__d3/d2`, `rpg_climbtop__e2/e1` | `SNDINFO.txt`: `hv/jump`, `hv/dash`, `hv/doublejump`, `hv/climb`, `hv/climbtop` |
 
 Regenerate and check:
 
