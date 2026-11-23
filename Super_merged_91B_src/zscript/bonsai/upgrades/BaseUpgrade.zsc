@@ -136,6 +136,12 @@ class TFLV_Upgrade_BaseUpgrade : Object play {
     return;
   }
 
+  // Called for every +SEEKERMISSILE actor that spawns (any owner), without priority checks.
+  // *pawn* is the player whose upgrades are being notified. Tracer is usually not set yet.
+  virtual void OnHostileMissileSpawned(Actor pawn, Actor shot) {
+    return;
+  }
+
   // Event handlers for damage events.
   // Note that in all of these, *pawn* is the player, *target* or *attacker* is
   // the monster; *shot*, if defined, is the projectile or puff associated with
