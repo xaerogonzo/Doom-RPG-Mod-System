@@ -118,15 +118,10 @@ shield/hit6 "sounds/rpg_shield_hit2__x1b.wav"
 shield/hit7 "sounds/rpg_shield_hit2__x2b.wav"
 shield/hit8 "sounds/rpg_shield_hit2__x4b.wav"
 
-// Bouncy Shots round 2 (assets/sfx/gen_bouncy2.py, CC0): a layered energy-field effect (soft zap + hum + gentle thud + a few random pentatonic notes), eight variants. Provisional.
+// Bouncy Shots round 2 (assets/sfx/gen_bouncy2.py, CC0): a layered effect (soft zap + hum + gentle thud + random pentatonic notes: a hit, then a chime as it bounces off). Three kept variants (m1, m2, m6).
 // Assigned to the projectile's BounceSound / WallBounceSound at creation (one projectile per 25 tics, see SimpleUpgrades.zsc).
-$random bouncy/field { bouncy/field1 bouncy/field2 bouncy/field3 bouncy/field4 bouncy/field5 bouncy/field6 bouncy/field7 bouncy/field8 }
+$random bouncy/field { bouncy/field1 bouncy/field2 bouncy/field3 }
 bouncy/field1 "sounds/rpg_bouncy2__m1.wav"
 bouncy/field2 "sounds/rpg_bouncy2__m2.wav"
-bouncy/field3 "sounds/rpg_bouncy2__m3.wav"
-bouncy/field4 "sounds/rpg_bouncy2__m4.wav"
-bouncy/field5 "sounds/rpg_bouncy2__m5.wav"
-bouncy/field6 "sounds/rpg_bouncy2__m6.wav"
-bouncy/field7 "sounds/rpg_bouncy2__m7.wav"
-bouncy/field8 "sounds/rpg_bouncy2__m8.wav"
+bouncy/field3 "sounds/rpg_bouncy2__m6.wav"
 $limit bouncy/field 3

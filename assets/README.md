@@ -27,4 +27,4 @@ ECM cues: `sfx/gen_ecm.py` -> `sfx/ecm_candidates.json` (seed 2030, 10 candidate
 
 Thorns and Shield: `sfx/gen_thorns_shield.py` -> `sfx/thorns_shield_candidates.json` (seed 2031, 16 candidates); shipped (provisional): `rpg_thorns2__w2/w4/w5/w8` and `w2b/w4b/w5b/w8b` from `sfx/gen_thorns2.py` -> `thorns2_candidates.json` (seed 2032, replaces the harsher spark round) (`thorns/zap`), `rpg_shield_up__s1/s3/s4`, `rpg_shield_down__t1/t2/t3`, `rpg_shield_hit2__x1-x5` and `x1b/x2b/x4b` (from `sfx/gen_shield_hit2.py` -> `shield_hit2_candidates.json`, seed 2033) (`shield/up`, `shield/down`, `shield/hit`).
 
-Bouncy Shots: `sfx/gen_bouncy2.py` -> `sfx/bouncy2_candidates.json` (seed 2035, 8 layered variants, all shipped, provisional; round 1 single-tone blips in `bouncy_candidates.json` were too close to the Thorns chimes) as `bouncy/field` in `SNDINFO.txt`.
+Bouncy Shots: `sfx/gen_bouncy2.py` -> `sfx/bouncy2_candidates.json` (seed 2035, 8 layered candidates, shipped: `rpg_bouncy2__m1/m2/m6`, provisional; round 1 single-tone blips in `bouncy_candidates.json` were too close to the Thorns chimes) as `bouncy/field` in `SNDINFO.txt`.
