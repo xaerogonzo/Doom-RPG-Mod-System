@@ -89,12 +89,16 @@ ecm/failed3 "sounds/rpg_ecm_failed__b5.wav"
 
 // Thorns and melee Shield (assets/sfx/gen_thorns_shield.py, CC0), quiet, provisional picks.
 // thorns/zap: a soft tonal chime when thorns reflect damage. shield/up, shield/down: the melee shield switching on/off. shield/hit: it absorbing a blow.
-// Thorns round 2 (assets/sfx/gen_thorns2.py): soft tonal chimes, no noise; four kept variants so repeated hits do not sound identical.
-$random thorns/zap { thorns/zap1 thorns/zap2 thorns/zap3 thorns/zap4 }
+// Thorns round 2 (assets/sfx/gen_thorns2.py): soft tonal chimes, no noise; eight variants (the four kept ones plus the same four moved by a consonant interval) so repeated hits do not sound identical.
+$random thorns/zap { thorns/zap1 thorns/zap2 thorns/zap3 thorns/zap4 thorns/zap5 thorns/zap6 thorns/zap7 thorns/zap8 }
 thorns/zap1 "sounds/rpg_thorns2__w2.wav"
 thorns/zap2 "sounds/rpg_thorns2__w4.wav"
 thorns/zap3 "sounds/rpg_thorns2__w5.wav"
 thorns/zap4 "sounds/rpg_thorns2__w8.wav"
+thorns/zap5 "sounds/rpg_thorns2__w2b.wav"
+thorns/zap6 "sounds/rpg_thorns2__w4b.wav"
+thorns/zap7 "sounds/rpg_thorns2__w5b.wav"
+thorns/zap8 "sounds/rpg_thorns2__w8b.wav"
 // Melee shield: up and down keepers (s1/s3/s4, t1/t2/t3); absorb round 2 is bubblier and deeper (assets/sfx/gen_shield_hit2.py).
 $random shield/up { shield/up1 shield/up2 shield/up3 }
 shield/up1 "sounds/rpg_shield_up__s1.wav"
@@ -104,7 +108,12 @@ $random shield/down { shield/down1 shield/down2 shield/down3 }
 shield/down1 "sounds/rpg_shield_down__t1.wav"
 shield/down2 "sounds/rpg_shield_down__t2.wav"
 shield/down3 "sounds/rpg_shield_down__t3.wav"
-$random shield/hit { shield/hit1 shield/hit2 shield/hit3 }
+$random shield/hit { shield/hit1 shield/hit2 shield/hit3 shield/hit4 shield/hit5 shield/hit6 shield/hit7 shield/hit8 }
 shield/hit1 "sounds/rpg_shield_hit2__x1.wav"
 shield/hit2 "sounds/rpg_shield_hit2__x2.wav"
-shield/hit3 "sounds/rpg_shield_hit2__x4.wav"
+shield/hit3 "sounds/rpg_shield_hit2__x3.wav"
+shield/hit4 "sounds/rpg_shield_hit2__x4.wav"
+shield/hit5 "sounds/rpg_shield_hit2__x5.wav"
+shield/hit6 "sounds/rpg_shield_hit2__x1b.wav"
+shield/hit7 "sounds/rpg_shield_hit2__x2b.wav"
+shield/hit8 "sounds/rpg_shield_hit2__x4b.wav"

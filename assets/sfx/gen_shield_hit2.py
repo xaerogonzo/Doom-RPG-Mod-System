@@ -8,6 +8,7 @@ Feedback: the first absorb sounds were short and ding-like. So: deeper base pitc
 and a soft low swell layered together, low-passed (<= 1800 Hz), 0.28-0.4 s. Quiet (-28 dBFS), heard on blows
 absorbed (at most every 12 tics).
 """
+import copy
 import json
 import os
 
@@ -66,6 +67,24 @@ sounds = [
     snd("shield_hit2__x5", 0.36, [L(0.0, 1.0, bubble(175, 0.22)), L(0.06, 0.8, bubble(230, 0.2)),
                                   L(0.0, 0.35, pad(350, 0.36, 0.03, 0.16, cutoff=1800)), L(0.0, 0.4, pad(105, 0.36, 0.05, 0.2))]),
 ]
+
+
+def transposed(sound, ratio, new_id):
+    """the same sound with every layer's pitch multiplied by ratio (a musical interval), for more variants"""
+    s = copy.deepcopy(sound)
+    s["id"] = new_id
+    s["alias"] = s["alias"].rsplit("/", 1)[0] + "/" + new_id.split("__")[1]
+    for ly in s["fm"]["layers"]:
+        ly["patch"]["pitch"] = round(ly["patch"]["pitch"] * ratio, 3)
+    return s
+
+
+by_id = {s["id"]: s for s in sounds}
+
+# more variants: the same bubble figures moved by a consonant interval
+sounds += [transposed(by_id["shield_hit2__x1"], 9 / 8, "shield_hit2__x1b"),
+           transposed(by_id["shield_hit2__x2"], 4 / 3, "shield_hit2__x2b"),
+           transposed(by_id["shield_hit2__x4"], 5 / 6, "shield_hit2__x4b")]
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "shield_hit2_candidates.json")
 with open(out, "w", encoding="utf-8", newline="\n") as f:

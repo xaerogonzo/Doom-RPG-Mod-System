@@ -10,6 +10,7 @@ touch of gentle FM, pitch glides and slow swells for the "psychedelic" feel, sho
 audible RMS). Pleasantness over punch. Variants sit on different pentatonic notes so repeated hits do not
 sound like the same tone over and over.
 """
+import copy
 import json
 import os
 
@@ -68,6 +69,25 @@ sounds = [
     snd("thorns2__w8", 0.40, [L(0, 1.0, tone(D5, 0.45, 0.01, 0.22, fm_ratio=2.0, fm_depth=0.5)),
                               L(0.0, 0.8, tone(G5, 0.45, 0.012, 0.2, fm_ratio=2.0, fm_depth=0.5))]),
 ]
+
+
+def transposed(sound, ratio, new_id):
+    """the same sound with every layer's pitch multiplied by ratio (a musical interval), for more variants"""
+    s = copy.deepcopy(sound)
+    s["id"] = new_id
+    s["alias"] = s["alias"].rsplit("/", 1)[0] + "/" + new_id.split("__")[1]
+    for ly in s["fm"]["layers"]:
+        ly["patch"]["pitch"] = round(ly["patch"]["pitch"] * ratio, 3)
+    return s
+
+
+by_id = {s["id"]: s for s in sounds}
+
+# more variants for a sound that is heard on every hit: the kept ones moved by a consonant interval
+sounds += [transposed(by_id["thorns2__w2"], 4 / 3, "thorns2__w2b"),    # up a fourth
+           transposed(by_id["thorns2__w4"], 3 / 4, "thorns2__w4b"),    # down a fourth
+           transposed(by_id["thorns2__w5"], 9 / 8, "thorns2__w5b"),    # up a second
+           transposed(by_id["thorns2__w8"], 5 / 6, "thorns2__w8b")]    # down a minor third
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "thorns2_candidates.json")
 with open(out, "w", encoding="utf-8", newline="\n") as f:

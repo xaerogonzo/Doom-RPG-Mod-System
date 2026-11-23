@@ -28,9 +28,9 @@ class TFLV_Upgrade_Thorns : TFLV_Upgrade_BaseUpgrade {
 // to proc elemental effects or not.
 class TFLV_Upgrade_Thorns_Aux : Actor {
   property UpgradePriority: weaponspecial;
-  // Sound cue throttle: Thorns can fire on every hit taken, so a swarm gives a chime at most every CUE_GAP_TICS tics.
+  // Sound cue throttle: Thorns can fire on every hit taken, so a swarm gives a chime at most every CUE_GAP_TICS tics (0.57 s; longer than the Shield's gap).
   int last_cue_tic;
-  const CUE_GAP_TICS = 14;
+  const CUE_GAP_TICS = 20;
 
   Default {
     RenderStyle "None";
