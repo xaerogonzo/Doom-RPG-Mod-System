@@ -240,6 +240,44 @@ class TFLV_PerPlayerStats : Object play {
     }
   }
 
+  // Take back player XP that weapon levels had contributed (death penalty). Clamped at zero;
+  // never changes the player's level, upgrades or pending level-ups.
+  void RemovePlayerXP(uint amount) {
+    self.XP -= min(self.XP, amount);
+  }
+
+  // Last death penalty, for the debug dump.
+  int deathPenaltyTic;      // gametic of the last penalty (guards against applying it twice)
+  int lastPenaltyRequested;
+  int lastPenaltyLevelsLost;
+  int lastPenaltyUpgradesRemoved;
+  int lastPenaltyWeapons;
+
+  // Death penalty over every weapon record: configurable levels lost per weapon.
+  // Only called when the stats will survive the death. Applied at most once per death.
+  void ApplyDeathPenalty() {
+    int n = clamp(bonsai_death_levels_lost, 0, 50);
+    if (n <= 0 || deathPenaltyTic == gametic) return;
+    deathPenaltyTic = gametic;
+    int minLevel = max(0, bonsai_death_min_level);
+    lastPenaltyRequested = n;
+    lastPenaltyLevelsLost = 0;
+    lastPenaltyUpgradesRemoved = 0;
+    lastPenaltyWeapons = 0;
+    for (int i = 0; i < weapons.Size(); ++i) {
+      let info = weapons[i];
+      if (!info) continue;
+      int removed;
+      int lost = info.ApplyDeathPenalty(n, minLevel, bonsai_death_lose_upgrades, removed);
+      if (lost > 0) ++lastPenaltyWeapons;
+      lastPenaltyLevelsLost += lost;
+      lastPenaltyUpgradesRemoved += removed;
+    }
+    if (lastPenaltyLevelsLost > 0)
+      owner.A_Log(string.format("You died: %d weapon level(s) lost, %d upgrade point(s) lost.",
+        lastPenaltyLevelsLost, lastPenaltyUpgradesRemoved), true);
+  }
+
   void Fanfare() {
     EventHandler.SendNetworkEvent("bonsai-level-up", 0, self.level+1);
     // VUAS achievement netevents for player level milestones

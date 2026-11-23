@@ -264,9 +264,16 @@ user   int   bonsai_upg_overdrive = 4;             // 0=Disabled 1=VeryRare 2=Ra
 
 // Gun Bonsai - Progression Controls
 server bool bonsai_freeze_progression = false;
-server bool bonsai_keep_upgrades_on_death = false;
+server bool bonsai_keep_upgrades_on_death = true;
 // Death penalty: fraction of current weapon XP lost on death (0.0 = none, 0.25 = lose 25%)
 server float bonsai_death_xp_penalty = 0.0;
+// Death penalty: levels each weapon loses on death (0 = off). XP resets to the start of the resulting level.
+// Weapons with unspent bonus levels are exempt. Needs the stats to survive death (keep upgrades on death on).
+server int   bonsai_death_levels_lost = 0;
+// Death penalty: weapons never drop below this level.
+server int   bonsai_death_min_level = 0;
+// Death penalty: each weapon level lost also removes one eligible upgrade point (never breaking a prerequisite).
+server bool  bonsai_death_lose_upgrades = true;
 // Death penalty: flat score points deducted on death (Doom Points). 0 = no penalty.
 user int dp_death_score_penalty = 0;
 // =============================================================================

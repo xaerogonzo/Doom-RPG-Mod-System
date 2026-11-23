@@ -380,6 +380,30 @@ class TFLV_WeaponInfo : Object play {
     return true;
   }
 
+  // Death penalty: lose up to n levels (never below minLevel) and, optionally, one upgrade point per
+  // level lost. XP resets to the start of the resulting level, so partial progress is gone too.
+  // A weapon holding unspent bonus levels (free respec levels) is exempt and left untouched.
+  // Player XP is reduced by one per level actually lost (each weapon level gave the player +1).
+  // Returns levels lost; upgradesRemoved says how many of them also cost an upgrade point.
+  int ApplyDeathPenalty(int n, int minLevel, bool loseUpgrades, out int upgradesRemoved) {
+    upgradesRemoved = 0;
+    if (bonus_levels > 0 || !stats) return 0;
+    int lost = 0;
+    bool active = (stats.infoForCurrentWeapon == self);
+    for (int i = 0; i < n; ++i) {
+      if (level == 0 || int(level) <= minLevel) break;
+      if (loseUpgrades && upgrades.RemoveOneLevel(stats, self, active) != "") ++upgradesRemoved;
+      --level;
+      ++lost;
+    }
+    if (lost > 0) {
+      XP = TotalXPForLevel(level);
+      maxXP = TotalXPForLevel(level + 1);
+      stats.RemovePlayerXP(lost);
+    }
+    return lost;
+  }
+
   void RejectLevelUp() {
     if (bonus_levels) {
       --bonus_levels;

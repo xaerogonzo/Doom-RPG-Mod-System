@@ -285,6 +285,10 @@ class TFLV_Profiles play
     n.Push("bonsai_hyperv_slomo_any_weapon");  // bool stored as 0/1
     n.Push("bonsai_hyperv_hregen_amount");
     n.Push("bonsai_hyperv_aregen_amount");
+    // Death penalty (appended last so the positional default arrays below stay aligned)
+    n.Push("bonsai_death_levels_lost");
+    n.Push("bonsai_death_min_level");
+    n.Push("bonsai_death_lose_upgrades");
     // NOTE: bonsai_upg_hyperv_* rarity CVars are also excluded here,
     // same reason as the bonsai_upg_* block above.
   }
@@ -538,6 +542,7 @@ class TFLV_Profiles play
     v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
     v.Push(5); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
+    v.Push(0); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
   }
 
   static void BalancedInts(out Array<int> v)
@@ -554,6 +559,7 @@ class TFLV_Profiles play
     v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
     v.Push(5); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
+    v.Push(1); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
   }
 
   static void ChallengingInts(out Array<int> v)
@@ -570,6 +576,7 @@ class TFLV_Profiles play
     v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
     v.Push(4); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
+    v.Push(1); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
   }
 
   static void PunishingInts(out Array<int> v)
@@ -586,6 +593,7 @@ class TFLV_Profiles play
     v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
     v.Push(3); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
+    v.Push(2); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
   }
 
   static void BrutalInts(out Array<int> v)
@@ -602,6 +610,7 @@ class TFLV_Profiles play
     v.Push(1); v.Push(0); v.Push(3); v.Push(10);  // hybrid: component_a, component_b, transition_start, _end
     v.Push(5); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
+    v.Push(2); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
   }
 
 // =============================================================================

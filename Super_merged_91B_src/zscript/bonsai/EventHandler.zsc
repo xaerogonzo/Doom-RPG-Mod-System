@@ -274,6 +274,11 @@ class TFLV_EventHandler : StaticEventHandler {
         // fires, GZDoom has already cleared ReadyWeapon to null and TickStats
         // has set infoForCurrentWeapon to null as a result — so we can't rely
         // on either of those fields here.
+        // Levels-lost penalty (every weapon). Only when the stats will survive this death:
+        // otherwise the respawn wipes everything anyway.
+        if (playerstats[pn] && (bonsai_keep_upgrades_on_death || bonsai_ignore_death_exits))
+          playerstats[pn].ApplyDeathPenalty();
+
         if (bonsai_death_xp_penalty > 0 && playerstats[pn]) {
           let stats = playerstats[pn];
           bool anyPenalty = false;

@@ -35,6 +35,45 @@ class TFLV_Upgrade_UpgradeBag : Object play {
     upgrades.clear();
   }
 
+  // Would upgrade i losing one point leave the bag with no more broken prerequisites than it has
+  // now? (A consistent bag stays consistent; an already inconsistent old bag is never made worse.)
+  // Simulated on the real levels and restored; nothing is changed permanently.
+  bool CanLoseLevel(uint i, int violationsBefore) {
+    let u = upgrades[i];
+    uint oldLevel = u.level;
+    if (u.level > 0 && u.level >= u.max_level) u.level -= 1;
+    int after = TFLV_Upgrade_ElementalUpgrade.BagViolations(self);
+    u.level = oldLevel;
+    return after <= violationsBefore;
+  }
+
+  // Death penalty: remove one point from a random upgrade whose loss keeps every prerequisite
+  // intact. Candidates are entries (not individual levels), so a multi-level upgrade is not
+  // picked more often. 'active' means this bag's effects are currently running, in which case
+  // the changed upgrade is deactivated and re-activated like TuneUpgrade does. Returns the name
+  // of the upgrade that lost a point, or "" if nothing could be removed.
+  string RemoveOneLevel(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info, bool active) {
+    Array<uint> candidates;
+    int before = TFLV_Upgrade_ElementalUpgrade.BagViolations(self);
+    for (uint i = 0; i < upgrades.Size(); ++i) {
+      if (upgrades[i].max_level > 0 && CanLoseLevel(i, before)) candidates.Push(i);
+    }
+    if (candidates.Size() == 0) return "";
+    uint pick = candidates[random[TFLV_Upgrade_RNG_DeathPenalty](0, candidates.Size() - 1)];
+    let u = upgrades[pick];
+    string name = u.GetClassName();
+    bool running = active && u.enabled;
+    if (running) u.OnDeactivate(stats, info);
+    u.max_level -= 1;
+    if (u.level > u.max_level) u.level = u.max_level;
+    if (u.max_level == 0) {
+      upgrades.Delete(pick);
+    } else if (running && u.level > 0) {
+      u.OnActivate(stats, info);
+    }
+    return name;
+  }
+
   uint Level(string cls) const {
     for (uint i = 0; i < upgrades.Size(); ++i) {
       if (upgrades[i].GetClassName() == cls) {

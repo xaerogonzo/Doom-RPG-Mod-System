@@ -41,6 +41,42 @@ class TFLV_Upgrade_ElementalUpgrade : TFLV_Upgrade_BaseUpgrade {
       && info.upgrades.Level(alternate) == 0;
   }
 
+  // Upgrade trees, four entries each: basic, intermediate, mastery A, mastery B ("" = none).
+  // A mastery needs its intermediate at level >= max(2, mastery level) and the two masteries
+  // exclude each other; the intermediate needs the basic at level >= max(2, its level).
+  // Blood has no second-tier mastery split: SanguineShots -> VitalDrain -> Exsanguinate.
+  // These follow HasIntermediatePrereq / HasMasteryPrereq above and each element file.
+
+  // Number of prerequisite rules (above, plus the Elemental Synthesis requirement) that the levels in
+  // this bag break; 0 = fully consistent. Used to decide whether removing a point is safe.
+  static int BagViolations(TFLV_Upgrade_UpgradeBag bag) {
+    static const string DEATH_TREES[] = {
+    "TFLV_Upgrade_IncendiaryShots",      "TFLV_Upgrade_BurningTerror",     "TFLV_Upgrade_Conflagration",  "TFLV_Upgrade_InfernalKiln",
+    "TFLV_Upgrade_PoisonShots",          "TFLV_Upgrade_Weakness",          "TFLV_Upgrade_Putrefaction",   "TFLV_Upgrade_Hallucinogens",
+    "TFLV_Upgrade_CorrosiveShots",       "TFLV_Upgrade_ConcentratedAcid",  "TFLV_Upgrade_AcidSpray",      "TFLV_Upgrade_Embrittlement",
+    "TFLV_Upgrade_ShockingInscription",  "TFLV_Upgrade_Thunderbolt",       "TFLV_Upgrade_ChainLightning", "TFLV_Upgrade_Revivification",
+    "TFLV_Upgrade_SanguineShots",        "TFLV_Upgrade_VitalDrain",        "TFLV_Upgrade_Exsanguinate",   ""
+  };
+    int bad = 0;
+    for (uint t = 0; t < 5; ++t) {
+      uint lb = bag.Level(DEATH_TREES[t*4]);
+      uint li = bag.Level(DEATH_TREES[t*4+1]);
+      uint la = bag.Level(DEATH_TREES[t*4+2]);
+      uint lm = DEATH_TREES[t*4+3] == "" ? 0 : bag.Level(DEATH_TREES[t*4+3]);
+      if (la > 0 && lm > 0) ++bad;             // masteries exclude each other
+      uint master = max(la, lm);
+      if (master > 0 && li < max(2, master)) ++bad;
+      if (li > 0 && lb < max(2, li)) ++bad;
+    }
+    // Elemental Synthesis: two completed elements, none left in progress.
+    if (bag.Level("TFLV_Upgrade_ElementalBeam") + bag.Level("TFLV_Upgrade_ElementalBlast")
+        + bag.Level("TFLV_Upgrade_ElementalWave") > 0) {
+      if (GetElementCount(bag) < 2) ++bad;
+      if (GetElementInProgress(bag) != TFLV_Upgrade_ELEM_NULL) ++bad;
+    }
+    return bad;
+  }
+
   static uint CountElementLevels(TFLV_Upgrade_UpgradeBag upgrades, TFLV_Upgrade_UpgradeElement elem) {
     let n = 0;
     for (uint i = 0; i < upgrades.upgrades.size(); ++i) {

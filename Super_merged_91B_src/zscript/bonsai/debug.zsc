@@ -24,6 +24,22 @@ class TFLV_Debug : Object play {
       service.GetDouble("add-w-xp", "", player, arg, null);
     } else if (argv[1] == "p-xp") {
       service.GetDouble("add-p-xp", "", player, arg);
+    } else if (argv[1] == "dump") {
+      Dump(player);
+    } else if (argv[1] == "w-level") {
+      // Test helper: set the current weapon's level (XP at the start of that level).
+      let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+      let info = stats ? stats.GetInfoForCurrentWeapon() : null;
+      if (info) {
+        info.level = arg;
+        info.XP = info.TotalXPForLevel(arg);
+        info.maxXP = info.TotalXPForLevel(arg + 1);
+      } else console.printf("w-level: no current weapon info");
+    } else if (argv[1] == "w-bonus") {
+      // Test helper: set the current weapon's unspent bonus levels.
+      let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+      let info = stats ? stats.GetInfoForCurrentWeapon() : null;
+      if (info) info.bonus_levels = arg;
     } else if (argv[1] == "allupgrades") {
       AddAllUpgrades(service, player);
     } else if (argv[1] == "reset") {
@@ -38,6 +54,33 @@ class TFLV_Debug : Object play {
     } else {
       console.printf("Unknown or malformed debug command: %s", argv[1]);
     }
+  }
+
+  // Read-only, deterministic listing of every weapon's progression and upgrades, the player's
+  // level/XP and the last death penalty. One "BONSAI ..." line each so tests can match them.
+  static void Dump(int player) {
+    let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+    if (!stats) { console.printf("BONSAI dump: no stats"); return; }
+    console.printf("BONSAI player level=%d xp=%d", stats.level, stats.XP);
+    for (uint i = 0; stats.upgrades && i < stats.upgrades.upgrades.Size(); ++i) {
+      let u = stats.upgrades.upgrades[i];
+      console.printf("BONSAI pupgrade class=%s level=%d max=%d enabled=%d", u.GetClassName(), u.level, u.max_level, u.enabled);
+    }
+    for (int w = 0; w < stats.weapons.Size(); ++w) {
+      let info = stats.weapons[w];
+      if (!info) continue;
+      console.printf("BONSAI weapon class=%s level=%d xp=%.1f maxxp=%.1f bonus_levels=%d",
+        info.wpnClass, info.level, info.XP, info.maxXP, info.bonus_levels);
+      for (uint i = 0; info.upgrades && i < info.upgrades.upgrades.Size(); ++i) {
+        let u = info.upgrades.upgrades[i];
+        console.printf("BONSAI upgrade weapon=%s class=%s level=%d max=%d enabled=%d",
+          info.wpnClass, u.GetClassName(), u.level, u.max_level, u.enabled);
+      }
+    }
+    console.printf("BONSAI death_penalty requested=%d levels_lost=%d upgrades_removed=%d weapons=%d",
+      stats.lastPenaltyRequested, stats.lastPenaltyLevelsLost,
+      stats.lastPenaltyUpgradesRemoved, stats.lastPenaltyWeapons);
+    console.printf("BONSAI end");
   }
 
   static void ShowInfoConsole(Actor pawn) {

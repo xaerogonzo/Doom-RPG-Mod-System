@@ -120,7 +120,13 @@ OptionMenu "GunBonsaiOptions"
   Option "Freeze Progression (no XP gain)", "bonsai_freeze_progression", "OnOff"
   TFLV_Tooltip "When enabled, weapons and players stop gaining XP entirely. Existing upgrades remain active. Useful for locking in a build and jumping into maps."
   Option "Always Keep Upgrades On Death", "bonsai_keep_upgrades_on_death", "OnOff"
-  TFLV_Tooltip "When enabled, upgrades are never lost on death or map transition — including death exits and pistol starts. Starting a brand new game still resets everything. This overrides the 'Keep upgrades on death exit/pistol start' setting above."
+  TFLV_Tooltip "(Default ON.) When enabled, upgrades are never lost on death or map transition — including death exits and pistol starts. Starting a brand new game still resets everything. This overrides the 'Keep upgrades on death exit/pistol start' setting above."
+  Slider "Levels Lost Per Weapon On Death", "bonsai_death_levels_lost", 0, 10, 1, 0
+  TFLV_Tooltip "Every weapon loses this many levels when you die and its XP resets to the start of the new level. 0 = off. Weapons with unspent bonus levels are exempt. Player level and player upgrades are not affected. Only applies while 'Always Keep Upgrades On Death' (or the death-exit setting) keeps your progress; otherwise death still resets everything."
+  Slider "Weapon Level Floor On Death", "bonsai_death_min_level", 0, 20, 1, 0
+  TFLV_Tooltip "Weapons never lose levels below this level."
+  Option "Lose Upgrades With Levels", "bonsai_death_lose_upgrades", "OnOff"
+  TFLV_Tooltip "Each weapon level lost also removes one upgrade point from that weapon, chosen at random among points that can go without breaking a prerequisite (for example Burning Terror is kept while Conflagration depends on it)."
   Slider "XP Penalty on Death (%)", "bonsai_death_xp_penalty", 0.0, 1.0, 0.05, 2
   TFLV_Tooltip "Fraction of current weapon XP lost when you die. 0 = no penalty. 0.25 = lose 25% of weapon XP. XP will not drop below the current level threshold (you won't de-level)."
 
