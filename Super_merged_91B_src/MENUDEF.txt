@@ -1980,7 +1980,7 @@ OptionMenu "VMM_Settings" {
 	StaticText "Gun Bonsai Integration", GOLD
 	StaticText "Lock features behind upgrades earned through combat.", DARKGRAY
 	Option "Mobility (Dash/Jump/Crouch)",    "hyperv_gb_mobility",     "OnOff"
-	TFLV_Tooltip "When ON, dash, jump, crouch, ledge climb, and double jump are locked behind the Mobility player upgrade."
+	TFLV_Tooltip "When ON, jump, crouch, dash, double dash, ledge climb, and double jump are locked behind the Mobility player upgrade."
 	Option "Combat Training (Melee/Parry)",  "hyperv_gb_melee",        "OnOff"
 	TFLV_Tooltip "When ON, auto-melee, combo, and parry are locked behind the Combat Training player upgrade."
 	Option "Bullet Time (Slomo)",            "hyperv_gb_slomo",        "OnOff"

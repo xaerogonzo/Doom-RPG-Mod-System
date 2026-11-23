@@ -284,7 +284,7 @@ VMM_TT_RESET_HUD = "Resets all HUD position, size, and visibility settings to de
 [enu default]
 
 TFLV_Upgrade_HyperV_Mobility_Name      = "Mobility";
-TFLV_Upgrade_HyperV_Mobility_Desc      = "Unlocks movement abilities. Level 1: crouch, jump, and dash. Level 2: double dash and ledge climb. Level 3: double jump.";
+TFLV_Upgrade_HyperV_Mobility_Desc      = "Lv1: jump, crouch, dash. Lv2: double dash, ledge climb. Lv3: double jump.";
 TFLV_Upgrade_HyperV_Mobility_TT        = "Mobility (@next)";
 
 TFLV_Upgrade_HyperV_Melee_Name         = "Combat Training";
@@ -308,7 +308,7 @@ TFLV_Upgrade_HyperV_AmmoRegen_Desc     = "Unlocks passive ammo regeneration. All
 TFLV_Upgrade_HyperV_AmmoRegen_TT       = "Resupply (tick: @tick, backpack: @backpack)";
 
 TFLV_Upgrade_HyperV_Agility_Name       = "Agility";
-TFLV_Upgrade_HyperV_Agility_Desc       = "Increases movement speed and jump height. Level 1: +25% speed. Level 2: +35% jump height.";
+TFLV_Upgrade_HyperV_Agility_Desc       = "Lv1: +25% movement speed. Lv2: +35% jump height.";
 TFLV_Upgrade_HyperV_Agility_TT         = "Agility: @speed / @jump";
 
 TFLV_Upgrade_HyperV_Hook_Name          = "Grappling Hook";

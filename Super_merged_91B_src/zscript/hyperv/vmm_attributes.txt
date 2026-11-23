@@ -70,6 +70,16 @@ class CustomPlayerProperties play
 
 	private void updateJumpZ(PlayerPawn pawn, vmm_Settings loadCVar, readonly<PlayerPawn> default)
 	{
+		// Mobility gate: below Mobility Lv1 base jumping is off (JumpZ 0). _jumpZ is kept at 0 too, so
+		// when the gate opens the "something else changed JumpZ" check below does not mistake our 0 for
+		// another mod's value and the original JumpZ is restored.
+		if (!loadCVar.jumpCrouchEnabled())
+		{
+			pawn.JumpZ = 0;
+			_jumpZ = 0;
+			return;
+		}
+
 		double originalJumpZ = default.JumpZ;
 		double _jump_mult = loadCVar.jumpMultiplier();
 
@@ -157,6 +167,8 @@ class VPlayerPropModifier : EventHandler
 		if (_isTitlemap) { return; }
 
 		if (!_isInitialized) { initEvent(player); }
+
+		EnforceJumpCrouchGate(player);
 
 		// Throttle property updates to once per second — speed/jump/damage
 		// multipliers almost never change mid-game, no need to update every tic
@@ -515,7 +527,34 @@ class VPlayerPropModifier : EventHandler
 		// simply expires on its own once top-ups stop.
 	}
 
+	// Mobility Lv1 gate for base jump and crouch. Jump: CustomPlayerProperties zeroes JumpZ (refreshed at once
+	// when the gate changes). Crouch: the engine's CheckCrouch runs before world tick, so a crouch started this
+	// tic is undone here before it is drawn; no PlayerPawn override is needed, so it works with any player class.
+	private void EnforceJumpCrouchGate(PlayerInfo player)
+	{
+		PlayerPawn pawn = player.mo;
+		if (!pawn || player.health <= 0) return;
+		if (!_jcGate) _jcGate = vmm_GbGate.of("mobility");
+
+		bool closed = !_jcGate.openBaseMoves();
+		if (closed != _jcClosed)
+		{
+			_jcClosed = closed;
+			updateProperties(player);
+			_propTimer = 0;
+		}
+		if (!closed) return;
+
+		if (player.crouchfactor != 1.0 && pawn.pos.z + pawn.FullHeight <= pawn.ceilingz)
+		{
+			player.Uncrouch();
+			pawn.A_SetSize(-1, pawn.FullHeight);
+		}
+	}
+
 	private bool _isInitialized;
+	private vmm_GbGate _jcGate;
+	private bool _jcClosed;
 	private bool _isTitlemap;
 	private vmm_Settings _settings;
 	private int _propTimer;

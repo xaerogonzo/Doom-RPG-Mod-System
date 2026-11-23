@@ -196,7 +196,7 @@ class TFLV_HyperV_UpgradeHelper : Object
 
 // =============================================================================
 // 1. MOBILITY (player upgrade)
-// Lv1: dash  Lv2: double dash + ledge climb  Lv3: double jump
+// Lv1: jump, crouch, dash  Lv2: double dash + ledge climb  Lv3: double jump
 // Lv4+: dash cooldown reduction per level
 // =============================================================================
 class TFLV_Upgrade_HyperV_Mobility : TFLV_Upgrade_BaseUpgrade
@@ -216,9 +216,9 @@ class TFLV_Upgrade_HyperV_Mobility : TFLV_Upgrade_BaseUpgrade
     {
         String unlocked;
         if      (level == 0) unlocked = "Nothing yet.";
-        else if (level == 1) unlocked = "Dash.";
-        else if (level == 2) unlocked = "Dash, Double Dash, Ledge Climb.";
-        else                 unlocked = "Dash, Double Dash, Ledge Climb, Double Jump.";
+        else if (level == 1) unlocked = "Jump, Crouch, Dash.";
+        else if (level == 2) unlocked = "Jump, Crouch, Dash, Double Dash, Ledge Climb.";
+        else                 unlocked = "Jump, Crouch, Dash, Double Dash, Ledge Climb, Double Jump.";
         int scaleLvs = max(0, int(level) - 3);
         double cdReduction = scaleLvs * CVar.FindCVar("bonsai_hyperv_mobility_cd_per_level").GetFloat();
         fields.insert("unlocked", unlocked);

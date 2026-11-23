@@ -62,6 +62,8 @@ class vmm_Settings
   bool permTimeFreezer()              { return permTimeFreezerCvar.getBool();      }
   bool permTorch()                    { return permTorchCvar.getBool();            }
   bool permWeaponLevel2()             { return permWeaponLevel2Cvar.getBool();     }
+  // Mobility Lv1 also unlocks base jump and crouch (see VPlayerPropModifier / CustomPlayerProperties)
+  bool jumpCrouchEnabled()				{ return gbMobility.openBaseMoves();					}
   bool dashEnabled()					{ return dashCvar.getBool() && gbMobility.open(1);					}
   double dashMultiplier()   			{ return dashMultiplierCvar.getDouble();   		}
   double dashCooldown()   				{ return dashCooldownCvar.getDouble();   		}
@@ -551,6 +553,15 @@ class vmm_GbGate
   bool open(int minLevel)
   {
     return !_mode.getBool() || _level.getInt() >= minLevel;
+  }
+
+  // Base jump / crouch: not Hyper-V features, so with Hyper-V switched off nothing may lock them
+  // (the Mobility upgrade could never be earned then).
+  bool openBaseMoves()
+  {
+    CVar enabled = CVar.FindCVar("hyperv_enabled");
+    if (enabled && !enabled.GetBool()) return true;
+    return open(1);
   }
 
   private vmm_Cvar _mode;
