@@ -23,39 +23,88 @@ class TFLV_Upgrade_ECM : TFLV_Upgrade_BaseUpgrade {
     return 0.8 ** level;
   }
 
-  override void Tick(Actor owner) {
-    let radius = EcmRange(self.level);
+  // Seeker missiles that may still need a decision. Filled by OnSeekerSpawned (event driven)
+  // instead of scanning every actor each tic. Entries leave the list once decided, dead, or
+  // when their tracer turns out to be someone else.
+  Array<Actor> pending;
+  // The list is seeded with one full scan the first time Tick runs (covers seekers already in
+  // flight when ECM is acquired, and games saved before this list existed).
+  bool primed;
+  // Outcome tallies (cheap integers; read by the debug dump so tests can see what happened).
+  uint n_redirected, n_reprogrammed, n_failed;
+
+  // Called from WorldThingSpawned for every +SEEKERMISSILE actor. Their tracer is usually not
+  // set yet at this point (e.g. A_SkelMissile assigns it just after spawning), so only remember
+  // the missile; Tick reads the tracer later.
+  override void OnSeekerSpawned(Actor pawn, Actor shot) {
+    pending.Push(shot);
+  }
+
+  private void Prime(Actor owner) {
+    primed = true;
     ThinkerIterator it = ThinkerIterator.Create("Actor", Thinker.STAT_DEFAULT);
     Actor shot;
-    Array<Actor> monsters; bool did_monsters = false;
     while (shot = Actor(it.next())) {
-      if (!shot || !shot.bSEEKERMISSILE || shot.tracer != owner || shot.bINCOMBAT || owner.Distance3D(shot) > radius) {
-        // DEBUG("Skipping %s", TAG(shot));
+      if (shot.bSEEKERMISSILE && shot.bMISSILE && shot.tracer == owner && !shot.bINCOMBAT)
+        pending.Push(shot);
+    }
+  }
+
+  // --- The three outcomes. Each happens in exactly one place, once per missile. ---
+
+  // Outcome 1: redirected against a nearby monster.
+  private void Redirect(Actor owner, Actor shot, Array<Actor> monsters) {
+    ++n_redirected;
+    shot.tracer = monsters[random[TFLV_Upgrade_RNG_ECMTarget](0, monsters.size()-1)];
+    shot.target = owner;
+  }
+
+  // Outcome 2: reprogrammed to hunt its launcher.
+  private void Reprogram(Actor owner, Actor shot) {
+    ++n_reprogrammed;
+    shot.tracer = shot.target;
+    shot.target = owner;
+  }
+
+  // Outcome 3: hack failed. We set the +INCOMBAT flag to keep track of shots we've already tried
+  // and failed to redirect.
+  // This shouldn't break anything since this flag is normally used to control
+  // Strife dialogue and homing missiles are not known for being particularly
+  // conversational.
+  private void Fail(Actor owner, Actor shot) {
+    ++n_failed;
+    shot.bINCOMBAT = true;
+  }
+
+  override void Tick(Actor owner) {
+    if (!primed) Prime(owner);
+    if (pending.Size() == 0) return;
+    let radius = EcmRange(self.level);
+    Array<Actor> monsters; bool did_monsters = false;
+    for (int i = pending.Size() - 1; i >= 0; --i) {
+      Actor shot = pending[i];
+      // Gone, exploded, already handled, or aimed at somebody else: forget it. A tracer that is
+      // still null stays listed, since it may be assigned a tic or two after spawning.
+      if (!shot || !shot.bMISSILE || shot.bINCOMBAT || (shot.tracer && shot.tracer != owner)) {
+        pending.Delete(i);
         continue;
       }
-//      DEBUG("Found shot %s with tracer=%s target=%s",
-//        TAG(shot), TAG(shot.tracer), TAG(shot.target));
-      // Found a seeker missile aimed at the player.
+      // Not (yet) aimed at the player, or still out of range: check again next tic.
+      if (shot.tracer != owner || owner.Distance3D(shot) > radius) continue;
+      // Found a seeker missile aimed at the player. It is decided now and leaves the list.
+      pending.Delete(i);
       // First, try to redirect it against a nearby enemy.
       if (!did_monsters) {
         TFLV_Util.MonstersInRadius(owner, LockRange(self.level), monsters);
         did_monsters = true;
       }
       if (monsters.size()) {
-        // If we found a nearby monster to judo it into, do so.
-        shot.tracer = monsters[random[TFLV_Upgrade_RNG_ECMTarget](0, monsters.size()-1)];
-        shot.target = owner;
+        Redirect(owner, shot, monsters);
       } else if (frandom[TFLV_Upgrade_RNG_ECMHack](0.0, 1.0) >= UnhackableChance(self.level)) {
         // Else we have a chance to reprogram it to hunt its creator.
-        shot.tracer = shot.target;
-        shot.target = owner;
+        Reprogram(owner, shot);
       } else {
-        // We set the +INCOMBAT flag to keep track of shots we've already tried
-        // and failed to redirect.
-        // This shouldn't break anything since this flag is normally used to control
-        // Strife dialogue and homing missiles are not known for being particularly
-        // conversational.
-        shot.bINCOMBAT = true;
+        Fail(owner, shot);
       }
     }
   }

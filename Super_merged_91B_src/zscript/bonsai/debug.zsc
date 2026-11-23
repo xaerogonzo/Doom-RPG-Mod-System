@@ -65,6 +65,9 @@ class TFLV_Debug : Object play {
       stats.level, stats.XP, players[player].mo.score, bonsai_score_to_xp_factor, bonsai_damage_to_xp_factor);
     for (uint i = 0; stats.upgrades && i < stats.upgrades.upgrades.Size(); ++i) {
       let u = stats.upgrades.upgrades[i];
+      let ecm = TFLV_Upgrade_ECM(u);
+      if (ecm) console.printf("BONSAI ecm redirected=%d reprogrammed=%d failed=%d pending=%d",
+        ecm.n_redirected, ecm.n_reprogrammed, ecm.n_failed, ecm.pending.Size());
       console.printf("BONSAI pupgrade class=%s level=%d max=%d enabled=%d", u.GetClassName(), u.level, u.max_level, u.enabled);
     }
     for (int w = 0; w < stats.weapons.Size(); ++w) {

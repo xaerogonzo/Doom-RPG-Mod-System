@@ -129,6 +129,12 @@ class TFLV_Upgrade_UpgradeBag : Object play {
     }
   }
 
+  void OnSeekerSpawned(Actor pawn, Actor shot) {
+    for (uint i = 0; i < upgrades.Size(); ++i) {
+      if (upgrades[i].enabled) upgrades[i].OnSeekerSpawned(pawn, shot);
+    }
+  }
+
   double ModifyDamageDealt(Actor pawn, Actor shot, Actor target, double damage, Name attacktype) {
     for (uint i = 0; i < upgrades.Size(); ++i) {
 //      DEBUG("UpgradeBag.ModifyDamageDealt: %d %s", i, upgrades[i].GetClassName());

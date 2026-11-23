@@ -417,6 +417,11 @@ class TFLV_PerPlayerStats : Object play {
     if (info) info.upgrades.OnProjectileCreated(owner, shot);
   }
 
+  // Player (not weapon) upgrades only: today just ECM listens.
+  void OnSeekerSpawned(Actor shot) {
+    upgrades.OnSeekerSpawned(owner, shot);
+  }
+
   void OnDamageDealt(Actor shot, Actor target, uint damage) {
     upgrades.OnDamageDealt(owner, shot, target, damage);
     let info = GetInfoForCurrentWeapon();

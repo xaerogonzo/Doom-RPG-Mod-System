@@ -236,6 +236,14 @@ class TFLV_EventHandler : StaticEventHandler {
     if (!thing) return;
     if (BonsaiEnabled() && thing.bMISSILE && PlayerPawn(thing.target))
       TFLV_PerPlayerStats.GetStatsFor(thing.target).OnProjectileCreated(thing);
+    if (thing.bSEEKERMISSILE && BonsaiEnabled()) {
+      // Seekers are rare; let player upgrades (ECM) remember them instead of scanning.
+      for (int i = 0; i < MAXPLAYERS; ++i) {
+        if (!playeringame[i] || !players[i].mo) continue;
+        let stats = TFLV_PerPlayerStats.GetStatsFor(players[i].mo);
+        if (stats) stats.OnSeekerSpawned(thing);
+      }
+    }
     if (DoomPointsEnabled())
       scoring.WorldThingSpawned(thing);
     if (CompanionsEnabled()) {
