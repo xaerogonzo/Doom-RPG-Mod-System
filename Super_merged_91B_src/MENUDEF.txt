@@ -2083,6 +2083,8 @@ OptionMenu "VMM_Movement" {
 	TFLV_Tooltip "$VMM_TT_LEDGE_CLIMB"
 	StaticText " "
 	StaticText "Movement Sounds", "Gold"
+	Option "Jump sound",						"vmm_sfx_jump", "OnOff"
+	TFLV_Tooltip "A soft push-off sound each time you jump (only when a jump actually happens). If your player class or skin already plays its own jump sound you will hear both: turn this off then."
 	Option "Dash sound",						"vmm_sfx_dash", "OnOff"
 	TFLV_Tooltip "A short whoosh (three variants) each time you dash or roll."
 	Option "Double jump sound",					"vmm_sfx_double_jump", "OnOff"

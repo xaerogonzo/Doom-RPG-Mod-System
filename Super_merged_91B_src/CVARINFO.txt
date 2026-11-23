@@ -576,6 +576,7 @@ user int	vmm_dash_back_cost		= 20;
 user bool	vmm_double_jump			= false;
 user bool	vmm_ledge_climb			= false;
 // Movement sounds (Hyper-V): original cues for dash, double jump and ledge climb
+user bool	vmm_sfx_jump			= true;   // regular jump (played on the jump key press when a jump is actually possible)
 user bool	vmm_sfx_dash			= true;
 user bool	vmm_sfx_double_jump		= true;
 user bool	vmm_sfx_ledge_climb		= true;

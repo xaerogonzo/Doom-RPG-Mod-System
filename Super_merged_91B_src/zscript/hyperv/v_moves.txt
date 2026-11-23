@@ -96,6 +96,7 @@ class VMovesHandler : EventHandler
 		V_Moves(hyperv).dash_back_cost		= _settings.dashBackCost();
 		V_Moves(hyperv).double_jumping 		= _settings.doubleJumpEnabled();
 		V_Moves(hyperv).ledge_climbing 		= _settings.ledgeClimbEnabled();
+		V_Moves(hyperv).sfx_jump			= _settings.sfxJump();
 		V_Moves(hyperv).sfx_dash			= _settings.sfxDash();
 		V_Moves(hyperv).sfx_double_jump		= _settings.sfxDoubleJump();
 		V_Moves(hyperv).sfx_ledge_climb		= _settings.sfxLedgeClimb();
@@ -223,6 +224,13 @@ class VMovesHandler : EventHandler
 			V_Moves(hyperv).jump_thrust = true;
 			V_Moves(hyperv).jump_buttons_press++;
 			countdown_for_djump_stop = 35;
+
+			// Regular jump sound, once per jump key press, only when the engine will really jump:
+			// standing on the ground, jump height above 0 (it is 0 while Mobility is locked), not swimming.
+			let vmj = V_Moves(hyperv);
+			if(vmj.sfx_jump && vmj.owner && vmj.owner.player && vmj.owner.player.onground
+				&& vmj.owner.player.jumpTics == 0 && vmj.owner.player.mo.JumpZ > 0 && vmj.owner.WaterLevel < 2 && !vmj.owner.bNOGRAVITY)
+				vmj.owner.A_StartSound("hv/jump", CHAN_AUTO, CHANF_NOPAUSE, 0.8);
 		}
 		
 		// Grapple hook
@@ -1310,6 +1318,7 @@ class V_Moves : CustomInventory
 	bool ledge_climbing; //set by cvar
 	// Movement sound cues (set by cvar when settings refresh). One sound per dash / double jump;
 	// the climb sound is a loop started when climbing begins and stopped when it ends (no per-tic work).
+	bool sfx_jump;
 	bool sfx_dash;
 	bool sfx_double_jump;
 	bool sfx_ledge_climb;
