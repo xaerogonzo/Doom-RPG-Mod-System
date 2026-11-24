@@ -3,8 +3,8 @@
 Run:  python assets/sfx/gen_explosions.py
 Then: python -m doomcreator audition assets/sfx/explosions_candidates.json -o audition_explosions.html
 
-A short, soft, low "boom": a pitch-dropping sine body, a low-passed FM crunch for a little bite, a very quiet,
-short, dark noise tick for the onset (no long noise swell, so no whoosh) and a low sub tail. Lower and rounder
+A small explosion: a short band-limited noise burst for the blast, a darker longer noise rumble, a rough self-feedback FM
+low body (not a clean sine, which sounds like a drum) and a quiet sub. e4 is the toolkit's own explosion preset, low-passed. Lower and rounder
 than the old fireball sound so a crowd of bomblets stays pleasant. About -24 dBFS, 0.45-0.65 s.
 """
 import json
@@ -31,30 +31,39 @@ def crunch(hz, dur, depth, cutoff):
             "filter": {"type": "lp", "cutoff": cutoff, "q": 0.8}}
 
 
-def tick(dur, level, cutoff):
-    return {"duration": dur, "pitch": 200, "operators": [{"ratio": 1.0, "level": 0.0, "env": env(0.001, dur)}],
-            "carriers": [0], "noise": {"level": level, "env": env(0.001, dur * 0.5, 0.01)},
+def noise(dur, level, d, cutoff, a=0.001):
+    return {"duration": dur, "pitch": 100, "operators": [{"ratio": 1.0, "level": 0.0, "env": env(0.001, dur)}],
+            "carriers": [0], "noise": {"level": level, "env": env(a, d, 0.02)},
             "filter": {"type": "lp", "cutoff": cutoff, "q": 0.7}}
+
+
+def grit(hz, dur, fb, cutoff):
+    # self-feedback FM: rough, inharmonic, noise-like low rumble (not a clean drum tone)
+    return {"duration": dur, "pitch": hz,
+            "operators": [{"ratio": 1.0, "level": 1.0, "feedback": fb, "env": env(0.002, dur * 0.6)}],
+            "carriers": [0], "pitch_env": {"start": 1.5, "end": 0.8, "time": dur * 0.8, "curve": 2.0},
+            "filter": {"type": "lp", "cutoff": cutoff, "q": 0.8}}
 
 
 def L(off, level, patch):
     return {"offset": round(off, 4), "level": round(level, 4), "patch": patch}
 
 
-def boom(sid, dur, hz, drop, cr_hz, depth, tk, tail_hz):
-    layers = [L(0.0, 1.0, body(hz, dur * 0.8, drop, 420)),
-              L(0.0, 0.55, crunch(cr_hz, dur * 0.5, depth, 1400)),
-              L(0.0, tk, tick(0.06, 1.0, 1800)),
-              L(0.03, 0.5, body(tail_hz, dur - 0.03, 1.0, 200))]
+def boom(sid, dur, burst_cut, rumble_cut, fb, hz, sub):
+    layers = [L(0.0, 1.0, noise(0.3, 1.0, 0.16, burst_cut)),                 # the blast itself: a short band-limited burst
+              L(0.0, 0.8, noise(dur, 1.0, dur * 0.7, rumble_cut, a=0.004)),   # dark, longer rumble
+              L(0.0, 0.7, grit(hz, dur * 0.8, fb, 1200)),                     # rough low body
+              L(0.0, sub, grit(hz * 0.5, dur, 0.0, 200))]                     # quiet sub, no clean drum thump
     return {"id": sid, "alias": "cand15/" + sid.replace("__", "/"),
-            "fm": {"duration": dur, "sample_rate": RATE, "gain": 0.9, "target_rms_dbfs": -24, "layers": layers}}
+            "fm": {"duration": dur, "sample_rate": RATE, "gain": 0.9, "target_rms_dbfs": -22, "layers": layers}}
 
 
 sounds = [
-    boom("explosion__e1", 0.55, 75, 2.6, 130, 2.5, 0.15, 45),
-    boom("explosion__e2", 0.65, 62, 2.4, 110, 2.0, 0.12, 40),
-    boom("explosion__e3", 0.5, 90, 2.8, 150, 3.0, 0.2, 50),
-    boom("explosion__e4", 0.6, 70, 2.2, 120, 1.5, 0.1, 42),
+    boom("explosion__e1", 0.6, 3200, 700, 1.2, 80, 0.2),
+    boom("explosion__e2", 0.7, 2400, 500, 1.6, 65, 0.25),
+    boom("explosion__e3", 0.5, 4000, 900, 1.0, 95, 0.15),
+    {"id": "explosion__e4", "preset": "explosion", "alias": "cand15/explosion/e4",
+     "overrides": {"filter": {"type": "lp", "cutoff": 2600, "q": 0.8}}},
 ]
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "explosions_candidates.json")
