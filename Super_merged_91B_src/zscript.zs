@@ -32,6 +32,7 @@ version "2.5"
 #include "zscript/bonsai/UpgradeGiver.zsc"
 #include "zscript/bonsai/PlayerUpgradeGiver.zsc"
 #include "zscript/bonsai/WeaponUpgradeGiver.zsc"
+#include "zscript/bonsai/RareArtifact.zsc"
 #include "zscript/bonsai/WeaponInfo.zsc"
 #include "zscript/bonsai/WeaponTypeInference.zsc"
 

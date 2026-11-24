@@ -48,7 +48,8 @@ class TFLV_UpgradeGiver : Inventory {
 //
 //    DEBUG("%s claiming menu", self.GetClassName());
     stats.currentEffectGiver = self;
-    if (players[consoleplayer].mo == owner) Menu.SetMenu(menuname);
+    // bonsai_test_no_menu: automated tests answer the choice with bonsai_dbg instead (an open menu pauses the game).
+    if (players[consoleplayer].mo == owner && !bonsai_test_no_menu) Menu.SetMenu(menuname);
     self.SetStateLabel("AwaitChoice");
   }
 

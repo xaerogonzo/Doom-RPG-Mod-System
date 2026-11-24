@@ -26,6 +26,47 @@ class TFLV_Debug : Object play {
       service.GetDouble("add-p-xp", "", player, arg);
     } else if (argv[1] == "gate-test") {
       GateTest();
+    } else if (argv[1] == "synth-test") {
+      SynthTest(player);
+    } else if (argv[1] == "art-spawn" && argv.size() >= 3) {
+      // Test helper: spawn an actor (a power-up source, a boss) next to the player.
+      class<Actor> cls = (class<Actor>)(argv[2]);
+      let pawn = players[player].mo;
+      if (cls && pawn) pawn.Spawn(cls, pawn.Vec3Angle(96, pawn.angle, 0));
+      else console.printf("BONSAI art-spawn: unknown class %s", argv[2]);
+    } else if (argv[1] == "art-choose") {
+      // Test helper: answer the open upgrade menu as the player would (index = arg).
+      let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+      if (stats && stats.currentEffectGiver) stats.currentEffectGiver.Choose(arg);
+      else console.printf("BONSAI art-choose: no open giver");
+    } else if (argv[1] == "cvar-int" && argv.size() >= 3) {
+      // Test helper: set an integer cvar from a scenario (the unattended runner cannot use the cvar op).
+      let cv = CVar.FindCVar(argv[2]);
+      if (cv) cv.SetInt(arg); else console.printf("BONSAI cvar-int: unknown cvar %s", argv[2]);
+    } else if (argv[1] == "art-reject") {
+      let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+      if (stats && stats.currentEffectGiver) stats.currentEffectGiver.Choose(-1);
+      else console.printf("BONSAI art-reject: no open giver");
+    } else if (argv[1] == "w-startlevel") {
+      // Test helper: start the ordinary level-up for the current weapon (uses pending XP/bonus levels).
+      let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+      let info = stats ? stats.GetInfoForCurrentWeapon() : null;
+      if (info) info.StartLevelUp();
+    } else if (argv[1] == "art-info") {
+      // Test helper: one line with the current weapon's progression and any open giver.
+      let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+      let info = stats ? stats.GetInfoForCurrentWeapon() : null;
+      if (!info) { console.printf("BONSAI art-info: no weapon info"); }
+      else {
+        let g = stats.currentEffectGiver;
+        string gname = "none";
+        if (g) gname = g.GetClassName();
+        int levels = 0;
+        for (uint i = 0; i < info.upgrades.upgrades.Size(); ++i) levels += info.upgrades.upgrades[i].level;
+        console.printf("BONSAI art-info level=%d xp=%.1f bonus=%d levels=%d giver=%s cands=%d",
+          info.level, info.XP, info.bonus_levels, levels,
+          gname, g ? g.candidates.Size() : 0);
+      }
     } else if (argv[1] == "dump") {
       Dump(player);
     } else if (argv[1] == "w-level") {
@@ -56,6 +97,34 @@ class TFLV_Debug : Object play {
     } else {
       console.printf("Unknown or malformed debug command: %s", argv[1]);
     }
+  }
+
+  // Test helper: runs the current weapon's Elemental Synthesis upgrade against the first live monster, as a hit would
+  // (OnDamageDealt, then the colour, dot and copy helpers), and logs what it collected. Catches table-index bugs.
+  static void SynthTest(int player) {
+    let pawn = players[player].mo;
+    let stats = TFLV_PerPlayerStats.GetStatsFor(pawn);
+    let info = stats ? stats.GetInfoForCurrentWeapon() : null;
+    if (!info) { console.printf("BONSAI synth-test: no weapon info"); return; }
+    TFLV_Upgrade_ElementalSynthesis syn;
+    for (uint i = 0; i < info.upgrades.upgrades.Size(); ++i) {
+      syn = TFLV_Upgrade_ElementalSynthesis(info.upgrades.upgrades[i]);
+      if (syn) break;
+    }
+    if (!syn) { console.printf("BONSAI synth-test: no synthesis upgrade"); return; }
+    Actor victim;
+    let it = ThinkerIterator.Create("Actor");
+    Actor mo;
+    while (mo = Actor(it.Next())) {
+      if (mo.bShootable && mo.bIsMonster && mo.health > 0) { victim = mo; break; }
+    }
+    if (!victim) { console.printf("BONSAI synth-test: no monster"); return; }
+    syn.OnDamageDealt(pawn, null, victim, 10);
+    int c0 = syn.GetColour(0);
+    int c1 = syn.GetColour(1);
+    bool has = syn.HasDots(victim);
+    syn.CopyElements(victim, victim);
+    console.printf("BONSAI synth-test elements=%d colour0=%x colour1=%x hasdots=%d done", syn.elements.Size(), c0, c1, has ? 1 : 0);
   }
 
   // Read-only, deterministic listing of every weapon's progression and upgrades, the player's

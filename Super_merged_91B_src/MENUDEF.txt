@@ -82,6 +82,8 @@ OptionMenu "GunBonsaiOptions"
   TFLV_Tooltip "Per-feature visual effects quality settings. Override individual systems independently of the global VFX level above."
   TFLV_AnimatedSubmenu "Sound Effects",                   "GunBonsaiSfx"
   TFLV_Tooltip "Turn Gun Bonsai sound cues off, essential-only or full, and override single cues. The weapon level-up sound keeps its own option above. Hyper-V movement sounds are in the Hyper-V options."
+  TFLV_AnimatedSubmenu "Rare finds",                      "GunBonsaiRareFinds"
+  TFLV_Tooltip "A rare artifact that gives your equipped weapon one free upgrade choice. It can appear beside power-ups (each kind has its own chance) and drop from bosses. Set a chance to 0 to turn that source off."
   Option "$TFLV_OPT_NAME_LEVELUP_FLASH", "bonsai_levelup_flash", "OnOff"
   TFLV_Tooltip "$TFLV_OPT_TT_LEVELUP_FLASH"
   ColorPicker "$TFLV_OPT_NAME_LEVELUP_FLASH_RGB", "bonsai_levelup_flash_rgb"
@@ -2982,4 +2984,35 @@ OptionMenu "VMM_Hud" {
 	StaticText " "
 	Command "Reset HUD to Defaults",			"vmm_reset_hud"
 	TFLV_Tooltip "$VMM_TT_RESET_HUD"
+}
+
+OptionMenu "GunBonsaiRareFinds"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Rare finds"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "A rare artifact gives your equipped weapon one free upgrade choice. Each chance is rolled once, when the item appears.", DARKGRAY
+  StaticText ""
+  Option "Rare artifacts", "bonsai_artifact_enabled", "OnOff"
+  TFLV_Tooltip "Master switch for the rare artifact. Off: none appear and any on the floor cannot be used."
+  Slider "Megasphere chance (%)", "bonsai_artifact_spawn_mega", 0, 100, 1, 0
+  TFLV_Tooltip "Chance that a Megasphere has an artifact lying next to it. 0 = never."
+  Slider "Soulsphere chance (%)", "bonsai_artifact_spawn_soul", 0, 100, 1, 0
+  TFLV_Tooltip "Chance that a Soulsphere has an artifact lying next to it. 0 = never."
+  Slider "Invulnerability chance (%)", "bonsai_artifact_spawn_invuln", 0, 100, 1, 0
+  TFLV_Tooltip "Chance that an Invulnerability sphere has an artifact lying next to it. 0 = never."
+  Slider "Blue armour chance (%)", "bonsai_artifact_spawn_bluearmor", 0, 100, 1, 0
+  TFLV_Tooltip "Chance that Blue armour has an artifact lying next to it. 0 = never."
+  Slider "Other power-ups chance (%)", "bonsai_artifact_spawn_other", 0, 100, 1, 0
+  TFLV_Tooltip "Chance for a Berserk pack, Partial Invisibility or Radiation Suit. 0 = never."
+  StaticText ""
+  Option "Boss drops", "bonsai_artifact_boss_enabled", "OnOff"
+  TFLV_Tooltip "Bosses (monsters with the BOSS flag, such as the Cyberdemon) can drop an artifact when they die."
+  Slider "Boss drop chance (%)", "bonsai_artifact_boss_chance", 0, 100, 1, 0
+  TFLV_Tooltip "Chance that a dying boss drops an artifact. 0 = never."
+  StaticText ""
+  Slider "Most per map", "bonsai_artifact_map_cap", 0, 5, 1, 0
+  TFLV_Tooltip "The most artifacts that can appear on one map, all sources together. 0 = no limit."
 }

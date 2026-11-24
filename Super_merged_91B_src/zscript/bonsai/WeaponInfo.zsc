@@ -427,11 +427,16 @@ class TFLV_WeaponInfo : Object play {
 //    DEBUG("Level-up completed! xp=%d, base=%d, since=%d, next=%d",
 //      xp, BaseXP(), LevelXP(), maxXP);
 
-    if (upgrade) {
+    if (upgrade) InstallChosenUpgrade(upgrade, "$TFLV_MSG_WEAPON_LEVELUP");
+  }
+
+  // Adds the chosen upgrade, tells the player and fires the achievement hooks. Shared by ordinary level-ups and
+  // the rare artifact's free choice, which never changes level, XP or bonus levels.
+  void InstallChosenUpgrade(TFLV_Upgrade_BaseUpgrade upgrade, string msgkey) {
       let addedUpgrade = upgrades.AddUpgrade(upgrade);
       addedUpgrade.OnActivate(stats, self);
       wpn.owner.A_Log(string.format(
-          StringTable.Localize("$TFLV_MSG_WEAPON_LEVELUP"),
+          StringTable.Localize(msgkey),
           wpn.GetTag(), upgrade.GetName()),
         true);
 
@@ -454,6 +459,10 @@ class TFLV_WeaponInfo : Object play {
 
       // Elemental Master: all 4 elemental trees active on this weapon
       CheckElementalMasterAchievement();
-    }
+  }
+
+  // The rare artifact's free upgrade: installs the choice without touching level, XP, bonus_levels or player XP.
+  void FinishFreeUpgrade(TFLV_Upgrade_BaseUpgrade upgrade) {
+    if (upgrade) InstallChosenUpgrade(upgrade, "$TFLV_MSG_ARTIFACT_UPGRADE");
   }
 }

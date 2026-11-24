@@ -24,21 +24,44 @@ class TFLV_Upgrade_ElementalSynthesis : TFLV_Upgrade_ElementalUpgrade {
     for (TFLV_Upgrade_UpgradeElement elem = TFLV_Upgrade_ELEM_NULL+1; elem < TFLV_Upgrade_ELEM_LAST; ++elem) {
       let levels = CountElementLevels(info.upgrades, elem);
       if (levels == 0) continue;
+      if (DotFor(elem) == "") continue; // e.g. Blood has no dot class: nothing to copy, and no table entry
 //      DEBUG("ES init: %d", elem);
       elements.push(elem);
     }
   }
 
-  Color GetColour(uint i) {
+  // Dot class and colour per element enum value. Blood (and anything newer than the tables) has neither and
+  // returns "": every consumer must skip it. Never index these tables with a raw enum value.
+  static string DotFor(int elem) {
+    static const string dots[] = { "", "TFLV_Upgrade_FireDot", "TFLV_Upgrade_AcidDot", "TFLV_Upgrade_PoisonDot", "TFLV_Upgrade_ShockDot" };
+    if (elem < 0 || elem >= dots.size()) return "";
+    return dots[elem];
+  }
+
+  static string ColourFor(int elem) {
     static const string colours[] = { "black", "orange", "purple", "green", "cyan" };
-    return colours[elements[i]];
+    if (elem < 0 || elem >= colours.size()) return "";
+    return colours[elem];
+  }
+
+  // Colour of the i-th transferable element. A weapon may have only one (or, from an older save, none), but the
+  // visuals ask for two: fall back to the first element's colour, then to white, never index out of range.
+  Color GetColour(uint i) {
+    string c = "white";
+    if (elements.size() > 0) {
+      if (i >= elements.size()) i = 0;
+      c = ColourFor(elements[i]);
+      if (c == "") c = ColourFor(elements[0]);
+      if (c == "") c = "white";
+    }
+    return c;
   }
 
   // True if src carries any of this weapon's elemental dots, i.e. a spread would actually copy something.
   bool HasDots(Actor src) {
-    static const string dots[] = { "", "TFLV_Upgrade_FireDot", "TFLV_Upgrade_AcidDot", "TFLV_Upgrade_PoisonDot", "TFLV_Upgrade_ShockDot" };
     for (uint i = 0; i < elements.size(); ++i) {
-      if (src.FindInventory(dots[elements[i]])) return true;
+      string dotname = DotFor(elements[i]);
+      if (dotname != "" && src.FindInventory(dotname)) return true;
     }
     return false;
   }
@@ -50,11 +73,11 @@ class TFLV_Upgrade_ElementalSynthesis : TFLV_Upgrade_ElementalUpgrade {
   }
 
   void CopyElements(Actor src, Actor dst) {
-    static const string dots[] = { "", "TFLV_Upgrade_FireDot", "TFLV_Upgrade_AcidDot", "TFLV_Upgrade_PoisonDot", "TFLV_Upgrade_ShockDot" };
 //
 //    DEBUG("CopyElements: %s <- %s", dst.GetTag(), src.GetTag());
     for (uint i = 0; i < elements.size(); ++i) {
-      let dotname = dots[elements[i]];
+      string dotname = DotFor(elements[i]);
+      if (dotname == "") continue; // no dot class (e.g. an older save that recorded Blood)
 //      DEBUG("Check for %s", dotname);
       let srcdot = TFLV_Upgrade_Dot(src.FindInventory(dotname));
       if (!srcdot) continue;
