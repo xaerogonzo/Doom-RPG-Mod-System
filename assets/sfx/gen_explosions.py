@@ -2,21 +2,18 @@
 
 Run:  python assets/sfx/gen_explosions.py      (needs the toolkit with up to 96 layers)
 Then: python -m doomcreator audition assets/sfx/explosions_candidates.json -o audition_explosions.html
-Compare by numbers: python assets/sfx/analyze_wav.py candidate.wav
+Compare by numbers: python assets/sfx/analyze_wav.py candidate.wav reference.wav
 
-Round 6. Target: a SMALL explosion (an M80 firework, at most a grenade), not artillery. Feedback on rounds 1-5: a bass
-drum, a snare, static over a drum, tones too prominent. The bass drum came from the tonal low body (sine or feedback FM
-with a pitch drop); white noise itself has little bass, so this round has NO pitched low body at all. Anatomy of a
-small blast, one layer group each, all noise except the last:
-  1. crack     a very sharp, bright, high-passed burst (about 40 ms): the "bang"
-  2. pop       a mid noise body (lp ~3 kHz, 100-150 ms): the body of the bang, with little weight below 150 Hz
-  3. whump     a short low-passed noise (lp ~500 Hz, ~100 ms) at low level: a touch of chest, not a drum
-  4. smear     copies of the pop at 8-60 ms offsets, falling levels: they are different noise, so this blurs the
-               attack into a short room-like tail and blends the layers smoothly
-  5. debris    sparse, quiet, high-passed crackle grains falling away over the tail
-  6. edge      a few very quiet pentatonic pings (about -26 dB below the crack) around the tail onset, only to
-               soften the corners of the noise
-About 0.45-0.7 s, -24 dBFS RMS.
+Round 7: built from the MEASURED frequency shape of the vanilla Doom explosion sounds (DSFIRXPL, DSBAREXP; measured only
+with analyze_wav.py, nothing copied or resampled, and the output below is pure synthesis). What the numbers showed:
+  * the energy is equal in every octave band (that is PINK noise, 1/f), not a bright white burst and not a tonal drum;
+  * it is band-limited at about 5.5 kHz (the sounds are 11 kHz samples), with a lot of body in the low-mids and lows;
+  * the highs die first (about -40 dB over a second) while the lows and mids hold (-12 to -18 dB): the sound darkens
+    as it decays, and it starts at full level in all bands at once.
+A sum of equal-power low-passed noise layers at octave-spaced cutoffs is exactly pink, so each sound here is eight noise
+layers (cutoffs 5.6 kHz down to 90 Hz), each with its own decay (short for the highs, long for the lows), plus a sharp
+attack crack, sparse debris crackle and a very quiet tonal edge. No pitched low body at all (that was the bass drum).
+Variants differ in how much low end, how long, and how much crackle. 0.5-0.8 s, level matched.
 """
 import json
 import math
@@ -48,18 +45,22 @@ def L(off, level, patch):
 
 
 PENTA = [1046.5, 1174.7, 1318.5, 1568.0, 1760.0, 2093.0, 2349.3, 2637.0]
+CUTS = [5600, 2800, 1400, 700, 350, 175, 88]                 # octave-spaced: equal power per layer = pink noise
+# decay (seconds) of each octave layer, from the measured vanilla fall-off over about one second (highs die first)
+DECAYS = [0.30, 0.42, 0.62, 0.8, 0.95, 1.05, 1.1]
 
 
-def blast(sid, seed, dur, crack_cut, pop_cut, pop_d, whump, tail, debris, edge, rms=-18):
+def blast(sid, seed, dur, scale, low_gain, crack, debris, edge, rms=-18):
     rng = random.Random(seed)
-    layers = [L(0.0, 1.0, noise(0.12, 0.035, crack_cut, kind="hp", a=0.0004)),            # crack
-              L(0.0, 0.9, noise(dur, pop_d, pop_cut)),                                    # pop
-              L(0.0, whump, noise(0.2, 0.09, 500, a=0.003))]                              # whump
-    for k, off in enumerate((0.008, 0.019, 0.034, 0.052)):                                # smear: blurs the attack into a tail
-        layers.append(L(off, tail * (0.8 ** k), noise(dur, pop_d * (1.0 + 0.25 * k), pop_cut * (0.8 ** k))))
+    layers = []
+    for k, (fc, d) in enumerate(zip(CUTS, DECAYS)):
+        gain = 1.0 if k < 4 else low_gain * (0.85 ** (k - 4))     # low_gain trims the two or three lowest octaves
+        layers.append(L(0.0, gain, noise(dur, d * scale, fc, a=0.001 + 0.002 * k)))
+    layers.append(L(0.0, crack, noise(0.1, 0.03, 1500, kind="hp", a=0.0004)))            # sharp onset
     for _ in range(int(10 + 22 * debris)):                                                # debris crackle
-        t = 0.02 + min(-math.log(1 - rng.random()) * dur * 0.3, dur * 0.8)
-        layers.append(L(t, debris * rng.uniform(0.3, 1.0) * (1 - 0.7 * t / dur), noise(0.03, 0.008, rng.choice([2000, 3000, 4500]), kind="hp", a=0.0005)))
+        t = 0.03 + min(-math.log(1 - rng.random()) * dur * 0.3, dur * 0.8)
+        layers.append(L(t, debris * rng.uniform(0.3, 1.0) * (1 - 0.7 * t / dur),
+                        noise(0.03, 0.008, rng.choice([2000, 3000, 4500]), kind="hp", a=0.0005)))
     for _ in range(8):                                                                    # very quiet tonal edge
         t = rng.uniform(0.01, dur * 0.45)
         layers.append(L(t, edge * rng.uniform(0.5, 1.0), ping(rng.choice(PENTA), rng.uniform(0.08, 0.18))))
@@ -68,10 +69,10 @@ def blast(sid, seed, dur, crack_cut, pop_cut, pop_d, whump, tail, debris, edge, 
 
 
 sounds = [
-    blast("explosion__e1", 61, 0.45, 900, 3200, 0.09, 0.25, 0.5, 0.18, 0.05),   # M80: sharp and bright, little body
-    blast("explosion__e2", 62, 0.6, 700, 2800, 0.13, 0.4, 0.6, 0.2, 0.05),      # small grenade: more body and tail
-    blast("explosion__e3", 63, 0.55, 700, 2400, 0.11, 0.3, 0.6, 0.12, 0.08),    # softer pop, slightly more tonal edge
-    blast("explosion__e4", 64, 0.7, 800, 3000, 0.15, 0.35, 0.7, 0.3, 0.06),     # longer tail, more crackle
+    blast("explosion__e1", 71, 0.7, 0.6, 1.0, 0.35, 0.20, 0.03),    # measured shape, shortened to a small blast
+    blast("explosion__e2", 72, 0.6, 0.55, 0.45, 0.4, 0.2, 0.03),    # same, much less low end (firework-like)
+    blast("explosion__e3", 73, 0.75, 0.65, 0.7, 0.3, 0.45, 0.04),   # more crackle, medium bass
+    blast("explosion__e4", 74, 0.5, 0.45, 0.6, 0.5, 0.25, 0.03),    # shortest and snappiest
 ]
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "explosions_candidates.json")
