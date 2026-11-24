@@ -161,6 +161,13 @@ class TFLV_Profiles play
     n.Push("bonsai_stat_blood_heal_ratio");
     n.Push("bonsai_stat_blood_vitaldrain_bonus");
     n.Push("bonsai_stat_blood_burst_ratio");
+    // Rare artifact chances (appended last; percent, 0 = off)
+    n.Push("bonsai_artifact_spawn_mega");
+    n.Push("bonsai_artifact_spawn_soul");
+    n.Push("bonsai_artifact_spawn_invuln");
+    n.Push("bonsai_artifact_spawn_bluearmor");
+    n.Push("bonsai_artifact_spawn_other");
+    n.Push("bonsai_artifact_boss_chance");
   }
 
   static void GetIntCVarNames(out Array<String> n)
@@ -281,6 +288,10 @@ class TFLV_Profiles play
     n.Push("bonsai_death_levels_lost");
     n.Push("bonsai_death_min_level");
     n.Push("bonsai_death_lose_upgrades");
+    // Rare artifact switches (appended last; bools as 0/1)
+    n.Push("bonsai_artifact_enabled");
+    n.Push("bonsai_artifact_boss_enabled");
+    n.Push("bonsai_artifact_map_cap");
     // NOTE: bonsai_upg_hyperv_* rarity CVars are also excluded here,
     // same reason as the bonsai_upg_* block above.
   }
@@ -373,6 +384,8 @@ class TFLV_Profiles play
     // Blood — mult, stacks_per_damage, softcap, drain_pct, stack_drain_rate, heal_ratio, vitaldrain_bonus, burst_ratio
     v.Push(1.00); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
     v.Push(0.40); v.Push(0.50); v.Push(0.020);
+    // Rare artifact chances: mega, soul, invuln, bluearmor, other, boss (percent)
+    v.Push(1.5); v.Push(1.0); v.Push(1.5); v.Push(1.0); v.Push(0.5); v.Push(10.0);
   }
 
   static void BalancedFloats(out Array<double> v)
@@ -409,6 +422,8 @@ class TFLV_Profiles play
     // Blood — heal/burst mirror damage curve (mult=0.85 → heal ratio scaled the same)
     v.Push(0.85); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
     v.Push(0.34); v.Push(0.43); v.Push(0.017);
+    // Rare artifact chances: mega, soul, invuln, bluearmor, other, boss (percent)
+    v.Push(1.5); v.Push(1.0); v.Push(1.5); v.Push(1.0); v.Push(0.5); v.Push(10.0);
   }
 
   static void ChallengingFloats(out Array<double> v)
@@ -445,6 +460,8 @@ class TFLV_Profiles play
     // Blood — heal/burst mirror damage curve (mult=0.70 → heal ratio scaled the same)
     v.Push(0.70); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
     v.Push(0.28); v.Push(0.35); v.Push(0.014);
+    // Rare artifact chances: mega, soul, invuln, bluearmor, other, boss (percent)
+    v.Push(1.5); v.Push(1.0); v.Push(1.5); v.Push(1.0); v.Push(0.5); v.Push(10.0);
   }
 
   static void PunishingFloats(out Array<double> v)
@@ -481,6 +498,8 @@ class TFLV_Profiles play
     // Blood — heal/burst mirror damage curve (mult=0.50 → heal ratio scaled the same)
     v.Push(0.50); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
     v.Push(0.20); v.Push(0.25); v.Push(0.010);
+    // Rare artifact chances: mega, soul, invuln, bluearmor, other, boss (percent)
+    v.Push(1.5); v.Push(1.0); v.Push(1.5); v.Push(1.0); v.Push(0.5); v.Push(10.0);
   }
 
   static void BrutalFloats(out Array<double> v)
@@ -518,6 +537,8 @@ class TFLV_Profiles play
     // Blood — matches Default (Brutal keeps full upgrade power, only pacing differs)
     v.Push(1.00); v.Push(0.50); v.Push(20.0); v.Push(0.015); v.Push(0.20);
     v.Push(0.40); v.Push(0.50); v.Push(0.020);
+    // Rare artifact chances: mega, soul, invuln, bluearmor, other, boss (percent)
+    v.Push(1.5); v.Push(1.0); v.Push(1.5); v.Push(1.0); v.Push(0.5); v.Push(10.0);
   }
 
   static void DefaultInts(out Array<int> v)
@@ -535,6 +556,8 @@ class TFLV_Profiles play
     v.Push(5); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
     v.Push(0); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
+    // Rare artifact: enabled, boss_enabled, map_cap
+    v.Push(1); v.Push(1); v.Push(1);
   }
 
   static void BalancedInts(out Array<int> v)
@@ -552,6 +575,8 @@ class TFLV_Profiles play
     v.Push(5); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
     v.Push(1); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
+    // Rare artifact: enabled, boss_enabled, map_cap
+    v.Push(1); v.Push(1); v.Push(1);
   }
 
   static void ChallengingInts(out Array<int> v)
@@ -569,6 +594,8 @@ class TFLV_Profiles play
     v.Push(4); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
     v.Push(1); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
+    // Rare artifact: enabled, boss_enabled, map_cap
+    v.Push(1); v.Push(1); v.Push(1);
   }
 
   static void PunishingInts(out Array<int> v)
@@ -586,6 +613,8 @@ class TFLV_Profiles play
     v.Push(3); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
     v.Push(2); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
+    // Rare artifact: enabled, boss_enabled, map_cap
+    v.Push(1); v.Push(1); v.Push(1);
   }
 
   static void BrutalInts(out Array<int> v)
@@ -603,6 +632,8 @@ class TFLV_Profiles play
     v.Push(5); // bonsai_stat_overdrive_max_stacks
     DefaultPoolInts(v);
     v.Push(2); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
+    // Rare artifact: enabled, boss_enabled, map_cap
+    v.Push(1); v.Push(1); v.Push(1);
   }
 
 // =============================================================================

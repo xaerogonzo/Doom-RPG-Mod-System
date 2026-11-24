@@ -2997,20 +2997,20 @@ OptionMenu "GunBonsaiRareFinds"
   StaticText ""
   Option "Rare artifacts", "bonsai_artifact_enabled", "OnOff"
   TFLV_Tooltip "Master switch for the rare artifact. Off: none appear and any on the floor cannot be used."
-  Slider "Megasphere chance (%)", "bonsai_artifact_spawn_mega", 0, 100, 1, 0
+  Slider "Megasphere chance (%)", "bonsai_artifact_spawn_mega", 0, 100, 0.1, 1
   TFLV_Tooltip "Chance that a Megasphere has an artifact lying next to it. 0 = never."
-  Slider "Soulsphere chance (%)", "bonsai_artifact_spawn_soul", 0, 100, 1, 0
+  Slider "Soulsphere chance (%)", "bonsai_artifact_spawn_soul", 0, 100, 0.1, 1
   TFLV_Tooltip "Chance that a Soulsphere has an artifact lying next to it. 0 = never."
-  Slider "Invulnerability chance (%)", "bonsai_artifact_spawn_invuln", 0, 100, 1, 0
+  Slider "Invulnerability chance (%)", "bonsai_artifact_spawn_invuln", 0, 100, 0.1, 1
   TFLV_Tooltip "Chance that an Invulnerability sphere has an artifact lying next to it. 0 = never."
-  Slider "Blue armour chance (%)", "bonsai_artifact_spawn_bluearmor", 0, 100, 1, 0
+  Slider "Blue armour chance (%)", "bonsai_artifact_spawn_bluearmor", 0, 100, 0.1, 1
   TFLV_Tooltip "Chance that Blue armour has an artifact lying next to it. 0 = never."
-  Slider "Other power-ups chance (%)", "bonsai_artifact_spawn_other", 0, 100, 1, 0
+  Slider "Other power-ups chance (%)", "bonsai_artifact_spawn_other", 0, 100, 0.1, 1
   TFLV_Tooltip "Chance for a Berserk pack, Partial Invisibility or Radiation Suit. 0 = never."
   StaticText ""
   Option "Boss drops", "bonsai_artifact_boss_enabled", "OnOff"
   TFLV_Tooltip "Bosses (monsters with the BOSS flag, such as the Cyberdemon) can drop an artifact when they die."
-  Slider "Boss drop chance (%)", "bonsai_artifact_boss_chance", 0, 100, 1, 0
+  Slider "Boss drop chance (%)", "bonsai_artifact_boss_chance", 0, 100, 0.5, 1
   TFLV_Tooltip "Chance that a dying boss drops an artifact. 0 = never."
   StaticText ""
   Slider "Most per map", "bonsai_artifact_map_cap", 0, 5, 1, 0
