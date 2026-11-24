@@ -172,7 +172,7 @@ class TFLV_Upgrade_PoisonDot : TFLV_Upgrade_Dot {
     if (hallucinogens > 0 && GetTotalDamage() >= owner.health && !owner.bFRIENDLY) {
 //      DEBUG("Made the %s friendly!", owner.GetClassName());
       owner.A_SetFriendly(true);
-      ElementCue(owner, self.target, "bonsai_sfx_poison", TFLV_PerPlayerStats.ELEM_POISON, "poison/hallucinate", 20, 0.4, 2.5);
+      ElementCue(owner, self.target, "bonsai_sfx_poison", TFLV_PerPlayerStats.ELEM_POISON, "poison/hallucinate", 20, 0.4);
       owner.bDONTHARMCLASS = false;
       owner.bDONTHARMSPECIES = false;
     }
