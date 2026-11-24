@@ -181,3 +181,20 @@ poison/putrefy1 "sounds/rpg_poison_putrefy__b1.wav"
 poison/putrefy2 "sounds/rpg_poison_putrefy__b2.wav"
 poison/putrefy3 "sounds/rpg_poison_putrefy__b3.wav"
 poison/putrefy4 "sounds/rpg_poison_putrefy__b4.wav"
+
+// Blood / Infernal Kiln cues (assets/sfx/gen_blood_kiln.py, CC0): quiet tonal one-shots, four variants each, provisional (bonsai_sfx_blood, bonsai_sfx_fire).
+$random blood/exsanguinate { blood/exsanguinate1 blood/exsanguinate2 blood/exsanguinate3 blood/exsanguinate4 }
+blood/exsanguinate1 "sounds/rpg_blood_exsanguinate__x1.wav"
+blood/exsanguinate2 "sounds/rpg_blood_exsanguinate__x2.wav"
+blood/exsanguinate3 "sounds/rpg_blood_exsanguinate__x3.wav"
+blood/exsanguinate4 "sounds/rpg_blood_exsanguinate__x4.wav"
+$random blood/vitaldrain { blood/vitaldrain1 blood/vitaldrain2 blood/vitaldrain3 blood/vitaldrain4 }
+blood/vitaldrain1 "sounds/rpg_blood_vitaldrain__v1.wav"
+blood/vitaldrain2 "sounds/rpg_blood_vitaldrain__v2.wav"
+blood/vitaldrain3 "sounds/rpg_blood_vitaldrain__v3.wav"
+blood/vitaldrain4 "sounds/rpg_blood_vitaldrain__v4.wav"
+$random fire/kiln { fire/kiln1 fire/kiln2 fire/kiln3 fire/kiln4 }
+fire/kiln1 "sounds/rpg_fire_kiln__k1.wav"
+fire/kiln2 "sounds/rpg_fire_kiln__k2.wav"
+fire/kiln3 "sounds/rpg_fire_kiln__k3.wav"
+fire/kiln4 "sounds/rpg_fire_kiln__k4.wav"

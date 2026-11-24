@@ -90,7 +90,9 @@ class TFLV_Upgrade_InfernalKiln : TFLV_Upgrade_ElementalUpgrade {
       bonus *= 1.0 - double(hardness - softcap)/double(hardcap - softcap);
     }
 //    DEBUG("Kiln: %f -> %f", hardness, hardness + bonus);
+    bool wasCold = hardness <= 0;
     hardness = min(hardcap, hardness + bonus);
+    if (wasCold && hardness > 0) TFLV_Upgrade_Dot.ElementCue(player, player, "bonsai_sfx_fire", TFLV_PerPlayerStats.ELEM_KILN, "fire/kiln", 40);
   }
 
   override void Tick(Actor owner) {
