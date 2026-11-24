@@ -29,7 +29,7 @@ Thorns and Shield: `sfx/gen_thorns_shield.py` -> `sfx/thorns_shield_candidates.j
 
 Bouncy Shots: `sfx/gen_bouncy2.py` -> `sfx/bouncy2_candidates.json` (seed 2035, 8 layered candidates, shipped: `rpg_bouncy2__m1/m2/m6`, provisional; round 1 single-tone blips in `bouncy_candidates.json` were too close to the Thorns chimes) as `bouncy/field` in `SNDINFO.txt`.
 
-Explosion sound: `sfx/gen_explosions.py` -> `sfx/explosions_candidates.json` (seed 2043; 4 soft low booms, provisional) as `bonsai/smallboom` in `SNDINFO.txt`.
+Explosion sound: 7 sounds picked from the Doom Creator Toolkit sound-search lab (rounds 4-5, gene vectors and measures in `sfx/explosions_picked.json`; the earlier `sfx/gen_explosions.py` -> `sfx/explosions_candidates.json` hand-made set, seed 2043, is no longer shipped; provisional) as `bonsai/smallboom` in `SNDINFO.txt`.
 
 Blood/Kiln cues: `sfx/gen_blood_kiln.py` -> `sfx/blood_kiln_candidates.json` (seed 2042; 12 quiet tonal one-shots, provisional) as `blood/exsanguinate`, `blood/vitaldrain`, `fire/kiln` in `SNDINFO.txt`.
 

@@ -2,12 +2,15 @@
 bonsai/gunlevelup "sounds/rpg_levelup.wav"
 // TODO: include a sound effect here that will work with non-doom iwads
 $alias bonsai/smallboom_vanilla imp/shotx
-// Small explosion (assets/sfx/gen_explosions.py, CC0, provisional): Explosive Shots and Submunitions blasts. $limit keeps a crowd of bomblets from stacking.
-$random bonsai/smallboom { bonsai/smallboom1 bonsai/smallboom2 bonsai/smallboom3 bonsai/smallboom4 }
-bonsai/smallboom1 "sounds/rpg_explosion__e1.wav"
-bonsai/smallboom2 "sounds/rpg_explosion__e2.wav"
-bonsai/smallboom3 "sounds/rpg_explosion__e3.wav"
-bonsai/smallboom4 "sounds/rpg_explosion__e4.wav"
+// Small explosion (assets/sfx/explosions_picked.json, made with the Doom Creator Toolkit sound-search lab, CC0, provisional): Explosive Shots and Submunitions blasts. 7 variants picked by ear; $limit keeps a crowd of bomblets from stacking.
+$random bonsai/smallboom { bonsai/smallboom1 bonsai/smallboom2 bonsai/smallboom3 bonsai/smallboom4 bonsai/smallboom5 bonsai/smallboom6 bonsai/smallboom7 }
+bonsai/smallboom1 "sounds/rpg_explosion__k1.wav"
+bonsai/smallboom2 "sounds/rpg_explosion__k2.wav"
+bonsai/smallboom3 "sounds/rpg_explosion__k3.wav"
+bonsai/smallboom4 "sounds/rpg_explosion__k4.wav"
+bonsai/smallboom5 "sounds/rpg_explosion__k5.wav"
+bonsai/smallboom6 "sounds/rpg_explosion__k6.wav"
+bonsai/smallboom7 "sounds/rpg_explosion__k7.wav"
 $limit bonsai/smallboom 6
 
 // Companions system sounds

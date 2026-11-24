@@ -117,8 +117,8 @@ class TFLV_Upgrade_Submunitions_Grenade : Actor {
 
   void PlayBoom() {
     string snd = TFLV_Settings.boom_sound();
-    A_StartSound(snd, CHAN_WEAPON, CHANF_OVERLAP, 1, 0.5);
-    A_StartSound(snd, CHAN_7, CHANF_OVERLAP, 0.1, 0.01);
+    A_StartSound(snd, CHAN_WEAPON, CHANF_OVERLAP, 1, ATTN_NORM);   // distance-based: full volume close, fading to silence by about 1200 units
+    A_StartSound(snd, CHAN_7, CHANF_OVERLAP, 0.1, 0.2);   // faint far cue, also distance-based (audible out to about 6000 units)
   }
 
   // One event per bomblet: lets the cluster sound stop when none are left.
