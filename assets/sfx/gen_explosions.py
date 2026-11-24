@@ -1,16 +1,17 @@
 """Small-explosion sound for Explosive Shots and Submunitions bomblets (replaces the borrowed vanilla imp/shotx).
 
-Run:  python assets/sfx/gen_explosions.py
+Run:  python assets/sfx/gen_explosions.py      (needs the toolkit with up to 96 layers)
 Then: python -m doomcreator audition assets/sfx/explosions_candidates.json -o audition_explosions.html
 
-Round 3. Rounds 1-2 sounded like a bass drum, then a snare: a short noise burst plus a tonal body is a drum. A real
-blast instead (a) darkens as it dies, so the noise comes in several layers with falling cutoffs and growing decays
-(bright crack gone in 0.1 s, mid body 0.3 s, dark rumble 0.8 s), (b) has NO tonal low body (no sine, no pitch drop), the
-rumble is low-passed noise with a slow attack so there is no thump, and (c) has crinkly debris after the blast: a
-scatter of tiny, quiet, high-passed grains (e1-e3) or, for a pleasant tonal flavour, soft high pings (e4). Quiet, soft,
-0.8-1.0 s.
+Round 4. Rounds 1-3 (drum body, then graded noise plus a few crinkle grains) let you hear the individual parts, so they
+sounded like a drum beat with static on top. This round makes the blast out of MANY small overlapping layers so no
+single component stands out: a dense, front-loaded burst of dozens of short pentatonic pings spread over three octaves
+(a "slot machine win" sparkle, tonal and rewarding rather than harsh), glued together by a quiet dark noise bed and a
+slow-attack cluster of low detuned tones (a soft rumble chord, not one drum tone). Everything is randomised in pitch,
+level, timing and decay from a fixed seed, so it is reproducible. 0.7-1.0 s, about -24 dBFS RMS (ids e1-e4 again so the SNDINFO wiring is unchanged).
 """
 import json
+import math
 import os
 import random
 
@@ -21,50 +22,62 @@ def env(a, d, r=0.03):
     return {"a": a, "d": d, "s": 0.0, "r": r}
 
 
-def noise(dur, d, cutoff, a=0.001, kind="lp", q=0.7):
+def ping(hz, dur, metal, cutoff):
+    return {"duration": dur, "pitch": hz,
+            "operators": [{"ratio": 1.0, "level": 1.0, "env": env(0.001, dur * 0.55)},
+                          {"ratio": 2.76 if metal else 2.0, "level": metal if metal else 0.2, "env": env(0.001, dur * 0.3)},
+                          {"ratio": 1.006, "level": 0.5, "env": env(0.001, dur * 0.55)}],
+            "carriers": [0, 1, 2], "filter": {"type": "lp", "cutoff": cutoff, "q": 0.7}}
+
+
+def bed(dur, d, cutoff, a=0.004):
     return {"duration": dur, "pitch": 100, "operators": [{"ratio": 1.0, "level": 0.0, "env": env(0.001, dur)}],
             "carriers": [0], "noise": {"level": 1.0, "env": env(a, d)},
-            "filter": {"type": kind, "cutoff": cutoff, "q": q}}
+            "filter": {"type": "lp", "cutoff": cutoff, "q": 0.7}}
 
 
-def ping(hz, dur):
+def low(hz, dur, a):
     return {"duration": dur, "pitch": hz,
-            "operators": [{"ratio": 1.0, "level": 1.0, "env": env(0.001, dur * 0.5)},
-                          {"ratio": 2.01, "level": 0.25, "env": env(0.001, dur * 0.3)}],
-            "carriers": [0, 1], "filter": {"type": "lp", "cutoff": 6000, "q": 0.7}}
+            "operators": [{"ratio": 1.0, "level": 1.0, "env": env(a, dur * 0.6)}, {"ratio": 1.011, "level": 0.8, "env": env(a, dur * 0.6)}],
+            "carriers": [0, 1], "filter": {"type": "lp", "cutoff": 320, "q": 0.7}}
 
 
 def L(off, level, patch):
     return {"offset": round(off, 4), "level": round(level, 4), "patch": patch}
 
 
-def blast(sid, seed, dur, crack, mid, rumble, crinkle, grains, pings=None, rms=-16):
+# C pentatonic over four octaves: C3 D3 E3 G3 A3 ... up to G7
+def scale(lo, hi):
+    out = []
+    for octv in range(2, 8):
+        for n in (0, 2, 4, 7, 9):
+            hz = 16.3516 * 2 ** (octv + n / 12.0)
+            if lo <= hz <= hi:
+                out.append(hz)
+    return out
+
+
+def blast(sid, seed, dur, pings, spread, lo, hi, metal, bed_lv, low_lv, cutoff, rms=-19):
     rng = random.Random(seed)
-    layers = [L(0.0, crack, noise(0.2, 0.09, 5500)),                 # bright crack, gone almost at once
-              L(0.0, mid, noise(0.5, 0.28, 2200, a=0.002)),          # mid body
-              L(0.0, 1.0, noise(dur, dur * 0.55, 700, a=0.004)),     # dark body
-              L(0.0, rumble, noise(dur, dur * 0.75, 220, a=0.02))]   # sub rumble: slow attack, no thump, no tone
-    t = 0.03
-    for i in range(grains):
-        t += rng.uniform(0.012, 0.05) * (1 + i * 0.12)               # sparser as it dies
-        if t > dur * 0.8:
-            break
-        lv = crinkle * (1.0 - t / dur) * rng.uniform(0.5, 1.0)
-        if pings:
-            layers.append(L(t, lv, ping(rng.choice(pings), 0.09)))
-        else:
-            layers.append(L(t, lv, noise(0.03, 0.006, 1800, kind="hp")))
+    notes = scale(lo, hi)
+    layers = [L(0.0, bed_lv, bed(dur, dur * 0.45, 1800)),
+              L(0.0, bed_lv * 0.8, bed(dur, dur * 0.7, 450, a=0.01))]
+    for _ in range(pings):
+        t = min(-math.log(1 - rng.random()) * spread, dur * 0.8)            # dense at the start, thinning out
+        hz = rng.choice(notes) * rng.choice([1.0, 1.0, 1.0, 1.0035, 0.9965])
+        d = rng.uniform(0.07, 0.28) * (1.0 - 0.5 * t / dur)
+        layers.append(L(t, rng.uniform(0.25, 1.0) * (1.0 - 0.6 * t / dur), ping(hz, d + 0.04, metal, cutoff)))
+    for hz in rng.sample(scale(45, 140), 5):                                  # soft low chord, slow attack: no thump
+        layers.append(L(rng.uniform(0.0, 0.03), low_lv, low(hz, dur * 0.9, 0.025)))
     return {"id": sid, "alias": "cand15/" + sid.replace("__", "/"),
             "fm": {"duration": dur, "sample_rate": RATE, "gain": 0.9, "target_rms_dbfs": rms, "layers": layers}}
 
 
-PENTA = [1568.0, 1760.0, 2093.0, 2349.3, 2637.0, 3136.0]      # G6 A6 C7 D7 E7 G7
-
 sounds = [
-    blast("explosion__e1", 31, 0.8, 0.5, 0.9, 0.5, 0.45, 16),       # balanced, crinkly tail
-    blast("explosion__e2", 32, 0.95, 0.35, 0.7, 0.8, 0.35, 14),     # darker, more rumble
-    blast("explosion__e3", 33, 0.7, 0.6, 1.0, 0.35, 0.6, 22),       # crisper, lots of debris
-    blast("explosion__e4", 34, 0.85, 0.35, 0.8, 0.6, 0.5, 14, pings=PENTA),   # tonal flavour: soft pings instead of grit
+    blast("explosion__e1", 41, 0.8, 64, 0.13, 260, 3200, 0.0, 0.25, 0.4, 5000),     # dense pentatonic sparkle burst
+    blast("explosion__e2", 42, 0.95, 52, 0.18, 130, 2100, 0.0, 0.3, 0.6, 3500),     # lower, warmer, longer, more rumble
+    blast("explosion__e3", 43, 0.75, 70, 0.1, 400, 3600, 0.3, 0.35, 0.3, 5500),     # brighter, a touch of metal (shattering)
+    blast("explosion__e4", 44, 0.85, 60, 0.14, 180, 2800, 0.15, 0.5, 0.5, 4200),    # more noise bed: the most 'explosion-like'
 ]
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "explosions_candidates.json")
