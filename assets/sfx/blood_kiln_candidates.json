@@ -726,94 +726,44 @@
    "id": "blood_vitaldrain__v1",
    "alias": "cand14/blood_vitaldrain/v1",
    "fm": {
-    "duration": 0.4,
+    "duration": 0.55,
     "sample_rate": 44100,
     "gain": 0.9,
     "target_rms_dbfs": -30,
     "layers": [
      {
       "offset": 0.0,
-      "level": 0.9,
-      "patch": {
-       "duration": 0.3,
-       "pitch": 523.25,
-       "operators": [
-        {
-         "ratio": 1.0,
-         "level": 1.0,
-         "env": {
-          "a": 0.004,
-          "d": 0.12,
-          "s": 0.0,
-          "r": 0.05
-         }
-        },
-        {
-         "ratio": 2.0,
-         "level": 0.3,
-         "env": {
-          "a": 0.004,
-          "d": 0.072,
-          "s": 0.0,
-          "r": 0.05
-         }
-        },
-        {
-         "ratio": 1.005,
-         "level": 0.5,
-         "env": {
-          "a": 0.005,
-          "d": 0.12,
-          "s": 0.0,
-          "r": 0.05
-         }
-        }
-       ],
-       "carriers": [
-        0,
-        1,
-        2
-       ],
-       "filter": {
-        "type": "lp",
-        "cutoff": 3000,
-        "q": 0.8
-       }
-      }
-     },
-     {
-      "offset": 0.09,
       "level": 1.0,
       "patch": {
-       "duration": 0.31000000000000005,
-       "pitch": 784.875,
+       "duration": 0.55,
+       "pitch": 98,
        "operators": [
         {
          "ratio": 1.0,
          "level": 1.0,
          "env": {
-          "a": 0.004,
-          "d": 0.16,
+          "a": 0.05,
+          "d": 0.275,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
          "ratio": 2.0,
-         "level": 0.3,
+         "level": 0.04,
          "env": {
-          "a": 0.004,
-          "d": 0.096,
+          "a": 0.05,
+          "d": 0.165,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
-         "ratio": 1.005,
-         "level": 0.5,
+         "ratio": 1.01,
+         "level": 0.9,
          "env": {
-          "a": 0.005,
-          "d": 0.16,
+          "a": 0.06,
+          "d": 0.275,
           "s": 0.0,
           "r": 0.05
          }
@@ -826,24 +776,86 @@
        ],
        "filter": {
         "type": "lp",
-        "cutoff": 3000,
+        "cutoff": 700,
         "q": 0.8
+       },
+       "pitch_env": {
+        "start": 1.15,
+        "end": 1.0,
+        "time": 0.3,
+        "curve": 2.5
        }
       }
      },
      {
-      "offset": 0.09,
-      "level": 0.3,
+      "offset": 0.1,
+      "level": 0.8,
       "patch": {
-       "duration": 0.31000000000000005,
-       "pitch": 1569.75,
+       "duration": 0.45000000000000007,
+       "pitch": 116.522,
        "operators": [
         {
          "ratio": 1.0,
          "level": 1.0,
          "env": {
-          "a": 0.01,
-          "d": 0.1,
+          "a": 0.06,
+          "d": 0.24750000000000003,
+          "s": 0.0,
+          "r": 0.05
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.03,
+         "env": {
+          "a": 0.06,
+          "d": 0.14850000000000002,
+          "s": 0.0,
+          "r": 0.05
+         }
+        },
+        {
+         "ratio": 1.012,
+         "level": 0.9,
+         "env": {
+          "a": 0.072,
+          "d": 0.24750000000000003,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 650,
+        "q": 0.8
+       },
+       "pitch_env": {
+        "start": 1.12,
+        "end": 1.0,
+        "time": 0.28,
+        "curve": 2.5
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.35,
+      "patch": {
+       "duration": 0.55,
+       "pitch": 49.0,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.08,
+          "d": 0.275,
           "s": 0.0,
           "r": 0.05
          }
@@ -852,18 +864,18 @@
          "ratio": 2.0,
          "level": 0.0,
          "env": {
-          "a": 0.01,
-          "d": 0.06,
+          "a": 0.08,
+          "d": 0.165,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
          "ratio": 1.008,
-         "level": 0.3,
+         "level": 0.0,
          "env": {
-          "a": 0.012,
-          "d": 0.1,
+          "a": 0.096,
+          "d": 0.275,
           "s": 0.0,
           "r": 0.05
          }
@@ -876,7 +888,7 @@
        ],
        "filter": {
         "type": "lp",
-        "cutoff": 3200,
+        "cutoff": 400,
         "q": 0.8
        }
       }
@@ -888,94 +900,44 @@
    "id": "blood_vitaldrain__v2",
    "alias": "cand14/blood_vitaldrain/v2",
    "fm": {
-    "duration": 0.45,
+    "duration": 0.6,
     "sample_rate": 44100,
     "gain": 0.9,
     "target_rms_dbfs": -30,
     "layers": [
      {
       "offset": 0.0,
-      "level": 0.9,
-      "patch": {
-       "duration": 0.3,
-       "pitch": 440.0,
-       "operators": [
-        {
-         "ratio": 1.0,
-         "level": 1.0,
-         "env": {
-          "a": 0.004,
-          "d": 0.12,
-          "s": 0.0,
-          "r": 0.05
-         }
-        },
-        {
-         "ratio": 2.0,
-         "level": 0.25,
-         "env": {
-          "a": 0.004,
-          "d": 0.072,
-          "s": 0.0,
-          "r": 0.05
-         }
-        },
-        {
-         "ratio": 1.005,
-         "level": 0.5,
-         "env": {
-          "a": 0.005,
-          "d": 0.12,
-          "s": 0.0,
-          "r": 0.05
-         }
-        }
-       ],
-       "carriers": [
-        0,
-        1,
-        2
-       ],
-       "filter": {
-        "type": "lp",
-        "cutoff": 3000,
-        "q": 0.8
-       }
-      }
-     },
-     {
-      "offset": 0.1,
       "level": 1.0,
       "patch": {
-       "duration": 0.35,
-       "pitch": 660.0,
+       "duration": 0.6,
+       "pitch": 87.3,
        "operators": [
         {
          "ratio": 1.0,
          "level": 1.0,
          "env": {
-          "a": 0.004,
-          "d": 0.16,
+          "a": 0.05,
+          "d": 0.3,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
          "ratio": 2.0,
-         "level": 0.25,
+         "level": 0.04,
          "env": {
-          "a": 0.004,
-          "d": 0.096,
+          "a": 0.05,
+          "d": 0.18,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
-         "ratio": 1.005,
-         "level": 0.5,
+         "ratio": 1.01,
+         "level": 0.9,
          "env": {
-          "a": 0.005,
-          "d": 0.16,
+          "a": 0.06,
+          "d": 0.3,
           "s": 0.0,
           "r": 0.05
          }
@@ -988,24 +950,86 @@
        ],
        "filter": {
         "type": "lp",
-        "cutoff": 3000,
+        "cutoff": 700,
         "q": 0.8
+       },
+       "pitch_env": {
+        "start": 1.15,
+        "end": 1.0,
+        "time": 0.3,
+        "curve": 2.5
        }
       }
      },
      {
-      "offset": 0.1,
-      "level": 0.3,
+      "offset": 0.12,
+      "level": 0.8,
       "patch": {
-       "duration": 0.35,
-       "pitch": 1320.0,
+       "duration": 0.48,
+       "pitch": 103.7997,
        "operators": [
         {
          "ratio": 1.0,
          "level": 1.0,
          "env": {
-          "a": 0.01,
-          "d": 0.1,
+          "a": 0.06,
+          "d": 0.27,
+          "s": 0.0,
+          "r": 0.05
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.03,
+         "env": {
+          "a": 0.06,
+          "d": 0.162,
+          "s": 0.0,
+          "r": 0.05
+         }
+        },
+        {
+         "ratio": 1.012,
+         "level": 0.9,
+         "env": {
+          "a": 0.072,
+          "d": 0.27,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 650,
+        "q": 0.8
+       },
+       "pitch_env": {
+        "start": 1.12,
+        "end": 1.0,
+        "time": 0.28,
+        "curve": 2.5
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.35,
+      "patch": {
+       "duration": 0.6,
+       "pitch": 43.65,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.08,
+          "d": 0.3,
           "s": 0.0,
           "r": 0.05
          }
@@ -1014,18 +1038,18 @@
          "ratio": 2.0,
          "level": 0.0,
          "env": {
-          "a": 0.01,
-          "d": 0.06,
+          "a": 0.08,
+          "d": 0.18,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
          "ratio": 1.008,
-         "level": 0.3,
+         "level": 0.0,
          "env": {
-          "a": 0.012,
-          "d": 0.1,
+          "a": 0.096,
+          "d": 0.3,
           "s": 0.0,
           "r": 0.05
          }
@@ -1038,7 +1062,7 @@
        ],
        "filter": {
         "type": "lp",
-        "cutoff": 3200,
+        "cutoff": 400,
         "q": 0.8
        }
       }
@@ -1050,94 +1074,44 @@
    "id": "blood_vitaldrain__v3",
    "alias": "cand14/blood_vitaldrain/v3",
    "fm": {
-    "duration": 0.38,
+    "duration": 0.5,
     "sample_rate": 44100,
     "gain": 0.9,
     "target_rms_dbfs": -30,
     "layers": [
      {
       "offset": 0.0,
-      "level": 0.9,
-      "patch": {
-       "duration": 0.3,
-       "pitch": 587.33,
-       "operators": [
-        {
-         "ratio": 1.0,
-         "level": 1.0,
-         "env": {
-          "a": 0.004,
-          "d": 0.12,
-          "s": 0.0,
-          "r": 0.05
-         }
-        },
-        {
-         "ratio": 2.0,
-         "level": 0.35,
-         "env": {
-          "a": 0.004,
-          "d": 0.072,
-          "s": 0.0,
-          "r": 0.05
-         }
-        },
-        {
-         "ratio": 1.005,
-         "level": 0.5,
-         "env": {
-          "a": 0.005,
-          "d": 0.12,
-          "s": 0.0,
-          "r": 0.05
-         }
-        }
-       ],
-       "carriers": [
-        0,
-        1,
-        2
-       ],
-       "filter": {
-        "type": "lp",
-        "cutoff": 3000,
-        "q": 0.8
-       }
-      }
-     },
-     {
-      "offset": 0.08,
       "level": 1.0,
       "patch": {
-       "duration": 0.3,
-       "pitch": 784.08555,
+       "duration": 0.5,
+       "pitch": 110,
        "operators": [
         {
          "ratio": 1.0,
          "level": 1.0,
          "env": {
-          "a": 0.004,
-          "d": 0.16,
+          "a": 0.05,
+          "d": 0.25,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
          "ratio": 2.0,
-         "level": 0.35,
+         "level": 0.04,
          "env": {
-          "a": 0.004,
-          "d": 0.096,
+          "a": 0.05,
+          "d": 0.15,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
-         "ratio": 1.005,
-         "level": 0.5,
+         "ratio": 1.01,
+         "level": 0.9,
          "env": {
-          "a": 0.005,
-          "d": 0.16,
+          "a": 0.06,
+          "d": 0.25,
           "s": 0.0,
           "r": 0.05
          }
@@ -1150,24 +1124,86 @@
        ],
        "filter": {
         "type": "lp",
-        "cutoff": 3000,
+        "cutoff": 700,
         "q": 0.8
+       },
+       "pitch_env": {
+        "start": 1.15,
+        "end": 1.0,
+        "time": 0.3,
+        "curve": 2.5
        }
       }
      },
      {
-      "offset": 0.08,
-      "level": 0.3,
+      "offset": 0.09,
+      "level": 0.8,
       "patch": {
-       "duration": 0.3,
-       "pitch": 1568.1711,
+       "duration": 0.41000000000000003,
+       "pitch": 138.6,
        "operators": [
         {
          "ratio": 1.0,
          "level": 1.0,
          "env": {
-          "a": 0.01,
-          "d": 0.1,
+          "a": 0.06,
+          "d": 0.225,
+          "s": 0.0,
+          "r": 0.05
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.03,
+         "env": {
+          "a": 0.06,
+          "d": 0.135,
+          "s": 0.0,
+          "r": 0.05
+         }
+        },
+        {
+         "ratio": 1.012,
+         "level": 0.9,
+         "env": {
+          "a": 0.072,
+          "d": 0.225,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 650,
+        "q": 0.8
+       },
+       "pitch_env": {
+        "start": 1.12,
+        "end": 1.0,
+        "time": 0.28,
+        "curve": 2.5
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.35,
+      "patch": {
+       "duration": 0.5,
+       "pitch": 55.0,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.08,
+          "d": 0.25,
           "s": 0.0,
           "r": 0.05
          }
@@ -1176,18 +1212,18 @@
          "ratio": 2.0,
          "level": 0.0,
          "env": {
-          "a": 0.01,
-          "d": 0.06,
+          "a": 0.08,
+          "d": 0.15,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
          "ratio": 1.008,
-         "level": 0.3,
+         "level": 0.0,
          "env": {
-          "a": 0.012,
-          "d": 0.1,
+          "a": 0.096,
+          "d": 0.25,
           "s": 0.0,
           "r": 0.05
          }
@@ -1200,7 +1236,7 @@
        ],
        "filter": {
         "type": "lp",
-        "cutoff": 3200,
+        "cutoff": 400,
         "q": 0.8
        }
       }
@@ -1212,94 +1248,44 @@
    "id": "blood_vitaldrain__v4",
    "alias": "cand14/blood_vitaldrain/v4",
    "fm": {
-    "duration": 0.42,
+    "duration": 0.6,
     "sample_rate": 44100,
     "gain": 0.9,
     "target_rms_dbfs": -30,
     "layers": [
      {
       "offset": 0.0,
-      "level": 0.9,
-      "patch": {
-       "duration": 0.3,
-       "pitch": 392.0,
-       "operators": [
-        {
-         "ratio": 1.0,
-         "level": 1.0,
-         "env": {
-          "a": 0.004,
-          "d": 0.12,
-          "s": 0.0,
-          "r": 0.05
-         }
-        },
-        {
-         "ratio": 2.0,
-         "level": 0.2,
-         "env": {
-          "a": 0.004,
-          "d": 0.072,
-          "s": 0.0,
-          "r": 0.05
-         }
-        },
-        {
-         "ratio": 1.005,
-         "level": 0.5,
-         "env": {
-          "a": 0.005,
-          "d": 0.12,
-          "s": 0.0,
-          "r": 0.05
-         }
-        }
-       ],
-       "carriers": [
-        0,
-        1,
-        2
-       ],
-       "filter": {
-        "type": "lp",
-        "cutoff": 3000,
-        "q": 0.8
-       }
-      }
-     },
-     {
-      "offset": 0.1,
       "level": 1.0,
       "patch": {
-       "duration": 0.31999999999999995,
-       "pitch": 588.0,
+       "duration": 0.6,
+       "pitch": 82.4,
        "operators": [
         {
          "ratio": 1.0,
          "level": 1.0,
          "env": {
-          "a": 0.004,
-          "d": 0.16,
+          "a": 0.05,
+          "d": 0.3,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
          "ratio": 2.0,
-         "level": 0.2,
+         "level": 0.04,
          "env": {
-          "a": 0.004,
-          "d": 0.096,
+          "a": 0.05,
+          "d": 0.18,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
-         "ratio": 1.005,
-         "level": 0.5,
+         "ratio": 1.01,
+         "level": 0.9,
          "env": {
-          "a": 0.005,
-          "d": 0.16,
+          "a": 0.06,
+          "d": 0.3,
           "s": 0.0,
           "r": 0.05
          }
@@ -1312,24 +1298,86 @@
        ],
        "filter": {
         "type": "lp",
-        "cutoff": 3000,
+        "cutoff": 700,
         "q": 0.8
+       },
+       "pitch_env": {
+        "start": 1.15,
+        "end": 1.0,
+        "time": 0.3,
+        "curve": 2.5
        }
       }
      },
      {
-      "offset": 0.1,
-      "level": 0.3,
+      "offset": 0.14,
+      "level": 0.8,
       "patch": {
-       "duration": 0.31999999999999995,
-       "pitch": 1176.0,
+       "duration": 0.45999999999999996,
+       "pitch": 97.9736,
        "operators": [
         {
          "ratio": 1.0,
          "level": 1.0,
          "env": {
-          "a": 0.01,
-          "d": 0.1,
+          "a": 0.06,
+          "d": 0.27,
+          "s": 0.0,
+          "r": 0.05
+         }
+        },
+        {
+         "ratio": 2.0,
+         "level": 0.03,
+         "env": {
+          "a": 0.06,
+          "d": 0.162,
+          "s": 0.0,
+          "r": 0.05
+         }
+        },
+        {
+         "ratio": 1.012,
+         "level": 0.9,
+         "env": {
+          "a": 0.072,
+          "d": 0.27,
+          "s": 0.0,
+          "r": 0.05
+         }
+        }
+       ],
+       "carriers": [
+        0,
+        1,
+        2
+       ],
+       "filter": {
+        "type": "lp",
+        "cutoff": 650,
+        "q": 0.8
+       },
+       "pitch_env": {
+        "start": 1.12,
+        "end": 1.0,
+        "time": 0.28,
+        "curve": 2.5
+       }
+      }
+     },
+     {
+      "offset": 0.0,
+      "level": 0.35,
+      "patch": {
+       "duration": 0.6,
+       "pitch": 41.2,
+       "operators": [
+        {
+         "ratio": 1.0,
+         "level": 1.0,
+         "env": {
+          "a": 0.08,
+          "d": 0.3,
           "s": 0.0,
           "r": 0.05
          }
@@ -1338,18 +1386,18 @@
          "ratio": 2.0,
          "level": 0.0,
          "env": {
-          "a": 0.01,
-          "d": 0.06,
+          "a": 0.08,
+          "d": 0.18,
           "s": 0.0,
           "r": 0.05
          }
         },
         {
          "ratio": 1.008,
-         "level": 0.3,
+         "level": 0.0,
          "env": {
-          "a": 0.012,
-          "d": 0.1,
+          "a": 0.096,
+          "d": 0.3,
           "s": 0.0,
           "r": 0.05
          }
@@ -1362,7 +1410,7 @@
        ],
        "filter": {
         "type": "lp",
-        "cutoff": 3200,
+        "cutoff": 400,
         "q": 0.8
        }
       }

@@ -5,7 +5,7 @@ Then: python -m doomcreator audition assets/sfx/blood_kiln_candidates.json -o au
 
   blood/exsanguinate - heal burst on a kill: a warm low "heartbeat" of two soft rounded tones (lub-dub, slow attack so
                        it is a pulse, not a drum) with a gentle rising tone over it. From the dead enemy.
-  blood/vitaldrain   - armour gained: a soft bright two-note "plate" tone (low-passed, a hint of metal). From the player.
+  blood/vitaldrain   - armour gained: a dark, low, sinking minor-third pair of warm tones (vampiric). From the player.
   fire/kiln          - Infernal Kiln lights up: a warm low rising two-tone glow, like a furnace catching. From the player.
 Quiet (about -30 dBFS), 0.3-0.7 s.
 """
@@ -53,11 +53,12 @@ def exsang(sid, dur, hz, gap, rise):
     ])
 
 
-def vital(sid, dur, hz, ratio, gap, metal):
+def vital(sid, dur, hz, ratio, gap):
+    # dark, vampiric: two low minor-interval tones that sink in pitch (a slow drinking sigh), warm, no bright partials
     return snd(sid, dur, [
-        L(0.0, 0.9, plate(hz, 0.3, 0.12, metal=metal)),
-        L(gap, 1.0, plate(hz * ratio, dur - gap, 0.16, metal=metal)),
-        L(gap, 0.3, tone(hz * ratio * 2, dur - gap, 0.01, 0.1, cutoff=3200, partial=0.0, chorus=0.3)),
+        L(0.0, 1.0, tone(hz, dur, 0.05, dur * 0.5, glide=(1.15, 0.3), cutoff=700, partial=0.04, chorus=0.9, detune=1.01)),
+        L(gap, 0.8, tone(hz * ratio, dur - gap, 0.06, dur * 0.45, glide=(1.12, 0.28), cutoff=650, partial=0.03, chorus=0.9, detune=1.012)),
+        L(0.0, 0.35, tone(hz / 2, dur, 0.08, dur * 0.5, cutoff=400, partial=0.0, chorus=0.0)),
     ])
 
 
@@ -75,10 +76,10 @@ sounds = [
     exsang("blood_exsanguinate__x2", 0.65, 98, 0.2, 3.4),
     exsang("blood_exsanguinate__x3", 0.55, 123, 0.16, 2.7),
     exsang("blood_exsanguinate__x4", 0.6, 104, 0.22, 3.0),
-    vital("blood_vitaldrain__v1", 0.4, 523.25, 1.5, 0.09, 0.3),
-    vital("blood_vitaldrain__v2", 0.45, 440.0, 1.5, 0.1, 0.25),
-    vital("blood_vitaldrain__v3", 0.38, 587.33, 1.335, 0.08, 0.35),
-    vital("blood_vitaldrain__v4", 0.42, 392.0, 1.5, 0.1, 0.2),
+    vital("blood_vitaldrain__v1", 0.55, 98, 1.189, 0.1),
+    vital("blood_vitaldrain__v2", 0.6, 87.3, 1.189, 0.12),
+    vital("blood_vitaldrain__v3", 0.5, 110, 1.26, 0.09),
+    vital("blood_vitaldrain__v4", 0.6, 82.4, 1.189, 0.14),
     kiln("fire_kiln__k1", 0.6, 165, 1.5, 0.12),
     kiln("fire_kiln__k2", 0.7, 147, 1.5, 0.15),
     kiln("fire_kiln__k3", 0.55, 185, 1.335, 0.1),
