@@ -961,13 +961,13 @@ server float bonsai_hyperv_hook_stun_max_per_level  = 1.0; // Bonus to max stun 
 // Rare artifact (one free upgrade choice): rare spawns beside vanilla power-ups and a drop from +BOSS monsters.
 // Each spawn value is the % chance (0-100) rolled once per item; 0 = off. Same idea as the Flashlight mod's sliders.
 server bool bonsai_artifact_enabled = true;
-server int bonsai_artifact_spawn_mega = 4;        // Megasphere
-server int bonsai_artifact_spawn_soul = 3;        // Soulsphere
-server int bonsai_artifact_spawn_invuln = 4;      // Invulnerability sphere
-server int bonsai_artifact_spawn_bluearmor = 2;   // Blue armour
-server int bonsai_artifact_spawn_other = 1;       // Berserk, Partial Invisibility, Radiation Suit
+server float bonsai_artifact_spawn_mega = 1.5;    // Megasphere (% chance, 0 = off)
+server float bonsai_artifact_spawn_soul = 1.0;    // Soulsphere
+server float bonsai_artifact_spawn_invuln = 1.5;  // Invulnerability sphere
+server float bonsai_artifact_spawn_bluearmor = 1.0; // Blue armour
+server float bonsai_artifact_spawn_other = 0.5;   // Berserk, Partial Invisibility, Radiation Suit
 server bool bonsai_artifact_boss_enabled = true;
-server int bonsai_artifact_boss_chance = 25;      // drop chance for +BOSS monsters
+server float bonsai_artifact_boss_chance = 10.0;  // drop chance for +BOSS monsters
 server int bonsai_artifact_map_cap = 1;           // most artifacts that can appear per map, all sources together (0 = no limit)
 // Automated tests only: do not open the level-up menu (an open menu pauses the game); tests answer with bonsai_dbg.
 nosave server bool bonsai_test_no_menu = false;

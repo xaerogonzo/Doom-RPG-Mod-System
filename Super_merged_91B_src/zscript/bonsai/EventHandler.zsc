@@ -243,7 +243,7 @@ class TFLV_EventHandler : StaticEventHandler {
     return -1;
   }
 
-  static int ArtifactChance(int src) {
+  static double ArtifactChance(int src) {
     switch (src) {
       case 0: return bonsai_artifact_spawn_mega;
       case 1: return bonsai_artifact_spawn_soul;

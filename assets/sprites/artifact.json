@@ -1,0 +1,23 @@
+{
+ "schema_version": 1,
+ "sprites": [
+  {
+   "prefix": "RGEM",
+   "frames": [
+    {
+     "frame": "A", "rotation_mode": "single", "size": [24, 30], "offset": [12, 22], "outline": "#2a1800",
+     "layers": [
+      {"type": "polygon", "points": [[12, 2], [22, 15], [12, 28], [2, 15]], "color": "#d89a1a", "shade": 0.6, "outline": "#2a1800"},
+      {"type": "polygon", "points": [[12, 2], [22, 15], [12, 15]], "color": "#ffd860", "shade": 0.4},
+      {"type": "polygon", "points": [[12, 15], [22, 15], [12, 28]], "color": "#a86a0a", "shade": 0.3},
+      {"type": "polygon", "points": [[12, 7], [17, 15], [12, 23], [7, 15]], "color": "#fff0a0", "shade": 0.2},
+      {"type": "ellipse", "box": [9, 9, 13, 13], "color": "#ffffff"}
+     ]
+    },
+    {"frame": "B", "copy_of": "A", "tweak": [{"layer": 4, "scale": [1.8, 1.8], "move": [1, 1]}, {"layer": 3, "color": "#ffffc0"}]},
+    {"frame": "C", "copy_of": "A", "tweak": [{"layer": 4, "scale": [0.6, 0.6], "move": [4, 3]}, {"layer": 1, "color": "#ffb830"}]},
+    {"frame": "D", "copy_of": "B", "tweak": [{"layer": 1, "color": "#f0aa28"}]}
+   ]
+  }
+ ]
+}

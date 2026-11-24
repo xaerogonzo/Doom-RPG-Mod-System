@@ -43,6 +43,27 @@ class TFLV_Debug : Object play {
       // Test helper: set an integer cvar from a scenario (the unattended runner cannot use the cvar op).
       let cv = CVar.FindCVar(argv[2]);
       if (cv) cv.SetInt(arg); else console.printf("BONSAI cvar-int: unknown cvar %s", argv[2]);
+    } else if (argv[1] == "profile-apply") {
+      // Test helper: apply profile slot 'arg' (what the netevent does).
+      TFLV_Profiles.Apply(arg);
+    } else if (argv[1] == "profile-save") {
+      TFLV_Profiles.Save(arg);
+    } else if (argv[1] == "cvar-get" && argv.size() >= 3) {
+      let cv = CVar.FindCVar(argv[2]);
+      if (cv) console.printf("BONSAI cvar %s=%.3f", argv[2], cv.GetFloat());
+      else console.printf("BONSAI cvar %s=missing", argv[2]);
+    } else if (argv[1] == "w-select" && argv.size() >= 3) {
+      // Test helper: select a weapon by class name.
+      let pawn = players[player].mo;
+      if (pawn) pawn.A_SelectWeapon((class<Weapon>)(argv[2]));
+    } else if (argv[1] == "w-null") {
+      // Test helper: no weapon in hand (like right after a death or a weapon switch).
+      players[player].ReadyWeapon = null;
+    } else if (argv[1] == "w-ignore") {
+      // Test helper: mark the current weapon as ignored (arg 1) or normal (arg 0), as a BONSAIRC IGNORE would.
+      let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+      let info = stats ? stats.GetInfoForCurrentWeapon() : null;
+      if (info) info.typeflags = arg ? TFLV_TYPE_IGNORE : 0;
     } else if (argv[1] == "art-reject") {
       let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
       if (stats && stats.currentEffectGiver) stats.currentEffectGiver.Choose(-1);
