@@ -228,12 +228,53 @@ class TFLV_EventHandler : StaticEventHandler {
   }
 
   // =========================================================================
+  // Rare artifact support: which spawned item is a source, and the per-map cap
+  // =========================================================================
+
+  // Source category of a vanilla power-up (0 mega, 1 soul, 2 invulnerability, 3 blue armour, 4 other), -1 = none.
+  // Explicit class checks, in order, so one actor is only ever one category (the vanilla pickups do not share a
+  // base class). Matches the vanilla class and its descendants, not unrelated replacement actors.
+  static int ArtifactSourceOf(Actor thing) {
+    if (thing is "Megasphere") return 0;
+    if (thing is "Soulsphere") return 1;
+    if (thing is "InvulnerabilitySphere") return 2;
+    if (thing is "BlueArmor") return 3;
+    if (thing is "Berserk" || thing is "BlurSphere" || thing is "RadSuit") return 4;
+    return -1;
+  }
+
+  static int ArtifactChance(int src) {
+    switch (src) {
+      case 0: return bonsai_artifact_spawn_mega;
+      case 1: return bonsai_artifact_spawn_soul;
+      case 2: return bonsai_artifact_spawn_invuln;
+      case 3: return bonsai_artifact_spawn_bluearmor;
+      case 4: return bonsai_artifact_spawn_other;
+    }
+    return 0;
+  }
+
+  // Per-map cap, shared by all players and both sources, keyed by map name so it does not depend on the order of
+  // the map-load events (map-placed power-ups spawn before WorldLoaded). Counted only after a successful spawn.
+  string artifact_map;
+  int artifact_count;
+  bool ArtifactCapOpen() {
+    if (artifact_map != level.MapName) { artifact_map = level.MapName; artifact_count = 0; }
+    return bonsai_artifact_map_cap <= 0 || artifact_count < bonsai_artifact_map_cap;
+  }
+  void ArtifactCounted() { ++artifact_count; }
+
+  // =========================================================================
   // Thing spawned
   // =========================================================================
 
   override void WorldThingSpawned(WorldEvent evt) {
     Actor thing = evt.thing;
     if (!thing) return;
+    if (thing is "Inventory" && !thing.bMISSILE && BonsaiEnabled() && bonsai_artifact_enabled) {
+      int src = ArtifactSourceOf(thing);
+      if (src >= 0) TFLV_RareArtifact.Roll(thing, ArtifactChance(src));
+    }
     if (BonsaiEnabled() && thing.bMISSILE && PlayerPawn(thing.target))
       TFLV_PerPlayerStats.GetStatsFor(thing.target).OnProjectileCreated(thing);
     if (thing.bMISSILE && !PlayerPawn(thing.target) && BonsaiEnabled()) {
@@ -267,6 +308,11 @@ class TFLV_EventHandler : StaticEventHandler {
   override void WorldThingDied(WorldEvent evt) {
     Actor died = evt.thing;
     if (!died) return;
+
+    // Rare artifact: +BOSS monsters can drop one (own switch and chance; never from friendly monsters).
+    if (BonsaiEnabled() && bonsai_artifact_enabled && bonsai_artifact_boss_enabled
+        && died.bISMONSTER && died.bBOSS && !died.bFRIENDLY && !PlayerPawn(died))
+      TFLV_RareArtifact.Roll(died, bonsai_artifact_boss_chance);
 
     // Track player deaths so WorldLoaded can distinguish a same-map respawn
     // (where totaltime resets to 0) from a true new game start.

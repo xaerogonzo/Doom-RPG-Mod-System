@@ -11,7 +11,7 @@ class TFLV_WeaponUpgradeGiver : TFLV_UpgradeGiver {
     TFLV_Upgrade_Registry.GetRegistry().GenerateUpgradesForWeapon(wielded, candidates);
   }
 
-  void InstallUpgrade(int index) {
+  virtual void InstallUpgrade(int index) {
     if (index < 0) {
       wielded.RejectLevelUp();
       if (bonsai_autosave_after_level) { wielded.stats.Autosave(); }
