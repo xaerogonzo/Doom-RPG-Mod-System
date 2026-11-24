@@ -3,70 +3,71 @@
 Run:  python assets/sfx/gen_explosions.py
 Then: python -m doomcreator audition assets/sfx/explosions_candidates.json -o audition_explosions.html
 
-A small explosion: a short band-limited noise burst for the blast, a darker longer noise rumble, a rough self-feedback FM
-low body (not a clean sine, which sounds like a drum) and a quiet sub. e4 is the toolkit's own explosion preset, low-passed. Lower and rounder
-than the old fireball sound so a crowd of bomblets stays pleasant. About -24 dBFS, 0.45-0.65 s.
+Round 3. Rounds 1-2 sounded like a bass drum, then a snare: a short noise burst plus a tonal body is a drum. A real
+blast instead (a) darkens as it dies, so the noise comes in several layers with falling cutoffs and growing decays
+(bright crack gone in 0.1 s, mid body 0.3 s, dark rumble 0.8 s), (b) has NO tonal low body (no sine, no pitch drop), the
+rumble is low-passed noise with a slow attack so there is no thump, and (c) has crinkly debris after the blast: a
+scatter of tiny, quiet, high-passed grains (e1-e3) or, for a pleasant tonal flavour, soft high pings (e4). Quiet, soft,
+0.8-1.0 s.
 """
 import json
 import os
+import random
 
 RATE = 44100
 
 
-def env(a, d, r=0.05):
+def env(a, d, r=0.03):
     return {"a": a, "d": d, "s": 0.0, "r": r}
 
 
-def body(hz, dur, drop, cutoff):
-    return {"duration": dur, "pitch": hz, "operators": [{"ratio": 1.0, "level": 1.0, "env": env(0.003, dur * 0.6)}],
-            "carriers": [0], "pitch_env": {"start": drop, "end": 1.0, "time": 0.14, "curve": 3.0},
-            "filter": {"type": "lp", "cutoff": cutoff, "q": 0.8}}
-
-
-def crunch(hz, dur, depth, cutoff):
-    return {"duration": dur, "pitch": hz,
-            "operators": [{"ratio": 1.0, "level": 1.0, "env": env(0.002, dur * 0.5)},
-                          {"ratio": 1.41, "level": 1.0, "env": env(0.002, dur * 0.3)}],
-            "carriers": [0], "mods": [[1, 0, depth]], "pitch_env": {"start": 1.8, "end": 1.0, "time": 0.08, "curve": 3.0},
-            "filter": {"type": "lp", "cutoff": cutoff, "q": 0.8}}
-
-
-def noise(dur, level, d, cutoff, a=0.001):
+def noise(dur, d, cutoff, a=0.001, kind="lp", q=0.7):
     return {"duration": dur, "pitch": 100, "operators": [{"ratio": 1.0, "level": 0.0, "env": env(0.001, dur)}],
-            "carriers": [0], "noise": {"level": level, "env": env(a, d, 0.02)},
-            "filter": {"type": "lp", "cutoff": cutoff, "q": 0.7}}
+            "carriers": [0], "noise": {"level": 1.0, "env": env(a, d)},
+            "filter": {"type": kind, "cutoff": cutoff, "q": q}}
 
 
-def grit(hz, dur, fb, cutoff):
-    # self-feedback FM: rough, inharmonic, noise-like low rumble (not a clean drum tone)
+def ping(hz, dur):
     return {"duration": dur, "pitch": hz,
-            "operators": [{"ratio": 1.0, "level": 1.0, "feedback": fb, "env": env(0.002, dur * 0.6)}],
-            "carriers": [0], "pitch_env": {"start": 1.5, "end": 0.8, "time": dur * 0.8, "curve": 2.0},
-            "filter": {"type": "lp", "cutoff": cutoff, "q": 0.8}}
+            "operators": [{"ratio": 1.0, "level": 1.0, "env": env(0.001, dur * 0.5)},
+                          {"ratio": 2.01, "level": 0.25, "env": env(0.001, dur * 0.3)}],
+            "carriers": [0, 1], "filter": {"type": "lp", "cutoff": 6000, "q": 0.7}}
 
 
 def L(off, level, patch):
     return {"offset": round(off, 4), "level": round(level, 4), "patch": patch}
 
 
-def boom(sid, dur, burst_cut, rumble_cut, fb, hz, sub):
-    layers = [L(0.0, 1.0, noise(0.3, 1.0, 0.16, burst_cut)),                 # the blast itself: a short band-limited burst
-              L(0.0, 0.8, noise(dur, 1.0, dur * 0.7, rumble_cut, a=0.004)),   # dark, longer rumble
-              L(0.0, 0.7, grit(hz, dur * 0.8, fb, 1200)),                     # rough low body
-              L(0.0, sub, grit(hz * 0.5, dur, 0.0, 200))]                     # quiet sub, no clean drum thump
+def blast(sid, seed, dur, crack, mid, rumble, crinkle, grains, pings=None, rms=-16):
+    rng = random.Random(seed)
+    layers = [L(0.0, crack, noise(0.2, 0.09, 5500)),                 # bright crack, gone almost at once
+              L(0.0, mid, noise(0.5, 0.28, 2200, a=0.002)),          # mid body
+              L(0.0, 1.0, noise(dur, dur * 0.55, 700, a=0.004)),     # dark body
+              L(0.0, rumble, noise(dur, dur * 0.75, 220, a=0.02))]   # sub rumble: slow attack, no thump, no tone
+    t = 0.03
+    for i in range(grains):
+        t += rng.uniform(0.012, 0.05) * (1 + i * 0.12)               # sparser as it dies
+        if t > dur * 0.8:
+            break
+        lv = crinkle * (1.0 - t / dur) * rng.uniform(0.5, 1.0)
+        if pings:
+            layers.append(L(t, lv, ping(rng.choice(pings), 0.09)))
+        else:
+            layers.append(L(t, lv, noise(0.03, 0.006, 1800, kind="hp")))
     return {"id": sid, "alias": "cand15/" + sid.replace("__", "/"),
-            "fm": {"duration": dur, "sample_rate": RATE, "gain": 0.9, "target_rms_dbfs": -22, "layers": layers}}
+            "fm": {"duration": dur, "sample_rate": RATE, "gain": 0.9, "target_rms_dbfs": rms, "layers": layers}}
 
+
+PENTA = [1568.0, 1760.0, 2093.0, 2349.3, 2637.0, 3136.0]      # G6 A6 C7 D7 E7 G7
 
 sounds = [
-    boom("explosion__e1", 0.6, 3200, 700, 1.2, 80, 0.2),
-    boom("explosion__e2", 0.7, 2400, 500, 1.6, 65, 0.25),
-    boom("explosion__e3", 0.5, 4000, 900, 1.0, 95, 0.15),
-    {"id": "explosion__e4", "preset": "explosion", "alias": "cand15/explosion/e4",
-     "overrides": {"filter": {"type": "lp", "cutoff": 2600, "q": 0.8}}},
+    blast("explosion__e1", 31, 0.8, 0.5, 0.9, 0.5, 0.45, 16),       # balanced, crinkly tail
+    blast("explosion__e2", 32, 0.95, 0.35, 0.7, 0.8, 0.35, 14),     # darker, more rumble
+    blast("explosion__e3", 33, 0.7, 0.6, 1.0, 0.35, 0.6, 22),       # crisper, lots of debris
+    blast("explosion__e4", 34, 0.85, 0.35, 0.8, 0.6, 0.5, 14, pings=PENTA),   # tonal flavour: soft pings instead of grit
 ]
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "explosions_candidates.json")
 with open(out, "w", encoding="utf-8", newline="\n") as f:
     json.dump({"schema_version": 1, "seed": 2043, "sounds": sounds}, f, indent=1)
-print("wrote", out, len(sounds), "sounds")
+print("wrote", out, len(sounds), "sounds,", max(len(s["fm"]["layers"]) for s in sounds), "layers max")
