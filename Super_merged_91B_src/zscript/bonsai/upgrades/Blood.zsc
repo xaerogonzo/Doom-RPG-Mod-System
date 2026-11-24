@@ -66,6 +66,7 @@ class TFLV_Upgrade_Exsanguinate : TFLV_Upgrade_ElementalUpgrade {
     int burstHeal = int(target.SpawnHealth() * bonsai_stat_blood_burst_ratio * level);
     if (burstHeal <= 0) return;
     player.GiveBody(burstHeal);
+    TFLV_Upgrade_Dot.ElementCue(target, player, "bonsai_sfx_blood", TFLV_PerPlayerStats.ELEM_BLOOD, "blood/exsanguinate", 20);
   }
 
   override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
@@ -140,7 +141,10 @@ class TFLV_Upgrade_BloodDot : TFLV_Upgrade_Dot {
           double hpFrac = double(owner.health) / max(1, owner.SpawnHealth());
           if (hpFrac <= 0.5) {
             let ab = BasicArmorBonus(Actor.Spawn("BasicArmorBonus", plr.pos, NO_REPLACE));
-            if (ab && !ab.CallTryPickup(plr)) ab.Destroy();
+            if (ab) {
+              if (ab.CallTryPickup(plr)) ElementCue(plr, plr, "bonsai_sfx_blood", TFLV_PerPlayerStats.ELEM_BLOOD, "blood/vitaldrain", 40);
+              else ab.Destroy();
+            }
           }
         }
       }

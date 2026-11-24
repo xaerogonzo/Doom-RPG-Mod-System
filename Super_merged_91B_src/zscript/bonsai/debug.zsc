@@ -140,6 +140,16 @@ class TFLV_Debug : Object play {
       ar = ar .. (ok ? "1" : "0");
     }
     console.printf("BONSAI elem gate2 result=%s", ar);
+    // Blood (4) and Kiln (5) gates, gap 40. {tic, kind}. Expected 1101
+    let bs2 = new("TFLV_PerPlayerStats");
+    static const int btics2[] = { 100, 4,  100, 5,  120, 4,  140, 5 };
+    string br2 = "";
+    for (int i = 0; i < 4; ++i) {
+      bool ok = bs2.ElemCueOpen(btics2[i*2], btics2[i*2+1]);
+      if (ok) bs2.ElemCueClaim(btics2[i*2], btics2[i*2+1], 40);
+      br2 = br2 .. (ok ? "1" : "0");
+    }
+    console.printf("BONSAI elem gate3 result=%s", br2);
   }
 
   static void ShowInfoConsole(Actor pawn) {
