@@ -34,6 +34,21 @@ class TFLV_Upgrade_ElementalSynthesis : TFLV_Upgrade_ElementalUpgrade {
     return colours[elements[i]];
   }
 
+  // True if src carries any of this weapon's elemental dots, i.e. a spread would actually copy something.
+  bool HasDots(Actor src) {
+    static const string dots[] = { "", "TFLV_Upgrade_FireDot", "TFLV_Upgrade_AcidDot", "TFLV_Upgrade_PoisonDot", "TFLV_Upgrade_ShockDot" };
+    for (uint i = 0; i < elements.size(); ++i) {
+      if (src.FindInventory(dots[elements[i]])) return true;
+    }
+    return false;
+  }
+
+  // One soft shimmer per spread, gated (40 tics) and switchable (bonsai_sfx_synthesis, Full tier).
+  void SpreadCue(Actor pawn, Actor from) {
+    if (!HasDots(from)) return;
+    TFLV_Upgrade_Dot.ElementCue(from, pawn, "bonsai_sfx_synthesis", TFLV_PerPlayerStats.ELEM_SYNTHESIS, "synth/spread", 40);
+  }
+
   void CopyElements(Actor src, Actor dst) {
     static const string dots[] = { "", "TFLV_Upgrade_FireDot", "TFLV_Upgrade_AcidDot", "TFLV_Upgrade_PoisonDot", "TFLV_Upgrade_ShockDot" };
 //
@@ -82,6 +97,7 @@ class TFLV_Upgrade_ElementalBeam : TFLV_Upgrade_ElementalSynthesis {
 
     let particles = TFLV_Settings.vfx_for("bonsai_vfx_synthesis") == TFLV_VFX_FULL;
     first_hit = target;
+    SpreadCue(pawn, target);
     pawn.A_CustomRailgun(
       1, 0,
       particles ? GetColour(0) : -1, particles ? GetColour(1) : -1,
@@ -120,6 +136,7 @@ class TFLV_Upgrade_ElementalBlast : TFLV_Upgrade_ElementalSynthesis {
       "TFLV_Upgrade_ElementalSynthesis_Aoe",
       (target.pos.x, target.pos.y, target.pos.z + target.height/2)));
     aoe.InitFrom(self, target, target.radius * bonsai_stat_elemblast_radius);
+    SpreadCue(pawn, target);
   }
 
   override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {
@@ -138,6 +155,7 @@ class TFLV_Upgrade_ElementalWave : TFLV_Upgrade_ElementalSynthesis {
       "TFLV_Upgrade_ElementalSynthesis_Aoe",
       (pawn.pos.x, pawn.pos.y, pawn.pos.z + pawn.height/2)));
     aoe.InitFrom(self, target, pawn.radius * bonsai_stat_elemwave_radius);
+    SpreadCue(pawn, pawn);
   }
 
   override bool IsSuitableForWeapon(TFLV_WeaponInfo info) const {

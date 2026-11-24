@@ -218,3 +218,10 @@ lightning/arc4 "sounds/rpg_lightning_arc__a4.wav"
 lightning/arc5 "sounds/rpg_lightning_arc__a5.wav"
 lightning/arc6 "sounds/rpg_lightning_arc__a6.wav"
 $limit lightning/arc 5
+
+// Elemental Synthesis cue (assets/sfx/gen_synthesis.py, CC0): a soft tonal shimmer when Beam/Blast/Wave copies elemental effects. bonsai_sfx_synthesis, Full tier, provisional.
+$random synth/spread { synth/spread1 synth/spread2 synth/spread3 synth/spread4 }
+synth/spread1 "sounds/rpg_synth_spread__s1.wav"
+synth/spread2 "sounds/rpg_synth_spread__s2.wav"
+synth/spread3 "sounds/rpg_synth_spread__s3.wav"
+synth/spread4 "sounds/rpg_synth_spread__s4.wav"
