@@ -208,3 +208,13 @@ fire/kiln1 "sounds/rpg_fire_kiln__k1.wav"
 fire/kiln2 "sounds/rpg_fire_kiln__k2.wav"
 fire/kiln3 "sounds/rpg_fire_kiln__k3.wav"
 fire/kiln4 "sounds/rpg_fire_kiln__k4.wav"
+
+// Chain Lightning arc hop (Doom Creator sound-search lab, profile chain_zap, 6 picks, softened with a 4.5 kHz low-pass): bonsai_sfx_lightning, Full tier; falls back to vanilla weapons/plasmaf.
+$random lightning/arc { lightning/arc1 lightning/arc2 lightning/arc3 lightning/arc4 lightning/arc5 lightning/arc6 }
+lightning/arc1 "sounds/rpg_lightning_arc__a1.wav"
+lightning/arc2 "sounds/rpg_lightning_arc__a2.wav"
+lightning/arc3 "sounds/rpg_lightning_arc__a3.wav"
+lightning/arc4 "sounds/rpg_lightning_arc__a4.wav"
+lightning/arc5 "sounds/rpg_lightning_arc__a5.wav"
+lightning/arc6 "sounds/rpg_lightning_arc__a6.wav"
+$limit lightning/arc 5
