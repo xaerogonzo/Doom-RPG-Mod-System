@@ -609,7 +609,7 @@ class TFLV_Upgrade_ChainLightning_Aux : TFLV_Upgrade_AuxActor {
       if (arc.to) {
         ApplyDamage(arc.to);
         // Play a sharp electric crack on the struck target.
-        arc.to.A_StartSound("weapons/plasmaf", CHAN_AUTO, CHANF_OVERLAP, 0.6, ATTN_NORM);
+        arc.to.A_StartSound(TFLV_Settings.arc_sound(), CHAN_AUTO, CHANF_OVERLAP, 0.6, ATTN_NORM);
       }
     }
     --jumps;
