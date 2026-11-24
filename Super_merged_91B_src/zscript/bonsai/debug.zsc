@@ -26,6 +26,8 @@ class TFLV_Debug : Object play {
       service.GetDouble("add-p-xp", "", player, arg);
     } else if (argv[1] == "gate-test") {
       GateTest();
+    } else if (argv[1] == "synth-test") {
+      SynthTest(player);
     } else if (argv[1] == "dump") {
       Dump(player);
     } else if (argv[1] == "w-level") {
@@ -56,6 +58,34 @@ class TFLV_Debug : Object play {
     } else {
       console.printf("Unknown or malformed debug command: %s", argv[1]);
     }
+  }
+
+  // Test helper: runs the current weapon's Elemental Synthesis upgrade against the first live monster, as a hit would
+  // (OnDamageDealt, then the colour, dot and copy helpers), and logs what it collected. Catches table-index bugs.
+  static void SynthTest(int player) {
+    let pawn = players[player].mo;
+    let stats = TFLV_PerPlayerStats.GetStatsFor(pawn);
+    let info = stats ? stats.GetInfoForCurrentWeapon() : null;
+    if (!info) { console.printf("BONSAI synth-test: no weapon info"); return; }
+    TFLV_Upgrade_ElementalSynthesis syn;
+    for (uint i = 0; i < info.upgrades.upgrades.Size(); ++i) {
+      syn = TFLV_Upgrade_ElementalSynthesis(info.upgrades.upgrades[i]);
+      if (syn) break;
+    }
+    if (!syn) { console.printf("BONSAI synth-test: no synthesis upgrade"); return; }
+    Actor victim;
+    let it = ThinkerIterator.Create("Actor");
+    Actor mo;
+    while (mo = Actor(it.Next())) {
+      if (mo.bShootable && mo.bIsMonster && mo.health > 0) { victim = mo; break; }
+    }
+    if (!victim) { console.printf("BONSAI synth-test: no monster"); return; }
+    syn.OnDamageDealt(pawn, null, victim, 10);
+    int c0 = syn.GetColour(0);
+    int c1 = syn.GetColour(1);
+    bool has = syn.HasDots(victim);
+    syn.CopyElements(victim, victim);
+    console.printf("BONSAI synth-test elements=%d colour0=%x colour1=%x hasdots=%d done", syn.elements.Size(), c0, c1, has ? 1 : 0);
   }
 
   // Read-only, deterministic listing of every weapon's progression and upgrades, the player's
