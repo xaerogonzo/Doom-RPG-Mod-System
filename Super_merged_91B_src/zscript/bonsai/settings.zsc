@@ -102,6 +102,12 @@ class TFLV_Settings : Object {
     return global >= tier;
   }
 
+  // Small-explosion sound: the new original one, or the old vanilla one when the cue switch is off.
+  // Never silent: the blast is hit feedback. Called once per explosion.
+  static string boom_sound() {
+    return sfx_for("bonsai_sfx_explosion", 1) ? "bonsai/smallboom" : "bonsai/smallboom_vanilla";
+  }
+
   static string levelup_sound() {
     // Must be kept in sync with the GunBonsaiLevelUpSoundOption in MENUDEF
     static const string sounds[] = { "", "bonsai/gunlevelup", "misc/secret", "misc/teleport" };

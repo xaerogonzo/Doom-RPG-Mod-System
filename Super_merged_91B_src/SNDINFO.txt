@@ -1,7 +1,14 @@
 // Level-up, parry: original sounds generated with Doom Creator from assets/sfx/stage_a.json (CC0).
 bonsai/gunlevelup "sounds/rpg_levelup.wav"
 // TODO: include a sound effect here that will work with non-doom iwads
-$alias bonsai/smallboom imp/shotx
+$alias bonsai/smallboom_vanilla imp/shotx
+// Small explosion (assets/sfx/gen_explosions.py, CC0, provisional): Explosive Shots and Submunitions blasts. $limit keeps a crowd of bomblets from stacking.
+$random bonsai/smallboom { bonsai/smallboom1 bonsai/smallboom2 bonsai/smallboom3 bonsai/smallboom4 }
+bonsai/smallboom1 "sounds/rpg_explosion__e1.wav"
+bonsai/smallboom2 "sounds/rpg_explosion__e2.wav"
+bonsai/smallboom3 "sounds/rpg_explosion__e3.wav"
+bonsai/smallboom4 "sounds/rpg_explosion__e4.wav"
+$limit bonsai/smallboom 6
 
 // Companions system sounds
 f_ally/down   AL_DOW
