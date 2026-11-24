@@ -277,7 +277,8 @@ class TFLV_PerPlayerStats : Object play {
   const ELEM_POISON = 3;
   const ELEM_BLOOD = 4;
   const ELEM_KILN = 5;
-  int elemCueUntil[6];
+  const ELEM_SYNTHESIS = 6;
+  int elemCueUntil[7];
   int elemCuesGiven;
   bool ElemCueOpen(int now, int kind) const {
     return now >= elemCueUntil[kind];

@@ -43,6 +43,7 @@ user int bonsai_sfx_acid = -1;              // Acid upgrade cues: Acid Spray, Em
 user int bonsai_sfx_poison = -1;            // Poison upgrade cues: Hallucinogens, Putrefaction (full tier)
 user int bonsai_sfx_blood = -1;             // Blood upgrade cues: Exsanguinate, Vital Drain (full tier)
 user int bonsai_sfx_explosion = -1;         // small-explosion sound for Explosive Shots / Submunitions: on = new sound, off = old vanilla sound (never silent) (essential tier)
+user int bonsai_sfx_synthesis = -1;         // Elemental Synthesis shimmer when Beam/Blast/Wave spreads elemental effects (full tier)
 user int bonsai_sfx_submunitions = -1;     // Submunitions multi-ball cluster sound (full tier)
 user int bonsai_vfx_mode = 2;              // global VFX level: 0=off 1=reduced 2=full
 // Per-feature VFX overrides. -1 = follow global setting, 0 = off, 1 = reduced, 2 = full.
