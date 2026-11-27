@@ -9,6 +9,16 @@ alias bonsai-show-info "netevent bonsai-show-info"
 alias bonsai-dump "netevent bonsai-debug,info"
 defaultbind I bonsai-show-info
 
+// --- Companion orders ---
+addkeysection "Gun Bonsai - Companions" bonsai_companion_keys
+
+alias companions-stay "netevent companion-stay"
+alias companions-follow "netevent companion-follow"
+alias companions-toggle "netevent companion-toggle"
+addmenukey "Companions: Stay" companions-stay
+addmenukey "Companions: Follow" companions-follow
+addmenukey "Companions: Toggle Stay/Follow" companions-toggle
+
 // --- Doom Points ---
 Alias dp_top "OpenMenu dp_TopMenu"
 

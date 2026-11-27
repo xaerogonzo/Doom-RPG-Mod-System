@@ -1928,6 +1928,8 @@ OptionMenu "CompanionsBehavior"
   TFLV_Tooltip "How close you need to be before companions become non-solid."
   Option "Player shots pass through companions", "F_PassPlayerShots", "YesNo"
   TFLV_Tooltip "Player rockets, plasma and other missiles fly through companions instead of hitting them. Hitscan shots (pistol, shotgun, chaingun) still hit them."
+  Option "Companions stay put",                "companions_stay", "YesNo"
+  TFLV_Tooltip "Companion order. On: companions stop following and stop teleporting, but still fight enemies in range. Set with the Companions keybinds (Stay / Follow / Toggle)."
 }
 
 OptionMenu "CompanionsStats"
