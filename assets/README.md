@@ -35,6 +35,6 @@ Blood/Kiln cues: `sfx/gen_blood_kiln.py` -> `sfx/blood_kiln_candidates.json` (se
 
 Acid/Poison cues: `sfx/gen_acid_poison.py` -> `sfx/acid_poison_candidates.json` (seed 2039; 16 quiet one-shots, provisional) as `acid/spray`, `acid/embrittle`, `poison/hallucinate`, `poison/putrefy` in `SNDINFO.txt`.
 
-Fire/Lightning cues: `sfx/gen_fire_lightning.py` -> `sfx/fire_lightning_candidates.json` (seed 2038; 17 quiet one-shots, all shipped, provisional) as `fire/terror`, `fire/spread`, `lightning/thunder`, `lightning/chain`, `lightning/revive` in `SNDINFO.txt`.
+Fire/Lightning cues: `sfx/gen_fire_lightning.py` still ships `fire/terror`, `fire/spread`, `lightning/thunder`, `lightning/revive`. **Chain Lightning:** hops `lightning/arc` = eight shorter snaps (`sfx/chain_zap_arc_picked.json`); start `lightning/chain` = six longer keeps plus 013 (`sfx/lightning_chain_picked.json`). Old FM chain variants and `chain_arc_picked.json` are no longer shipped. Thunderbolt keepers are still unwired. Plan: Doom Hub `LIGHTNING_SFX.md`.
 
 Submunitions: `sfx/gen_submunitions.py` -> `sfx/submunitions_candidates.json` (seed 2037, 5 rhythmic 5.83 s loop variants matched to the measured bomblet bounce rhythm, all shipped, provisional; needs the toolkit's 96-layer limit) as `submunitions/cluster` in `SNDINFO.txt`.

@@ -164,11 +164,15 @@ fire/spread1 "sounds/rpg_fire_spread__s4.wav"
 fire/spread2 "sounds/rpg_fire_spread__s5.wav"
 fire/spread3 "sounds/rpg_fire_spread__s6.wav"
 fire/spread4 "sounds/rpg_fire_spread__s7.wav"
-$random lightning/chain { lightning/chain1 lightning/chain2 lightning/chain3 lightning/chain4 }
-lightning/chain1 "sounds/rpg_lightning_chain__c4.wav"
-lightning/chain2 "sounds/rpg_lightning_chain__c5.wav"
-lightning/chain3 "sounds/rpg_lightning_chain__c6.wav"
-lightning/chain4 "sounds/rpg_lightning_chain__c7.wav"
+// Chain Lightning start: longer zaps from lightning_chain_r0 plus s9r0g0c013 (assets/sfx/lightning_chain_picked.json). Same switch as hops.
+$random lightning/chain { lightning/chain1 lightning/chain2 lightning/chain3 lightning/chain4 lightning/chain5 lightning/chain6 lightning/chain7 }
+lightning/chain1 "sounds/rpg_lightning_chain__c1.wav"
+lightning/chain2 "sounds/rpg_lightning_chain__c2.wav"
+lightning/chain3 "sounds/rpg_lightning_chain__c3.wav"
+lightning/chain4 "sounds/rpg_lightning_chain__c4.wav"
+lightning/chain5 "sounds/rpg_lightning_chain__c5.wav"
+lightning/chain6 "sounds/rpg_lightning_chain__c6.wav"
+lightning/chain7 "sounds/rpg_lightning_chain__c7.wav"
 
 // Acid / Poison upgrade cues (assets/sfx/gen_acid_poison.py, CC0): quiet one-shots from the affected enemy, four variants each, provisional (bonsai_sfx_acid / bonsai_sfx_poison).
 $random acid/spray { acid/spray1 acid/spray2 acid/spray3 acid/spray4 }
@@ -209,14 +213,16 @@ fire/kiln2 "sounds/rpg_fire_kiln__k2.wav"
 fire/kiln3 "sounds/rpg_fire_kiln__k3.wav"
 fire/kiln4 "sounds/rpg_fire_kiln__k4.wav"
 
-// Chain Lightning arc hop (Doom Creator sound-search lab, profile chain_zap, 6 picks, softened with a 4.5 kHz low-pass): bonsai_sfx_lightning, Full tier; falls back to vanilla weapons/plasmaf.
-$random lightning/arc { lightning/arc1 lightning/arc2 lightning/arc3 lightning/arc4 lightning/arc5 lightning/arc6 }
+// Chain Lightning arc hop: shorter snaps from chain_zap_arc_r0 (8 keeps, assets/sfx/chain_zap_arc_picked.json). bonsai_sfx_lightning, Full tier; falls back to vanilla weapons/plasmaf.
+$random lightning/arc { lightning/arc1 lightning/arc2 lightning/arc3 lightning/arc4 lightning/arc5 lightning/arc6 lightning/arc7 lightning/arc8 }
 lightning/arc1 "sounds/rpg_lightning_arc__a1.wav"
 lightning/arc2 "sounds/rpg_lightning_arc__a2.wav"
 lightning/arc3 "sounds/rpg_lightning_arc__a3.wav"
 lightning/arc4 "sounds/rpg_lightning_arc__a4.wav"
 lightning/arc5 "sounds/rpg_lightning_arc__a5.wav"
 lightning/arc6 "sounds/rpg_lightning_arc__a6.wav"
+lightning/arc7 "sounds/rpg_lightning_arc__a7.wav"
+lightning/arc8 "sounds/rpg_lightning_arc__a8.wav"
 $limit lightning/arc 5
 
 // Elemental Synthesis cue (assets/sfx/gen_synthesis.py, CC0): a soft tonal shimmer when Beam/Blast/Wave copies elemental effects. bonsai_sfx_synthesis, Full tier, provisional.

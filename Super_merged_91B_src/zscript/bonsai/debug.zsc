@@ -64,6 +64,25 @@ class TFLV_Debug : Object play {
       let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
       let info = stats ? stats.GetInfoForCurrentWeapon() : null;
       if (info) info.typeflags = arg ? TFLV_TYPE_IGNORE : 0;
+    } else if (argv[1] == "fire-hitscan") {
+      // Test helper: do what a pistol shot does (LineAttack with a puff) against a fresh Zombieman in front of the player.
+      let pawn = players[player].mo;
+      if (pawn) {
+        let mon = Actor.Spawn("ZombieMan", pawn.Vec3Angle(160, pawn.angle, 0));
+        if (mon) {
+          mon.A_Stop();
+          pawn.A_Face(mon, 0, 0);
+          double pt = pawn.AimLineAttack(pawn.angle, 512);
+          pawn.LineAttack(pawn.angle, 512, pt, 1, 'Hitscan', 'BulletPuff', LAF_ISMELEEATTACK == 0 ? 0 : 0);
+        }
+      }
+    } else if (argv[1] == "w-type") {
+      // Test helper: what weapon type the inference has settled on for the weapon in hand.
+      let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
+      let info = stats ? stats.GetInfoForCurrentWeapon() : null;
+      if (info) console.printf("BONSAI w-type wpn=%s melee=%d hitscans=%.0f projectiles=%.0f total=%.0f hit=%d proj=%d flags=%d",
+        info.wpn ? info.wpn.GetClassName() : 'none', info.IsMelee(), info.hitscans, info.projectiles, info.total, info.IsHitscan(), info.IsProjectile(), info.typeflags);
+      else console.printf("BONSAI w-type none");
     } else if (argv[1] == "art-reject") {
       let stats = TFLV_PerPlayerStats.GetStatsFor(players[player].mo);
       if (stats && stats.currentEffectGiver) stats.currentEffectGiver.Choose(-1);
