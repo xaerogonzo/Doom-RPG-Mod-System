@@ -1,0 +1,128 @@
+// =============================================================================
+// Save Gate — Gun Bonsai x Simple Saving bridge
+//
+// A player upgrade that unlocks Simple Saving's quicksave and save-item economy.
+// Simple Saving owns all the rules (see its SaveGate.zsc); this file only
+// reports the upgrade level to it through plain CVars. Simple Saving works
+// without this mod, and this mod works without Simple Saving: the upgrade
+// never shows up in the pool unless Simple Saving is loaded and the gate is on.
+//
+// Why the class lives here and not in Simple Saving: a ZScript class cannot
+// extend a parent that is not loaded, so any Gun Bonsai upgrade has to sit in
+// the pk3 that contains Gun Bonsai.
+//
+// Source of truth for the settings is this mod (bonsai_savegate_*, saved in the
+// balance profiles). TFLV_SaveGateHandler copies them into Simple Saving's
+// nosave_gate_* CVars about once a second and on every map/spawn, so a profile
+// change or a loaded save can never leave the gate stuck on a stale level.
+//
+// Level meaning (defaults, tunable in Simple Saving's Save Gate menu):
+//   Lv1 quicksave + kill/event save items     Lv2 secrets give save items
+//   Lv3 bosses can drop save items            Lv4 save items survive map changes
+// Every level also raises how many save items can be held
+// (bonsai_savegate_cap_base + (level - 1) * bonsai_savegate_cap_per_level).
+// =============================================================================
+
+class TFLV_SaveGateHandler : EventHandler
+{
+    const SYNC_PERIOD = 35; // tics
+
+    // True when Simple Saving is loaded (it declares nosave_gate_level in CVARINFO).
+    static bool SimpleSavingPresent()
+    {
+        return CVar.FindCVar("nosave_gate_level") != null;
+    }
+
+    static int ReadInt(String name, int fallback)
+    {
+        CVar c = CVar.FindCVar(name);
+        return c ? c.GetInt() : fallback;
+    }
+
+    // Writes only when the value changed, so an idle sync costs a few lookups.
+    static void WriteInt(String name, int value)
+    {
+        CVar c = CVar.FindCVar(name);
+        if (c && c.GetInt() != value)
+            c.SetInt(value);
+    }
+
+    static int MaxLevel()
+    {
+        return max(1, ReadInt("bonsai_savegate_max_level", 4));
+    }
+
+    // Capacity at a given level, same formula Simple Saving uses.
+    static int CapacityAt(int level)
+    {
+        if (level < 1) return 0;
+        return max(1, ReadInt("bonsai_savegate_cap_base", 2)
+            + (level - 1) * ReadInt("bonsai_savegate_cap_per_level", 1));
+    }
+
+    // The upgrade level the local player holds, 0 if none or not in game.
+    static int PlayerLevel()
+    {
+        int pnum = consoleplayer;
+        if (!playeringame[pnum] || !players[pnum].mo) return 0;
+        let stats = TFLV_PerPlayerStats.GetStatsFor(players[pnum].mo);
+        if (!stats) return 0;
+        return min(int(stats.upgrades.Level("TFLV_Upgrade_SaveGate")), MaxLevel());
+    }
+
+    // Copies this mod's settings and the player's upgrade level into Simple Saving.
+    static void Sync()
+    {
+        if (!SimpleSavingPresent()) return;
+        WriteInt("nosave_gate_enabled", ReadInt("bonsai_savegate_enabled", 0) != 0 ? 1 : 0);
+        WriteInt("nosave_gate_cap_base", max(1, ReadInt("bonsai_savegate_cap_base", 2)));
+        WriteInt("nosave_gate_cap_per_level", max(0, ReadInt("bonsai_savegate_cap_per_level", 1)));
+        WriteInt("nosave_gate_level", PlayerLevel());
+    }
+
+    override void WorldLoaded(WorldEvent e)       { Sync(); }
+    override void PlayerEntered(PlayerEvent e)    { Sync(); }
+    override void PlayerRespawned(PlayerEvent e)  { Sync(); }
+
+    override void WorldTick()
+    {
+        if (gametic % SYNC_PERIOD == 0)
+            Sync();
+    }
+}
+
+class TFLV_Upgrade_SaveGate : TFLV_Upgrade_BaseUpgrade
+{
+    override bool IsSuitableForPlayer(TFLV_PerPlayerStats stats) const
+    {
+        // Only offered when Simple Saving is loaded and its save gate is switched on.
+        if (!TFLV_SaveGateHandler.SimpleSavingPresent()) return false;
+        if (TFLV_SaveGateHandler.ReadInt("bonsai_savegate_enabled", 0) == 0) return false;
+        return int(stats.upgrades.Level("TFLV_Upgrade_SaveGate")) < TFLV_SaveGateHandler.MaxLevel();
+    }
+
+    override void OnActivate(TFLV_PerPlayerStats stats, TFLV_WeaponInfo info)
+    {
+        TFLV_SaveGateHandler.Sync();
+    }
+
+    override void GetTooltipFields(Dictionary fields, uint level) const
+    {
+        int lv = int(level);
+        String unlocked;
+        if (lv <= 0)
+        {
+            unlocked = "Nothing yet.";
+        }
+        else
+        {
+            unlocked = "Quicksave";
+            if (lv >= TFLV_SaveGateHandler.ReadInt("nosave_gate_secret_level", 2)) unlocked = unlocked .. ", secret saves";
+            if (lv >= TFLV_SaveGateHandler.ReadInt("nosave_gate_boss_level", 3))   unlocked = unlocked .. ", boss saves";
+            if (lv >= TFLV_SaveGateHandler.ReadInt("nosave_gate_carry_level", 4))  unlocked = unlocked .. ", saves kept between maps";
+            unlocked = unlocked .. ".";
+        }
+        fields.insert("unlocked", unlocked);
+        fields.insert("cap", String.Format("Holds %d save items.", TFLV_SaveGateHandler.CapacityAt(lv)));
+    }
+}

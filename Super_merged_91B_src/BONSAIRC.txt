@@ -107,6 +107,10 @@ register TFLV_Upgrade_Indestructible;
 # Companions upgrade — player upgrade for the companion/friendly monster system.
 register TFLV_Upgrade_Companions;
 
+# Save Gate - player upgrade that unlocks Simple Saving's quicksave and save items.
+# Only offered when Simple Saving is loaded and its gate is switched on (see SaveGate.zsc).
+register TFLV_Upgrade_SaveGate;
+
 # Disable Juggler upgrade in Hellrider, since it doesn't work with HR weapon switching.
 ifdef EndieWeapon { unregister TFLV_Upgrade_Juggler; }
 

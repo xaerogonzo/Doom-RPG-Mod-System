@@ -84,6 +84,8 @@ OptionMenu "GunBonsaiOptions"
   TFLV_Tooltip "Turn Gun Bonsai sound cues off, essential-only or full, and override single cues. The weapon level-up sound keeps its own option above. Hyper-V movement sounds are in the Hyper-V options."
   TFLV_AnimatedSubmenu "Rare finds",                      "GunBonsaiRareFinds"
   TFLV_Tooltip "A rare artifact that gives your equipped weapon one free upgrade choice. It can appear beside power-ups (each kind has its own chance) and drop from bosses. Set a chance to 0 to turn that source off."
+  TFLV_AnimatedSubmenu "Save Gate (Simple Saving)",      "GunBonsaiSaveGate"
+  TFLV_Tooltip "Lock Simple Saving's quicksave and save items until you take the Save Gate upgrade. Only has an effect when Simple Saving is loaded. Saved and applied with the balance profiles."
   Option "$TFLV_OPT_NAME_LEVELUP_FLASH", "bonsai_levelup_flash", "OnOff"
   TFLV_Tooltip "$TFLV_OPT_TT_LEVELUP_FLASH"
   ColorPicker "$TFLV_OPT_NAME_LEVELUP_FLASH_RGB", "bonsai_levelup_flash_rgb"
@@ -310,6 +312,8 @@ OptionMenu "GunBonsaiUpgradeToggles"
   TFLV_Tooltip "$TFLV_TOGGLE_INDESTRUCTIBLE"
   Option "Companions",          "bonsai_upg_companions",      "GunBonsaiUpgradeTier"
   TFLV_Tooltip "$TFLV_TOGGLE_COMPANIONS"
+  Option "Save Gate (needs Simple Saving)", "bonsai_upg_savegate", "GunBonsaiUpgradeTier"
+  TFLV_Tooltip "Rarity of the Save Gate upgrade, which unlocks Simple Saving. Only offered when Simple Saving is loaded and Lock Saving is on. Default Favored."
 
   StaticText "--- Hyper-V Integration Upgrades ---"
   Option "Mobility (Dash/Jump/Crouch)",      "bonsai_upg_hyperv_mobility",     "GunBonsaiUpgradeTier"
@@ -3015,4 +3019,24 @@ OptionMenu "GunBonsaiRareFinds"
   StaticText ""
   Slider "Most per map", "bonsai_artifact_map_cap", 0, 5, 1, 0
   TFLV_Tooltip "The most artifacts that can appear on one map, all sources together. 0 = no limit."
+}
+
+OptionMenu "GunBonsaiSaveGate"
+{
+  class TFLV_TooltipOptionMenu
+  Title "Save Gate (Simple Saving)"
+  TFLV_TooltipGeometry 0.0, 0.5, 0.35, 1.0, 0.5
+  TFLV_TooltipAppearance "", "", "tfttbg"
+
+  StaticText "Locks Simple Saving's quicksave and save items until you take the Save Gate upgrade. Does nothing unless Simple Saving is loaded.", DARKGRAY
+  StaticText "Saving from the Save menu and the engine's autosaves are never locked. These settings are saved with the balance profiles.", DARKGRAY
+  StaticText ""
+  Option "Lock saving behind the upgrade", "bonsai_savegate_enabled", "OnOff"
+  TFLV_Tooltip "On: Simple Saving's quicksave, save item drops and event saves stay locked until the Save Gate upgrade is taken. The upgrade then appears in the level-up pool."
+  Slider "Upgrade levels", "bonsai_savegate_max_level", 1, 6, 1, 0
+  TFLV_Tooltip "How many times the Save Gate upgrade can be taken. Default 4: unlock, secret saves, boss saves, saves kept between maps. Which level unlocks what is set in Simple Saving's Save Gate menu."
+  Slider "Save items held at level 1", "bonsai_savegate_cap_base", 1, 10, 1, 0
+  TFLV_Tooltip "How many save items you can carry once the upgrade is taken."
+  Slider "Extra items per level", "bonsai_savegate_cap_per_level", 0, 5, 1, 0
+  TFLV_Tooltip "Extra save items you can carry for every level above 1. Never above Simple Saving's Max Save Items."
 }

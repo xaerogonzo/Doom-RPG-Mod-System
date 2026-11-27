@@ -2,5 +2,5 @@
 // Combines: Gun Bonsai, Indestructible, Doom Points, Companions, Hyper-V
 
 GameInfo {
-  AddEventHandlers = "TFLV_EventHandler", "dp_StaticView", "VPlayerPropModifier", "VMovesHandler", "SlomoHandler", "UnifiedHudHandler", "TFLV_HyperV_IntegrationHandler"
+  AddEventHandlers = "TFLV_EventHandler", "dp_StaticView", "VPlayerPropModifier", "VMovesHandler", "SlomoHandler", "UnifiedHudHandler", "TFLV_HyperV_IntegrationHandler", "TFLV_SaveGateHandler"
 }
