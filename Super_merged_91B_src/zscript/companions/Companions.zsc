@@ -338,6 +338,12 @@ class TFCO_CompanionsSystem play {
                bonsai_companions_max_allies);
   }
 
+  // Companion order set by keybinds (companions_stay CVar). True = stay put.
+  static bool StayOrdered() {
+    CVar c = CVar.FindCVar("companions_stay");
+    return c && c.GetBool();
+  }
+
   // Whether bosses are allowed to spawn at the current upgrade level.
   static bool GetBossesAllowed(int playerNumber) {
     if (!companions_gun_bonsai_mode)
@@ -390,6 +396,8 @@ class TFCO_FriendEnhancer : Inventory {
   bool ArrowPopped;
   bool RevValue;
   int  ReviveCount;
+  bool ShotPassActive;  // true while this companion is letting player missiles through
+  bool StayApplied;        // true while this companion carries STANDSTILL because of the stay order
 
   // Cached state references — resolved once in AttachToOwner, never change.
   // FindState() on every tic is measurably expensive with many companions.
@@ -497,6 +505,8 @@ class TFCO_FriendEnhancer : Inventory {
         TickAI(act, master, distToMaster, canSeeMaster);
         TickHealing(act, distToMaster, canSeeMaster);
         TickTeleport(act, master, distToMaster, canSeeMaster);
+        TickStay(act);
+        TickShotPass(act, distToMaster);
       }
     }
 
@@ -546,6 +556,52 @@ class TFCO_FriendEnhancer : Inventory {
     act.damagemultiply = act.default.damagemultiply * F_DamageMult;
   }
 
+  // Stay order: the engine itself walks friendly monsters toward the player, so
+  // gating our own follow code is not enough. STANDSTILL makes the monster stop
+  // moving in its chase state while it still attacks anything in range. The
+  // class default is restored when the order returns to follow.
+  private void TickStay(Actor act) {
+    if (TFCO_CompanionsSystem.StayOrdered()) {
+      if (!act.bSTANDSTILL) {
+        act.bSTANDSTILL = true;
+        StayApplied = true;
+      }
+    } else if (StayApplied) {
+      let def = GetDefaultByType(act.GetClass());
+      act.bSTANDSTILL = def ? def.bSTANDSTILL : false;
+      StayApplied = false;
+    }
+  }
+
+  // Let player-fired missiles (rockets, plasma...) fly through this companion.
+  // While a player missile is close enough to reach it this tic, the companion
+  // is made THRUACTORS so the missile's collision check skips it; otherwise the
+  // walk-through state from UpdateVisuals is restored. Hitscan is not affected.
+  // Only missiles owned by a player count, so enemy fire still hits companions.
+  private void TickShotPass(Actor act, double distToMaster) {
+    bool incoming = false;
+    if (F_PassPlayerShots) {
+      BlockThingsIterator it = BlockThingsIterator.Create(act, 128);
+      while (it.Next()) {
+        let m = it.thing;
+        if (!m || m == act || m.bDESTROYED || !m.bMISSILE) continue;
+        if (!m.target || !m.target.player) continue;
+        if (act.Distance3D(m) <= act.radius + m.radius + m.speed + 4) {
+          incoming = true;
+          break;
+        }
+      }
+    }
+
+    if (incoming) {
+      act.bTHRUACTORS = true;
+      ShotPassActive = true;
+    } else if (ShotPassActive) {
+      act.bTHRUACTORS = F_Walkable && (distToMaster <= F_WalkableRange);
+      ShotPassActive = false;
+    }
+  }
+
   // Throttled visual styling — tint, walkable proximity, translucency.
   // Called every 4 tics (cosmetic, saves ~75% of the cost).
   private void UpdateVisuals(Actor act, double distToMaster) {
@@ -585,7 +641,7 @@ class TFCO_FriendEnhancer : Inventory {
   private void TickAI(Actor act, Actor master, double distToMaster, bool canSeeMaster) {
     // Following and idle behaviour (only when no active target).
     if (!act.target) {
-      if (F_Follow && canSeeMaster && distToMaster > F_IdleRange) {
+      if (F_Follow && !TFCO_CompanionsSystem.StayOrdered() && canSeeMaster && distToMaster > F_IdleRange) {
         act.bSPRITEANGLE = true;
         act.SpriteAngle  = 180;
         act.A_FaceMaster();
@@ -673,6 +729,7 @@ class TFCO_FriendEnhancer : Inventory {
   // Per-tic teleport-to-master logic. Mutates CantSeeMaster (sight timer).
   private void TickTeleport(Actor act, Actor master, double distToMaster, bool canSeeMaster) {
     if (!F_Teleport || act.speed <= 0) return;
+    if (TFCO_CompanionsSystem.StayOrdered()) return;  // stay order: no teleporting into or out of a fight
 
     if (canSeeMaster)
       CantSeeMaster = 0;

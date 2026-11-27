@@ -7,6 +7,13 @@ Third-party components (Gun Bonsai, Hyper-V, VUAS, Indestructible, Doom Points, 
 
 ## [Unreleased]
 
+### Added
+- **Player shots pass through companions (optional).** New `F_PassPlayerShots` CVar (default off), toggle under Companions > Combat Behavior. While a player-fired missile (rocket, plasma) is close enough to reach a companion, that companion is made THRUACTORS for that tic so the missile flies on instead of blocking. Enemy missiles are unaffected.
+- **Companion orders: Stay / Follow / Toggle.** New keybinds under "Gun Bonsai - Companions" (`companions-stay`, `companions-follow`, `companions-toggle`, unbound by default). The order is the `companions_stay` CVar (not archived), also shown as "Companions stay put" in Companions > Combat Behavior. While staying, companions do not follow the player or teleport to them (they carry `STANDSTILL`, because the engine's own friendly-follow otherwise still walks them to about 120 units of the player); they still fight enemies in range.
+
+### Known limitations
+- **Hitscan shots (pistol, shotgun, chaingun) still hit companions.** `F_PassPlayerShots` only covers missiles. A hitscan pass-through was tried and removed: while the attack button was held, companions in the line of fire were made non-shootable (`bNONSHOOTABLE`) from the companion's own tick. In a live test (UZDoom, empty room, friendly Demon 160 units ahead, Super Shotgun and chaingun, option on) the shots still produced a puff on the Demon. The likely cause is ordering: the player's weapon fires before the companion's tick runs, and a mouse click only holds the attack bit for one tic, so the flag is never set in time. Untested alternative: do the marking from `WorldTick` in the event handler, which probably runs before the actors act, and restore the flag the tic after the line is clear. That was judged not worth the per-tic block-map search and was not built. A side effect of any version of this approach is that enemies cannot hit the marked companion while it is non-shootable.
+
 ### Changed
 - **Chain Lightning hops vs start cue.** `lightning/arc` is the eight shorter snaps kept from `chain_zap_arc_r0` (`assets/sfx/chain_zap_arc_picked.json`). `lightning/chain` is the six longer `lightning_chain_r0` keeps plus `s9r0g0c013` (`assets/sfx/lightning_chain_picked.json`). Round 1 of the hop search was the same family and is not used. No extra low-pass. Thunderbolt and revive cues are unchanged. Same `bonsai_sfx_lightning` switch and `$limit` 5 on hops.
 

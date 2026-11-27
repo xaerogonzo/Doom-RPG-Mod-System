@@ -507,6 +507,18 @@ class TFLV_EventHandler : StaticEventHandler {
   // =========================================================================
 
   override void NetworkProcess(ConsoleEvent evt) {
+    // Companion orders work even when Gun Bonsai is off.
+    if (evt.name == "companion-stay" || evt.name == "companion-follow" || evt.name == "companion-toggle") {
+      CVar stayCv = CVar.FindCVar("companions_stay");
+      if (stayCv) {
+        bool stay = (evt.name == "companion-stay")
+                 || (evt.name == "companion-toggle" && !stayCv.GetBool());
+        stayCv.SetBool(stay);
+        Console.MidPrint(Font.GetFont("SmallFont"), stay ? "Companions: STAY" : "Companions: FOLLOW");
+      }
+      return;
+    }
+
     if (BonsaiEnabled()) {
       if (evt.name == "bonsai-show-info") { ShowInfo(evt.player); return; }
       else if (evt.name == "bonsai-choose-level-up-option") { ChooseLevelUpOption(evt.player, evt.args[0]); return; }

@@ -347,6 +347,8 @@ server bool  F_Idle            = true;
 server int   F_IdleRange       = 128;
 server bool  F_Strafing        = true;
 server bool  F_NoFriendlyFire  = true;
+server bool  F_PassPlayerShots = false; // player missiles (rockets, plasma...) fly through companions
+server noarchive bool companions_stay = false; // companion order: true = stay put (no following, no teleporting); set by keybinds
 server bool  F_Revive          = true;
 server bool  F_ReviveMsg       = true;
 server float F_ReviveSpeed     = 1.0;
