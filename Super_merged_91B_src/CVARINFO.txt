@@ -969,5 +969,15 @@ server float bonsai_artifact_spawn_other = 0.5;   // Berserk, Partial Invisibili
 server bool bonsai_artifact_boss_enabled = true;
 server float bonsai_artifact_boss_chance = 10.0;  // drop chance for +BOSS monsters
 server int bonsai_artifact_map_cap = 1;           // most artifacts that can appear per map, all sources together (0 = no limit)
+// Save Gate: Gun Bonsai upgrade that unlocks Simple Saving's quicksave and save items (needs Simple Saving).
+// These are the source of truth; TFLV_SaveGateHandler copies them into Simple Saving's nosave_gate_* CVars.
+// Saved and applied with the balance profiles. Capacity = cap_base + (level - 1) * cap_per_level.
+server bool bonsai_savegate_enabled = false;      // lock Simple Saving until the upgrade is taken
+server int bonsai_savegate_max_level = 4;         // levels of the upgrade (1-6)
+server int bonsai_savegate_cap_base = 2;          // save items you can hold at level 1
+server int bonsai_savegate_cap_per_level = 1;     // extra items you can hold per level above 1
+// Pool rarity of the Save Gate upgrade: 0=Disabled 1=VeryRare 2=Rare 3=Uncommon 4=Common 5=Favored.
+// Favored by default so a player who locked saving behind it is offered it reasonably soon.
+server int bonsai_upg_savegate = 5;
 // Automated tests only: do not open the level-up menu (an open menu pauses the game); tests answer with bonsai_dbg.
 nosave server bool bonsai_test_no_menu = false;

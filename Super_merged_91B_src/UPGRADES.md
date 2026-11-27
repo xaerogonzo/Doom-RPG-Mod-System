@@ -58,6 +58,12 @@ Friendly monsters spawn at map start to fight alongside you. Each level increase
 
 All companion behavior — color tinting, pointer arrows, teleportation, healing mode, idle and follow range — is independently configurable in the Companions Options menu regardless of upgrade level.
 
+### Save Gate *(Simple Saving only)*
+
+Requires the Simple Saving mod to be loaded and `Lock saving behind the upgrade` to be on (Gun Bonsai Options > Save Gate), or this upgrade will not appear in the pool. It is a player upgrade with 4 levels by default (`bonsai_savegate_max_level`).
+
+Until you take it, Simple Saving's quicksave key, save item drops and event saves do nothing (saving from the Save menu and the engine's autosaves still work). Defaults: Lv1 quicksave and normal save item drops; Lv2 secrets give save items; Lv3 bosses can drop them; Lv4 save items survive a map change (before that only 1 is kept). Every level also raises how many save items you can hold: `bonsai_savegate_cap_base + (level - 1) * bonsai_savegate_cap_per_level` (default 2, 3, 4, 5), never above Simple Saving's Max Save Items. The level-to-feature thresholds live in Simple Saving's Save Gate menu. The class is only a bridge: it reports the level to Simple Saving through `nosave_gate_*` CVars.
+
 ### Hazard Suit
 Reduces damage from environmental hazards — acid floors, lava, slime. Does not affect enemy attacks.
 

@@ -149,6 +149,7 @@ Never add `_lv1` / `_lv2` / `_lv3` CVars — always use the base+per_level patte
 | `Super_merged_91B_src/zscript/bonsai/upgrades/Overdrive.zsc` | Kill-streak charge upgrade; `GetMaxStacks()` uses `min(1 + level*2, max_stacks)` |
 | `Super_merged_91B_src/zscript/hyperv/HyperV_GunBonsai.zsc` | 9 Hyper-V upgrade bridge classes; all use base+per_level formula |
 | `Super_merged_91B_src/zscript/hyperv/unified_hud.txt` | HUD renderer; slomo bar with CD pip overlay |
+| `Super_merged_91B_src/zscript/bonsai/upgrades/SaveGate.zsc` | Save Gate player upgrade + `TFLV_SaveGateHandler`: bridge that writes Simple Saving's `nosave_gate_*` CVars (the gate rules live in the Simple Saving repo) |
 | `Vortex_Universal_Achievement_System-patched15D/ZSCRIPT/Achievements/AchievementHandler.zs` | VUAS main handler — patched: `WorldPreSave` removed, `SyncTrackerAt` used instead |
 | `Vortex_Universal_Achievement_System-patched15D/ZSCRIPT/Achievements/AchievementSetup.zs` | Achievement definitions + `WorldLoaded` init (calls `SaveToTracker` on first load) |
 | `Supermerged_VUAS_Bridge-14/zscript/SupermergedAchievements.zs` | 25 achievement definitions (kill streaks, upgrade milestones, companions, etc.) |

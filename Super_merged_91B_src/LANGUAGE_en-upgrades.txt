@@ -161,6 +161,9 @@ TFLV_Upgrade_Conflagration_TT = "Fire spreads to everything within @range of the
 TFLV_Upgrade_Companions_Name = "Companions";
 TFLV_Upgrade_Companions_Desc = "Friendly monsters spawn to fight at your side.";
 TFLV_Upgrade_Companions_TT = "@allies companions. @boss-info @arch-info @revive-info";
+TFLV_Upgrade_SaveGate_Name = "Save Gate";
+TFLV_Upgrade_SaveGate_Desc = "Unlocks Simple Saving. Lv1: quicksave and save items. Lv2: secrets give saves. Lv3: bosses drop saves. Lv4: saves survive map changes. Every level holds more saves.";
+TFLV_Upgrade_SaveGate_TT = "Save Gate (@unlocked) @cap";
 
 // Blood tree
 TFLV_Upgrade_SanguineShots_Name = "\c[RED]Sanguine Inscription";

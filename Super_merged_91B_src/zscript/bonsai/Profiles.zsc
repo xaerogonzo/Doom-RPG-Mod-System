@@ -292,6 +292,11 @@ class TFLV_Profiles play
     n.Push("bonsai_artifact_enabled");
     n.Push("bonsai_artifact_boss_enabled");
     n.Push("bonsai_artifact_map_cap");
+    // Save Gate (appended last; enabled is 0/1)
+    n.Push("bonsai_savegate_enabled");
+    n.Push("bonsai_savegate_max_level");
+    n.Push("bonsai_savegate_cap_base");
+    n.Push("bonsai_savegate_cap_per_level");
     // NOTE: bonsai_upg_hyperv_* rarity CVars are also excluded here,
     // same reason as the bonsai_upg_* block above.
   }
@@ -558,6 +563,8 @@ class TFLV_Profiles play
     v.Push(0); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
     // Rare artifact: enabled, boss_enabled, map_cap
     v.Push(1); v.Push(1); v.Push(1);
+    // Save Gate (Default): enabled, max_level, cap_base, cap_per_level
+    v.Push(0); v.Push(4); v.Push(2); v.Push(1);
   }
 
   static void BalancedInts(out Array<int> v)
@@ -577,6 +584,8 @@ class TFLV_Profiles play
     v.Push(1); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
     // Rare artifact: enabled, boss_enabled, map_cap
     v.Push(1); v.Push(1); v.Push(1);
+    // Save Gate (Balanced): enabled, max_level, cap_base, cap_per_level
+    v.Push(1); v.Push(4); v.Push(3); v.Push(1);
   }
 
   static void ChallengingInts(out Array<int> v)
@@ -596,6 +605,8 @@ class TFLV_Profiles play
     v.Push(1); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
     // Rare artifact: enabled, boss_enabled, map_cap
     v.Push(1); v.Push(1); v.Push(1);
+    // Save Gate (Challenging): enabled, max_level, cap_base, cap_per_level
+    v.Push(1); v.Push(4); v.Push(2); v.Push(1);
   }
 
   static void PunishingInts(out Array<int> v)
@@ -615,6 +626,8 @@ class TFLV_Profiles play
     v.Push(2); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
     // Rare artifact: enabled, boss_enabled, map_cap
     v.Push(1); v.Push(1); v.Push(1);
+    // Save Gate (Punishing): enabled, max_level, cap_base, cap_per_level
+    v.Push(1); v.Push(3); v.Push(1); v.Push(1);
   }
 
   static void BrutalInts(out Array<int> v)
@@ -634,6 +647,8 @@ class TFLV_Profiles play
     v.Push(2); v.Push(0); v.Push(1); // death penalty: levels_lost, min_level, lose_upgrades
     // Rare artifact: enabled, boss_enabled, map_cap
     v.Push(1); v.Push(1); v.Push(1);
+    // Save Gate (Brutal): enabled, max_level, cap_base, cap_per_level
+    v.Push(1); v.Push(3); v.Push(1); v.Push(0);
   }
 
 // =============================================================================
