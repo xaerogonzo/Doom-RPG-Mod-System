@@ -7,6 +7,9 @@ Third-party components (Gun Bonsai, Hyper-V, VUAS, Indestructible, Doom Points, 
 
 ## [Unreleased]
 
+### Added
+- **Player shots pass through companions (optional).** New `F_PassPlayerShots` CVar (default off), toggle under Companions > Combat Behavior. While a player-fired missile (rocket, plasma) is close enough to reach a companion, that companion is made THRUACTORS for that tic so the missile flies on instead of blocking. Enemy missiles are unaffected. Hitscan is not covered yet.
+
 ### Changed
 - **Chain Lightning hops vs start cue.** `lightning/arc` is the eight shorter snaps kept from `chain_zap_arc_r0` (`assets/sfx/chain_zap_arc_picked.json`). `lightning/chain` is the six longer `lightning_chain_r0` keeps plus `s9r0g0c013` (`assets/sfx/lightning_chain_picked.json`). Round 1 of the hop search was the same family and is not used. No extra low-pass. Thunderbolt and revive cues are unchanged. Same `bonsai_sfx_lightning` switch and `$limit` 5 on hops.
 

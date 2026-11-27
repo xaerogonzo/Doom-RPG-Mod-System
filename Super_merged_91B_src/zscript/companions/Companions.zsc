@@ -390,6 +390,7 @@ class TFCO_FriendEnhancer : Inventory {
   bool ArrowPopped;
   bool RevValue;
   int  ReviveCount;
+  bool ShotPassActive;  // true while this companion is letting player missiles through
 
   // Cached state references — resolved once in AttachToOwner, never change.
   // FindState() on every tic is measurably expensive with many companions.
@@ -497,6 +498,7 @@ class TFCO_FriendEnhancer : Inventory {
         TickAI(act, master, distToMaster, canSeeMaster);
         TickHealing(act, distToMaster, canSeeMaster);
         TickTeleport(act, master, distToMaster, canSeeMaster);
+        TickShotPass(act, distToMaster);
       }
     }
 
@@ -544,6 +546,35 @@ class TFCO_FriendEnhancer : Inventory {
     act.bNOBLOCKMONST     = true;
     act.damagefactor   = act.default.damagefactor   * F_DamageFactor;
     act.damagemultiply = act.default.damagemultiply * F_DamageMult;
+  }
+
+  // Let player-fired missiles (rockets, plasma...) fly through this companion.
+  // While a player missile is close enough to reach it this tic, the companion
+  // is made THRUACTORS so the missile's collision check skips it; otherwise the
+  // walk-through state from UpdateVisuals is restored. Hitscan is not affected.
+  // Only missiles owned by a player count, so enemy fire still hits companions.
+  private void TickShotPass(Actor act, double distToMaster) {
+    bool incoming = false;
+    if (F_PassPlayerShots) {
+      BlockThingsIterator it = BlockThingsIterator.Create(act, 128);
+      while (it.Next()) {
+        let m = it.thing;
+        if (!m || m == act || m.bDESTROYED || !m.bMISSILE) continue;
+        if (!m.target || !m.target.player) continue;
+        if (act.Distance3D(m) <= act.radius + m.radius + m.speed + 4) {
+          incoming = true;
+          break;
+        }
+      }
+    }
+
+    if (incoming) {
+      act.bTHRUACTORS = true;
+      ShotPassActive = true;
+    } else if (ShotPassActive) {
+      act.bTHRUACTORS = F_Walkable && (distToMaster <= F_WalkableRange);
+      ShotPassActive = false;
+    }
   }
 
   // Throttled visual styling — tint, walkable proximity, translucency.

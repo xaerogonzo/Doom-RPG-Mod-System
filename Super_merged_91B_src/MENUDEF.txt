@@ -1926,6 +1926,8 @@ OptionMenu "CompanionsBehavior"
   TFLV_Tooltip "Companions become non-solid when you're very close."
   Slider "Walk-through range",                "F_WalkableRange", 72, 312, 8, 0
   TFLV_Tooltip "How close you need to be before companions become non-solid."
+  Option "Player shots pass through companions", "F_PassPlayerShots", "YesNo"
+  TFLV_Tooltip "Player rockets, plasma and other missiles fly through companions instead of hitting them. Hitscan shots (pistol, shotgun, chaingun) still hit them."
 }
 
 OptionMenu "CompanionsStats"
