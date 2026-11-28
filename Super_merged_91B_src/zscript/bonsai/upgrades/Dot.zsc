@@ -72,7 +72,37 @@ class TFLV_Upgrade_Dot : Inventory {
     return st ? st.GetInfoForCurrentWeapon() : null;
   }
 
+  // Guard against runaway nesting. A dot that spreads to a target, whose new dot spreads again, and so on, all inside one
+  // call stack, overflows the engine's native stack (about 1 MB) and the game dies with no message. Every nested
+  // application below goes through EnterChain/LeaveChain; past CHAIN_LIMIT levels it is skipped and a line is logged (a few times).
+  const CHAIN_LIMIT = 12;
+  static bool EnterChain(Actor where) {
+    let h = TFLV_EventHandler(StaticEventHandler.Find("TFLV_EventHandler"));
+    if (!h) return true;
+    if (h.chainDepth >= CHAIN_LIMIT) {
+      if (h.chainTrips < 5) {
+        ++h.chainTrips;
+        Console.printf("TFLV: damage-over-time chain stopped at depth %d (%s)", CHAIN_LIMIT, where ? string.format("%s", where.GetClassName()) : "none");
+      }
+      return false;
+    }
+    ++h.chainDepth;
+    return true;
+  }
+
+  static void LeaveChain() {
+    let h = TFLV_EventHandler(StaticEventHandler.Find("TFLV_EventHandler"));
+    if (h && h.chainDepth > 0) --h.chainDepth;
+  }
+
   static TFLV_Upgrade_Dot GiveStacks(Actor owner, Actor target, string cls, double count, double max = double.infinity, TFLV_WeaponInfo src = null) {
+    if (!EnterChain(target)) return null;
+    let item = GiveStacksImpl(owner, target, cls, count, max, src);
+    LeaveChain();
+    return item;
+  }
+
+  private static TFLV_Upgrade_Dot GiveStacksImpl(Actor owner, Actor target, string cls, double count, double max, TFLV_WeaponInfo src) {
 //    DEBUG("GiveStacks: %f of %s", count, cls);
     TFLV_Upgrade_Dot item = TFLV_Upgrade_Dot(target.FindInventory(cls));
     if (!item) item = TFLV_Upgrade_Dot(target.GiveInventoryType(cls));
@@ -157,9 +187,12 @@ class TFLV_Upgrade_Dot : Inventory {
     if (buffer > 1) {
 //      DEBUG("Dot %s damages %s for %d (source=%s)",
 //        TAG(self), TAG(owner), buffer, TAG(self.target));
-      owner.DamageMobj(
-        self, self.target, floor(buffer), self.DamageType,
-        DMG_NO_ARMOR | DMG_NO_PAIN | DMG_THRUSTLESS | DMG_NO_ENHANCE);
+      if (EnterChain(owner)) {
+        owner.DamageMobj(
+          self, self.target, floor(buffer), self.DamageType,
+          DMG_NO_ARMOR | DMG_NO_PAIN | DMG_THRUSTLESS | DMG_NO_ENHANCE);
+        LeaveChain();
+      }
       buffer -= floor(buffer);
     }
   }

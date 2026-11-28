@@ -25,6 +25,7 @@ class TFLV_Upgrade_CorrosiveShots : TFLV_Upgrade_ElementalUpgrade {
   override TFLV_Upgrade_UpgradeElement Element() { return TFLV_Upgrade_ELEM_ACID; }
   override void OnDamageDealt(Actor player, Actor shot, Actor target, int damage) {
     let ad = TFLV_Upgrade_AcidDot(TFLV_Upgrade_Dot.GiveStacks(player, target, "TFLV_Upgrade_AcidDot", 0));
+    if (!ad) return;
     ad.damage_this_tick += damage;
     ad.level = level;
   }
@@ -235,6 +236,7 @@ class TFLV_Upgrade_AcidSpray_Aux : TFLV_Upgrade_AuxActor {
 
   void SpreadTo(Actor target) {
     let acid = TFLV_Upgrade_AcidDot(TFLV_Upgrade_Dot.GiveStacks(self.target, target, "TFLV_Upgrade_AcidDot", stacks, softcap, self.srcWeapon));
+    if (!acid) return;
     acid.level = max(acid.level, level);
     acid.concentration = max(acid.concentration, concentration);
     acid.splash = max(acid.splash, splash);

@@ -12,6 +12,9 @@ class TFLV_EventHandler : StaticEventHandler {
   TFLV_Upgrade_Registry UPGRADE_REGISTRY;
   TFLV_RC rc;
   TFLV_GunBonsaiService service;
+  // Nesting guard for damage-over-time chains (see TFLV_Upgrade_Dot.EnterChain). Reset every tic.
+  int chainDepth;
+  int chainTrips;
   ui TFLV_HUD hud;
   // Tracks whether each player died this session without a map transition
   // in between. Used to distinguish a same-map death respawn (totaltime resets
@@ -223,6 +226,7 @@ class TFLV_EventHandler : StaticEventHandler {
   // =========================================================================
 
   override void WorldTick() {
+    chainDepth = 0;
     if (DoomPointsEnabled())
       scoring.WorldTick();
   }

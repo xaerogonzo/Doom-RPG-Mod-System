@@ -26,6 +26,7 @@ class TFLV_Upgrade_ShockingInscription : TFLV_Upgrade_ElementalUpgrade {
       player, target, "TFLV_Upgrade_ShockDot",
       level * damage * bonsai_stat_lightning_stack_rate,
       level * bonsai_stat_lightning_softcap));
+    if (!zap) return;
     zap.level = self.level;
   }
 
@@ -268,6 +269,7 @@ class TFLV_Upgrade_ShockDot : TFLV_Upgrade_Dot {
 
       let zap = TFLV_Upgrade_ShockDot(
         TFLV_Upgrade_Dot.GiveStacks(self.target, targets[i], "TFLV_Upgrade_ShockDot", stacks, thunderbolt * bonsai_stat_lightning_softcap, self.srcWeapon));
+      if (!zap) continue;
       zap.stacks = max(zap.stacks, self.stacks);
       zap.bolt_cap = max(zap.bolt_cap, ceil(zap.level * bonsai_stat_lightning_softcap));
     }
